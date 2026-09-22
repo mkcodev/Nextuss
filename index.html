@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0B0E14" />
+    <meta
+      name="description"
+      content="Centro de mando personal: hábitos, planificación, captura y estadísticas, todo local y sin conexión."
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Nexus" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Nexus — Centro de mando" />
+    <meta
+      property="og:description"
+      content="Centro de mando personal: hábitos, planificación, captura y estadísticas, todo local y sin conexión."
+    />
+
+    <title>Nexus — Centro de mando</title>
+    <script>
+      (function () {
+        try {
+          var cached = localStorage.getItem('nx-theme')
+          var theme = cached || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+          document.documentElement.setAttribute('data-theme', theme)
+        } catch (e) {
+          /* no-op: falls back to the light default already in index.css */
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,237 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------- */
+/* Nexus — Design tokens ("cuarzo")                                       */
+/* Light = cuarzo blanco/cristal. Dark = cuarzo ahumado/obsidiana.        */
+/* Tailwind v4 reads these via @theme and emits var()-based utilities,    */
+/* so overriding the custom properties below is enough to re-theme them.  */
+/* ---------------------------------------------------------------------- */
+
+@theme {
+  --font-sans: 'InterVariable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --color-bg: var(--nx-bg);
+  --color-bg-soft: var(--nx-bg-soft);
+  --color-surface: var(--nx-surface);
+  --color-surface-hover: var(--nx-surface-hover);
+  --color-border: var(--nx-border);
+  --color-border-strong: var(--nx-border-strong);
+  --color-text: var(--nx-text);
+  --color-text-muted: var(--nx-text-muted);
+  --color-text-faint: var(--nx-text-faint);
+
+  --color-accent: var(--nx-accent);
+  --color-accent-soft: var(--nx-accent-soft);
+  --color-accent-strong: var(--nx-accent-strong);
+
+  --color-success: var(--nx-success);
+  --color-warning: var(--nx-warning);
+  --color-danger: var(--nx-danger);
+
+  --shadow-glow: var(--nx-shadow-glow);
+  --shadow-card: var(--nx-shadow-card);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-slow: 280ms;
+
+  --z-sticky: 30;
+  --z-mobile-nav: 40;
+  --z-dialog: 50;
+  --z-toast: 60;
+  --z-palette: 70;
+  --z-palette-content: 71;
+  --z-tooltip: 100;
+}
+
+/* Named z-index utilities backed by the --z-* theme tokens above. Tailwind v4's @utility directive
+   proved unreliable here (stacked declarations after the first leaked through unprocessed instead
+   of compiling), so these are plain CSS classes — that's all a utility class is at the DOM level,
+   and it sidesteps that entirely. Replaces the uncoordinated z-40/z-50/z-[60]/z-[70]/z-[100]
+   literals that used to be scattered across Dialog, ToastHost, CommandPalette, MobileNav, Tooltip. */
+.z-sticky {
+  z-index: var(--z-sticky);
+}
+.z-mobile-nav {
+  z-index: var(--z-mobile-nav);
+}
+.z-dialog {
+  z-index: var(--z-dialog);
+}
+.z-toast {
+  z-index: var(--z-toast);
+}
+.z-palette {
+  z-index: var(--z-palette);
+}
+.z-palette-content {
+  z-index: var(--z-palette-content);
+}
+.z-tooltip {
+  z-index: var(--z-tooltip);
+}
+
+/* Light theme (default) */
+:root {
+  color-scheme: light;
+
+  --nx-bg: #eef1f6;
+  --nx-bg-soft: #f6f8fb;
+  --nx-surface: rgba(255, 255, 255, 0.72);
+  --nx-surface-hover: rgba(255, 255, 255, 0.9);
+  --nx-border: rgba(15, 23, 42, 0.08);
+  --nx-border-strong: rgba(15, 23, 42, 0.14);
+  --nx-text: #10131b;
+  --nx-text-muted: #565f70;
+  --nx-text-faint: #656e80;
+
+  --nx-accent: #0ea5e9;
+  --nx-accent-soft: rgba(14, 165, 233, 0.12);
+  --nx-accent-strong: #0284c7;
+
+  --nx-success: #10b981;
+  --nx-warning: #f59e0b;
+  --nx-danger: #f43f5e;
+
+  --nx-shadow-glow: 0 0 32px rgba(14, 165, 233, 0.18);
+  --nx-shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 24px -12px rgba(15, 23, 42, 0.12);
+
+  --nx-quartz-a: rgba(14, 165, 233, 0.10);
+  --nx-quartz-b: rgba(148, 163, 184, 0.12);
+}
+
+/* Dark theme. `useTheme.ts` always resolves 'system' to an explicit data-theme attribute
+   (and keeps it in sync on OS preference change), so this is the only dark declaration needed —
+   no @media duplicate. An inline script in index.html sets this attribute before first paint. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --nx-bg: #0a0d14;
+  --nx-bg-soft: #10131c;
+  --nx-surface: rgba(255, 255, 255, 0.035);
+  --nx-surface-hover: rgba(255, 255, 255, 0.06);
+  --nx-border: rgba(255, 255, 255, 0.08);
+  --nx-border-strong: rgba(255, 255, 255, 0.14);
+  --nx-text: #e9edf5;
+  --nx-text-muted: #9aa3b5;
+  --nx-text-faint: #8891a3;
+
+  --nx-accent: #5ec8ff;
+  --nx-accent-soft: rgba(94, 200, 255, 0.14);
+  --nx-accent-strong: #7dd3fc;
+
+  --nx-success: #34d399;
+  --nx-warning: #fbbf24;
+  --nx-danger: #fb7185;
+
+  --nx-shadow-glow: 0 0 40px rgba(94, 200, 255, 0.25);
+  --nx-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 32px -16px rgba(0, 0, 0, 0.5);
+
+  --nx-quartz-a: rgba(94, 200, 255, 0.08);
+  --nx-quartz-b: rgba(255, 255, 255, 0.03);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--color-text);
+  background:
+    radial-gradient(1200px 600px at 85% -10%, var(--nx-quartz-a), transparent),
+    radial-gradient(900px 500px at -10% 110%, var(--nx-quartz-b), transparent),
+    var(--color-bg);
+  background-attachment: fixed;
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+::selection {
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+}
+
+* {
+  scrollbar-color: var(--color-border-strong) transparent;
+  scrollbar-width: thin;
+}
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 1rem;
+  z-index: var(--z-tooltip);
+  background: var(--color-accent);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: top var(--dur-fast) var(--ease-out-quart);
+}
+
+.skip-link:focus-visible {
+  top: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Impresión de informes: oculta todo salvo el `.print-area` marcado por la página actual (p. ej.
+   InformesTab), para que "Imprimir" -> PDF del navegador salga limpio sin el chrome de la app. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    background: white;
+    color: black;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
