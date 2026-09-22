@@ -20,7 +20,7 @@ export function RouteErrorBoundary() {
     setSaving(true)
     try {
       const payload = await exportDatabase()
-      downloadJson(`nexus-backup-emergencia-${Date.now()}.json`, payload)
+      downloadJson(`nextuss-backup-emergencia-${Date.now()}.json`, payload)
       setSaved(true)
     } finally {
       setSaving(false)
@@ -32,7 +32,7 @@ export function RouteErrorBoundary() {
       <AlertTriangle size={40} className="text-danger" strokeWidth={1.75} />
       <h1 className="text-lg font-semibold text-text">Algo se rompió</h1>
       <p className="max-w-md text-sm text-text-muted">
-        Nexus encontró un error inesperado al mostrar esta página. Tus datos siguen intactos en tu
+        Nextuss encontró un error inesperado al mostrar esta página. Tus datos siguen intactos en tu
         dispositivo — puedes descargar una copia de seguridad antes de recargar.
       </p>
       <p className="max-w-md truncate text-xs text-text-faint">{messageFor(error)}</p>
@@ -43,7 +43,7 @@ export function RouteErrorBoundary() {
         </Button>
         <Button onClick={() => window.location.assign('/')}>
           <RefreshCw size={16} strokeWidth={1.75} />
-          Recargar Nexus
+          Recargar Nextuss
         </Button>
       </div>
     </div>

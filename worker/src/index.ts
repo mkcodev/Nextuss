@@ -1,9 +1,9 @@
 // Relay opcional (Fase 5.5): recibe el webhook de Telegram 24/7 y guarda los mensajes en KV.
-// Nexus (la app) los descarga y los vacía al abrirse — este worker nunca habla con la Bot API
+// Nextuss (la app) los descarga y los vacía al abrirse — este worker nunca habla con la Bot API
 // directamente más allá de recibir el webhook; procesar comandos y responder sigue siendo cosa de
 // la app, que es donde vive la base de datos real del usuario.
 export interface Env {
-  NEXUS_KV: KVNamespace
+  NEXTUSS_KV: KVNamespace
   SECRET: string
 }
 
@@ -40,23 +40,23 @@ export default {
       const update = (await readJson(request)) as StoredUpdate | null
       if (update && typeof update.update_id === 'number') {
         const key = `update:${Date.now()}:${update.update_id}`
-        await env.NEXUS_KV.put(key, JSON.stringify(update), { expirationTtl: SEVEN_DAYS_SEC })
+        await env.NEXTUSS_KV.put(key, JSON.stringify(update), { expirationTtl: SEVEN_DAYS_SEC })
       }
       // Telegram solo necesita un 200 rápido — la app procesa el contenido más tarde.
       return new Response('ok')
     }
 
     if (action === 'pending' && request.method === 'GET') {
-      const list = await env.NEXUS_KV.list({ prefix: 'update:' })
+      const list = await env.NEXTUSS_KV.list({ prefix: 'update:' })
       const updates = await Promise.all(
-        list.keys.map(async (k) => JSON.parse((await env.NEXUS_KV.get(k.name)) ?? 'null') as StoredUpdate | null),
+        list.keys.map(async (k) => JSON.parse((await env.NEXTUSS_KV.get(k.name)) ?? 'null') as StoredUpdate | null),
       )
       return Response.json({ updates: updates.filter((u): u is StoredUpdate => u != null), keys: list.keys.map((k) => k.name) })
     }
 
     if (action === 'clear' && request.method === 'POST') {
       const body = (await readJson(request)) as { keys?: string[] } | null
-      await Promise.all((body?.keys ?? []).map((k) => env.NEXUS_KV.delete(k)))
+      await Promise.all((body?.keys ?? []).map((k) => env.NEXTUSS_KV.delete(k)))
       return new Response('ok')
     }
 

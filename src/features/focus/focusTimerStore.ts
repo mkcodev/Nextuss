@@ -49,7 +49,7 @@ export const useFocusTimerStore = create<FocusTimerState>()(
       goToMode: (mode, plannedSec, cyclesCompleted) =>
         set({ mode, plannedSec, cyclesCompleted, running: false, startedAt: null, accumulatedSec: 0, interruptions: 0 }),
     }),
-    { name: 'nexus-focus-timer' },
+    { name: 'nextuss-focus-timer' },
   ),
 )
 

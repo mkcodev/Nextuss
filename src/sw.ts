@@ -13,7 +13,7 @@ precacheAndRoute(self.__WB_MANIFEST)
 cleanupOutdatedCaches()
 clientsClaim()
 
-// Nexus es una SPA: sin esto, navegar (o refrescar) sin conexión a una ruta que no sea "/" exacta
+// Nextuss es una SPA: sin esto, navegar (o refrescar) sin conexión a una ruta que no sea "/" exacta
 // (p. ej. /estadisticas) no encontraría nada en caché — el precache de Workbox solo sirve
 // coincidencias exactas de URL, no rutas cliente. Toda navegación cae de vuelta al shell cacheado.
 registerRoute(new NavigationRoute(createHandlerBoundToURL('/index.html')))

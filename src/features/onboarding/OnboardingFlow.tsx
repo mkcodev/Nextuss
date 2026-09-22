@@ -94,7 +94,7 @@ export function OnboardingFlow() {
       <motion.div
         role="dialog"
         aria-modal="true"
-        aria-label="Bienvenida a Nexus"
+        aria-label="Bienvenida a Nextuss"
         initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 8 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: reduceMotion ? 0 : 0.18 }}
@@ -112,7 +112,7 @@ export function OnboardingFlow() {
               <Target size={26} strokeWidth={1.75} />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-text">Bienvenido a Nexus</h1>
+              <h1 className="text-lg font-semibold text-text">Bienvenido a Nextuss</h1>
               <p className="mt-1 text-sm text-text-muted">
                 Tu centro de mando personal: hábitos, planificación, captura y estadísticas. Todo
                 local, sin cuenta, sin conexión.
@@ -179,7 +179,7 @@ export function OnboardingFlow() {
               ))}
             </ul>
             <Button className="w-full" onClick={finish}>
-              {choice === 'fresh' ? 'Crear mi primer hábito' : 'Empezar a usar Nexus'}
+              {choice === 'fresh' ? 'Crear mi primer hábito' : 'Empezar a usar Nextuss'}
             </Button>
           </div>
         )}

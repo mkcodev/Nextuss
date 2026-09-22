@@ -539,7 +539,7 @@ function TelegramSection() {
           <input
             defaultValue={settings?.telegramWorkerUrl ?? ''}
             onBlur={(e) => updateSettings({ telegramWorkerUrl: e.target.value.trim() || undefined })}
-            placeholder="https://nexus-telegram-relay.tu-cuenta.workers.dev/tu-secreto"
+            placeholder="https://nextuss-telegram-relay.tu-cuenta.workers.dev/tu-secreto"
             className="mt-1 w-full rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
           />
         </>

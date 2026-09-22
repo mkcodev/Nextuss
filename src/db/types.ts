@@ -154,7 +154,7 @@ export interface Settings {
   /** `update_id` más alto ya procesado — evita reprocesar mensajes tras un reload (Fase 5.5). */
   telegramUpdateOffset?: number
   /** URL base del worker opcional (incluye el secreto como segmento, ver `worker/README.md`), p.ej.
-   * `https://nexus-relay.usuario.workers.dev/nx_abc123`. Vacío = no se usa (100% opcional). */
+   * `https://nextuss-relay.usuario.workers.dev/nx_abc123`. Vacío = no se usa (100% opcional). */
   telegramWorkerUrl?: string
   claudeApiKey?: string
   /** Contador de llamadas a la API de Claude hechas desde esta app — estimación de uso, no facturación real. */

@@ -39,7 +39,7 @@ export function useFocusTimerEngine(): void {
     const id = setInterval(() => {
       const s = useFocusTimerStore.getState()
       if (s.running) {
-        document.title = `${formatTime(Math.max(0, s.plannedSec - elapsedSeconds(s)))} · ${MODE_LABEL[s.mode]} — Nexus`
+        document.title = `${formatTime(Math.max(0, s.plannedSec - elapsedSeconds(s)))} · ${MODE_LABEL[s.mode]} — Nextuss`
         if (elapsedSeconds(s) >= s.plannedSec) void finishSegment(durations)
       } else if (document.title !== DEFAULT_TITLE) {
         document.title = DEFAULT_TITLE

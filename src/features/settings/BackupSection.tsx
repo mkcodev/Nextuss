@@ -17,7 +17,7 @@ export function BackupSection() {
 
   const downloadBackup = async () => {
     const backup = await exportDatabase()
-    downloadJson(`nexus-backup-${dateKey(new Date())}.json`, backup)
+    downloadJson(`nextuss-backup-${dateKey(new Date())}.json`, backup)
     push({ title: 'Copia de seguridad descargada', variant: 'success' })
   }
 
@@ -41,7 +41,7 @@ export function BackupSection() {
     } catch (err) {
       push({
         title: 'No se pudo restaurar',
-        description: err instanceof BackupVersionMismatchError ? err.message : 'Comprueba que el archivo es una copia de seguridad de Nexus válida.',
+        description: err instanceof BackupVersionMismatchError ? err.message : 'Comprueba que el archivo es una copia de seguridad de Nextuss válida.',
         variant: 'error',
       })
     } finally {

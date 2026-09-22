@@ -19,8 +19,8 @@ export default defineConfig({
       },
       includeAssets: ['favicon.svg', 'favicon.ico', 'apple-touch-icon-180.png'],
       manifest: {
-        name: 'Nexus — Centro de mando',
-        short_name: 'Nexus',
+        name: 'Nextuss — Centro de mando',
+        short_name: 'Nextuss',
         description: 'Centro de mando personal: hábitos, planificación, captura y estadísticas, todo local y sin conexión.',
         lang: 'es',
         start_url: '/',

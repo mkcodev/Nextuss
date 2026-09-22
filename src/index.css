@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /* ---------------------------------------------------------------------- */
-/* Nexus — Design tokens ("cuarzo")                                       */
+/* Nextuss — Design tokens ("cuarzo")                                      */
 /* Light = cuarzo blanco/cristal. Dark = cuarzo ahumado/obsidiana.        */
 /* Tailwind v4 reads these via @theme and emits var()-based utilities,    */
 /* so overriding the custom properties below is enough to re-theme them.  */

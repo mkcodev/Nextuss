@@ -87,11 +87,11 @@ export function InformesTab() {
       push({ title: `Sin datos de "${name}" en este periodo` })
       return
     }
-    downloadCsv(`nexus-${name}-${periodKey}.csv`, rows as never)
+    downloadCsv(`nextuss-${name}-${periodKey}.csv`, rows as never)
   }
 
   const exportPeriodJson = () => {
-    downloadJson(`nexus-informe-${periodKey}.json`, {
+    downloadJson(`nextuss-informe-${periodKey}.json`, {
       period,
       periodKey,
       range: bounds,

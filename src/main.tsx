@@ -22,7 +22,7 @@ ensureSingletons()
       <div className="flex h-screen flex-col items-center justify-center gap-3 bg-bg p-6 text-center text-text">
         <h1 className="text-lg font-semibold">No se pudo abrir la base de datos</h1>
         <p className="max-w-md text-sm text-text-muted">
-          Nexus no pudo inicializar el almacenamiento local. Recarga la página; si el problema
+          Nextuss no pudo inicializar el almacenamiento local. Recarga la página; si el problema
           continúa, puede deberse a que el navegador tenga el almacenamiento bloqueado o lleno.
         </p>
       </div>,

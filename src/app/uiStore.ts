@@ -65,7 +65,7 @@ export const useUIStore = create<UIState>()(
         }),
     }),
     {
-      name: 'nexus-ui-layout',
+      name: 'nextuss-ui-layout',
       version: 4,
       partialize: (state) => {
         const { mobileDockOpen: _mobileDockOpen, ...rest } = state

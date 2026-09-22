@@ -18,7 +18,7 @@ import type {
   WeeklyReview,
 } from './types'
 
-export class NexusDB extends Dexie {
+export class NextussDB extends Dexie {
   habits!: EntityTable<Habit, 'id'>
   habitLogs!: EntityTable<HabitLog, 'id'>
   attributes!: EntityTable<Attribute, 'id'>
@@ -37,6 +37,10 @@ export class NexusDB extends Dexie {
   insightFeedback!: EntityTable<InsightFeedbackRecord, 'id'>
 
   constructor() {
+    // Nombre real de la base de datos IndexedDB — deliberadamente NO sigue el rebranding a
+    // "Nextuss": cambiarlo haría que la app abra una base de datos nueva y vacía, dejando huérfanos
+    // todos los datos reales ya guardados bajo 'nexus'. Es un identificador interno invisible para
+    // el usuario, así que no hay ningún coste en mantenerlo estable.
     super('nexus')
 
     this.version(1).stores({
@@ -100,4 +104,4 @@ export class NexusDB extends Dexie {
   }
 }
 
-export const db = new NexusDB()
+export const db = new NextussDB()

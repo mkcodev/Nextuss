@@ -1,10 +1,10 @@
-name = "nexus-telegram-relay"
+name = "nextuss-telegram-relay"
 main = "src/index.ts"
 compatibility_date = "2026-01-01"
 
-# Créala con `wrangler kv namespace create NEXUS_KV` y pega el id que te devuelva aquí.
+# Créala con `wrangler kv namespace create NEXTUSS_KV` y pega el id que te devuelva aquí.
 kv_namespaces = [
-  { binding = "NEXUS_KV", id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID" }
+  { binding = "NEXTUSS_KV", id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID" }
 ]
 
 # El secreto NO va aquí (este archivo se versiona) — usa `wrangler secret put SECRET`.

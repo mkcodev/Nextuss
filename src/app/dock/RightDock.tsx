@@ -6,7 +6,7 @@ import { useUIStore, type DockZone } from '../uiStore'
 import { PANEL_REGISTRY, type PanelKey } from './panels'
 import { cn } from '../../lib/cn'
 
-const DRAG_MIME = 'application/x-nexus-panel-order'
+const DRAG_MIME = 'application/x-nextuss-panel-order'
 
 interface DropTarget {
   key: PanelKey

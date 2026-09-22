@@ -88,7 +88,7 @@ export function Navbar() {
       <div className="flex items-center gap-1.5">
         <span className="h-2 w-2 rounded-full bg-accent shadow-glow" />
         <span className="hidden text-sm font-semibold tracking-[0.14em] text-text sm:inline">
-          NEXUS
+          NEXTUSS
         </span>
       </div>
 

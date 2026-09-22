@@ -1,5 +1,5 @@
 {
-  "name": "nexus-telegram-relay",
+  "name": "nextuss-telegram-relay",
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
