@@ -40,7 +40,10 @@ export function DayPlanSuggestion({ date }: DayPlanSuggestionProps) {
       }
       const plan = await suggestDayPlan(apiKey, {
         capacityMin: Math.max(0, availableMin - scheduledMin),
-        checkIn: checkIn ? { energy: checkIn.energy, mood: checkIn.mood, focus: checkIn.focus } : undefined,
+        checkIn:
+          checkIn && (checkIn.energy != null || checkIn.mood != null || checkIn.focus != null)
+            ? { energy: checkIn.energy, mood: checkIn.mood, focus: checkIn.focus }
+            : undefined,
         tasks: tasks.map((t) => ({ id: t.id!, title: t.title, estimateMin: t.estimateMin, energy: t.energy })),
       })
       void recordAiUsage(settings)

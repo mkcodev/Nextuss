@@ -66,7 +66,7 @@ export const useUIStore = create<UIState>()(
     }),
     {
       name: 'nextuss-ui-layout',
-      version: 4,
+      version: 5,
       partialize: (state) => {
         const { mobileDockOpen: _mobileDockOpen, ...rest } = state
         return rest
@@ -74,18 +74,24 @@ export const useUIStore = create<UIState>()(
       // v1 stored panelOrder as a single flat array shared by both zones.
       // v3+ reconciles each zone's order against the current panel catalog, so
       // newly added panels (or ones removed) stay in sync for existing users.
-      // v4: added the 'insights' panel (Fase 4.8) — bumping forces `migrate` to
-      // run again for already-persisted users so it gets merged into their panelOrder.
+      // v4: added the 'insights' panel (Fase 4.8).
+      // v5: removed the 'checkin' panel (Fase 12, promoted to a card in Hoy) — bumping forces
+      // `migrate` to run again so it's dropped from any already-persisted `panelOrder`, and any
+      // zone that had it assigned falls back to a real panel instead of pointing at nothing.
       migrate: (persisted) => {
         const state = persisted as UIState
         if (!state.panelOrder || Array.isArray(state.panelOrder)) {
           state.panelOrder = { top: [...DEFAULT_PANEL_ORDER], bottom: [...DEFAULT_PANEL_ORDER] }
         }
+        const known = new Set(DEFAULT_PANEL_ORDER)
         for (const zone of ['top', 'bottom'] as DockZone[]) {
-          const known = new Set(DEFAULT_PANEL_ORDER)
           const existing = (state.panelOrder[zone] ?? []).filter((k) => known.has(k))
           const missing = DEFAULT_PANEL_ORDER.filter((k) => !existing.includes(k))
           state.panelOrder[zone] = [...existing, ...missing]
+        }
+        if (state.dock) {
+          if (state.dock.top && !known.has(state.dock.top)) state.dock.top = 'progress'
+          if (state.dock.bottom && !known.has(state.dock.bottom)) state.dock.bottom = 'activity'
         }
         return state
       },

@@ -24,6 +24,8 @@ import { useGoalFormStore } from '../features/planner/goalFormStore'
 import { WeeklyReviewDialog } from '../features/planner/WeeklyReviewDialog'
 import { TaskBreakdownDialog } from '../features/ai/TaskBreakdownDialog'
 import { OnboardingFlow } from '../features/onboarding/OnboardingFlow'
+import { DayStartFlow } from '../features/rituals/DayStartFlow'
+import { DayCloseFlow } from '../features/rituals/DayCloseFlow'
 
 export function AppShell() {
   useGlobalShortcuts()
@@ -67,6 +69,8 @@ export function AppShell() {
       <WeeklyReviewDialog />
       <TaskBreakdownDialog />
       <OnboardingFlow />
+      <DayStartFlow />
+      <DayCloseFlow />
       <ToastHost />
     </div>
   )

@@ -4,6 +4,7 @@ import { getTasksForDate, getOverdueTasks } from '../../db/repositories/tasks'
 import { getReview } from '../../db/repositories/reviews'
 import { getPriorityGoal } from '../../db/repositories/goals'
 import { dateKey, weekKey } from '../../lib/dates'
+import { previousPeriodKey } from '../../lib/periods'
 import { sendNotification } from './notify'
 import {
   eveningSummaryNotifications,
@@ -26,7 +27,7 @@ async function evaluate(now: Date): Promise<void> {
     getLogsForDate(today),
     getTasksForDate(today),
     getOverdueTasks(today),
-    getReview(weekKey(now)),
+    getReview(previousPeriodKey('week', weekKey(now))),
     getPriorityGoal('week', weekKey(now)),
   ])
   const todayLogsByHabit = new Map(todayLogs.map((l) => [l.habitId, l]))
@@ -42,7 +43,7 @@ async function evaluate(now: Date): Promise<void> {
       northStarTitle: northStar?.title,
     }),
     ...eveningSummaryNotifications({ now, settings, doneTaskCount, totalTaskCount: tasksToday.length }),
-    ...weeklyReviewNudgeNotifications({ now, settings, hasReviewForCurrentWeek: !!review }),
+    ...weeklyReviewNudgeNotifications({ now, settings, hasReviewForLastWeek: !!review }),
     ...zombieTaskNotifications({ now, settings, overdueCount: overdue.length }),
   ]
 

@@ -190,10 +190,12 @@ export interface Goal {
 export interface CheckIn {
   id?: number
   date: string
-  energy: number // 1-5
-  mood: number // 1-5
-  focus: number // 1-5
+  energy: number | null // 1-5, null = sin responder — nunca se fabrica un valor por defecto
+  mood: number | null // 1-5
+  focus: number | null // 1-5
   note?: string
+  ritualStartDismissedAt?: number // "inicio del día" ya mostrado/completado para `date` (Fase 12)
+  ritualCloseDismissedAt?: number // "cierre del día" ya mostrado/completado para `date`
 }
 
 export interface FocusSession {

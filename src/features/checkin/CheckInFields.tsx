@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Star } from 'lucide-react'
-import { cn } from '../../../lib/cn'
-import { todayKey } from '../../../lib/dates'
-import { getCheckInForDate, upsertCheckIn } from '../../../db/repositories/checkins'
-import { Textarea } from '../../../design/primitives'
-import { useToastStore } from '../../../lib/toastStore'
+import { cn } from '../../lib/cn'
+import { getCheckInForDate, upsertCheckIn } from '../../db/repositories/checkins'
+import { Textarea } from '../../design/primitives'
+import { useToastStore } from '../../lib/toastStore'
 
 type Field = 'energy' | 'mood' | 'focus'
 
@@ -15,7 +14,7 @@ function RatingRow({
   onChange,
 }: {
   label: string
-  value: number
+  value: number | null
   onChange: (value: number) => void
 }) {
   return (
@@ -34,7 +33,7 @@ function RatingRow({
             <Star
               size={14}
               strokeWidth={1.75}
-              className={n <= value ? 'fill-accent text-accent' : 'text-text-faint'}
+              className={value != null && n <= value ? 'fill-accent text-accent' : 'text-text-faint'}
             />
           </button>
         ))}
@@ -43,26 +42,21 @@ function RatingRow({
   )
 }
 
-export function CheckInPanel() {
-  const date = todayKey()
+/**
+ * Check-in de un día: energía/ánimo/foco (1-5, sin responder = `null`, nunca se fabrica un
+ * valor por defecto) + nota libre. Auto-contenido — solo necesita `date`, hace su propia
+ * `useLiveQuery`/escritura, así que puede montarse tal cual en la tarjeta de Hoy y en el paso 1
+ * del flujo de inicio del día sin duplicar lógica.
+ */
+export function CheckInFields({ date }: { date: string }) {
   const checkin = useLiveQuery(() => getCheckInForDate(date), [date])
   const [note, setNote] = useState<string | null>(null)
-
-  const energy = checkin?.energy ?? 0
-  const mood = checkin?.mood ?? 0
-  const focus = checkin?.focus ?? 0
   const noteValue = note ?? checkin?.note ?? ''
-
   const push = useToastStore((s) => s.push)
 
   const setRating = async (field: Field, value: number) => {
     try {
-      await upsertCheckIn(date, {
-        energy: field === 'energy' ? value : energy || 3,
-        mood: field === 'mood' ? value : mood || 3,
-        focus: field === 'focus' ? value : focus || 3,
-        note: noteValue.trim() || undefined,
-      })
+      await upsertCheckIn(date, { [field]: value })
     } catch {
       push({ title: 'No se pudo guardar el check-in', variant: 'error' })
     }
@@ -71,25 +65,22 @@ export function CheckInPanel() {
   const commitNote = async () => {
     if (note === null) return
     try {
-      await upsertCheckIn(date, {
-        energy: energy || 3,
-        mood: mood || 3,
-        focus: focus || 3,
-        note: note.trim() || undefined,
-      })
+      await upsertCheckIn(date, { note: note.trim() || undefined })
     } catch {
       push({ title: 'No se pudo guardar el check-in', variant: 'error' })
     }
   }
 
+  const answered = checkin?.energy != null || checkin?.mood != null || checkin?.focus != null
+
   return (
     <div className="space-y-3">
-      <p className={cn('text-[11px]', checkin ? 'text-accent' : 'text-text-faint')}>
-        {checkin ? 'Check-in de hoy guardado.' : 'Todavía no has hecho el check-in de hoy.'}
+      <p className={cn('text-[11px]', answered ? 'text-accent' : 'text-text-faint')}>
+        {answered ? 'Check-in guardado.' : 'Todavía no has hecho el check-in.'}
       </p>
-      <RatingRow label="Energía" value={energy} onChange={(v) => setRating('energy', v)} />
-      <RatingRow label="Ánimo" value={mood} onChange={(v) => setRating('mood', v)} />
-      <RatingRow label="Foco" value={focus} onChange={(v) => setRating('focus', v)} />
+      <RatingRow label="Energía" value={checkin?.energy ?? null} onChange={(v) => setRating('energy', v)} />
+      <RatingRow label="Ánimo" value={checkin?.mood ?? null} onChange={(v) => setRating('mood', v)} />
+      <RatingRow label="Foco" value={checkin?.focus ?? null} onChange={(v) => setRating('focus', v)} />
       <Textarea
         value={noteValue}
         onChange={(e) => setNote(e.target.value)}

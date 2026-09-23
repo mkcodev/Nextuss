@@ -174,19 +174,26 @@ describe('eveningSummaryNotifications', () => {
 })
 
 describe('weeklyReviewNudgeNotifications', () => {
-  it('fires on Monday morning only if no review exists yet for the current week', () => {
-    const fired = weeklyReviewNudgeNotifications({ now: MONDAY_8AM, settings: settings(), hasReviewForCurrentWeek: false })
+  it('fires at the morning time only if no review exists yet for last week', () => {
+    const fired = weeklyReviewNudgeNotifications({ now: MONDAY_8AM, settings: settings(), hasReviewForLastWeek: false })
     expect(fired).toHaveLength(1)
     expect(fired[0].key).toContain('2026-W')
 
-    const skipped = weeklyReviewNudgeNotifications({ now: MONDAY_8AM, settings: settings(), hasReviewForCurrentWeek: true })
+    const skipped = weeklyReviewNudgeNotifications({ now: MONDAY_8AM, settings: settings(), hasReviewForLastWeek: true })
     expect(skipped).toHaveLength(0)
   })
 
-  it('never fires on a non-Monday', () => {
+  it('keeps firing on a non-Monday too — skipping Monday shouldn\'t lose the whole week\'s nudge', () => {
     const tuesday = new Date(2026, 8, 22, 8, 0)
     expect(
-      weeklyReviewNudgeNotifications({ now: tuesday, settings: settings(), hasReviewForCurrentWeek: false }),
+      weeklyReviewNudgeNotifications({ now: tuesday, settings: settings(), hasReviewForLastWeek: false }),
+    ).toHaveLength(1)
+  })
+
+  it('still only fires at the configured morning time', () => {
+    const wrongTime = new Date(2026, 8, 21, 9, 0)
+    expect(
+      weeklyReviewNudgeNotifications({ now: wrongTime, settings: settings(), hasReviewForLastWeek: false }),
     ).toHaveLength(0)
   })
 })

@@ -178,7 +178,7 @@ export async function suggestDayPlan(
   apiKey: string,
   input: {
     capacityMin: number
-    checkIn?: { energy: number; mood: number; focus: number }
+    checkIn?: { energy: number | null; mood: number | null; focus: number | null }
     tasks: DayPlanTaskInput[]
   },
 ): Promise<DayPlanSuggestion> {
@@ -202,7 +202,7 @@ export async function suggestDayPlan(
     .map((t) => `- id=${t.id} "${t.title}" (${t.estimateMin ?? '?'} min, energía=${t.energy ?? 'sin especificar'})`)
     .join('\n')
   const checkInNote = input.checkIn
-    ? `Check-in de hoy: energía ${input.checkIn.energy}/5, ánimo ${input.checkIn.mood}/5, foco ${input.checkIn.focus}/5.`
+    ? `Check-in de hoy: energía ${input.checkIn.energy ?? 'sin especificar'}/5, ánimo ${input.checkIn.mood ?? 'sin especificar'}/5, foco ${input.checkIn.focus ?? 'sin especificar'}/5.`
     : 'Sin check-in de hoy todavía.'
 
   const validIds = new Set(input.tasks.map((t) => t.id))

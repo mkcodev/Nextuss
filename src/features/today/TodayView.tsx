@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { addDays, format, getDay, subDays } from 'date-fns'
+import { addDays, format, subDays } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { CheckCheck, ChevronLeft, ChevronRight, Compass, Flame, Plus, Sparkles, Target } from 'lucide-react'
-import { Button, EmptyState, Skeleton } from '../../design/primitives'
+import { CheckCheck, ChevronLeft, ChevronRight, Moon, Plus, Sparkles, Target } from 'lucide-react'
+import { Alert, Button, EmptyState, Skeleton } from '../../design/primitives'
 import { useInsights } from '../stats/insights/useInsights'
 import { todayKey, isHabitScheduledOn, dateKey, parseDateKey, weekKey } from '../../lib/dates'
 import { useHabitsWithStats } from '../habits/useHabitsWithStats'
@@ -18,11 +18,19 @@ import { Timeline } from '../planner/Timeline'
 import { UnscheduledTray } from '../planner/UnscheduledTray'
 import { CapacityBanner } from '../planner/CapacityBanner'
 import { OverdueTasks } from '../planner/OverdueTasks'
-import { getNorthStarStreak, getPriorityGoal } from '../../db/repositories/goals'
+import { NorthStarCallout } from '../planner/NorthStarCallout'
+import { getTasksForDate, getOverdueTasks } from '../../db/repositories/tasks'
 import { getReview } from '../../db/repositories/reviews'
+import { getCheckInForDate } from '../../db/repositories/checkins'
 import { previousPeriodKey } from '../../lib/periods'
 import { useWeeklyReviewStore } from '../planner/weeklyReviewStore'
 import { DayPlanSuggestion } from '../ai/DayPlanSuggestion'
+import { CheckInCard } from './CheckInCard'
+import { db } from '../../db/schema'
+import { shouldShowDayClose, shouldShowDayStart } from '../rituals/gates'
+import type { CheckIn, Task } from '../../db/types'
+import { useDayStartStore } from '../rituals/dayStartStore'
+import { useDayCloseStore } from '../rituals/dayCloseStore'
 
 export function TodayView() {
   const today = todayKey()
@@ -45,15 +53,13 @@ export function TodayView() {
   const pending = todaysEntries?.filter((e) => !e.log?.completed) ?? []
 
   const currentWeekKey = weekKey()
-  const northStar = useLiveQuery(() => getPriorityGoal('week', currentWeekKey), [currentWeekKey])
-  const northStarStreak = useLiveQuery(() => getNorthStarStreak('week', currentWeekKey), [currentWeekKey]) ?? 0
-  // The weekly-review nudge is about the real calendar (is it actually Monday right now?), not
-  // whichever day the user happens to be viewing — navigating to a past/future Monday must not
-  // spuriously trigger it.
-  const isMonday = isToday && getDay(parseDateKey(today)) === 1
+  // El aviso de revisión semanal es sobre el calendario real, no sobre el día que se esté viendo —
+  // navegar a un lunes pasado/futuro no debe disparar el aviso espuriamente. Ya no depende de que
+  // "hoy" sea literalmente lunes (Fase 12): si te saltas el lunes, el aviso sigue vigente toda la
+  // semana hasta que exista una revisión para la semana pasada.
   const lastWeekKey = previousPeriodKey('week', currentWeekKey)
   const lastWeekReview = useLiveQuery(() => getReview(lastWeekKey), [lastWeekKey])
-  const needsReview = isMonday && lastWeekReview === undefined
+  const needsReview = isToday && lastWeekReview === undefined
   const openWeeklyReview = useWeeklyReviewStore((s) => s.openReview)
   const navigate = useNavigate()
   const { insights } = useInsights('30d')
@@ -64,30 +70,54 @@ export function TodayView() {
   const goToDate = (next: string) =>
     setSearchParams(next === today ? {} : { d: next }, { replace: true })
 
+  // Rituales del día (Fase 12) — solo evaluados para el "hoy" real, nunca al navegar a otro día.
+  const checkin = useLiveQuery(
+    () => (isToday ? getCheckInForDate(date) : Promise.resolve(undefined as CheckIn | undefined)),
+    [isToday, date],
+  )
+  const overdueForGate = useLiveQuery(() => (isToday ? getOverdueTasks(date) : Promise.resolve([] as Task[])), [isToday, date])
+  const tasksToday = useLiveQuery(() => (isToday ? getTasksForDate(date) : Promise.resolve([] as Task[])), [isToday, date])
+  const settings = useLiveQuery(() => db.settings.get(1), [])
+  const openDayStart = useDayStartStore((s) => s.openFlow)
+  const openDayClose = useDayCloseStore((s) => s.openFlow)
+  const dayStartOpen = useDayStartStore((s) => s.open)
+  const dayCloseOpen = useDayCloseStore((s) => s.open)
+  // Una vez se ha abierto (o descartado) un ritual para `date` en esta sesión, no se vuelve a
+  // proponer aunque `checkin` tarde en reflejar el `markRitual*` que se escribió al cerrar — ese
+  // escritura es fire-and-forget (`void markRitualStart(...)`), así que depender solo del
+  // round-trip a Dexie para no reabrirse dejaba una ventana real en la que el diálogo se
+  // reabría solo a sí mismo justo después de terminarlo.
+  const promptedDayStartRef = useRef<string | null>(null)
+  const promptedDayCloseRef = useRef<string | null>(null)
+
+  // `checkin` deliberately NOT part of the "still loading" guard below: a missing check-in row
+  // (the normal "haven't checked in today" case) resolves to `undefined` from Dexie exactly like
+  // an unresolved query does, so gating on it would mean the flow could never open for anyone who
+  // hasn't checked in yet. `overdueForGate`/`tasksToday`/`settings` are unambiguous (they always
+  // resolve to a real array/object, never object).
+  useEffect(() => {
+    if (!isToday || dayStartOpen || dayCloseOpen || overdueForGate === undefined) return
+    if (promptedDayStartRef.current === date) return
+    if (shouldShowDayStart(checkin, overdueForGate.length)) {
+      promptedDayStartRef.current = date
+      openDayStart(date)
+    }
+  }, [isToday, dayStartOpen, dayCloseOpen, checkin, overdueForGate, date, openDayStart])
+
+  useEffect(() => {
+    if (!isToday || dayStartOpen || dayCloseOpen || tasksToday === undefined || !settings) return
+    if (promptedDayCloseRef.current === date) return
+    const pendingCount =
+      tasksToday.filter((t) => t.status !== 'done').length + (todaysEntries?.filter((e) => !e.log?.completed).length ?? 0)
+    if (shouldShowDayClose(checkin, pendingCount, new Date(), settings.eveningSummaryTime ?? '21:00')) {
+      promptedDayCloseRef.current = date
+      openDayClose(date)
+    }
+  }, [isToday, dayStartOpen, dayCloseOpen, checkin, tasksToday, settings, todaysEntries, date, openDayClose])
+
   useContextPanel(
     'Resumen del día',
     <div className="space-y-4">
-      {northStar && (
-        <div className="rounded-xl bg-accent-soft p-3">
-          <p className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-accent">
-            <Compass size={11} /> Objetivo principal
-          </p>
-          <p className="mt-0.5 truncate text-sm font-medium text-text">{northStar.title}</p>
-          {northStarStreak > 0 && (
-            <p className="mt-0.5 flex items-center gap-1 text-xs text-text-muted">
-              <Flame size={12} className="text-accent" /> {northStarStreak} semanas seguidas
-            </p>
-          )}
-        </div>
-      )}
-      {needsReview && (
-        <button
-          onClick={() => openWeeklyReview(currentWeekKey)}
-          className="w-full rounded-xl border border-dashed border-border p-3 text-left text-xs text-text-muted hover:border-accent hover:text-accent"
-        >
-          Toca hacer la revisión semanal →
-        </button>
-      )}
       {topInsight && (
         <button
           onClick={() => navigate('/estadisticas?tab=insights')}
@@ -118,16 +148,7 @@ export function TodayView() {
         totalCount > 0 && <p className="text-xs text-accent">Todo completado por hoy.</p>
       )}
     </div>,
-    [
-      doneCount,
-      totalCount,
-      pending.map((e) => e.habit.id).join(','),
-      northStar?.id,
-      northStar?.title,
-      northStarStreak,
-      needsReview,
-      topInsight?.key,
-    ],
+    [doneCount, totalCount, pending.map((e) => e.habit.id).join(','), topInsight?.key],
   )
 
   useListNav(
@@ -172,24 +193,41 @@ export function TodayView() {
             </Button>
           )}
         </div>
-        {totalCount > 0 && (
-          <div className="flex items-center gap-1.5 text-sm text-text-muted">
-            <CheckCheck size={15} strokeWidth={2} className="text-accent" />
-            <span className="tabular-nums">
-              {doneCount}/{totalCount} completados
-            </span>
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {totalCount > 0 && (
+            <div className="flex items-center gap-1.5 text-sm text-text-muted">
+              <CheckCheck size={15} strokeWidth={2} className="text-accent" />
+              <span className="tabular-nums">
+                {doneCount}/{totalCount} completados
+              </span>
+            </div>
+          )}
+          {isToday && (
+            <Button variant="ghost" onClick={() => openDayClose(date)} className="px-2 py-1 text-xs">
+              <Moon size={13} strokeWidth={2} /> Cerrar el día
+            </Button>
+          )}
+        </div>
       </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
         <div className="space-y-3 lg:order-1">
+          <NorthStarCallout period="week" periodKey={currentWeekKey} />
+          {needsReview && (
+            <Alert tone="info">
+              <button onClick={() => openWeeklyReview(currentWeekKey)} className="hover:underline">
+                Toca hacer la revisión semanal →
+              </button>
+            </Alert>
+          )}
           {isToday && <OverdueTasks date={date} />}
           <CapacityBanner date={date} />
           <Timeline date={date} />
         </div>
 
         <div className="space-y-6 lg:order-2">
+          <CheckInCard date={date} />
+
           <div>
             <div className="mb-1 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-text-muted">{isToday ? 'Hábitos de hoy' : 'Hábitos ese día'}</h2>

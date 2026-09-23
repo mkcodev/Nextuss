@@ -177,6 +177,23 @@ export async function carryOverToToday(id: number, today: string) {
   })
 }
 
+/** Aparca una tarea (Fase 12, la acción real que faltaba para "delegarla"): la saca por completo
+ * del calendario y la manda a backlog — a diferencia de `carryOverToToday`, **resetea**
+ * `postponedCount` en vez de incrementarlo, porque decidir conscientemente que no toca hoy no es
+ * la misma "promesa rota" que un `postponedCount` cuenta. Envuelta con `withUndo` como cualquier
+ * otra reprogramación real. */
+export async function parkTask(id: number): Promise<void> {
+  await withUndo('Tarea aparcada', [{ table: 'tasks', ids: [id] }], async () => {
+    await db.tasks.update(id, {
+      scheduledDate: undefined,
+      scheduledStart: undefined,
+      scheduledEnd: undefined,
+      status: 'backlog',
+      postponedCount: 0,
+    })
+  })
+}
+
 /** Non-done tasks, most recently scheduled/created first — used by the focus timer's task picker. */
 export async function listActiveTasks(): Promise<Task[]> {
   const all = await db.tasks.where('status').notEqual('done').toArray()

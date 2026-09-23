@@ -50,7 +50,7 @@ export function OverdueTasks({ date }: { date: string }) {
               <span className="shrink-0 text-[10px] text-text-faint">{t.scheduledDate}</span>
               {isZombie && (
                 <span
-                  title={`Pospuesta ${t.postponedCount} veces — considera desglosarla, reducirla, delegarla o eliminarla`}
+                  title={`Pospuesta ${t.postponedCount} veces — usa el menú "···" para desglosarla, reducirla, aparcarla o eliminarla`}
                   className={cn('shrink-0 text-danger')}
                 >
                   <AlertTriangle size={12} strokeWidth={2} />

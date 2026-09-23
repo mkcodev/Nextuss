@@ -4,7 +4,7 @@
 // de testear con datos fijos.
 import { format } from 'date-fns'
 import type { Habit, HabitLog, Settings, Task } from '../../db/types'
-import { dateKey, isHabitScheduledOn, timeToMinutes, weekdayOf, weekKey } from '../../lib/dates'
+import { dateKey, isHabitScheduledOn, timeToMinutes, weekKey } from '../../lib/dates'
 import { ZOMBIE_THRESHOLD } from '../../db/repositories/tasks'
 
 export interface PendingNotification {
@@ -104,7 +104,7 @@ export function eveningSummaryNotifications(input: {
       key: `evening:${today}`,
       title: 'Cierre del día',
       body: `${doneTaskCount}/${totalTaskCount} tareas completadas`,
-      url: '/',
+      url: '/?action=dayClose',
     },
   ]
 }
@@ -112,13 +112,14 @@ export function eveningSummaryNotifications(input: {
 export function weeklyReviewNudgeNotifications(input: {
   now: Date
   settings: Settings
-  hasReviewForCurrentWeek: boolean
+  /** ¿Ya existe una revisión guardada para la semana que se está revisando (la que acaba de
+   * terminar), no para la semana en curso? Ver `TodayView.tsx`/`previousPeriodKey('week', ...)`. */
+  hasReviewForLastWeek: boolean
 }): PendingNotification[] {
-  const { now, settings, hasReviewForCurrentWeek } = input
+  const { now, settings, hasReviewForLastWeek } = input
   if (settings.notificationsEnabled === false || settings.notifyWeeklyReviewNudge === false) return []
-  if (weekdayOf(now) !== 1) return [] // lunes
   if (hhmm(now) !== (settings.morningSummaryTime ?? '08:00')) return []
-  if (hasReviewForCurrentWeek) return []
+  if (hasReviewForLastWeek) return []
   return [
     {
       key: `weekly-review:${weekKey(now)}`,
