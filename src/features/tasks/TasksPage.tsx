@@ -1,11 +1,31 @@
 import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, ListTodo, Pencil, Plus, Trash2 } from 'lucide-react'
-import { Button, Card, Checkbox, EmptyState, Select } from '../../design/primitives'
+import {
+  Archive,
+  ArrowDown,
+  ArrowUp,
+  ChevronDown,
+  ChevronUp,
+  FolderKanban,
+  ListTodo,
+  Pencil,
+  Plus,
+  Tag as TagIcon,
+  Trash2,
+  X,
+} from 'lucide-react'
+import { Button, Card, Checkbox, EmptyState, Menu, MenuItem, MenuSeparator, Select } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { todayKey } from '../../lib/dates'
 import { PRIORITY_COLORS, PRIORITY_LABELS } from '../../lib/priority'
-import { listAllTasks } from '../../db/repositories/tasks'
+import {
+  addTagBulk,
+  listAllTasks,
+  moveToProjectBulk,
+  parkTasksBulk,
+  setPriorityBulk,
+  trashTasksBulk,
+} from '../../db/repositories/tasks'
 import { listProjects } from '../../db/repositories/projects'
 import { listTags } from '../../db/repositories/tags'
 import {
@@ -59,11 +79,20 @@ export function TasksPage() {
   const [activeViewId, setActiveViewId] = useState<number | null>(null)
   const [showFilters, setShowFilters] = useState(true)
   const [renamingId, setRenamingId] = useState<number | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [lastCheckedIndex, setLastCheckedIndex] = useState<number | null>(null)
 
   useEffect(() => {
     void ensureDefaultTaskViews(today)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Cambiar de vista activa vacía la selección — aplicar una acción en lote a filas que ya no se
+  // están viendo sería sorprendente, no un atajo útil.
+  useEffect(() => {
+    setSelectedIds(new Set())
+    setLastCheckedIndex(null)
+  }, [activeViewId])
 
   // Sin efecto de "selecciona la primera vista por defecto": si no se ha elegido ninguna todavía,
   // se deriva directamente de `views[0]` en cada render — evita depender de la referencia (nueva en
@@ -73,6 +102,8 @@ export function TasksPage() {
   const projectsById = new Map(projects.map((p) => [p.id!, p]))
   const tagsById = new Map(tags.map((t) => [t.id!, t]))
   const rows = activeView ? applyTaskView(allTasks, activeView, today) : []
+  const rowsAllSelected = rows.length > 0 && rows.every((t) => t.id != null && selectedIds.has(t.id))
+  const rowsSomeSelected = rows.some((t) => t.id != null && selectedIds.has(t.id))
 
   const patchFilters = (changes: Partial<TaskView['filters']>) => {
     if (!activeView) return
@@ -103,6 +134,39 @@ export function TasksPage() {
       columns: base?.columns ?? ['priority', 'project', 'scheduledDate'],
     })
     setActiveViewId(id)
+  }
+
+  const toggleRowChecked = (index: number, task: Task, shiftKey: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (shiftKey && lastCheckedIndex != null) {
+        const [from, to] = lastCheckedIndex < index ? [lastCheckedIndex, index] : [index, lastCheckedIndex]
+        for (let i = from; i <= to; i++) {
+          const id = rows[i]?.id
+          if (id != null) next.add(id)
+        }
+      } else if (task.id != null) {
+        if (next.has(task.id)) next.delete(task.id)
+        else next.add(task.id)
+      }
+      return next
+    })
+    setLastCheckedIndex(index)
+  }
+
+  const toggleAllChecked = () => {
+    setSelectedIds((prev) => {
+      const allSelected = rows.length > 0 && rows.every((t) => t.id != null && prev.has(t.id))
+      if (allSelected) return new Set()
+      return new Set(rows.map((t) => t.id!).filter((id) => id != null))
+    })
+  }
+
+  const clearSelection = () => setSelectedIds(new Set())
+
+  const runBulk = async (fn: () => Promise<void>) => {
+    await fn()
+    clearSelection()
   }
 
   const handleReorderDrop = (draggedId: number, target: TaskView) => {
@@ -181,6 +245,76 @@ export function TasksPage() {
 
       {activeView && (
         <>
+          {selectedIds.size > 0 && (
+            <Card className="flex flex-wrap items-center gap-2 border-accent bg-accent-soft p-3">
+              <span className="text-xs font-semibold text-accent">{selectedIds.size} seleccionada{selectedIds.size === 1 ? '' : 's'}</span>
+              <div className="h-4 w-px bg-accent/30" />
+
+              <Menu
+                trigger={(props) => (
+                  <button {...props} className="rounded-md border border-accent/40 px-2.5 py-1 text-xs font-medium text-accent hover:bg-accent-soft">
+                    Prioridad
+                  </button>
+                )}
+              >
+                {[1, 2, 3, 4].map((p) => (
+                  <MenuItem key={p} onSelect={() => runBulk(() => setPriorityBulk([...selectedIds], p))}>
+                    <span style={{ color: PRIORITY_COLORS[p] }}>{PRIORITY_LABELS[p]}</span>
+                  </MenuItem>
+                ))}
+              </Menu>
+
+              <Menu
+                trigger={(props) => (
+                  <button {...props} className="flex items-center gap-1 rounded-md border border-accent/40 px-2.5 py-1 text-xs font-medium text-accent hover:bg-accent-soft">
+                    <FolderKanban size={12} strokeWidth={2} /> Proyecto
+                  </button>
+                )}
+              >
+                <MenuItem onSelect={() => runBulk(() => moveToProjectBulk([...selectedIds], undefined))}>Sin proyecto</MenuItem>
+                {projects.length > 0 && <MenuSeparator />}
+                {projects.map((p) => (
+                  <MenuItem key={p.id} onSelect={() => runBulk(() => moveToProjectBulk([...selectedIds], p.id))}>
+                    {p.name}
+                  </MenuItem>
+                ))}
+              </Menu>
+
+              <Menu
+                trigger={(props) => (
+                  <button {...props} className="flex items-center gap-1 rounded-md border border-accent/40 px-2.5 py-1 text-xs font-medium text-accent hover:bg-accent-soft">
+                    <TagIcon size={12} strokeWidth={2} /> Etiqueta
+                  </button>
+                )}
+              >
+                {tags.length === 0 && <p className="px-3 py-2 text-xs text-text-faint">Sin etiquetas todavía.</p>}
+                {tags.map((t) => (
+                  <MenuItem key={t.id} onSelect={() => runBulk(() => addTagBulk([...selectedIds], t.id!))}>
+                    {t.name}
+                  </MenuItem>
+                ))}
+              </Menu>
+
+              <button
+                onClick={() => runBulk(() => parkTasksBulk([...selectedIds]))}
+                className="flex items-center gap-1 rounded-md border border-accent/40 px-2.5 py-1 text-xs font-medium text-accent hover:bg-accent-soft"
+              >
+                <Archive size={12} strokeWidth={2} /> Aparcar
+              </button>
+
+              <button
+                onClick={() => runBulk(() => trashTasksBulk([...selectedIds]))}
+                className="flex items-center gap-1 rounded-md border border-danger/40 px-2.5 py-1 text-xs font-medium text-danger hover:bg-danger/10"
+              >
+                <Trash2 size={12} strokeWidth={2} /> Eliminar
+              </button>
+
+              <button onClick={clearSelection} className="ml-auto flex items-center gap-1 text-xs text-accent hover:underline">
+                <X size={12} strokeWidth={2} /> Cancelar
+              </button>
+            </Card>
+          )}
+
           <Card className="p-3.5">
             <button
               onClick={() => setShowFilters((v) => !v)}
@@ -340,7 +474,15 @@ export function TasksPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border text-left text-xs text-text-faint">
-                      <th className="px-4 py-2.5 font-medium">
+                      <th className="w-8 px-4 py-2.5">
+                        <Checkbox
+                          checked={rowsAllSelected}
+                          indeterminate={rowsSomeSelected && !rowsAllSelected}
+                          onChange={toggleAllChecked}
+                          aria-label="Seleccionar todas"
+                        />
+                      </th>
+                      <th className="px-3 py-2.5 font-medium">
                         <button onClick={() => toggleSort('title')} className="flex items-center gap-1">
                           Título {activeView.sortField === 'title' && <SortIcon dir={activeView.sortDir} />}
                         </button>
@@ -367,7 +509,7 @@ export function TasksPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((task) => (
+                    {rows.map((task, index) => (
                       <TaskViewRow
                         key={task.id}
                         task={task}
@@ -375,6 +517,8 @@ export function TasksPage() {
                         project={task.projectId ? projectsById.get(task.projectId) : undefined}
                         taskTags={task.tagIds.map((id) => tagsById.get(id)).filter((t): t is NonNullable<typeof t> => !!t)}
                         onOpen={() => openEditTask(task)}
+                        selected={task.id != null && selectedIds.has(task.id)}
+                        onToggleChecked={(shiftKey) => toggleRowChecked(index, task, shiftKey)}
                       />
                     ))}
                   </tbody>
@@ -394,16 +538,28 @@ function TaskViewRow({
   project,
   taskTags,
   onOpen,
+  selected,
+  onToggleChecked,
 }: {
   task: Task
   columns: TaskColumnKey[]
   project?: { name: string; color: string }
   taskTags: { id?: number; name: string }[]
   onOpen: () => void
+  selected: boolean
+  onToggleChecked: (shiftKey: boolean) => void
 }) {
   return (
-    <tr className="border-b border-border last:border-0 hover:bg-surface-hover">
-      <td className="px-4 py-2">
+    <tr className={cn('border-b border-border last:border-0 hover:bg-surface-hover', selected && 'bg-accent-soft/40')}>
+      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+        <Checkbox
+          checked={selected}
+          onChange={() => {}}
+          onClick={(e) => onToggleChecked(e.shiftKey)}
+          aria-label={`Seleccionar "${task.title}"`}
+        />
+      </td>
+      <td className="px-3 py-2">
         <button
           onClick={onOpen}
           className={cn('truncate text-left hover:underline', task.status === 'done' && 'text-text-faint line-through')}

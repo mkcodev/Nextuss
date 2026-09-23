@@ -194,6 +194,55 @@ export async function parkTask(id: number): Promise<void> {
   })
 }
 
+// --- Edición en lote (Fase 13.3) ---------------------------------------------------------------
+// `withUndo` ya acepta un array de ids por tabla y los snapshotea/restaura de una sola vez, así que
+// las cuatro acciones no destructivas de abajo son todas el mismo envoltorio de una línea sobre
+// `bulkModify` — no hace falta reinventar el deshacer por cada una.
+
+async function bulkModify(ids: number[], label: string, modifier: (task: Task) => void): Promise<void> {
+  await withUndo(label, [{ table: 'tasks', ids }], async () => {
+    await db.tasks.where('id').anyOf(ids).modify(modifier)
+  })
+}
+
+export const setPriorityBulk = (ids: number[], priority: number) =>
+  bulkModify(ids, `Prioridad actualizada en ${ids.length} tarea${ids.length === 1 ? '' : 's'}`, (t) => {
+    t.priority = priority
+  })
+
+export const moveToProjectBulk = (ids: number[], projectId: number | undefined) =>
+  bulkModify(ids, `Proyecto actualizado en ${ids.length} tarea${ids.length === 1 ? '' : 's'}`, (t) => {
+    t.projectId = projectId
+  })
+
+/** Fusiona la etiqueta en el `tagIds` de cada tarea en vez de sobrescribirlo — cada una puede
+ * tener ya un subconjunto distinto de etiquetas. */
+export const addTagBulk = (ids: number[], tagId: number) =>
+  bulkModify(ids, `Etiqueta añadida a ${ids.length} tarea${ids.length === 1 ? '' : 's'}`, (t) => {
+    if (!t.tagIds.includes(tagId)) t.tagIds = [...t.tagIds, tagId]
+  })
+
+export const parkTasksBulk = (ids: number[]) =>
+  bulkModify(ids, `${ids.length} tarea${ids.length === 1 ? '' : 's'} aparcada${ids.length === 1 ? '' : 's'}`, (t) => {
+    t.scheduledDate = undefined
+    t.scheduledStart = undefined
+    t.scheduledEnd = undefined
+    t.status = 'backlog'
+    t.postponedCount = 0
+  })
+
+/** Papelera en lote: une el subárbol de subtareas de cada tarea seleccionada (mismo
+ * `collectTaskSubtreeIds` que ya usa `trashTask`) en un solo lote/un solo deshacer, en vez de N
+ * lotes separados. */
+export async function trashTasksBulk(ids: number[]): Promise<void> {
+  const allIds = new Set<number>()
+  for (const id of ids) {
+    const subtree = await collectTaskSubtreeIds(id)
+    for (const sid of subtree) allIds.add(sid)
+  }
+  await trashRows('tasks', [...allIds], `${ids.length} tarea${ids.length === 1 ? '' : 's'} eliminada${ids.length === 1 ? '' : 's'}`)
+}
+
 /** Non-done tasks, most recently scheduled/created first — used by the focus timer's task picker. */
 export async function listActiveTasks(): Promise<Task[]> {
   const all = await db.tasks.where('status').notEqual('done').toArray()
