@@ -66,4 +66,7 @@ export function applyMigrationsToBackupTables(tables: Record<string, unknown[]>,
   if (fromVersion < 9 && tables.tasks) {
     for (const t of tables.tasks) backfillTaskXpAwardedV9(t as Partial<Task>)
   }
+  if (fromVersion < 11 && tables.projects) {
+    backfillTrashFields(tables.projects as never[])
+  }
 }

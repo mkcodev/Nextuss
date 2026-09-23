@@ -9,7 +9,7 @@ import {
   moveTaskBetween,
 } from './repositories/tasks'
 import { deleteTag, findOrCreateTag, listTags } from './repositories/tags'
-import { createProject, deleteProject, listProjects } from './repositories/projects'
+import { createProject, listProjects, trashProject } from './repositories/projects'
 
 beforeEach(async () => {
   await db.transaction('rw', db.tables, async () => {
@@ -38,13 +38,13 @@ describe('tags', () => {
 })
 
 describe('projects', () => {
-  it('deleteProject clears projectId on referencing tasks', async () => {
+  it('trashProject hides it from listProjects but keeps referencing tasks linked', async () => {
     const projectId = await createProject({ name: 'Lanzamiento', color: '#5EC8FF' })
     const taskId = await createTask({ title: 't', projectId })
-    await deleteProject(projectId)
+    await trashProject(projectId)
     expect(await listProjects()).toEqual([])
     const task = await db.tasks.get(taskId)
-    expect(task?.projectId).toBeUndefined()
+    expect(task?.projectId).toBe(projectId) // solo se desvincula al purgar de verdad, ver projects.test.ts
   })
 })
 

@@ -6,7 +6,7 @@
 import { db } from '../../db/schema'
 import { foldText } from '../../lib/text'
 
-export type SearchDocType = 'task' | 'habit' | 'goal'
+export type SearchDocType = 'task' | 'habit' | 'goal' | 'project'
 
 export interface SearchDoc {
   id: number
@@ -66,10 +66,16 @@ class SearchIndex {
   }
 
   private async build(): Promise<void> {
-    const [tasks, habits, goals] = await Promise.all([db.tasks.toArray(), db.habits.toArray(), db.goals.toArray()])
+    const [tasks, habits, goals, projects] = await Promise.all([
+      db.tasks.toArray(),
+      db.habits.toArray(),
+      db.goals.toArray(),
+      db.projects.toArray(),
+    ])
     for (const t of tasks) if (t.deletedAt === 0 && t.id != null) this.upsertDoc('task', t.id, t.title)
     for (const h of habits) if (h.deletedAt === 0 && h.id != null) this.upsertDoc('habit', h.id, h.name)
     for (const g of goals) if (g.deletedAt === 0 && g.id != null) this.upsertDoc('goal', g.id, g.title, g.periodKey)
+    for (const p of projects) if (p.deletedAt === 0 && p.id != null) this.upsertDoc('project', p.id, p.name)
     this.registerHooks()
     this.built = true
   }
@@ -132,6 +138,22 @@ class SearchIndex {
     })
     db.goals.hook('deleting', function (primKey) {
       this.onsuccess = () => searchIndex.removeDoc('goal', primKey!)
+    })
+
+    db.projects.hook('creating', function (_pk, obj) {
+      this.onsuccess = (key) => {
+        if (obj.deletedAt === 0) searchIndex.upsertDoc('project', key!, obj.name)
+      }
+    })
+    db.projects.hook('updating', function (mods, primKey, obj) {
+      this.onsuccess = () => {
+        const merged = { ...obj, ...mods }
+        if (merged.deletedAt === 0) searchIndex.upsertDoc('project', primKey!, merged.name)
+        else searchIndex.removeDoc('project', primKey!)
+      }
+    })
+    db.projects.hook('deleting', function (primKey) {
+      this.onsuccess = () => searchIndex.removeDoc('project', primKey!)
     })
   }
 

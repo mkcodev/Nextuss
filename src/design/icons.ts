@@ -11,16 +11,19 @@ import {
   Dumbbell,
   Flag,
   Flame,
+  FolderKanban,
   Footprints,
   Gem,
   GlassWater,
   GraduationCap,
   HeartPulse,
+  Layers,
   Leaf,
   Moon,
   Music,
   Palette,
   Pill,
+  Rocket,
   Salad,
   Shield,
   Smartphone,
@@ -75,6 +78,9 @@ export const ICON_REGISTRY = {
   award: Award,
   compass: Compass,
   flag: Flag,
+  folder: FolderKanban,
+  rocket: Rocket,
+  layers: Layers,
 } as const satisfies Record<string, LucideIcon>
 
 export type IconKey = keyof typeof ICON_REGISTRY
@@ -114,7 +120,23 @@ export const ATTRIBUTE_ICON_KEYS: IconKey[] = [
   'star',
 ]
 
+export const PROJECT_ICON_KEYS: IconKey[] = [
+  'folder',
+  'rocket',
+  'layers',
+  'briefcase',
+  'target',
+  'flag',
+  'compass',
+  'graduation',
+  'palette',
+  'wallet',
+  'trophy',
+  'gem',
+]
+
 export const DEFAULT_ICON_KEY: IconKey = 'target'
+export const DEFAULT_PROJECT_ICON_KEY: IconKey = 'folder'
 
 export function resolveIcon(key: string): LucideIcon | null {
   return (ICON_REGISTRY as Record<string, LucideIcon>)[key] ?? null

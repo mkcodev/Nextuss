@@ -21,6 +21,8 @@ import { useTaskFormStore } from '../features/tasks/taskFormStore'
 import { QuickAddDialog } from '../features/tasks/QuickAddDialog'
 import { GoalForm } from '../features/planner/GoalForm'
 import { useGoalFormStore } from '../features/planner/goalFormStore'
+import { ProjectForm } from '../features/projects/ProjectForm'
+import { useProjectFormStore } from '../features/projects/projectFormStore'
 import { WeeklyReviewDialog } from '../features/planner/WeeklyReviewDialog'
 import { TaskBreakdownDialog } from '../features/ai/TaskBreakdownDialog'
 import { OnboardingFlow } from '../features/onboarding/OnboardingFlow'
@@ -39,6 +41,7 @@ export function AppShell() {
   const formHabitNonce = useHabitFormStore((s) => s.nonce)
   const formTaskNonce = useTaskFormStore((s) => s.nonce)
   const formGoalNonce = useGoalFormStore((s) => s.nonce)
+  const formProjectNonce = useProjectFormStore((s) => s.nonce)
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
@@ -65,6 +68,7 @@ export function AppShell() {
       <HabitForm key={`habit-${formHabitNonce}`} />
       <TaskForm key={`task-${formTaskNonce}`} />
       <GoalForm key={`goal-${formGoalNonce}`} />
+      <ProjectForm key={`project-${formProjectNonce}`} />
       <QuickAddDialog />
       <WeeklyReviewDialog />
       <TaskBreakdownDialog />

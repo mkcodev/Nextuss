@@ -6,6 +6,8 @@ import { HabitsPage } from '../features/habits/HabitsPage'
 import { SettingsPage } from '../features/settings/SettingsPage'
 import { PlanningPage } from '../features/planner/PlanningPage'
 import { StatsPage } from '../features/stats/StatsPage'
+import { ProjectsPage } from '../features/projects/ProjectsPage'
+import { ProjectDetailPage } from '../features/projects/ProjectDetailPage'
 
 export const router = createBrowserRouter([
   {
@@ -16,6 +18,8 @@ export const router = createBrowserRouter([
       { path: '/planificacion', element: <PlanningPage /> },
       { path: '/habitos', element: <HabitsPage /> },
       { path: '/estadisticas', element: <StatsPage /> },
+      { path: '/proyectos', element: <ProjectsPage /> },
+      { path: '/proyectos/:id', element: <ProjectDetailPage /> },
       { path: '/ajustes', element: <SettingsPage /> },
     ],
   },

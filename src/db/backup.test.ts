@@ -119,4 +119,18 @@ describe('exportDatabase / importDatabase round trip', () => {
     expect(goal.createdAt).toBeGreaterThan(0)
     expect(goal.deletedAt).toBe(0)
   })
+
+  it('backfills deletedAt/sortKey on a backup older than Fase 13.1 (projects gain trash/order)', async () => {
+    const oldBackup = {
+      version: 10,
+      exportedAt: 1000,
+      tables: {
+        projects: [{ id: 1, name: 'Viejo', color: '#5EC8FF', archived: false, createdAt: 200 }],
+      },
+    }
+    await importDatabase(oldBackup, 'replace')
+    const project = (await db.projects.toArray())[0]
+    expect(project.deletedAt).toBe(0)
+    expect(project.sortKey).toBeTypeOf('number')
+  })
 })

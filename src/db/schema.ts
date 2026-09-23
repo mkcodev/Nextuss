@@ -150,6 +150,19 @@ export class NextussDB extends Dexie {
       tasks:
         '++id, status, scheduledDate, parentId, projectId, dueDate, completedAt, createdAt, deletedAt, sortKey, [deletedAt+status], [deletedAt+scheduledDate], [parentId+sortKey], *tagIds, recurrenceId, [recurrenceId+occurrenceDate]',
     })
+
+    // Dashboard de proyectos (Fase 13.1): projects gana papelera + orden manual, mismo patrón que
+    // tasks/habits/goals en la v6.
+    this.version(11)
+      .stores({
+        projects: '++id, attributeId, deletedAt, sortKey',
+      })
+      .upgrade(async (tx) => {
+        const table = tx.table('projects')
+        const rows = await table.toArray()
+        backfillTrashFields(rows)
+        await table.bulkPut(rows)
+      })
   }
 }
 

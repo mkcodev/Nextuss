@@ -7,6 +7,7 @@ import {
   Database,
   Download,
   FileText,
+  FolderKanban,
   Keyboard,
   ListTodo,
   Monitor,
@@ -32,6 +33,7 @@ import { weekKey } from '../lib/dates'
 import { useTaskFormStore } from '../features/tasks/taskFormStore'
 import { useGoalFormStore } from '../features/planner/goalFormStore'
 import { useWeeklyReviewStore } from '../features/planner/weeklyReviewStore'
+import { useProjectFormStore } from '../features/projects/projectFormStore'
 import { searchIndex, type SearchDoc } from '../features/search/searchIndex'
 import { NAV_ITEMS } from './navItems'
 
@@ -39,6 +41,7 @@ const SEARCH_ICON: Record<SearchDoc['type'], typeof ListTodo> = {
   task: ListTodo,
   habit: Repeat,
   goal: Target,
+  project: FolderKanban,
 }
 
 // Entradas del grupo "Navegación" que no son una ruta de NAV_ITEMS (sub-tabs, anclas, etc).
@@ -61,6 +64,7 @@ export function CommandPalette() {
   const openGoalCreate = useGoalFormStore((s) => s.openCreate)
   const openGoalEdit = useGoalFormStore((s) => s.openEdit)
   const openWeeklyReview = useWeeklyReviewStore((s) => s.openReview)
+  const openProjectCreate = useProjectFormStore((s) => s.openCreate)
 
   const [query, setQuery] = useState('')
   const results = useMemo(() => (query.trim() ? searchIndex.search(query) : []), [query])
@@ -81,9 +85,11 @@ export function CommandPalette() {
     } else if (doc.type === 'habit') {
       const habit = await getHabit(doc.id)
       if (habit) openHabitEdit(habit)
-    } else {
+    } else if (doc.type === 'goal') {
       const goal = await getGoal(doc.id)
       if (goal) openGoalEdit(goal)
+    } else {
+      navigate(`/proyectos/${doc.id}`)
     }
   }
 
@@ -170,6 +176,12 @@ export function CommandPalette() {
             className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <Target size={15} strokeWidth={1.75} /> Crear objetivo
+          </Command.Item>
+          <Command.Item
+            onSelect={() => run(openProjectCreate)}
+            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+          >
+            <FolderKanban size={15} strokeWidth={1.75} /> Crear proyecto
           </Command.Item>
           <Command.Item
             onSelect={() => run(() => openWeeklyReview(weekKey()))}

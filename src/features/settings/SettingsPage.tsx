@@ -14,7 +14,7 @@ import { useToastStore } from '../../lib/toastStore'
 import { InstallPrompt } from '../pwa/InstallPrompt'
 import { BackupSection } from './BackupSection'
 import { TrashSection } from './TrashSection'
-import { ProjectsTagsSection } from './ProjectsTagsSection'
+import { TagsSection } from './TagsSection'
 import {
   getNotificationPermissionState,
   requestNotificationPermission,
@@ -642,7 +642,7 @@ export function SettingsPage() {
 
       <PlannerSection />
 
-      <ProjectsTagsSection />
+      <TagsSection />
 
       <AiSection />
 

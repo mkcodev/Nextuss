@@ -162,9 +162,13 @@ export interface Project {
   id?: number
   name: string
   color: string
+  icon?: string
+  description?: string
   attributeId?: number // las tareas del proyecto heredan esta economía de atributo (Fase 8.6)
   archived: boolean
   createdAt: number
+  deletedAt: number // 0 = vivo. Nunca undefined: IndexedDB no indexa undefined. (Fase 13.1)
+  sortKey: number
 }
 
 export type GoalPeriod = 'week' | 'month'
@@ -284,7 +288,7 @@ export interface InsightFeedbackRecord {
   dismissedAt: number
 }
 
-export type TrashableTable = 'tasks' | 'habits' | 'goals'
+export type TrashableTable = 'tasks' | 'habits' | 'goals' | 'projects'
 
 /** Metadatos de un borrado por lote (una tarea con su subárbol, un hábito, un objetivo) — lo que
  * alimenta la página de Papelera y la purga a los 30 días en `runDailyMaintenance`. La fila borrada

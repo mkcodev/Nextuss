@@ -64,26 +64,33 @@ export async function restoreTrashEntry(trashId: number): Promise<void> {
 export async function purgeTrashEntry(trashId: number): Promise<void> {
   const entry = await db.trash.get(trashId)
   if (!entry) return
-  await db.transaction('rw', db.tasks, db.habits, db.habitLogs, db.goals, db.trash, async () => {
-    if (entry.table === 'habits') {
-      await db.habitLogs.where('habitId').anyOf(entry.entityIds).delete()
-    }
-    if (entry.table === 'tasks') {
-      const linkedGoals = await db.goals.filter((g) => g.taskIds.some((id) => entry.entityIds.includes(id))).toArray()
-      await Promise.all(
-        linkedGoals.map((g) =>
-          db.goals.update(g.id!, { taskIds: g.taskIds.filter((id) => !entry.entityIds.includes(id)) }),
-        ),
-      )
-    }
-    if (entry.table === 'goals') {
-      for (const goalId of entry.entityIds) {
-        await db.goals.where('parentGoalId').equals(goalId).modify({ parentGoalId: undefined })
+  await db.transaction(
+    'rw',
+    [db.tasks, db.habits, db.habitLogs, db.goals, db.projects, db.trash],
+    async () => {
+      if (entry.table === 'habits') {
+        await db.habitLogs.where('habitId').anyOf(entry.entityIds).delete()
       }
-    }
-    await db.table(entry.table).where('id').anyOf(entry.entityIds).delete()
-    await db.trash.delete(trashId)
-  })
+      if (entry.table === 'tasks') {
+        const linkedGoals = await db.goals.filter((g) => g.taskIds.some((id) => entry.entityIds.includes(id))).toArray()
+        await Promise.all(
+          linkedGoals.map((g) =>
+            db.goals.update(g.id!, { taskIds: g.taskIds.filter((id) => !entry.entityIds.includes(id)) }),
+          ),
+        )
+      }
+      if (entry.table === 'goals') {
+        for (const goalId of entry.entityIds) {
+          await db.goals.where('parentGoalId').equals(goalId).modify({ parentGoalId: undefined })
+        }
+      }
+      if (entry.table === 'projects') {
+        await db.tasks.where('projectId').anyOf(entry.entityIds).modify({ projectId: undefined })
+      }
+      await db.table(entry.table).where('id').anyOf(entry.entityIds).delete()
+      await db.trash.delete(trashId)
+    },
+  )
 }
 
 /** Purga cada lote más viejo que `maxAgeMs` — llamado desde `runDailyMaintenance`. */
