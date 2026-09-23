@@ -28,6 +28,9 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     description: 'Cumpliste tu objetivo principal 4 periodos seguidos.',
     icon: 'flag',
   },
+  { key: 'first_task', title: 'Manos a la obra', description: 'Completaste tu primera tarea.', icon: 'zap' },
+  { key: 'tasks_50', title: 'Productivo', description: 'Completaste 50 tareas.', icon: 'briefcase' },
+  { key: 'tasks_200', title: 'Máquina de hacer', description: 'Completaste 200 tareas.', icon: 'gem' },
 ]
 
 export const ACHIEVEMENTS_BY_KEY = new Map(ACHIEVEMENTS.map((a) => [a.key, a]))

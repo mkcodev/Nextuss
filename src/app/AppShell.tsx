@@ -18,6 +18,7 @@ import { HabitForm } from '../features/habits/HabitForm'
 import { useHabitFormStore } from '../features/habits/habitFormStore'
 import { TaskForm } from '../features/tasks/TaskForm'
 import { useTaskFormStore } from '../features/tasks/taskFormStore'
+import { QuickAddDialog } from '../features/tasks/QuickAddDialog'
 import { GoalForm } from '../features/planner/GoalForm'
 import { useGoalFormStore } from '../features/planner/goalFormStore'
 import { WeeklyReviewDialog } from '../features/planner/WeeklyReviewDialog'
@@ -62,6 +63,7 @@ export function AppShell() {
       <HabitForm key={`habit-${formHabitNonce}`} />
       <TaskForm key={`task-${formTaskNonce}`} />
       <GoalForm key={`goal-${formGoalNonce}`} />
+      <QuickAddDialog />
       <WeeklyReviewDialog />
       <TaskBreakdownDialog />
       <OnboardingFlow />

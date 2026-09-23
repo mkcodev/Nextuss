@@ -17,6 +17,8 @@ export interface Habit {
   reminderTime?: string // 'HH:mm'
   archived: boolean
   createdAt: number
+  deletedAt: number // 0 = vivo. Nunca undefined: IndexedDB no indexa undefined.
+  sortKey: number
 }
 
 export interface HabitLog {
@@ -82,16 +84,69 @@ export interface Task {
   postponedCount: number
   createdAt: number
   completedAt?: number
+  deletedAt: number // 0 = vivo. Nunca undefined: IndexedDB no indexa undefined.
+  sortKey: number
+  tagIds: number[]
+  /** XP realmente concedido al completarla (0 si nunca se completó o si es una subtarea, que no
+   * puntúa). Persistido en vez de recalculado para que desmarcarla devuelva exactamente lo que dio,
+   * aunque `XP_PER_TASK`/el bonus por prioridad cambien después (Fase 8.6). */
+  xpAwarded: number
+  /** Presente solo en una ocurrencia generada por una `RecurrenceRule` (Fase 9). Ambos van siempre
+   * juntos: `occurrenceDate` es la fecha de calendario que representa esta fila dentro de la serie,
+   * y junto a `recurrenceId` forma el índice `[recurrenceId+occurrenceDate]` que hace idempotente la
+   * generación (necesario porque `main.tsx` monta bajo `StrictMode`, que dispara los efectos dos
+   * veces). `undefined` en una tarea normal — nunca se backfillea, a diferencia de `deletedAt`, ya
+   * que "no pertenece a ninguna serie" es exactamente lo que significa ausente. */
+  recurrenceId?: number
+  occurrenceDate?: string // 'YYYY-MM-DD'
 }
 
-export interface EventItem {
+export type RecurrenceFreq = 'daily' | 'weekly' | 'monthly'
+/** `schedule`: fechas de calendario fijas (p.ej. "cada lunes"), se generan por adelantado.
+ * `completion`: la siguiente ocurrencia se genera solo al completar la anterior, desplazada
+ * `interval` unidades desde la fecha real de finalización (p.ej. "cada 3 días tras regarla"). */
+export type RecurrenceMode = 'schedule' | 'completion'
+
+/** Regla de recurrencia (Fase 9) — estructurada en tabla propia, no una cadena RRULE: no hay
+ * servidor de calendario con el que interoperar y RFC-5545 es peso muerto para los patrones que
+ * ofrece la interfaz. Además de la regla en sí, funciona como plantilla: cada ocurrencia generada
+ * es una fila `Task` normal que copia estos campos en el momento de crearse (edición posterior de
+ * la regla no reescribe ocurrencias ya generadas salvo que se pida explícitamente "esta y futuras"). */
+export interface RecurrenceRule {
   id?: number
+  freq: RecurrenceFreq
+  interval: number // cada N días/semanas/meses
+  byWeekday?: number[] // solo freq='weekly'; 0=domingo..6=sábado, como Habit.weekdays
+  byMonthDay?: number[] // solo freq='monthly'; 1-31
+  mode: RecurrenceMode
+  startDate: string // 'YYYY-MM-DD' — ancla del cálculo de intervalos; nunca se generan ocurrencias antes de esta fecha
+  until?: string // 'YYYY-MM-DD' opcional
+  // Plantilla de cada ocurrencia:
   title: string
-  date: string
-  start: string
-  end: string
-  recurrence?: string
+  notes?: string
+  energy?: EnergyLevel
+  estimateMin?: number
+  priority?: number
   color?: string
+  tagIds: number[]
+  projectId?: number
+  scheduledStart?: string // 'HH:mm' opcional
+  createdAt: number
+}
+
+export interface Tag {
+  id?: number
+  name: string
+  color: string
+}
+
+export interface Project {
+  id?: number
+  name: string
+  color: string
+  attributeId?: number // las tareas del proyecto heredan esta economía de atributo (Fase 8.6)
+  archived: boolean
+  createdAt: number
 }
 
 export type GoalPeriod = 'week' | 'month'
@@ -110,6 +165,8 @@ export interface Goal {
   completedAt?: number
   createdAt: number
   carriedFromGoalId?: number // procedencia al arrastrar desde la revisión semanal
+  deletedAt: number // 0 = vivo. Nunca undefined: IndexedDB no indexa undefined.
+  sortKey: number
 }
 
 export interface CheckIn {
@@ -205,4 +262,18 @@ export interface InsightFeedbackRecord {
   id?: number
   key: string // insight detector key, e.g. 'weekdayEffect'
   dismissedAt: number
+}
+
+export type TrashableTable = 'tasks' | 'habits' | 'goals'
+
+/** Metadatos de un borrado por lote (una tarea con su subárbol, un hábito, un objetivo) — lo que
+ * alimenta la página de Papelera y la purga a los 30 días en `runDailyMaintenance`. La fila borrada
+ * en sí sigue viva en su tabla con `deletedAt` puesto; esta entrada es solo el índice de "qué se
+ * borró junto y cuándo" para poder listarlo/restaurarlo/purgarlo como una unidad. */
+export interface TrashEntry {
+  id?: number
+  table: TrashableTable
+  entityIds: number[]
+  label: string
+  deletedAt: number
 }

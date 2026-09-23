@@ -20,6 +20,8 @@ function habit(overrides: Partial<Habit> = {}): Habit {
     weekdays: [],
     archived: false,
     createdAt: new Date(2026, 0, 1).getTime(),
+    deletedAt: 0,
+    sortKey: 0,
     ...overrides,
   }
 }
@@ -29,7 +31,17 @@ function log(overrides: Partial<HabitLog> = {}): HabitLog {
 }
 
 function task(overrides: Partial<Task> = {}): Task {
-  return { title: 't', status: 'planned', postponedCount: 0, createdAt: 0, ...overrides }
+  return {
+    title: 't',
+    status: 'planned',
+    postponedCount: 0,
+    createdAt: 0,
+    deletedAt: 0,
+    sortKey: 0,
+    tagIds: [],
+    xpAwarded: 0,
+    ...overrides,
+  }
 }
 
 describe('buildDailySeries', () => {
@@ -68,6 +80,16 @@ describe('buildDailySeries', () => {
     const points = buildDailySeries(range, [], [], [], [], checkins)
     expect(points[0]).toMatchObject({ energy: 4, mood: 3, focus: 5 })
     expect(points[1]).toMatchObject({ energy: null, mood: null, focus: null })
+  })
+
+  it('suma el xpAwarded real de las tareas completadas ese día (Fase 8.6)', () => {
+    const range = { from: '2026-09-15', to: '2026-09-15' }
+    const tasksCompleted = [
+      task({ completedAt: new Date(2026, 8, 15, 10).getTime(), xpAwarded: 15 }),
+      task({ completedAt: new Date(2026, 8, 15, 18).getTime(), xpAwarded: 5 }),
+    ]
+    const points = buildDailySeries(range, [], [], tasksCompleted, [], [])
+    expect(points[0].xp).toBe(20)
   })
 })
 

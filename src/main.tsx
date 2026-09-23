@@ -3,13 +3,15 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import { router } from './app/router'
 import { ensureSingletons } from './db/init'
+import { runDailyMaintenance } from './db/maintenance'
 import '@fontsource-variable/inter'
 import './index.css'
 
 const root = createRoot(document.getElementById('root')!)
 
 ensureSingletons()
-  .then(() => {
+  .then(async () => {
+    await runDailyMaintenance()
     root.render(
       <StrictMode>
         <RouterProvider router={router} />

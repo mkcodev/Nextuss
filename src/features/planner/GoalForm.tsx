@@ -4,9 +4,9 @@ import { Trash2 } from 'lucide-react'
 import { Button, Dialog } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { monthKey, weekKey } from '../../lib/dates'
-import { createGoal, deleteGoal, getChildGoals, listGoalsForPeriod, updateGoal } from '../../db/repositories/goals'
+import { createGoal, listGoalsForPeriod, trashGoal, updateGoal } from '../../db/repositories/goals'
 import { listAttributes } from '../../db/repositories/gamification'
-import { parsePeriodKey } from './goalProgress'
+import { parsePeriodKey } from '../../lib/periods'
 import { useGoalFormStore } from './goalFormStore'
 import type { Goal, GoalPeriod } from '../../db/types'
 
@@ -32,8 +32,6 @@ export function GoalForm() {
         period === 'week' ? listGoalsForPeriod('month', monthKey(parsePeriodKey('week', periodKey))) : Promise.resolve([]),
       [period, periodKey],
     ) ?? []
-  const childGoals =
-    useLiveQuery((): Promise<Goal[]> => (goal?.id ? getChildGoals(goal.id) : Promise.resolve([])), [goal?.id]) ?? []
   const forcedParent = prefill?.parentGoalId != null
 
   const handlePeriodChange = (p: GoalPeriod) => {
@@ -83,9 +81,7 @@ export function GoalForm() {
 
   const handleDelete = async () => {
     if (!goal?.id) return
-    const childWarning = childGoals.length > 0 ? ` Sus ${childGoals.length} objetivo(s) de semana quedarán sueltos.` : ''
-    if (!confirm(`¿Eliminar "${goal.title}"?${childWarning} Esto no se puede deshacer.`)) return
-    await deleteGoal(goal.id)
+    await trashGoal(goal.id)
     handleClose()
   }
 

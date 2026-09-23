@@ -21,7 +21,7 @@ export function useActivityFeed() {
       db.habitLogs.orderBy('loggedAt').reverse().limit(LIMIT).toArray(),
       db.achievements.orderBy('unlockedAt').reverse().limit(LIMIT).toArray(),
       db.habits.toArray(),
-      db.goals.filter((g) => g.done && g.completedAt != null).toArray(),
+      db.goals.filter((g) => g.deletedAt === 0 && g.done && g.completedAt != null).toArray(),
     ])
     const habitById = new Map(habits.map((h) => [h.id, h]))
 

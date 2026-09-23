@@ -1,15 +1,14 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ChevronLeft, ChevronRight, ClipboardCheck, Plus } from 'lucide-react'
-import { Button, Card } from '../../design/primitives'
-import { cn } from '../../lib/cn'
+import { ChevronLeft, ChevronRight, ClipboardCheck } from 'lucide-react'
+import { Button } from '../../design/primitives'
 import { monthKey, weekKey } from '../../lib/dates'
 import { listGoalsForPeriod } from '../../db/repositories/goals'
 import { listAttributes } from '../../db/repositories/gamification'
-import { GoalCard } from './GoalCard'
+import { GoalSection } from './GoalSection'
 import { NorthStarCallout } from './NorthStarCallout'
 import { AttributePortfolio } from './AttributePortfolio'
-import { parsePeriodKey, previousPeriodKey, nextPeriodKey } from './goalProgress'
+import { parsePeriodKey, previousPeriodKey, nextPeriodKey } from '../../lib/periods'
 import { useGoalFormStore } from './goalFormStore'
 import { useWeeklyReviewStore } from './weeklyReviewStore'
 
@@ -80,47 +79,20 @@ export function GoalsBoard() {
 
       <AttributePortfolio goals={allGoalsThisScope} attributes={attributes} />
 
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-text-muted">Objetivos del mes</h2>
-          <button
-            onClick={() => openCreate({ period: 'month', periodKey: monthCursor })}
-            className="flex items-center gap-1 text-xs font-medium text-accent hover:underline"
-          >
-            <Plus size={13} /> Nuevo
-          </button>
-        </div>
-        {visibleMonthGoals.length === 0 ? (
-          <Card className="p-4 text-sm text-text-faint">Sin objetivos de mes todavía.</Card>
-        ) : (
-          <div className="space-y-3">
-            {visibleMonthGoals.map((g) => (
-              <GoalCard key={g.id} goal={g} attributes={attributes} />
-            ))}
-          </div>
-        )}
-      </section>
+      <GoalSection
+        title="Objetivos del mes"
+        emptyLabel="Sin objetivos de mes todavía."
+        goals={visibleMonthGoals}
+        onCreate={() => openCreate({ period: 'month', periodKey: monthCursor })}
+      />
 
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-text-muted">Objetivos sueltos de la semana</h2>
-          <button
-            onClick={() => openCreate({ period: 'week', periodKey: weekCursor })}
-            className="flex items-center gap-1 text-xs font-medium text-accent hover:underline"
-          >
-            <Plus size={13} /> Nuevo
-          </button>
-        </div>
-        {visibleWeekGoals.length === 0 ? (
-          <Card className="p-4 text-sm text-text-faint">Sin objetivos sueltos esta semana.</Card>
-        ) : (
-          <div className={cn('grid grid-cols-1 gap-3', visibleWeekGoals.length > 1 && 'md:grid-cols-2')}>
-            {visibleWeekGoals.map((g) => (
-              <GoalCard key={g.id} goal={g} attributes={attributes} />
-            ))}
-          </div>
-        )}
-      </section>
+      <GoalSection
+        title="Objetivos sueltos de la semana"
+        emptyLabel="Sin objetivos sueltos esta semana."
+        goals={visibleWeekGoals}
+        onCreate={() => openCreate({ period: 'week', periodKey: weekCursor })}
+        twoColOnWide
+      />
     </div>
   )
 }

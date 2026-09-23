@@ -8,6 +8,11 @@ import type { CheckIn, EnergyLevel, FocusSession, Goal, Habit, HabitLog, Task, W
 import { dateKey, isHabitScheduledOn, minutesToTime, monthKey, weekKey, weekdayOf } from '../lib/dates'
 import { levelForXp, XP_PER_COMPLETION, XP_PER_GOAL_MONTH, XP_PER_GOAL_WEEK } from '../lib/xp'
 import { nextPeriodKey, parsePeriodKey as parsePeriodStart } from '../lib/periods'
+import {
+  LEVEL_ACHIEVEMENT_THRESHOLDS,
+  NORTH_STAR_STREAK_ACHIEVEMENT_THRESHOLD,
+  STREAK_ACHIEVEMENT_THRESHOLDS,
+} from '../lib/achievementThresholds'
 import { getOrCreateProgress, unlockAchievement } from './repositories/gamification'
 
 const DEMO_RANGE_DAYS = 182 // ~6 meses, hasta ayer — hoy se deja limpio para que el usuario interactúe con él
@@ -215,6 +220,8 @@ export async function generateDemoData(): Promise<DemoSeedResult> {
         attributeId: attributeIdByKey.get(h.attrKey),
         archived: false,
         createdAt: rangeStart.getTime(),
+        deletedAt: 0,
+        sortKey: habitIds.length * 1000,
       })) as number
       habitIds.push(id)
       createdIds.habits.push(id)
@@ -309,6 +316,10 @@ export async function generateDemoData(): Promise<DemoSeedResult> {
           energy: energyLevel,
           postponedCount: 0,
           createdAt: date.getTime() + Math.round(rand() * 8 * 3600 * 1000),
+          deletedAt: 0,
+          sortKey: tasksToAdd.length * 1000,
+          tagIds: [],
+          xpAwarded: 0,
         }
 
         if (scheduled) {
@@ -430,6 +441,8 @@ export async function generateDemoData(): Promise<DemoSeedResult> {
           attributeId: attributeIdByKey.get(attrKey),
           createdAt,
           completedAt: done ? createdAt + 4 * 86400000 : undefined,
+          deletedAt: 0,
+          sortKey: weekGoalsToAdd.length * 1000,
         })
         weekGoalIsPriority.push(isPriority)
         weekGoalPeriodKey.push(pk)
@@ -469,6 +482,8 @@ export async function generateDemoData(): Promise<DemoSeedResult> {
           attributeId: attributeIdByKey.get(attrKey),
           createdAt,
           completedAt: done ? createdAt + 20 * 86400000 : undefined,
+          deletedAt: 0,
+          sortKey: monthGoalsToAdd.length * 1000,
         })
         if (done) totalXpDelta += XP_PER_GOAL_MONTH
       }
@@ -546,16 +561,17 @@ export async function generateDemoData(): Promise<DemoSeedResult> {
     await tryUnlock('first_habit')
     if (anyCompletion) await tryUnlock('first_completion')
     const maxRun = Math.max(0, ...longestRun.values())
-    if (maxRun >= 7) await tryUnlock('streak_7')
-    if (maxRun >= 30) await tryUnlock('streak_30')
-    if (maxRun >= 100) await tryUnlock('streak_100')
+    for (const t of STREAK_ACHIEVEMENT_THRESHOLDS) {
+      if (maxRun >= t.streak) await tryUnlock(t.key)
+    }
     const finalLevel = levelForXp(newTotalXp)
-    if (finalLevel >= 5) await tryUnlock('level_5')
-    if (finalLevel >= 10) await tryUnlock('level_10')
+    for (const t of LEVEL_ACHIEVEMENT_THRESHOLDS) {
+      if (finalLevel >= t.level) await tryUnlock(t.key)
+    }
     if (weekGoalsToAdd.some((g) => g.done) || monthGoalsToAdd.some((g) => g.done)) await tryUnlock('first_goal')
     if (weekGoalsToAdd.some((g) => g.done && g.isPriority)) {
       await tryUnlock('first_priority_goal')
-      if (NORTH_STAR_STREAK_WEEKS >= 4) await tryUnlock('north_star_4')
+      if (NORTH_STAR_STREAK_WEEKS >= NORTH_STAR_STREAK_ACHIEVEMENT_THRESHOLD) await tryUnlock('north_star_4')
     }
 
     // --- Registro para poder borrar todo limpiamente después ---

@@ -22,19 +22,21 @@ export function getHabitLogsInRange(from: string, to: string): Promise<HabitLog[
 }
 
 /** Tareas cuyo `completedAt` cae dentro del rango de días [from, to]. */
-export function getTasksCompletedInRange(from: string, to: string): Promise<Task[]> {
-  return db.tasks
+export async function getTasksCompletedInRange(from: string, to: string): Promise<Task[]> {
+  const rows = await db.tasks
     .where('completedAt')
     .between(startOfDayTs(from), endOfDayExclusiveTs(to), true, false)
     .toArray()
+  return rows.filter((t) => t.deletedAt === 0)
 }
 
 /** Tareas cuyo `createdAt` cae dentro del rango de días [from, to] (completadas o no). */
-export function getTasksCreatedInRange(from: string, to: string): Promise<Task[]> {
-  return db.tasks
+export async function getTasksCreatedInRange(from: string, to: string): Promise<Task[]> {
+  const rows = await db.tasks
     .where('createdAt')
     .between(startOfDayTs(from), endOfDayExclusiveTs(to), true, false)
     .toArray()
+  return rows.filter((t) => t.deletedAt === 0)
 }
 
 /** Sesiones de foco cuyo `start` (epoch ms) cae en [fromTs, toTs]. */
@@ -58,7 +60,9 @@ export async function getGoalsInRange(from: string, to: string): Promise<Goal[]>
   const toTs = endOfDayExclusiveTs(to)
   const inRange = (ts: number) => ts >= fromTs && ts < toTs
   const all = await db.goals.toArray()
-  return all.filter((g) => inRange(g.createdAt) || (g.completedAt != null && inRange(g.completedAt)))
+  return all.filter(
+    (g) => g.deletedAt === 0 && (inRange(g.createdAt) || (g.completedAt != null && inRange(g.completedAt))),
+  )
 }
 
 /** Logros desbloqueados en el rango de días [from, to]. */

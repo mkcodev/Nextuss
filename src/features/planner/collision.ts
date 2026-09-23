@@ -1,46 +1,14 @@
 /**
- * Collision math for the daily timeline: tasks may never overlap. Every
- * drag, resize, create, or drop is clamped to the free interval around the
- * target position before it's ever written to the DB — so the invariant
- * ("no two scheduled tasks share a minute") holds by construction, not by
- * validation after the fact.
+ * Bounds math for the daily timeline: a task may move or resize freely, but
+ * never past the edges of the working day. Overlap between tasks is allowed
+ * by design (see lanes.ts for how overlapping blocks are laid out side by
+ * side) — these clamps only guard against dragging/resizing outside
+ * [dayStartMin, dayEndMin].
  */
 
 export interface Interval {
   start: number // minutes from midnight
   end: number
-}
-
-/**
- * Finds the free interval that contains (or is nearest to) `desiredStart`,
- * bounded by the day's edges and by any interval in `others` that isn't
- * being moved. If `desiredStart` falls inside another interval, resolves to
- * whichever side (before/after that interval) is closer.
- */
-export function findFreeInterval(
-  others: Interval[],
-  desiredStart: number,
-  dayStartMin: number,
-  dayEndMin: number,
-): Interval {
-  let lower = dayStartMin
-  let upper = dayEndMin
-
-  for (const t of others) {
-    if (t.end <= desiredStart) {
-      lower = Math.max(lower, t.end)
-    } else if (t.start >= desiredStart) {
-      upper = Math.min(upper, t.start)
-    } else {
-      // desiredStart lands inside this interval — push out to the nearer edge
-      const distToStart = desiredStart - t.start
-      const distToEnd = t.end - desiredStart
-      if (distToStart <= distToEnd) upper = Math.min(upper, t.start)
-      else lower = Math.max(lower, t.end)
-    }
-  }
-
-  return { start: lower, end: Math.max(lower, upper) }
 }
 
 /** Clamps a fixed-duration move so [start, start+duration] fits inside `interval`. */

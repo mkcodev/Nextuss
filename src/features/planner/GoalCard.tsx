@@ -6,16 +6,18 @@ import { cn } from '../../lib/cn'
 import { Badge, Card, Icon, RingProgress } from '../../design/primitives'
 import type { RingSegment } from '../../design/primitives/RingProgress'
 import type { Attribute, Goal, Task } from '../../db/types'
-import { createTask, toggleTaskDone } from '../../db/repositories/tasks'
+import { createTask } from '../../db/repositories/tasks'
+import { toggleTaskDoneWithFeedback } from '../tasks/actions'
 import {
-  deleteGoal,
   getChildGoals,
   linkTaskToGoal,
   setPriorityGoal,
+  trashGoal,
   unlinkTaskFromGoal,
 } from '../../db/repositories/goals'
 import { toggleGoalDoneWithFeedback } from './goalActions'
-import { computeGoalProgress, computeGoalSegments, goalElapsedRatio, isGoalAtRisk } from './goalProgress'
+import { computeGoalProgress, computeGoalSegments, isGoalAtRisk } from './goalProgress'
+import { goalElapsedRatio } from '../../lib/periods'
 import { useGoalFormStore } from './goalFormStore'
 
 function useGoalTasks(goal: Goal) {
@@ -72,9 +74,7 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
   }
 
   const handleDelete = () => {
-    const childWarning = children.length > 0 ? ` Sus ${children.length} objetivo(s) de semana quedarán sueltos.` : ''
-    if (!confirm(`¿Eliminar "${goal.title}"?${childWarning} Esto no se puede deshacer.`)) return
-    deleteGoal(goal.id!)
+    void trashGoal(goal.id!)
   }
 
   return (
@@ -168,7 +168,7 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
                   t && (
                     <li key={t.id} className="flex items-center gap-2 text-sm">
                       <button
-                        onClick={() => toggleTaskDone(t.id!)}
+                        onClick={() => toggleTaskDoneWithFeedback(t.id!, t.title)}
                         className={cn(
                           'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border',
                           t.status === 'done' ? 'border-accent bg-accent' : 'border-text-faint',

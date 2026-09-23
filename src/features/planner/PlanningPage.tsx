@@ -1,11 +1,14 @@
 import { useSearchParams } from 'react-router-dom'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { cn } from '../../lib/cn'
 import { monthKey, weekKey } from '../../lib/dates'
 import { Tabs } from '../../design/primitives'
 import { WeekView } from './WeekView'
 import { MonthView } from './MonthView'
-import { GoalsList } from './GoalsList'
 import { GoalsBoard } from './GoalsBoard'
+import { GoalSection } from './GoalSection'
+import { listGoalsForPeriod } from '../../db/repositories/goals'
+import { useGoalFormStore } from './goalFormStore'
 
 type Tab = 'week' | 'month' | 'objetivos'
 const TABS: { key: Tab; label: string }[] = [
@@ -18,6 +21,12 @@ export function PlanningPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const tabParam = searchParams.get('tab')
   const tab: Tab = tabParam === 'month' || tabParam === 'objetivos' ? tabParam : 'week'
+
+  const currentWeekKey = weekKey()
+  const currentMonthKey = monthKey()
+  const weekGoals = useLiveQuery(() => listGoalsForPeriod('week', currentWeekKey), [currentWeekKey]) ?? []
+  const monthGoals = useLiveQuery(() => listGoalsForPeriod('month', currentMonthKey), [currentMonthKey]) ?? []
+  const openCreate = useGoalFormStore((s) => s.openCreate)
 
   const setTab = (t: Tab) => {
     setSearchParams(t === 'week' ? {} : { tab: t }, { replace: true })
@@ -40,14 +49,18 @@ export function PlanningPage() {
           <div className="lg:order-1">{tab === 'week' ? <WeekView /> : <MonthView />}</div>
 
           <div className="space-y-6 lg:order-2">
-            <div>
-              <h2 className="mb-1 text-sm font-semibold text-text-muted">Objetivos de la semana</h2>
-              <GoalsList period="week" periodKey={weekKey()} />
-            </div>
-            <div>
-              <h2 className="mb-1 text-sm font-semibold text-text-muted">Objetivos del mes</h2>
-              <GoalsList period="month" periodKey={monthKey()} />
-            </div>
+            <GoalSection
+              title="Objetivos de la semana"
+              emptyLabel="Sin objetivos esta semana todavía."
+              goals={weekGoals}
+              onCreate={() => openCreate({ period: 'week', periodKey: currentWeekKey })}
+            />
+            <GoalSection
+              title="Objetivos del mes"
+              emptyLabel="Sin objetivos este mes todavía."
+              goals={monthGoals}
+              onCreate={() => openCreate({ period: 'month', periodKey: currentMonthKey })}
+            />
           </div>
         </div>
       )}

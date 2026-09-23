@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useNavigate } from 'react-router-dom'
 import {
   addDays,
   addMonths,
@@ -24,6 +25,7 @@ const MAX_CHIPS = 3
 
 export function MonthView() {
   const [monthStart, setMonthStart] = useState(() => startOfMonth(new Date()))
+  const navigate = useNavigate()
   const openEdit = useTaskFormStore((s) => s.openEdit)
   const openCreate = useTaskFormStore((s) => s.openCreate)
   const settings = useLiveQuery(() => getOrCreateSettings(), [])
@@ -106,6 +108,7 @@ export function MonthView() {
               className={cn(
                 'flex min-h-[92px] flex-col items-stretch gap-1 bg-bg p-1.5 text-left transition-colors hover:bg-surface-hover',
                 !inMonth && 'opacity-40',
+                today && 'relative z-10 scale-[1.06] rounded-lg shadow-md ring-1 ring-accent/40',
               )}
             >
               <span
@@ -135,7 +138,23 @@ export function MonthView() {
                   </div>
                 ))}
                 {dayTasks.length > MAX_CHIPS && (
-                  <p className="px-1 text-[10px] text-text-faint">+{dayTasks.length - MAX_CHIPS} más</p>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      navigate(`/?d=${key}`)
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key !== 'Enter' && e.key !== ' ') return
+                      e.preventDefault()
+                      e.stopPropagation()
+                      navigate(`/?d=${key}`)
+                    }}
+                    className="block px-1 text-left text-[10px] text-text-faint hover:text-accent hover:underline"
+                  >
+                    +{dayTasks.length - MAX_CHIPS} más
+                  </span>
                 )}
               </div>
             </button>

@@ -8,7 +8,7 @@ import type { HabitType } from '../../db/types'
 import {
   archiveHabit,
   createHabit,
-  deleteHabit,
+  trashHabit,
   updateHabit,
 } from '../../db/repositories/habits'
 import { useAttributesWithCreate } from '../gamification/useAttributesWithCreate'
@@ -103,8 +103,7 @@ export function HabitForm() {
 
   const handleDelete = async () => {
     if (!habit?.id) return
-    if (!confirm(`¿Eliminar "${habit.name}" y todo su historial? Esto no se puede deshacer.`)) return
-    await deleteHabit(habit.id)
+    await trashHabit(habit.id)
     handleClose()
   }
 

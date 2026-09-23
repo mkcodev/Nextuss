@@ -1,15 +1,6 @@
 import { previousPeriodKey } from '../../lib/periods'
 import type { Goal, GoalPeriod, Task } from '../../db/types'
 
-export {
-  goalElapsedRatio,
-  nextPeriodKey,
-  parsePeriodKey,
-  periodElapsedRatio,
-  previousPeriodKey,
-  shiftPeriodKey,
-} from '../../lib/periods'
-
 /** A goal looks behind schedule once we're meaningfully into the period and progress lags well behind time elapsed. */
 export function isGoalAtRisk(progressRatio: number, elapsedRatio: number): boolean {
   return elapsedRatio > 0.25 && elapsedRatio - progressRatio > 0.34
@@ -22,13 +13,14 @@ export interface GoalSegment {
 }
 
 /**
- * One segment per existing linked task (deleted/missing tasks — a `bulkGet` gap — are skipped
- * rather than counted as incomplete) plus one segment per child (week) goal. Tasks and child
- * goals are always combined, never one in place of the other.
+ * One segment per existing linked task (deleted/missing tasks — a `bulkGet` gap, or a trashed task
+ * still referenced by `goal.taskIds` — are skipped rather than counted as incomplete) plus one
+ * segment per child (week) goal. Tasks and child goals are always combined, never one in place of
+ * the other.
  */
 export function computeGoalSegments(linkedTasks: (Task | undefined)[], children: Goal[]): GoalSegment[] {
   const taskSegments = linkedTasks
-    .filter((t): t is Task => t != null)
+    .filter((t): t is Task => t != null && t.deletedAt === 0)
     .map((t) => ({ key: `task-${t.id}`, kind: 'task' as const, done: t.status === 'done' }))
   const childSegments = children.map((c) => ({ key: `week-${c.id}`, kind: 'week-goal' as const, done: c.done }))
   return [...taskSegments, ...childSegments]

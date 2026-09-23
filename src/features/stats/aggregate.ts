@@ -39,7 +39,9 @@ export interface DailyPoint {
   complianceRatio: number
   tasksCompleted: number
   focusMin: number
-  /** XP ganado ese día solo por hábitos (no incluye objetivos — esos se agregan aparte, ver `comparePeriods`/4.3). */
+  /** XP ganado ese día por hábitos + tareas raíz completadas (no incluye objetivos — esos se
+   * agregan aparte, ver `comparePeriods`/4.3). Usa `Task.xpAwarded` real, no una constante
+   * recalculada, para no contradecir el contador si el bonus por prioridad cambia (Fase 8.6). */
   xp: number
   energy: number | null
   mood: number | null
@@ -82,15 +84,17 @@ export function buildDailySeries(
 
     const focusMin = (sessionsByDate.get(key) ?? []).reduce((sum, s) => sum + (s.durationMin ?? 0), 0)
     const checkin = checkinsByDate.get(key)
+    const dayTasks = tasksByDate.get(key) ?? []
+    const taskXp = dayTasks.reduce((sum, t) => sum + t.xpAwarded, 0)
 
     return {
       date: key,
       habitsDone,
       habitsScheduled,
       complianceRatio: habitsScheduled > 0 ? habitsDone / habitsScheduled : 0,
-      tasksCompleted: (tasksByDate.get(key) ?? []).length,
+      tasksCompleted: dayTasks.length,
       focusMin,
-      xp: habitsDone * XP_PER_COMPLETION,
+      xp: habitsDone * XP_PER_COMPLETION + taskXp,
       energy: checkin?.energy ?? null,
       mood: checkin?.mood ?? null,
       focus: checkin?.focus ?? null,

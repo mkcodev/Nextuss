@@ -11,7 +11,17 @@ import { computeGoalProgress, computeGoalSegments, computeNorthStarStreak, isGoa
 import type { Goal, Task } from '../../db/types'
 
 function task(overrides: Partial<Task> = {}): Task {
-  return { title: 't', status: 'planned', postponedCount: 0, createdAt: 0, ...overrides }
+  return {
+    title: 't',
+    status: 'planned',
+    postponedCount: 0,
+    createdAt: 0,
+    deletedAt: 0,
+    sortKey: 0,
+    tagIds: [],
+    xpAwarded: 0,
+    ...overrides,
+  }
 }
 
 function goal(overrides: Partial<Goal> = {}): Goal {
@@ -23,6 +33,8 @@ function goal(overrides: Partial<Goal> = {}): Goal {
     done: false,
     isPriority: false,
     createdAt: 0,
+    deletedAt: 0,
+    sortKey: 0,
     ...overrides,
   }
 }
@@ -143,6 +155,11 @@ describe('computeGoalSegments', () => {
 
   it('ignores gaps from deleted linked tasks', () => {
     const tasks = [task({ id: 1, status: 'done' }), undefined, undefined]
+    expect(computeGoalSegments(tasks, [])).toEqual([{ key: 'task-1', kind: 'task', done: true }])
+  })
+
+  it('ignores trashed linked tasks (deletedAt !== 0) same as a bulkGet gap', () => {
+    const tasks = [task({ id: 1, status: 'done' }), task({ id: 2, status: 'planned', deletedAt: Date.now() })]
     expect(computeGoalSegments(tasks, [])).toEqual([{ key: 'task-1', kind: 'task', done: true }])
   })
 })

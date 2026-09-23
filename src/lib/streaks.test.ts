@@ -13,6 +13,8 @@ function makeHabit(overrides: Partial<Habit> = {}): Habit {
     weekdays: [],
     archived: false,
     createdAt: new Date(2026, 0, 1).getTime(),
+    deletedAt: 0,
+    sortKey: 0,
     ...overrides,
   }
 }

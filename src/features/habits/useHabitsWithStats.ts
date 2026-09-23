@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import type { Habit, HabitLog } from '../../db/types'
-import { getHabitLogs, getLogsForDate, listHabits } from '../../db/repositories/habits'
+import { getHabitLogsForHabits, getLogsForDate, listHabits } from '../../db/repositories/habits'
 import { calculateStreak } from '../../lib/streaks'
 import { parseDateKey } from '../../lib/dates'
 
@@ -18,15 +18,19 @@ export function useHabitsWithStats(date: string): HabitWithStats[] | undefined {
     const logByHabitId = new Map(logsForDate.map((log) => [log.habitId, log]))
     const referenceDate = parseDateKey(date)
 
-    const rows: HabitWithStats[] = []
-    for (const habit of habits) {
-      const allLogs = await getHabitLogs(habit.id!)
-      rows.push({
-        habit,
-        log: logByHabitId.get(habit.id!),
-        streak: calculateStreak(habit, allLogs, referenceDate),
-      })
+    // Una sola consulta indexada para todos los hábitos en vez de una por hábito (N+1).
+    const allLogs = await getHabitLogsForHabits(habits.map((h) => h.id!))
+    const logsByHabit = new Map<number, HabitLog[]>()
+    for (const log of allLogs) {
+      const arr = logsByHabit.get(log.habitId)
+      if (arr) arr.push(log)
+      else logsByHabit.set(log.habitId, [log])
     }
-    return rows
+
+    return habits.map((habit) => ({
+      habit,
+      log: logByHabitId.get(habit.id!),
+      streak: calculateStreak(habit, logsByHabit.get(habit.id!) ?? [], referenceDate),
+    }))
   }, [date])
 }

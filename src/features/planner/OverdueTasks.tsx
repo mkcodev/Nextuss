@@ -5,6 +5,7 @@ import { cn } from '../../lib/cn'
 import { carryOverToToday, getOverdueTasks, ZOMBIE_THRESHOLD } from '../../db/repositories/tasks'
 import { getGoalForTask } from '../../db/repositories/goals'
 import { useTaskFormStore } from '../tasks/taskFormStore'
+import { TaskQuickMenu } from '../tasks/TaskQuickMenu'
 
 /** Tracks which zombie tasks already have a linked goal, so the "link it?" nudge only shows where it's useful. */
 function useZombieGoalLinks(taskIds: number[]) {
@@ -71,6 +72,7 @@ export function OverdueTasks({ date }: { date: string }) {
               >
                 Hoy <ArrowRight size={10} strokeWidth={2.5} />
               </button>
+              <TaskQuickMenu task={t} />
             </div>
           )
         })}

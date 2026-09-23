@@ -8,6 +8,14 @@ export const XP_PER_COMPLETION = 10
 export const XP_PER_GOAL_WEEK = 50
 export const XP_PER_GOAL_MONTH = 150
 
+export const XP_PER_TASK = 5
+/** Bonus por prioridad (Fase 8.6) — P1 la más urgente, se lleva más XP. Sin prioridad = sin bonus. */
+export const TASK_PRIORITY_XP_BONUS: Record<number, number> = { 1: 15, 2: 10, 3: 5, 4: 0 }
+
+export function xpForTaskCompletion(priority?: number): number {
+  return XP_PER_TASK + (priority ? (TASK_PRIORITY_XP_BONUS[priority] ?? 0) : 0)
+}
+
 export function xpForLevel(level: number): number {
   return 25 * (level - 1) * level
 }

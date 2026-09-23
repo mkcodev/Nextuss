@@ -13,8 +13,9 @@ import {
 } from 'lucide-react'
 import { db } from '../db/schema'
 import { useUIStore } from './uiStore'
+import { usePageTitleStore } from './pageTitleStore'
 import { useOverlayStore } from './shortcuts/overlayStore'
-import { useHabitFormStore } from '../features/habits/habitFormStore'
+import { useQuickAddStore } from '../features/tasks/quickAddStore'
 import { usePlayerProgress } from '../features/gamification/usePlayerProgress'
 import { useOnlineStatus } from '../features/pwa/useOnlineStatus'
 import { initials } from '../lib/text'
@@ -62,11 +63,13 @@ export function Navbar() {
   const rightOpen = useUIStore((s) => s.rightOpen)
   const toggleRight = useUIStore((s) => s.toggleRight)
   const openPalette = useOverlayStore((s) => s.openPalette)
-  const openCreate = useHabitFormStore((s) => s.openCreate)
+  const openQuickAdd = useQuickAddStore((s) => s.openQuickAdd)
   const { level } = usePlayerProgress()
   const online = useOnlineStatus()
+  const pageTitle = usePageTitleStore((s) => s.title)
 
   const currentLabel =
+    pageTitle ??
     BREADCRUMB[location.pathname] ??
     NAV_ITEMS.find((item) => location.pathname.startsWith(item.to) && item.to !== '/')?.label
 
@@ -120,7 +123,7 @@ export function Navbar() {
         )}
 
         <button
-          onClick={() => openCreate()}
+          onClick={() => openQuickAdd()}
           className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white shadow-glow transition-opacity hover:opacity-90"
         >
           <Plus size={14} strokeWidth={2} />

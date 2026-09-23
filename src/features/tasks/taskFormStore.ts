@@ -13,6 +13,7 @@ interface TaskFormState {
     scheduledEnd?: string
     energy?: EnergyLevel
     estimateMin?: number
+    priority?: number
   }
   /** Bumped on every open so the form remounts with fresh state even for two back-to-back creates with different prefills. */
   nonce: number

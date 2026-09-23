@@ -5,6 +5,8 @@ import { useOverlayStore } from './overlayStore'
 import { useListNavStore } from './listNavStore'
 import { useCaptureRequestStore } from './captureRequestStore'
 import { useHabitFormStore } from '../../features/habits/habitFormStore'
+import { useQuickAddStore } from '../../features/tasks/quickAddStore'
+import { useUndoStore } from '../../lib/undoStore'
 import { NAV_ITEMS } from '../navItems'
 import { ensurePanelVisible } from '../dock/ensurePanelVisible'
 
@@ -57,6 +59,14 @@ export function useGlobalShortcuts() {
         return
       }
 
+      // Ctrl/Cmd+Z / Ctrl/Cmd+Shift+Z — deshacer/rehacer, funciona en cualquier sitio (papelera, drags…).
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') {
+        e.preventDefault()
+        if (e.shiftKey) void useUndoStore.getState().redo()
+        else void useUndoStore.getState().undo()
+        return
+      }
+
       if (e.key === 'Escape') {
         if (paletteOpen) closePalette()
         if (helpOpen) closeHelp()
@@ -77,6 +87,13 @@ export function useGlobalShortcuts() {
         e.preventDefault()
         ensurePanelVisible('capture')
         useCaptureRequestStore.getState().request()
+        return
+      }
+
+      // "n" — quick-add universal de tareas, works from anywhere.
+      if (e.key === 'n') {
+        e.preventDefault()
+        useQuickAddStore.getState().openQuickAdd()
         return
       }
 

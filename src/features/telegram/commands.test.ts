@@ -30,8 +30,8 @@ describe('handleIncomingText', () => {
   })
 
   it('/hecho marks the nth open task of /hoy as done', async () => {
-    await db.tasks.add({ title: 'A', status: 'planned', postponedCount: 0, createdAt: 1, scheduledDate: TODAY, scheduledStart: '09:00' })
-    await db.tasks.add({ title: 'B', status: 'planned', postponedCount: 0, createdAt: 2, scheduledDate: TODAY, scheduledStart: '10:00' })
+    await db.tasks.add({ title: 'A', status: 'planned', postponedCount: 0, createdAt: 1, deletedAt: 0, sortKey: 0, tagIds: [], xpAwarded: 0, scheduledDate: TODAY, scheduledStart: '09:00' })
+    await db.tasks.add({ title: 'B', status: 'planned', postponedCount: 0, createdAt: 2, deletedAt: 0, sortKey: 1000, tagIds: [], xpAwarded: 0, scheduledDate: TODAY, scheduledStart: '10:00' })
 
     const result = await handleIncomingText('/hecho 2', TODAY)
     expect(result.reply).toBe('Hecho: B')

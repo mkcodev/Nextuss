@@ -65,6 +65,8 @@ function habit(overrides: Partial<Habit> = {}): Habit {
     weekdays: [],
     archived: false,
     createdAt: new Date(2026, 0, 1).getTime(),
+    deletedAt: 0,
+    sortKey: 0,
     ...overrides,
   }
 }
@@ -78,12 +80,24 @@ function goal(overrides: Partial<Goal> = {}): Goal {
     done: false,
     isPriority: false,
     createdAt: 0,
+    deletedAt: 0,
+    sortKey: 0,
     ...overrides,
   }
 }
 
 function task(overrides: Partial<Task> = {}): Task {
-  return { title: 't', status: 'planned', postponedCount: 0, createdAt: 0, ...overrides }
+  return {
+    title: 't',
+    status: 'planned',
+    postponedCount: 0,
+    createdAt: 0,
+    deletedAt: 0,
+    sortKey: 0,
+    tagIds: [],
+    xpAwarded: 0,
+    ...overrides,
+  }
 }
 
 function baseCtx(overrides: Partial<InsightContext> = {}): InsightContext {

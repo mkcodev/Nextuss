@@ -32,12 +32,25 @@ function habit(overrides: Partial<Habit> = {}): Habit {
     weekdays: [],
     archived: false,
     createdAt: 0,
+    deletedAt: 0,
+    sortKey: 0,
     ...overrides,
   }
 }
 
 function task(overrides: Partial<Task> = {}): Task {
-  return { id: 1, title: 'Escribir informe', status: 'planned', postponedCount: 0, createdAt: 0, ...overrides }
+  return {
+    id: 1,
+    title: 'Escribir informe',
+    status: 'planned',
+    postponedCount: 0,
+    createdAt: 0,
+    deletedAt: 0,
+    sortKey: 0,
+    tagIds: [],
+    xpAwarded: 0,
+    ...overrides,
+  }
 }
 
 // Lunes 2026-09-21 08:00 — coincide con weekdayOf === 1 y con la hora por defecto de resumen/lunes.

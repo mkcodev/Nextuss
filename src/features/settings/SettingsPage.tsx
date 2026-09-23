@@ -13,6 +13,8 @@ import { clearDemoData, generateDemoData, isDemoDataPresent } from '../../db/dem
 import { useToastStore } from '../../lib/toastStore'
 import { InstallPrompt } from '../pwa/InstallPrompt'
 import { BackupSection } from './BackupSection'
+import { TrashSection } from './TrashSection'
+import { ProjectsTagsSection } from './ProjectsTagsSection'
 import {
   getNotificationPermissionState,
   requestNotificationPermission,
@@ -640,6 +642,8 @@ export function SettingsPage() {
 
       <PlannerSection />
 
+      <ProjectsTagsSection />
+
       <AiSection />
 
       <TelegramSection />
@@ -649,6 +653,8 @@ export function SettingsPage() {
       <NotificationsSection />
 
       <BackupSection />
+
+      <TrashSection />
 
       <DemoDataSection />
     </div>

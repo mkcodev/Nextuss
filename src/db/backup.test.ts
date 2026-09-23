@@ -19,6 +19,8 @@ describe('exportDatabase / importDatabase round trip', () => {
       weekdays: [],
       archived: false,
       createdAt: 1000,
+      deletedAt: 0,
+      sortKey: 0,
     })) as number
     await db.habitLogs.add({ habitId, date: '2026-09-01', value: 1, completed: true, loggedAt: 1000 })
 
@@ -54,9 +56,67 @@ describe('exportDatabase / importDatabase round trip', () => {
     expect(await db.attributes.count()).toBe(1) // replace vuelve exactamente al estado del backup
   })
 
-  it('rejects restoring a backup from a different schema version', async () => {
+  it('rejects restoring a backup newer than the app', async () => {
     const backup = await exportDatabase()
     const mismatched = { ...backup, version: backup.version + 1 }
     await expect(importDatabase(mismatched, 'replace')).rejects.toBeInstanceOf(BackupVersionMismatchError)
+  })
+
+  it('accepts and migrates a backup older than the app (pre-Fase-7, no deletedAt/sortKey, events table present)', async () => {
+    const oldBackup = {
+      version: 5,
+      exportedAt: 1000,
+      tables: {
+        habits: [
+          { id: 1, name: 'Meditar', icon: 'brain', color: '#fff', type: 'binary', weekdays: [], archived: false, createdAt: 500 },
+        ],
+        tasks: [{ id: 1, title: 'Viejo', status: 'planned', postponedCount: 0, createdAt: 200 }],
+        goals: [
+          { id: 1, period: 'week', periodKey: '2026-W10', title: 'g', taskIds: [], done: false, isPriority: false, createdAt: 100 },
+        ],
+        events: [{ id: 1, title: 'evento fantasma', date: '2026-01-01', start: '09:00', end: '10:00' }],
+      },
+    }
+
+    await importDatabase(oldBackup, 'replace')
+
+    const habits = await db.habits.toArray()
+    expect(habits[0].deletedAt).toBe(0)
+    expect(habits[0].sortKey).toBeTypeOf('number')
+    const tasks = await db.tasks.toArray()
+    expect(tasks[0].deletedAt).toBe(0)
+    const goals = await db.goals.toArray()
+    expect(goals[0].deletedAt).toBe(0)
+  })
+
+  it('backfills tagIds=[] on a backup older than Fase 8.3', async () => {
+    const oldBackup = {
+      version: 7,
+      exportedAt: 1000,
+      tables: {
+        tasks: [
+          { id: 1, title: 'Sin etiquetas', status: 'planned', postponedCount: 0, createdAt: 200, deletedAt: 0, sortKey: 0 },
+        ],
+      },
+    }
+    await importDatabase(oldBackup, 'replace')
+    const task = (await db.tasks.toArray())[0]
+    expect(task.tagIds).toEqual([])
+  })
+
+  it('replays the v4 goal backfill too when the backup predates it', async () => {
+    const olderBackup = {
+      version: 3,
+      exportedAt: 1000,
+      tables: {
+        goals: [{ id: 1, period: 'week', periodKey: '2026-W10', title: 'g', taskIds: undefined, done: false, createdAt: undefined }],
+      },
+    }
+    await importDatabase(olderBackup, 'replace')
+    const goal = (await db.goals.toArray())[0]
+    expect(goal.isPriority).toBe(false)
+    expect(goal.taskIds).toEqual([])
+    expect(goal.createdAt).toBeGreaterThan(0)
+    expect(goal.deletedAt).toBe(0)
   })
 })

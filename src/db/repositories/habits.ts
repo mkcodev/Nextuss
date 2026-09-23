@@ -1,9 +1,11 @@
 import { db } from '../schema'
-import type { Habit } from '../types'
+import type { Habit, HabitLog } from '../types'
 import { isLogCompleted } from '../../lib/habits'
 import { calculateStreak, findYesterdayMiss } from '../../lib/streaks'
 import { XP_PER_COMPLETION } from '../../lib/xp'
 import { parseDateKey } from '../../lib/dates'
+import { STREAK_ACHIEVEMENT_THRESHOLDS, LEVEL_ACHIEVEMENT_THRESHOLDS } from '../../lib/achievementThresholds'
+import { trashRows } from '../trash'
 import {
   applyAttributeXpDelta,
   applyXpDelta,
@@ -14,7 +16,7 @@ import {
 
 export async function listHabits(includeArchived = false): Promise<Habit[]> {
   const all = await db.habits.toArray()
-  return includeArchived ? all : all.filter((h) => !h.archived)
+  return all.filter((h) => h.deletedAt === 0 && (includeArchived || !h.archived))
 }
 
 export function getHabit(id: number) {
@@ -22,10 +24,16 @@ export function getHabit(id: number) {
 }
 
 export async function createHabit(
-  input: Omit<Habit, 'id' | 'createdAt' | 'archived'>,
+  input: Omit<Habit, 'id' | 'createdAt' | 'archived' | 'deletedAt' | 'sortKey'>,
 ): Promise<number> {
   const isFirst = (await db.habits.count()) === 0
-  const id = (await db.habits.add({ ...input, archived: false, createdAt: Date.now() })) as number
+  const id = (await db.habits.add({
+    ...input,
+    archived: false,
+    createdAt: Date.now(),
+    deletedAt: 0,
+    sortKey: Date.now(),
+  })) as number
   if (isFirst) await unlockAchievement('first_habit')
   return id
 }
@@ -38,15 +46,22 @@ export function archiveHabit(id: number, archived = true) {
   return db.habits.update(id, { archived })
 }
 
-export function deleteHabit(id: number) {
-  return db.transaction('rw', db.habits, db.habitLogs, async () => {
-    await db.habitLogs.where('habitId').equals(id).delete()
-    await db.habits.delete(id)
-  })
+/** Mueve el hábito a la papelera. Su historial (`habitLogs`) se queda intacto y oculto hasta que se
+ * restaure, y se borra de verdad solo cuando la papelera lo purga a los 30 días. */
+export async function trashHabit(id: number): Promise<void> {
+  const habit = await db.habits.get(id)
+  if (!habit) return
+  await trashRows('habits', [id], `Hábito eliminado: "${habit.name}"`)
 }
 
 export function getHabitLogs(habitId: number) {
   return db.habitLogs.where('habitId').equals(habitId).toArray()
+}
+
+/** Logs de varios hábitos en una sola consulta indexada — evita el N+1 de pedirlos uno a uno por hábito. */
+export function getHabitLogsForHabits(habitIds: number[]): Promise<HabitLog[]> {
+  if (habitIds.length === 0) return Promise.resolve([])
+  return db.habitLogs.where('habitId').anyOf(habitIds).toArray()
 }
 
 export function getLogsForDate(date: string) {
@@ -79,52 +94,63 @@ export async function setHabitLog(
   value: number,
   note?: string,
 ): Promise<LogHabitResult> {
-  const habit = await db.habits.get(habitId)
-  if (!habit) throw new Error(`Habit ${habitId} not found`)
+  return db.transaction(
+    'rw',
+    db.habits,
+    db.habitLogs,
+    db.progress,
+    db.attributes,
+    db.achievements,
+    async () => {
+      const habit = await db.habits.get(habitId)
+      if (!habit) throw new Error(`Habit ${habitId} not found`)
 
-  const completed = isLogCompleted(habit, value)
-  const existing = await getLog(habitId, date)
-  const wasCompleted = existing?.completed ?? false
+      const completed = isLogCompleted(habit, value)
+      const existing = await getLog(habitId, date)
+      const wasCompleted = existing?.completed ?? false
 
-  const loggedAt = Date.now()
-  if (existing) {
-    await db.habitLogs.update(existing.id!, { value, completed, note, shieldUsed: false, loggedAt })
-  } else {
-    await db.habitLogs.add({ habitId, date, value, completed, note, shieldUsed: false, loggedAt })
-  }
+      const loggedAt = Date.now()
+      if (existing) {
+        await db.habitLogs.update(existing.id!, { value, completed, note, shieldUsed: false, loggedAt })
+      } else {
+        await db.habitLogs.add({ habitId, date, value, completed, note, shieldUsed: false, loggedAt })
+      }
 
-  let leveledUp = false
-  let newLevel = 1
-  const delta = (completed ? 1 : 0) - (wasCompleted ? 1 : 0)
-  if (delta !== 0) {
-    const xpDelta = delta * XP_PER_COMPLETION
-    const result = await applyXpDelta(xpDelta)
-    leveledUp = result.leveledUp
-    newLevel = result.level
-    await applyAttributeXpDelta(habit.attributeId, xpDelta)
-  }
+      let leveledUp = false
+      let newLevel = 1
+      const delta = (completed ? 1 : 0) - (wasCompleted ? 1 : 0)
+      if (delta !== 0) {
+        const xpDelta = delta * XP_PER_COMPLETION
+        const result = await applyXpDelta(xpDelta)
+        leveledUp = result.leveledUp
+        newLevel = result.level
+        await applyAttributeXpDelta(habit.attributeId, xpDelta)
+      }
 
-  const logs = await getHabitLogs(habitId)
-  const { current } = calculateStreak(habit, logs, parseDateKey(date))
+      const logs = await getHabitLogs(habitId)
+      const { current } = calculateStreak(habit, logs, parseDateKey(date))
 
-  const unlockedAchievements: string[] = []
-  const tryUnlock = async (key: string) => {
-    if (await unlockAchievement(key)) unlockedAchievements.push(key)
-  }
+      const unlockedAchievements: string[] = []
+      const tryUnlock = async (key: string) => {
+        if (await unlockAchievement(key)) unlockedAchievements.push(key)
+      }
 
-  if (completed && !wasCompleted) {
-    await tryUnlock('first_completion')
-    if (current >= 7) await tryUnlock('streak_7')
-    if (current >= 30) await tryUnlock('streak_30')
-    if (current >= 100) await tryUnlock('streak_100')
-  }
+      if (completed && !wasCompleted) {
+        await tryUnlock('first_completion')
+        for (const t of STREAK_ACHIEVEMENT_THRESHOLDS) {
+          if (current >= t.streak) await tryUnlock(t.key)
+        }
+      }
 
-  if (leveledUp) {
-    if (newLevel >= 5) await tryUnlock('level_5')
-    if (newLevel >= 10) await tryUnlock('level_10')
-  }
+      if (leveledUp) {
+        for (const t of LEVEL_ACHIEVEMENT_THRESHOLDS) {
+          if (newLevel >= t.level) await tryUnlock(t.key)
+        }
+      }
 
-  return { completed, leveledUp, newLevel, streak: current, unlockedAchievements }
+      return { completed, leveledUp, newLevel, streak: current, unlockedAchievements }
+    },
+  )
 }
 
 /**

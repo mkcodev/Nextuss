@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react'
 import { Command } from 'cmdk'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -7,23 +8,38 @@ import {
   Download,
   FileText,
   Keyboard,
+  ListTodo,
   Monitor,
   Moon,
   PanelLeft,
   PanelRight,
   Plus,
+  Repeat,
   Search,
   Sun,
   Target,
+  Trash2,
 } from 'lucide-react'
 import { useOverlayStore } from './shortcuts/overlayStore'
 import { useUIStore } from './uiStore'
 import { useHabitFormStore } from '../features/habits/habitFormStore'
+import { useQuickAddStore } from '../features/tasks/quickAddStore'
 import { updateSettings } from '../db/repositories/settings'
+import { getTask } from '../db/repositories/tasks'
+import { getHabit } from '../db/repositories/habits'
+import { getGoal } from '../db/repositories/goals'
 import { weekKey } from '../lib/dates'
+import { useTaskFormStore } from '../features/tasks/taskFormStore'
 import { useGoalFormStore } from '../features/planner/goalFormStore'
 import { useWeeklyReviewStore } from '../features/planner/weeklyReviewStore'
+import { searchIndex, type SearchDoc } from '../features/search/searchIndex'
 import { NAV_ITEMS } from './navItems'
+
+const SEARCH_ICON: Record<SearchDoc['type'], typeof ListTodo> = {
+  task: ListTodo,
+  habit: Repeat,
+  goal: Target,
+}
 
 // Entradas del grupo "Navegación" que no son una ruta de NAV_ITEMS (sub-tabs, anclas, etc).
 const EXTRA_NAV_ITEMS = [{ to: '/planificacion?tab=objetivos', label: 'Ir a Objetivos', icon: Compass }]
@@ -39,12 +55,36 @@ export function CommandPalette() {
   const toggleLeft = useUIStore((s) => s.toggleLeft)
   const toggleRight = useUIStore((s) => s.toggleRight)
   const openCreate = useHabitFormStore((s) => s.openCreate)
+  const openHabitEdit = useHabitFormStore((s) => s.openEdit)
+  const openQuickAdd = useQuickAddStore((s) => s.openQuickAdd)
+  const openTaskEdit = useTaskFormStore((s) => s.openEdit)
   const openGoalCreate = useGoalFormStore((s) => s.openCreate)
+  const openGoalEdit = useGoalFormStore((s) => s.openEdit)
   const openWeeklyReview = useWeeklyReviewStore((s) => s.openReview)
+
+  const [query, setQuery] = useState('')
+  const results = useMemo(() => (query.trim() ? searchIndex.search(query) : []), [query])
+
+  useEffect(() => {
+    if (paletteOpen) void searchIndex.ensureBuilt()
+  }, [paletteOpen])
 
   const run = (fn: () => void) => {
     fn()
     closePalette()
+  }
+
+  const openResult = async (doc: SearchDoc) => {
+    if (doc.type === 'task') {
+      const task = await getTask(doc.id)
+      if (task) openTaskEdit(task)
+    } else if (doc.type === 'habit') {
+      const habit = await getHabit(doc.id)
+      if (habit) openHabitEdit(habit)
+    } else {
+      const goal = await getGoal(doc.id)
+      if (goal) openGoalEdit(goal)
+    }
   }
 
   return (
@@ -62,6 +102,8 @@ export function CommandPalette() {
         <Search size={15} strokeWidth={1.75} className="shrink-0 text-text-faint" />
         <Command.Input
           autoFocus
+          value={query}
+          onValueChange={setQuery}
           placeholder="Escribe un comando o busca…"
           className="w-full bg-transparent py-3.5 text-sm text-text outline-none placeholder:text-text-faint"
         />
@@ -71,6 +113,26 @@ export function CommandPalette() {
         <Command.Empty className="px-3 py-6 text-center text-sm text-text-faint">
           Sin resultados.
         </Command.Empty>
+
+        {results.length > 0 && (
+          <Command.Group heading="Resultados">
+            {results.map((doc) => {
+              const Icon = SEARCH_ICON[doc.type]
+              return (
+                <Command.Item
+                  key={`${doc.type}:${doc.id}`}
+                  value={`resultado ${doc.title}`}
+                  onSelect={() => run(() => void openResult(doc))}
+                  className={ITEM_CLASS}
+                >
+                  <Icon size={15} strokeWidth={1.75} />
+                  <span className="min-w-0 flex-1 truncate">{doc.title}</span>
+                  {doc.subtitle && <span className="shrink-0 text-xs text-text-faint">{doc.subtitle}</span>}
+                </Command.Item>
+              )
+            })}
+          </Command.Group>
+        )}
 
         <Command.Group heading="Navegación">
           {NAV_ITEMS.map(({ to, label, icon: Icon, paletteLabel }) => (
@@ -94,6 +156,9 @@ export function CommandPalette() {
         </Command.Group>
 
         <Command.Group heading="Acciones">
+          <Command.Item onSelect={() => run(openQuickAdd)} className={ITEM_CLASS}>
+            <Plus size={15} strokeWidth={1.75} /> Crear tarea
+          </Command.Item>
           <Command.Item
             onSelect={() => run(openCreate)}
             className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
@@ -132,6 +197,12 @@ export function CommandPalette() {
             className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <Database size={15} strokeWidth={1.75} /> Backup
+          </Command.Item>
+          <Command.Item
+            onSelect={() => run(() => navigate('/ajustes'))}
+            className={ITEM_CLASS}
+          >
+            <Trash2 size={15} strokeWidth={1.75} /> Papelera
           </Command.Item>
         </Command.Group>
 

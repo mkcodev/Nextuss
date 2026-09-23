@@ -1,18 +1,18 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useNavigate } from 'react-router-dom'
-import { format, getDay } from 'date-fns'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { addDays, format, getDay, subDays } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { CheckCheck, Compass, Flame, Plus, Sparkles, Target } from 'lucide-react'
+import { CheckCheck, ChevronLeft, ChevronRight, Compass, Flame, Plus, Sparkles, Target } from 'lucide-react'
 import { Button, EmptyState, Skeleton } from '../../design/primitives'
 import { useInsights } from '../stats/insights/useInsights'
-import { todayKey, isHabitScheduledOn, parseDateKey, weekKey } from '../../lib/dates'
+import { todayKey, isHabitScheduledOn, dateKey, parseDateKey, weekKey } from '../../lib/dates'
 import { useHabitsWithStats } from '../habits/useHabitsWithStats'
 import { HabitCard } from '../habits/HabitCard'
 import { activateHabitEntry } from '../habits/activateHabit'
-import { reconcileShields } from '../../db/repositories/habits'
 import { useHabitFormStore } from '../habits/habitFormStore'
 import { useContextPanel } from '../../app/dock/contextPanelStore'
+import { usePageTitle } from '../../app/pageTitleStore'
 import { useListNav } from '../../app/shortcuts/listNavStore'
 import { Timeline } from '../planner/Timeline'
 import { UnscheduledTray } from '../planner/UnscheduledTray'
@@ -20,20 +20,20 @@ import { CapacityBanner } from '../planner/CapacityBanner'
 import { OverdueTasks } from '../planner/OverdueTasks'
 import { getNorthStarStreak, getPriorityGoal } from '../../db/repositories/goals'
 import { getReview } from '../../db/repositories/reviews'
-import { previousPeriodKey } from '../planner/goalProgress'
+import { previousPeriodKey } from '../../lib/periods'
 import { useWeeklyReviewStore } from '../planner/weeklyReviewStore'
 import { DayPlanSuggestion } from '../ai/DayPlanSuggestion'
 
 export function TodayView() {
-  const date = todayKey()
+  const today = todayKey()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const dParam = searchParams.get('d')
+  const date = dParam ?? today
+  const isToday = date === today
   const entries = useHabitsWithStats(date)
   const openCreate = useHabitFormStore((s) => s.openCreate)
   const openEdit = useHabitFormStore((s) => s.openEdit)
   const [selectedIndex, setSelectedIndex] = useState(0)
-
-  useEffect(() => {
-    reconcileShields()
-  }, [])
 
   const todaysEntries = useMemo(
     () => entries?.filter((e) => isHabitScheduledOn(e.habit, parseDateKey(date))),
@@ -47,7 +47,10 @@ export function TodayView() {
   const currentWeekKey = weekKey()
   const northStar = useLiveQuery(() => getPriorityGoal('week', currentWeekKey), [currentWeekKey])
   const northStarStreak = useLiveQuery(() => getNorthStarStreak('week', currentWeekKey), [currentWeekKey]) ?? 0
-  const isMonday = getDay(parseDateKey(date)) === 1
+  // The weekly-review nudge is about the real calendar (is it actually Monday right now?), not
+  // whichever day the user happens to be viewing — navigating to a past/future Monday must not
+  // spuriously trigger it.
+  const isMonday = isToday && getDay(parseDateKey(today)) === 1
   const lastWeekKey = previousPeriodKey('week', currentWeekKey)
   const lastWeekReview = useLiveQuery(() => getReview(lastWeekKey), [lastWeekKey])
   const needsReview = isMonday && lastWeekReview === undefined
@@ -55,6 +58,11 @@ export function TodayView() {
   const navigate = useNavigate()
   const { insights } = useInsights('30d')
   const topInsight = insights[0]
+
+  usePageTitle(isToday ? null : format(parseDateKey(date), "EEE d MMM", { locale: es }), [date, isToday])
+
+  const goToDate = (next: string) =>
+    setSearchParams(next === today ? {} : { d: next }, { replace: true })
 
   useContextPanel(
     'Resumen del día',
@@ -139,9 +147,30 @@ export function TodayView() {
   return (
     <div className="mx-auto max-w-6xl p-6 lg:p-8">
       <header className="mb-6 flex items-end justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-text-faint">Hoy</p>
-          <h1 className="mt-1 text-2xl font-semibold capitalize text-text">{label}</h1>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => goToDate(dateKey(subDays(parseDateKey(date), 1)))}
+            className="rounded-md p-1.5 text-text-faint hover:bg-surface-hover hover:text-text"
+          >
+            <ChevronLeft size={17} strokeWidth={2} />
+          </button>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-text-faint">
+              {isToday ? 'Hoy' : 'Día'}
+            </p>
+            <h1 className="mt-1 text-2xl font-semibold capitalize text-text">{label}</h1>
+          </div>
+          <button
+            onClick={() => goToDate(dateKey(addDays(parseDateKey(date), 1)))}
+            className="rounded-md p-1.5 text-text-faint hover:bg-surface-hover hover:text-text"
+          >
+            <ChevronRight size={17} strokeWidth={2} />
+          </button>
+          {!isToday && (
+            <Button variant="ghost" onClick={() => goToDate(today)} className="px-2 py-1 text-xs">
+              Hoy
+            </Button>
+          )}
         </div>
         {totalCount > 0 && (
           <div className="flex items-center gap-1.5 text-sm text-text-muted">
@@ -155,7 +184,7 @@ export function TodayView() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
         <div className="space-y-3 lg:order-1">
-          <OverdueTasks date={date} />
+          {isToday && <OverdueTasks date={date} />}
           <CapacityBanner date={date} />
           <Timeline date={date} />
         </div>
@@ -163,7 +192,7 @@ export function TodayView() {
         <div className="space-y-6 lg:order-2">
           <div>
             <div className="mb-1 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-text-muted">Hábitos de hoy</h2>
+              <h2 className="text-sm font-semibold text-text-muted">{isToday ? 'Hábitos de hoy' : 'Hábitos ese día'}</h2>
               <Button variant="ghost" onClick={() => openCreate()} className="px-2 py-1 text-xs">
                 <Plus size={14} strokeWidth={2} /> Nuevo
               </Button>

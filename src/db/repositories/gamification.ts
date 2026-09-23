@@ -76,8 +76,14 @@ export function updateAttribute(id: number, changes: Partial<{ name: string; ico
   return db.attributes.update(id, changes)
 }
 
+/** Clears `attributeId` on any habit/goal that pointed at it before deleting for real — an attribute
+ * has no trash/undo of its own, so this is the one place that must not leave a dangling reference. */
 export function deleteAttribute(id: number) {
-  return db.attributes.delete(id)
+  return db.transaction('rw', db.attributes, db.habits, db.goals, async () => {
+    await db.habits.where('attributeId').equals(id).modify({ attributeId: undefined })
+    await db.goals.where('attributeId').equals(id).modify({ attributeId: undefined })
+    await db.attributes.delete(id)
+  })
 }
 
 export async function unlockAchievement(key: string): Promise<boolean> {

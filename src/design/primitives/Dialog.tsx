@@ -25,6 +25,10 @@ export function Dialog({ open, onClose, title, children }: DialogProps) {
   const isTopmost = useRef(false)
   const titleId = useId()
   const reduceMotion = useReducedMotion()
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
 
   useEffect(() => {
     if (!open) return
@@ -41,7 +45,7 @@ export function Dialog({ open, onClose, title, children }: DialogProps) {
       if (!isTopmost.current) return
       if (e.key === 'Escape') {
         e.stopPropagation()
-        onClose()
+        onCloseRef.current()
         return
       }
       if (e.key === 'Tab' && panelRef.current) {
@@ -67,7 +71,7 @@ export function Dialog({ open, onClose, title, children }: DialogProps) {
       if (openDialogCount === 0) document.body.style.overflow = ''
       previouslyFocused.current?.focus()
     }
-  }, [open, onClose])
+  }, [open])
 
   return (
     <AnimatePresence>

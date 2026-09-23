@@ -1,12 +1,113 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Plus } from 'lucide-react'
-import { getUnscheduledTasks, createTask } from '../../db/repositories/tasks'
+import { Check, Plus, Repeat } from 'lucide-react'
+import { getUnscheduledTasks, createTask, getSubtasks, moveTaskBetween } from '../../db/repositories/tasks'
+import { listTags } from '../../db/repositories/tags'
 import { useTaskFormStore } from '../tasks/taskFormStore'
+import { toggleTaskDoneWithFeedback } from '../tasks/actions'
+import { cn } from '../../lib/cn'
+import { PRIORITY_COLORS } from '../../lib/priority'
+import { TaskQuickMenu } from '../tasks/TaskQuickMenu'
+import type { Tag, Task } from '../../db/types'
 import { TASK_DRAG_MIME } from './constants'
+
+function SubtaskRow({ subtask, onOpen }: { subtask: Task; onOpen: (t: Task) => void }) {
+  const done = subtask.status === 'done'
+  return (
+    <div className="ml-4 flex items-center gap-2 rounded-lg border border-border bg-bg-soft px-2.5 py-1.5">
+      <button
+        onClick={() => toggleTaskDoneWithFeedback(subtask.id!, subtask.title)}
+        className={cn(
+          'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border',
+          done ? 'border-accent bg-accent text-white' : 'border-text-faint',
+        )}
+      >
+        {done && <Check size={9} strokeWidth={3} />}
+      </button>
+      <button
+        onClick={() => onOpen(subtask)}
+        className={cn('min-w-0 flex-1 truncate text-left text-xs text-text', done && 'text-text-faint line-through')}
+      >
+        {subtask.title}
+      </button>
+    </div>
+  )
+}
+
+function TaskRow({
+  task,
+  onOpen,
+  tagsById,
+  onReorderDrop,
+}: {
+  task: Task
+  onOpen: (t: Task) => void
+  tagsById: Map<number, Tag>
+  onReorderDrop: (draggedId: number, targetTask: Task) => void
+}) {
+  const subtasks = useLiveQuery(() => (task.id ? getSubtasks(task.id) : Promise.resolve([])), [task.id]) ?? []
+  const done = subtasks.filter((s) => s.status === 'done').length
+  const tags = task.tagIds.map((id) => tagsById.get(id)).filter((t): t is Tag => !!t)
+
+  return (
+    <div className="space-y-1.5">
+      <div
+        draggable
+        onDragStart={(e) => {
+          e.dataTransfer.setData(TASK_DRAG_MIME, String(task.id))
+          e.dataTransfer.effectAllowed = 'move'
+        }}
+        onDragOver={(e) => {
+          e.preventDefault()
+          e.dataTransfer.dropEffect = 'move'
+        }}
+        onDrop={(e) => {
+          e.preventDefault()
+          const draggedId = Number(e.dataTransfer.getData(TASK_DRAG_MIME))
+          if (draggedId && draggedId !== task.id) onReorderDrop(draggedId, task)
+        }}
+        onClick={() => onOpen(task)}
+        title="Arrastra al timeline para programarla, o sobre otra tarea para reordenar"
+        className="flex cursor-grab items-center gap-2 rounded-lg border border-l-[3px] border-border bg-surface px-3 py-2 transition-colors hover:border-border-strong active:cursor-grabbing"
+        style={{ borderLeftColor: task.color ?? '#5EC8FF' }}
+      >
+        {task.priority && (
+          <span
+            className="shrink-0 rounded px-1 py-0.5 text-[10px] font-semibold text-white"
+            style={{ backgroundColor: PRIORITY_COLORS[task.priority] }}
+          >
+            P{task.priority}
+          </span>
+        )}
+        <span className="min-w-0 flex-1 truncate text-sm text-text">{task.title}</span>
+        {task.recurrenceId && <Repeat size={11} strokeWidth={2} className="shrink-0 text-text-faint" />}
+        {tags.map((tag) => (
+          <span
+            key={tag.id}
+            className="shrink-0 rounded-full border border-border px-1.5 py-0.5 text-[10px] text-text-muted"
+          >
+            {tag.name}
+          </span>
+        ))}
+        {subtasks.length > 0 && (
+          <span className="shrink-0 text-[10px] tabular-nums text-text-faint">
+            {done}/{subtasks.length}
+          </span>
+        )}
+        <span className="shrink-0 text-xs tabular-nums text-text-faint">{task.estimateMin ?? 30} min</span>
+        <TaskQuickMenu task={task} />
+      </div>
+      {subtasks.map((s) => (
+        <SubtaskRow key={s.id} subtask={s} onOpen={onOpen} />
+      ))}
+    </div>
+  )
+}
 
 export function UnscheduledTray({ date }: { date: string }) {
   const tasks = useLiveQuery(() => getUnscheduledTasks(date), [date])
+  const tags = useLiveQuery(() => listTags(), []) ?? []
+  const tagsById = new Map(tags.map((t) => [t.id!, t]))
   const openEdit = useTaskFormStore((s) => s.openEdit)
   const [quickTitle, setQuickTitle] = useState('')
 
@@ -15,6 +116,15 @@ export function UnscheduledTray({ date }: { date: string }) {
     if (!title) return
     await createTask({ title, status: 'planned' })
     setQuickTitle('')
+  }
+
+  /** Suelta sobre `targetTask`: la tarea arrastrada pasa a ocupar el hueco justo antes de ella. */
+  const handleReorderDrop = (draggedId: number, targetTask: Task) => {
+    if (!tasks) return
+    const targetIndex = tasks.findIndex((t) => t.id === targetTask.id)
+    const prev = tasks[targetIndex - 1]
+    const beforeSortKey = prev && prev.id !== draggedId ? prev.sortKey : null
+    moveTaskBetween(draggedId, beforeSortKey, targetTask.sortKey)
   }
 
   return (
@@ -39,25 +149,9 @@ export function UnscheduledTray({ date }: { date: string }) {
         <p className="text-xs text-text-faint">Sin tareas pendientes de planificar.</p>
       )}
 
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         {tasks?.map((t) => (
-          <div
-            key={t.id}
-            draggable
-            onDragStart={(e) => {
-              e.dataTransfer.setData(TASK_DRAG_MIME, String(t.id))
-              e.dataTransfer.effectAllowed = 'move'
-            }}
-            onClick={() => openEdit(t)}
-            title="Arrastra al timeline para programarla"
-            className="flex cursor-grab items-center gap-2 rounded-lg border border-l-[3px] border-border bg-surface px-3 py-2 transition-colors hover:border-border-strong active:cursor-grabbing"
-            style={{ borderLeftColor: t.color ?? '#5EC8FF' }}
-          >
-            <span className="min-w-0 flex-1 truncate text-sm text-text">{t.title}</span>
-            <span className="shrink-0 text-xs tabular-nums text-text-faint">
-              {t.estimateMin ?? 30} min
-            </span>
-          </div>
+          <TaskRow key={t.id} task={t} onOpen={openEdit} tagsById={tagsById} onReorderDrop={handleReorderDrop} />
         ))}
       </div>
     </div>

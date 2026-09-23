@@ -4,7 +4,6 @@ import type {
   Attribute,
   CheckIn,
   DemoSeedRecord,
-  EventItem,
   FocusSession,
   Goal,
   Habit,
@@ -12,11 +11,22 @@ import type {
   InsightFeedbackRecord,
   NotificationLogRecord,
   Progress,
+  Project,
   QuickNote,
+  RecurrenceRule,
   Settings,
+  Tag,
   Task,
+  TrashEntry,
   WeeklyReview,
 } from './types'
+import {
+  backfillTaskTagIdsV8,
+  backfillTaskXpAwardedV9,
+  backfillTrashFields,
+  migrateGoalV4,
+  migrateHabitLogV3,
+} from './migrations'
 
 export class NextussDB extends Dexie {
   habits!: EntityTable<Habit, 'id'>
@@ -25,7 +35,6 @@ export class NextussDB extends Dexie {
   progress!: EntityTable<Progress, 'id'>
   achievements!: EntityTable<Achievement, 'id'>
   tasks!: EntityTable<Task, 'id'>
-  events!: EntityTable<EventItem, 'id'>
   goals!: EntityTable<Goal, 'id'>
   checkins!: EntityTable<CheckIn, 'id'>
   focusSessions!: EntityTable<FocusSession, 'id'>
@@ -35,6 +44,10 @@ export class NextussDB extends Dexie {
   demoSeeds!: EntityTable<DemoSeedRecord, 'id'>
   notificationLog!: EntityTable<NotificationLogRecord, 'id'>
   insightFeedback!: EntityTable<InsightFeedbackRecord, 'id'>
+  trash!: EntityTable<TrashEntry, 'id'>
+  tags!: EntityTable<Tag, 'id'>
+  projects!: EntityTable<Project, 'id'>
+  recurrenceRules!: EntityTable<RecurrenceRule, 'id'>
 
   constructor() {
     // Nombre real de la base de datos IndexedDB — deliberadamente NO sigue el rebranding a
@@ -69,12 +82,7 @@ export class NextussDB extends Dexie {
       })
       .upgrade(async (tx) => {
         // Backfill loggedAt for logs written before the activity feed existed.
-        await tx
-          .table('habitLogs')
-          .toCollection()
-          .modify((log) => {
-            if (!log.loggedAt) log.loggedAt = Date.now()
-          })
+        await tx.table('habitLogs').toCollection().modify(migrateHabitLogV3)
       })
 
     this.version(4)
@@ -83,15 +91,7 @@ export class NextussDB extends Dexie {
       })
       .upgrade(async (tx) => {
         // Backfill fields introduced by the goals-on-steroids upgrade.
-        await tx
-          .table('goals')
-          .toCollection()
-          .modify((g) => {
-            if (g.isPriority === undefined) g.isPriority = false
-            if (!g.createdAt) g.createdAt = Date.now()
-            if (!Array.isArray(g.taskIds)) g.taskIds = []
-            if (g.done && !g.completedAt) g.completedAt = Date.now()
-          })
+        await tx.table('goals').toCollection().modify(migrateGoalV4)
       })
 
     this.version(5).stores({
@@ -100,6 +100,55 @@ export class NextussDB extends Dexie {
       demoSeeds: '++id, createdAt',
       notificationLog: '++id, &key',
       insightFeedback: '++id, &key',
+    })
+
+    this.version(6)
+      .stores({
+        events: null, // tabla muerta desde siempre: cero lectores, cero escritores.
+        tasks:
+          '++id, status, scheduledDate, parentId, projectId, dueDate, completedAt, createdAt, deletedAt, sortKey, [deletedAt+status], [deletedAt+scheduledDate], [parentId+sortKey]',
+        habits: '++id, attributeId, deletedAt, sortKey',
+        goals:
+          '++id, period, periodKey, parentGoalId, completedAt, [period+periodKey], deletedAt, sortKey, *taskIds',
+        trash: '++id, deletedAt',
+      })
+      .upgrade(async (tx) => {
+        // Papelera/deshacer (Fase 7): deletedAt=0 y sortKey denso por createdAt en las tres tablas.
+        for (const name of ['tasks', 'habits', 'goals'] as const) {
+          const table = tx.table(name)
+          const rows = await table.toArray()
+          backfillTrashFields(rows)
+          await table.bulkPut(rows)
+        }
+      })
+
+    this.version(8)
+      .stores({
+        tags: '++id, &name',
+        projects: '++id, attributeId',
+        tasks:
+          '++id, status, scheduledDate, parentId, projectId, dueDate, completedAt, createdAt, deletedAt, sortKey, [deletedAt+status], [deletedAt+scheduledDate], [parentId+sortKey], *tagIds',
+      })
+      .upgrade(async (tx) => {
+        // Etiquetas y proyectos reales (Fase 8.3): tagIds=[] en toda tarea existente.
+        await tx.table('tasks').toCollection().modify(backfillTaskTagIdsV8)
+      })
+
+    this.version(9)
+      .stores({})
+      .upgrade(async (tx) => {
+        // XP por tareas (Fase 8.6): xpAwarded=0 en toda tarea existente.
+        await tx.table('tasks').toCollection().modify(backfillTaskXpAwardedV9)
+      })
+
+    // Tareas recurrentes (Fase 9). Sin `.upgrade()`: `recurrenceId`/`occurrenceDate` quedan
+    // `undefined` en toda tarea existente, que es exactamente su significado correcto ("no
+    // pertenece a ninguna serie") — a diferencia de `deletedAt`/`sortKey` en la v6, aquí no hay nada
+    // que backfillear.
+    this.version(10).stores({
+      recurrenceRules: '++id, mode',
+      tasks:
+        '++id, status, scheduledDate, parentId, projectId, dueDate, completedAt, createdAt, deletedAt, sortKey, [deletedAt+status], [deletedAt+scheduledDate], [parentId+sortKey], *tagIds, recurrenceId, [recurrenceId+occurrenceDate]',
     })
   }
 }
