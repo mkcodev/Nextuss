@@ -10,10 +10,10 @@ export interface HabitWithStats {
   streak: { current: number; longest: number }
 }
 
-/** All non-archived habits, each paired with its log for `date` (if any) and its current/longest streak as of that date. */
-export function useHabitsWithStats(date: string): HabitWithStats[] | undefined {
+/** Habits (archived included on request), each paired with its log for `date` (if any) and its current/longest streak as of that date. */
+export function useHabitsWithStats(date: string, includeArchived = false): HabitWithStats[] | undefined {
   return useLiveQuery(async () => {
-    const habits = await listHabits()
+    const habits = await listHabits(includeArchived)
     const logsForDate = await getLogsForDate(date)
     const logByHabitId = new Map(logsForDate.map((log) => [log.habitId, log]))
     const referenceDate = parseDateKey(date)
@@ -32,5 +32,5 @@ export function useHabitsWithStats(date: string): HabitWithStats[] | undefined {
       log: logByHabitId.get(habit.id!),
       streak: calculateStreak(habit, logsByHabit.get(habit.id!) ?? [], referenceDate),
     }))
-  }, [date])
+  }, [date, includeArchived])
 }

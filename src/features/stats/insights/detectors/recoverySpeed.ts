@@ -1,5 +1,5 @@
 import { addDays } from 'date-fns'
-import { dateKey, isHabitScheduledOn, parseDateKey } from '../../../../lib/dates'
+import { dateKey, isHabitScheduledOn, isPeriodicHabit, parseDateKey } from '../../../../lib/dates'
 import type { Detector } from '../types'
 
 const MIN_RECOVERY_EVENTS = 3
@@ -9,6 +9,9 @@ export const recoverySpeed: Detector = (ctx) => {
   const gaps: number[] = []
 
   for (const habit of ctx.habits) {
+    // "X veces/semana|mes" no tiene un "día fallado" — es "elegible" todos los días (ver
+    // `isHabitScheduledOn`), así que este detector no tiene una señal real que medir en él.
+    if (isPeriodicHabit(habit)) continue
     const logByDate = new Map(ctx.habitLogs.filter((l) => l.habitId === habit.id).map((l) => [l.date, l]))
 
     let missStreak = 0

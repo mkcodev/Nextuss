@@ -2,8 +2,16 @@
 // y devuelve series listas para pintar. Nada de aquí toca la base de datos — eso es lo que permite
 // testear cada pieza sin Dexie y lo que le da a `useStatsData` un único punto de recorrido por
 // tabla en vez de repetir consultas por hábito/día (el N+1 que ya tiene `useHabitsWithStats.ts`).
-import { addDays } from 'date-fns'
-import { dateKey, isHabitScheduledOn, parseDateKey, weekdayOf, WEEKDAY_LABELS_ES } from '../../lib/dates'
+import { addDays, endOfMonth, endOfWeek, startOfMonth, startOfWeek } from 'date-fns'
+import {
+  dateKey,
+  isHabitScheduledOn,
+  isPeriodicHabit,
+  parseDateKey,
+  weekdayOf,
+  WEEKDAY_LABELS_ES,
+} from '../../lib/dates'
+import { calculateStreak } from '../../lib/streaks'
 import { XP_PER_COMPLETION } from '../../lib/xp'
 import type { CheckIn, FocusSession, Habit, HabitLog, HabitType, Task } from '../../db/types'
 
@@ -76,6 +84,9 @@ export function buildDailySeries(
     let habitsScheduled = 0
     let habitsDone = 0
     for (const h of habits) {
+      // "X veces/semana|mes" no es un compromiso diario — contarlo cada día infla el denominador
+      // y hunde artificialmente el % de cumplimiento aunque el hábito se cumpla siempre.
+      if (isPeriodicHabit(h)) continue
       if (dateKey(new Date(h.createdAt)) > key) continue
       if (!isHabitScheduledOn(h, parseDateKey(key))) continue
       habitsScheduled += 1
@@ -188,6 +199,73 @@ function bestAndWorstWeekday(averages: (number | null)[]): { best: number | null
   return { best, worst }
 }
 
+/**
+ * Fila de un hábito "X veces/semana|mes" — cumplimiento por periodo, no por día (ver
+ * `isPeriodicHabit`). `currentStreak`/`bestStreak` reflejan la vida completa del hábito, no solo
+ * el rango: acotarlas al rango necesitaría reimplementar `calculatePeriodStreak` con un límite
+ * superior además del inferior, y no compensa la complejidad para una fila de tabla.
+ */
+function buildPeriodicMatrixRow(
+  h: Habit,
+  habitLogs: HabitLog[],
+  range: { from: string; to: string },
+  now: Date,
+): HabitMatrixRow {
+  const schedule = h.schedule as Extract<Habit['schedule'], { type: 'timesPerWeek' | 'timesPerMonth' }>
+  const unit = schedule.type === 'timesPerWeek' ? 'week' : 'month'
+  const bounds = (d: Date) =>
+    unit === 'week'
+      ? { start: startOfWeek(d, { weekStartsOn: 1 }), end: endOfWeek(d, { weekStartsOn: 1 }) }
+      : { start: startOfMonth(d), end: endOfMonth(d) }
+
+  const completedDates = new Set(habitLogs.filter((l) => l.completed).map((l) => l.date))
+  const habitCreatedKey = dateKey(new Date(h.createdAt))
+  const from = habitCreatedKey > range.from ? habitCreatedKey : range.from
+
+  let scheduledDays = 0
+  let completedDays = 0
+  const streakSeries: { date: string; streak: number }[] = []
+  let running = 0
+
+  for (
+    let periodStart = bounds(parseDateKey(from)).start;
+    dateKey(periodStart) <= range.to;
+    periodStart = addDays(bounds(periodStart).end, 1)
+  ) {
+    const { start, end } = bounds(periodStart)
+    let countInPeriod = 0
+    for (const key of eachDateKey(dateKey(start), dateKey(end))) {
+      if (completedDates.has(key)) countInPeriod += 1
+    }
+    scheduledDays += schedule.times
+    const met = Math.min(countInPeriod, schedule.times)
+    completedDays += met
+    running = met >= schedule.times ? running + 1 : 0
+    streakSeries.push({ date: dateKey(end), streak: running })
+  }
+
+  const { current: currentStreak, longest: bestStreak } = calculateStreak(h, habitLogs, now)
+
+  return {
+    habitId: h.id!,
+    name: h.name,
+    icon: h.icon,
+    color: h.color,
+    type: h.type,
+    attributeId: h.attributeId,
+    scheduledDays,
+    completedDays,
+    complianceRatio: scheduledDays > 0 ? completedDays / scheduledDays : 0,
+    currentStreak,
+    bestStreak,
+    trend: 'flat', // "2ª mitad vs 1ª" no aplica de forma útil a un cumplimiento por periodo
+    bestWeekday: null,
+    worstWeekday: null,
+    shieldsUsed: 0, // los escudos son un mecanismo diario, no aplican a hábitos por periodo
+    streakSeries,
+  }
+}
+
 /** Fila por hábito: cumplimiento, rachas, tendencia (2ª mitad del rango vs 1ª) y mejor/peor día. */
 export function buildHabitMatrix(
   habits: Habit[],
@@ -200,6 +278,9 @@ export function buildHabitMatrix(
   return habits.map((h) => {
     const logByDate = new Map((logsByHabit.get(h.id!) ?? []).map((l) => [l.date, l]))
     const habitCreatedKey = dateKey(new Date(h.createdAt))
+
+    if (isPeriodicHabit(h)) return buildPeriodicMatrixRow(h, logsByHabit.get(h.id!) ?? [], range, now)
+
     const scheduledDates = eachDateKey(range.from, range.to).filter(
       (key) => key >= habitCreatedKey && isHabitScheduledOn(h, parseDateKey(key)),
     )

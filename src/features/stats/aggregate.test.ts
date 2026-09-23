@@ -156,6 +156,19 @@ describe('buildHabitMatrix', () => {
     const [row] = buildHabitMatrix(habits, logs, range, today)
     expect(row.currentStreak).toBe(3)
   })
+
+  it('computes period-based compliance for a timesPerWeek habit instead of a per-day one', () => {
+    // Semana del 14 (lun) al 20 (dom) de sep 2026: 2 completados de meta 3.
+    const range = { from: '2026-09-14', to: '2026-09-20' }
+    const habits = [habit({ schedule: { type: 'timesPerWeek', times: 3 } })]
+    const logs: HabitLog[] = [
+      log({ date: '2026-09-15', completed: true }),
+      log({ date: '2026-09-17', completed: true }),
+    ]
+    const [row] = buildHabitMatrix(habits, logs, range)
+    expect(row.scheduledDays).toBe(3) // 1 semana × meta 3
+    expect(row.completedDays).toBe(2)
+  })
 })
 
 describe('buildEstimateAccuracy', () => {

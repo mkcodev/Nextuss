@@ -105,6 +105,58 @@ describe('calculateStreak', () => {
   })
 })
 
+describe('calculateStreak — timesPerWeek/timesPerMonth', () => {
+  it('extends the streak one per week once the weekly target is met, ignores day-level gaps within it', () => {
+    const habit = makeHabit({
+      schedule: { type: 'timesPerWeek', times: 2 },
+      createdAt: new Date(2026, 0, 1).getTime(),
+    })
+    // Week of 2026-02-09 (Mon) .. 02-15 (Sun): 2 completions on Mon+Wed meets times=2.
+    // Week of 2026-02-02 (Mon) .. 02-08 (Sun): 2 completions on Tue+Thu meets times=2.
+    const logs = [
+      log(1, new Date(2026, 1, 3), true), // Tue, week of Feb 2
+      log(1, new Date(2026, 1, 5), true), // Thu, week of Feb 2
+      log(1, new Date(2026, 1, 9), true), // Mon, week of Feb 9
+      log(1, new Date(2026, 1, 11), true), // Wed, week of Feb 9
+    ]
+    const referenceDate = new Date(2026, 1, 12) // Thu, still inside the week of Feb 9
+    expect(calculateStreak(habit, logs, referenceDate)).toEqual({ current: 2, longest: 2 })
+  })
+
+  it('does not break the streak while the current week is still short of target', () => {
+    const habit = makeHabit({
+      schedule: { type: 'timesPerWeek', times: 3 },
+      createdAt: new Date(2026, 0, 1).getTime(),
+    })
+    const logs = [
+      log(1, new Date(2026, 1, 2), true),
+      log(1, new Date(2026, 1, 3), true),
+      log(1, new Date(2026, 1, 4), true), // week of Feb 2: 3/3, met
+      log(1, new Date(2026, 1, 9), true), // week of Feb 9: only 1 so far, still in progress
+    ]
+    const referenceDate = new Date(2026, 1, 10) // Tue, week of Feb 9 not over
+    expect(calculateStreak(habit, logs, referenceDate)).toEqual({ current: 1, longest: 1 })
+  })
+
+  it('breaks the streak on a fully-elapsed week that missed the target', () => {
+    const habit = makeHabit({
+      schedule: { type: 'timesPerWeek', times: 2 },
+      createdAt: new Date(2026, 0, 1).getTime(),
+    })
+    const logs = [
+      log(1, new Date(2026, 1, 2), true),
+      log(1, new Date(2026, 1, 3), true), // week of Feb 2: 2/2, met
+      // week of Feb 9: 0 completions, fully elapsed by referenceDate
+      log(1, new Date(2026, 1, 16), true),
+      log(1, new Date(2026, 1, 17), true), // week of Feb 16: 2/2, met
+    ]
+    const referenceDate = new Date(2026, 1, 18) // Wed, week of Feb 16 in progress
+    // Week of Feb 9 (fully elapsed, 0 completions) breaks the run started at week of Feb 2, so the
+    // met week of Feb 16 starts a fresh run of 1 — it does not connect back across the missed week.
+    expect(calculateStreak(habit, logs, referenceDate)).toEqual({ current: 1, longest: 1 })
+  })
+})
+
 describe('findYesterdayMiss', () => {
   it('flags yesterday when scheduled and unlogged', () => {
     const habit = makeHabit()

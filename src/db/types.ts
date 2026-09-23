@@ -4,6 +4,20 @@
 
 export type HabitType = 'binary' | 'quantity' | 'duration' | 'negative'
 
+/**
+ * Calendario de un hábito, unión discriminada. `weekdays` en `Habit` sigue existiendo y
+ * escribiéndose siempre (incluso cuando `schedule` es de otro tipo) para que cualquier
+ * lector que no pase por `isHabitScheduledOn`/`schedule` siga teniendo una respuesta razonable.
+ */
+export type HabitSchedule =
+  | { type: 'weekdays'; weekdays: number[] } // 0=domingo..6=sábado; [] = todos los días
+  | { type: 'everyNDays'; interval: number; anchorDate: string } // 'YYYY-MM-DD', primer día del ciclo
+  | { type: 'timesPerWeek'; times: number }
+  | { type: 'timesPerMonth'; times: number }
+  | { type: 'monthDays'; days: number[] } // 1-31
+
+export type HabitScheduleType = HabitSchedule['type']
+
 export interface Habit {
   id?: number
   name: string
@@ -13,7 +27,11 @@ export interface Habit {
   targetValue?: number // required for 'quantity' | 'duration'
   unit?: string // e.g. 'vasos', 'min', 'páginas'
   attributeId?: number
-  weekdays: number[] // 0=domingo..6=sábado; [] = todos los días
+  weekdays: number[] // 0=domingo..6=sábado; [] = todos los días — ver comentario en `HabitSchedule`
+  schedule?: HabitSchedule // si está definido, sustituye a `weekdays` como fuente de verdad del calendario
+  pausedFrom?: string // 'YYYY-MM-DD', inclusive — vacaciones: no cuenta como día programado, no rompe racha
+  pausedUntil?: string // 'YYYY-MM-DD', inclusive
+  skipDates?: string[] // 'YYYY-MM-DD'[] — días sueltos exentos, mismo efecto que la pausa
   reminderTime?: string // 'HH:mm'
   archived: boolean
   createdAt: number

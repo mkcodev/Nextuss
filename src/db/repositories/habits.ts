@@ -3,7 +3,7 @@ import type { Habit, HabitLog } from '../types'
 import { isLogCompleted } from '../../lib/habits'
 import { calculateStreak, findYesterdayMiss } from '../../lib/streaks'
 import { XP_PER_COMPLETION } from '../../lib/xp'
-import { parseDateKey } from '../../lib/dates'
+import { isPeriodicHabit, parseDateKey } from '../../lib/dates'
 import { STREAK_ACHIEVEMENT_THRESHOLDS, LEVEL_ACHIEVEMENT_THRESHOLDS } from '../../lib/achievementThresholds'
 import { trashRows } from '../trash'
 import {
@@ -16,7 +16,40 @@ import {
 
 export async function listHabits(includeArchived = false): Promise<Habit[]> {
   const all = await db.habits.toArray()
-  return all.filter((h) => h.deletedAt === 0 && (includeArchived || !h.archived))
+  return all
+    .filter((h) => h.deletedAt === 0 && (includeArchived || !h.archived))
+    .sort((a, b) => a.sortKey - b.sortKey)
+}
+
+/** Reordena un hábito entre sus dos vecinos actuales (mismo patrón que `tasks.ts#moveTaskBetween`). */
+export function moveHabitBetween(habitId: number, beforeSortKey: number | null, afterSortKey: number | null) {
+  let sortKey: number
+  if (beforeSortKey == null && afterSortKey == null) sortKey = Date.now()
+  else if (beforeSortKey == null) sortKey = afterSortKey! - 1000
+  else if (afterSortKey == null) sortKey = beforeSortKey + 1000
+  else sortKey = (beforeSortKey + afterSortKey) / 2
+  return db.habits.update(habitId, { sortKey })
+}
+
+/** Vacaciones: rango inclusive durante el cual el hábito no cuenta como programado (ni rompe racha). */
+export function pauseHabit(id: number, pausedFrom: string, pausedUntil: string) {
+  return db.habits.update(id, { pausedFrom, pausedUntil })
+}
+
+export function resumeHabit(id: number) {
+  return db.habits.update(id, { pausedFrom: undefined, pausedUntil: undefined })
+}
+
+export async function addSkipDate(id: number, date: string) {
+  const habit = await db.habits.get(id)
+  if (!habit || habit.skipDates?.includes(date)) return
+  await db.habits.update(id, { skipDates: [...(habit.skipDates ?? []), date].sort() })
+}
+
+export async function removeSkipDate(id: number, date: string) {
+  const habit = await db.habits.get(id)
+  if (!habit) return
+  await db.habits.update(id, { skipDates: (habit.skipDates ?? []).filter((d) => d !== date) })
 }
 
 export function getHabit(id: number) {
@@ -162,6 +195,10 @@ export async function reconcileShields(today: Date = new Date()): Promise<void> 
   await refillShieldsIfNewMonth()
   const habits = await listHabits()
   for (const habit of habits) {
+    // "X veces/semana|mes" siempre es "elegible" (ver `isHabitScheduledOn`), así que "ayer sin
+    // registrar" no significa nada para él — su noción de fallo es semanal/mensual, no diaria, y
+    // gastar un escudo cada día sin log sería un bug real, no una vacación legítima.
+    if (isPeriodicHabit(habit)) continue
     const logs = await getHabitLogs(habit.id!)
     const missDate = findYesterdayMiss(habit, logs, today)
     if (!missDate) continue
