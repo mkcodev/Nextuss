@@ -203,6 +203,13 @@ export async function listActiveTasks(): Promise<Task[]> {
     .slice(0, 50)
 }
 
+/** Todas las tareas vivas, sin tope y sin excluir `done` (Fase 13.2) — a diferencia de
+ * `listActiveTasks`, pensada para la vista de tareas global, no para un selector acotado. */
+export async function listAllTasks(): Promise<Task[]> {
+  const all = await db.tasks.toArray()
+  return all.filter((t) => t.deletedAt === 0)
+}
+
 export async function addActualMinutes(id: number, minutes: number) {
   const task = await db.tasks.get(id)
   if (!task) return

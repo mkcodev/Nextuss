@@ -8,6 +8,7 @@ import { PlanningPage } from '../features/planner/PlanningPage'
 import { StatsPage } from '../features/stats/StatsPage'
 import { ProjectsPage } from '../features/projects/ProjectsPage'
 import { ProjectDetailPage } from '../features/projects/ProjectDetailPage'
+import { TasksPage } from '../features/tasks/TasksPage'
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
       { path: '/estadisticas', element: <StatsPage /> },
       { path: '/proyectos', element: <ProjectsPage /> },
       { path: '/proyectos/:id', element: <ProjectDetailPage /> },
+      { path: '/tareas', element: <TasksPage /> },
       { path: '/ajustes', element: <SettingsPage /> },
     ],
   },

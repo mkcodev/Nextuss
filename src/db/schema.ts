@@ -17,6 +17,7 @@ import type {
   Settings,
   Tag,
   Task,
+  TaskView,
   TrashEntry,
   WeeklyReview,
 } from './types'
@@ -48,6 +49,7 @@ export class NextussDB extends Dexie {
   tags!: EntityTable<Tag, 'id'>
   projects!: EntityTable<Project, 'id'>
   recurrenceRules!: EntityTable<RecurrenceRule, 'id'>
+  taskViews!: EntityTable<TaskView, 'id'>
 
   constructor() {
     // Nombre real de la base de datos IndexedDB — deliberadamente NO sigue el rebranding a
@@ -163,6 +165,12 @@ export class NextussDB extends Dexie {
         backfillTrashFields(rows)
         await table.bulkPut(rows)
       })
+
+    // Vista de tareas + vistas guardadas (Fase 13.2): tabla nueva, sin datos previos que migrar —
+    // mismo caso que `recurrenceRules`/`tags` al nacer, sin `.upgrade()`.
+    this.version(12).stores({
+      taskViews: '++id, sortKey',
+    })
   }
 }
 

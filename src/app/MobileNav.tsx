@@ -5,11 +5,12 @@ import { NAV_ITEMS } from './navItems'
 import { useUIStore } from './uiStore'
 import { useHabitFormStore } from '../features/habits/habitFormStore'
 
-// Ajustes is left out (reachable via the avatar menu and the palette); Proyectos is left out too
-// (reachable via the palette) to leave room for the two action buttons every phone user actually
-// needs: create, and the dock — a 7-tab bottom bar on a phone-width screen is "technically
+// Ajustes is left out (reachable via the avatar menu and the palette); Tareas and Proyectos are left
+// out too (both reachable via the palette) to leave room for the two action buttons every phone user
+// actually needs: create, and the dock — an 8-tab bottom bar on a phone-width screen is "technically
 // reachable", not "usable".
-const MOBILE_NAV_ITEMS = NAV_ITEMS.filter((item) => item.to !== '/ajustes' && item.to !== '/proyectos')
+const MOBILE_EXCLUDED = new Set(['/ajustes', '/proyectos', '/tareas'])
+const MOBILE_NAV_ITEMS = NAV_ITEMS.filter((item) => !MOBILE_EXCLUDED.has(item.to))
 
 export function MobileNav() {
   const openMobileDock = useUIStore((s) => s.openMobileDock)

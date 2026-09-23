@@ -119,6 +119,33 @@ export interface Task {
   occurrenceDate?: string // 'YYYY-MM-DD'
 }
 
+/** Vista de tareas guardada (Fase 13.2). Cada campo de filtro es un AND opcional — vacío/undefined
+ * significa "no filtra por esto". */
+export interface TaskViewFilters {
+  status?: TaskStatus[]
+  priority?: number[]
+  projectId?: number | null // null = filtro activo "sin proyecto"; undefined = no filtra por proyecto
+  tagIds?: number[]
+  dateField?: 'scheduledDate' | 'dueDate'
+  dateFrom?: string
+  dateTo?: string
+  overdueOnly?: boolean // atajo: dateField (o scheduledDate por defecto) < hoy && status !== 'done'
+}
+
+export type TaskSortField = 'priority' | 'scheduledDate' | 'dueDate' | 'createdAt' | 'title' | 'estimateMin'
+export type TaskColumnKey = 'priority' | 'project' | 'tags' | 'scheduledDate' | 'dueDate' | 'estimateMin'
+
+export interface TaskView {
+  id?: number
+  name: string
+  filters: TaskViewFilters
+  sortField: TaskSortField
+  sortDir: 'asc' | 'desc'
+  columns: TaskColumnKey[]
+  sortKey: number // orden manual entre vistas guardadas — misma convención que Habit/Project
+  createdAt: number
+}
+
 export type RecurrenceFreq = 'daily' | 'weekly' | 'monthly'
 /** `schedule`: fechas de calendario fijas (p.ej. "cada lunes"), se generan por adelantado.
  * `completion`: la siguiente ocurrencia se genera solo al completar la anterior, desplazada
