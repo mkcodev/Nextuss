@@ -46,6 +46,9 @@ import type { Task, TaskColumnKey, TaskSortField, TaskStatus, TaskView } from '.
 
 const VIEW_DRAG_MIME = 'application/x-nextuss-taskview'
 
+/** Filas que se montan de una vez; `listAllTasks` no tiene tope, así que el resto llega con "Mostrar más". */
+const ROWS_PAGE_SIZE = 100
+
 const STATUS_LABELS: Record<TaskStatus, string> = {
   inbox: 'Inbox',
   backlog: 'Backlog',
@@ -84,6 +87,7 @@ export function TasksPage() {
   const [renamingId, setRenamingId] = useState<number | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
   const [lastCheckedIndex, setLastCheckedIndex] = useState<number | null>(null)
+  const [visibleRows, setVisibleRows] = useState(ROWS_PAGE_SIZE)
   const [draft, setDraft] = useState<{ viewId: number; changes: TaskViewDraft } | null>(null)
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<number | null>(null)
 
@@ -97,6 +101,7 @@ export function TasksPage() {
   useEffect(() => {
     setSelectedIds(new Set())
     setLastCheckedIndex(null)
+    setVisibleRows(ROWS_PAGE_SIZE)
   }, [activeViewId])
 
   // Sin efecto de "selecciona la primera vista por defecto": si no se ha elegido ninguna todavía,
@@ -109,6 +114,7 @@ export function TasksPage() {
   const projectsById = new Map(projects.map((p) => [p.id!, p]))
   const tagsById = new Map(tags.map((t) => [t.id!, t]))
   const rows = activeView ? applyTaskView(allTasks, activeView, today) : []
+  const shownRows = rows.slice(0, visibleRows)
   const rowsAllSelected = rows.length > 0 && rows.every((t) => t.id != null && selectedIds.has(t.id))
   const rowsSomeSelected = rows.some((t) => t.id != null && selectedIds.has(t.id))
 
@@ -572,7 +578,7 @@ export function TasksPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((task, index) => (
+                    {shownRows.map((task, index) => (
                       <TaskViewRow
                         key={task.id}
                         task={task}
@@ -587,6 +593,16 @@ export function TasksPage() {
                   </tbody>
                 </table>
               </div>
+              {rows.length > shownRows.length && (
+                <div className="flex items-center justify-between border-t border-border px-4 py-2.5 text-xs text-text-faint">
+                  <span>
+                    Mostrando {shownRows.length} de {rows.length}
+                  </span>
+                  <Button variant="ghost" onClick={() => setVisibleRows((n) => n + ROWS_PAGE_SIZE)} className="px-2 py-1 text-xs">
+                    Mostrar {Math.min(ROWS_PAGE_SIZE, rows.length - shownRows.length)} más
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
         </>

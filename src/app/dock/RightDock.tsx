@@ -124,29 +124,44 @@ function DockZones() {
   const setSplitPct = useUIStore((s) => s.setSplitPct)
   const bodyRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
+  // Durante el arrastre el porcentaje vive en estado local (un render por fotograma, vía rAF); el
+  // store persistido — que escribe en localStorage en cada `set` — solo se toca al soltar.
+  const [livePct, setLivePct] = useState<number | null>(null)
+  const pendingPct = useRef<number | null>(null)
+  const frame = useRef(0)
 
   const onPointerDown = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
     dragging.current = true
     e.currentTarget.setPointerCapture(e.pointerId)
   }, [])
 
-  const onPointerMove = useCallback(
+  const onPointerMove = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    if (!dragging.current || !bodyRef.current) return
+    const rect = bodyRef.current.getBoundingClientRect()
+    pendingPct.current = Math.min(85, Math.max(15, ((e.clientY - rect.top) / rect.height) * 100))
+    if (frame.current) return
+    frame.current = requestAnimationFrame(() => {
+      frame.current = 0
+      setLivePct(pendingPct.current)
+    })
+  }, [])
+
+  const onPointerUp = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (!dragging.current || !bodyRef.current) return
-      const rect = bodyRef.current.getBoundingClientRect()
-      setSplitPct(((e.clientY - rect.top) / rect.height) * 100)
+      dragging.current = false
+      e.currentTarget.releasePointerCapture(e.pointerId)
+      if (frame.current) cancelAnimationFrame(frame.current)
+      frame.current = 0
+      if (pendingPct.current != null) setSplitPct(pendingPct.current)
+      pendingPct.current = null
+      setLivePct(null)
     },
     [setSplitPct],
   )
 
-  const onPointerUp = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
-    dragging.current = false
-    e.currentTarget.releasePointerCapture(e.pointerId)
-  }, [])
-
   return (
     <div ref={bodyRef} className="flex min-h-0 flex-1 flex-col">
-      <div className="flex min-h-0 flex-col" style={{ height: `${dock.splitPct}%` }}>
+      <div className="flex min-h-0 flex-col" style={{ height: `${livePct ?? dock.splitPct}%` }}>
         <PanelTabs zone="top" activeKey={dock.top} onSelect={(k) => assignPanel('top', k)} />
         <DockZoneBody panelKey={dock.top} />
       </div>

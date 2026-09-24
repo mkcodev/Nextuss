@@ -6,8 +6,8 @@ import { getCheckInForDate } from '../../db/repositories/checkins'
 import { getOrCreateSettings } from '../../db/repositories/settings'
 import { useDailyCapacity } from '../planner/useDailyCapacity'
 import { useAiAvailable } from './useAiAvailable'
-import { suggestDayPlan, type DayPlanSuggestion as DayPlanResult } from './prompts'
-import { AiError, recordAiUsage } from './client'
+import type { DayPlanSuggestion as DayPlanResult } from './prompts'
+import { AiError, recordAiUsage } from './errors'
 import { useTaskFormStore } from '../tasks/taskFormStore'
 
 interface DayPlanSuggestionProps {
@@ -38,6 +38,7 @@ export function DayPlanSuggestion({ date }: DayPlanSuggestionProps) {
         setError('No hay tareas sin planificar hoy.')
         return
       }
+      const { suggestDayPlan } = await import('./prompts')
       const plan = await suggestDayPlan(apiKey, {
         capacityMin: Math.max(0, availableMin - scheduledMin),
         checkIn:

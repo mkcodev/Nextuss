@@ -12,8 +12,7 @@ import { useTaskFormStore } from '../../../features/tasks/taskFormStore'
 import { useHabitFormStore } from '../../../features/habits/habitFormStore'
 import { useCaptureRequestStore } from '../../shortcuts/captureRequestStore'
 import { useAiAvailable } from '../../../features/ai/useAiAvailable'
-import { parseQuickCapture } from '../../../features/ai/prompts'
-import { AiError, recordAiUsage } from '../../../features/ai/client'
+import { AiError, recordAiUsage } from '../../../features/ai/errors'
 import { getOrCreateSettings } from '../../../db/repositories/settings'
 import { todayKey } from '../../../lib/dates'
 import { useToastStore } from '../../../lib/toastStore'
@@ -60,6 +59,7 @@ export function CapturePanel() {
       const settings = await getOrCreateSettings()
       const apiKey = settings.claudeApiKey?.trim()
       if (!apiKey) return
+      const { parseQuickCapture } = await import('../../../features/ai/prompts')
       const parsed = await parseQuickCapture(apiKey, note.text, todayKey())
       void recordAiUsage(settings)
       openTaskCreate({

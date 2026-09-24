@@ -3,8 +3,8 @@ import { Loader2, Sparkles, Trash2 } from 'lucide-react'
 import { Button, Dialog } from '../../design/primitives'
 import { createTask, getTasksForRange } from '../../db/repositories/tasks'
 import { buildEstimateAccuracy } from '../stats/aggregate'
-import { breakdownTask, type Subtask } from './prompts'
-import { AiError, recordAiUsage } from './client'
+import type { Subtask } from './prompts'
+import { AiError, recordAiUsage } from './errors'
 import { getOrCreateSettings } from '../../db/repositories/settings'
 import { dateKey } from '../../lib/dates'
 import { subDays } from 'date-fns'
@@ -42,6 +42,7 @@ export function TaskBreakdownDialog() {
         const from = dateKey(subDays(new Date(), 180))
         const recentTasks = await getTasksForRange(from, to)
         const bias = buildEstimateAccuracy(recentTasks)
+        const { breakdownTask } = await import('./prompts')
         const result = await breakdownTask(apiKey, { title, notes }, bias)
         if (cancelled) return
         setSubtasks(result)

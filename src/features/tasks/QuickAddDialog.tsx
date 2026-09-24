@@ -11,8 +11,8 @@ import { findOrCreateTag } from '../../db/repositories/tags'
 import { useQuickAddStore } from './quickAddStore'
 import { useTaskFormStore } from './taskFormStore'
 import { useAiAvailable } from '../ai/useAiAvailable'
-import { parseQuickCapture, type ParsedCapture } from '../ai/prompts'
-import { AiError, recordAiUsage } from '../ai/client'
+import type { ParsedCapture } from '../ai/prompts'
+import { AiError, recordAiUsage } from '../ai/errors'
 import { getOrCreateSettings } from '../../db/repositories/settings'
 import { useToastStore } from '../../lib/toastStore'
 
@@ -106,6 +106,7 @@ export function QuickAddDialog() {
       const settings = await getOrCreateSettings()
       const apiKey = settings.claudeApiKey?.trim()
       if (!apiKey) return
+      const { parseQuickCapture } = await import('../ai/prompts')
       const result = await parseQuickCapture(apiKey, text, todayKey())
       void recordAiUsage(settings)
       setAiResult(result)

@@ -52,6 +52,24 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rolldownOptions: {
+      output: {
+        // Vendor estable: react/router casi nunca cambian, así que su chunk (y su caché) sobrevive
+        // a los despliegues de código de la app. Recharts y el SDK de Anthropic ya quedan aparte
+        // solo por venir de `import()` dinámicos.
+        codeSplitting: {
+          groups: [
+            {
+              name: 'vendor-react',
+              test: /node_modules[/\\](react|react-dom|react-router|react-router-dom|scheduler)[/\\]/,
+              priority: 20,
+            },
+          ],
+        },
+      },
+    },
+  },
   test: {
     setupFiles: ['./src/test/setup.ts'],
   },

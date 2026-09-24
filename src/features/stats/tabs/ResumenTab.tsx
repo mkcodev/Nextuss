@@ -23,7 +23,8 @@ function deltaLabel(delta: KpiDelta | undefined, formatter: (v: number) => strin
 export function ResumenTab({ range }: ResumenTabProps) {
   const navigate = useNavigate()
   const data = useStatsData(range)
-  const yearData = useStatsData('year')
+  // El heatmap solo lee `points` del año: no necesita el año anterior (mitad de las consultas).
+  const yearData = useStatsData('year', false, false)
   const northStarStreak = useLiveQuery(() => getNorthStarStreak('week', weekKey()), []) ?? 0
   const thisWeekGoals = useLiveQuery(() => listGoalsForPeriod('week', weekKey()), []) ?? []
   const thisMonthGoals = useLiveQuery(() => listGoalsForPeriod('month', monthKey()), []) ?? []

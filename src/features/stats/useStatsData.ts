@@ -70,8 +70,15 @@ function tsBounds(r: { from: string; to: string }): { fromTs: number; toTs: numb
  *
  * `includeArchivedHabits`: la mayoría de pestañas quiere solo hábitos activos; el histórico de
  * "Hábitos" puede pedir también los archivados para no perder su racha pasada del gráfico.
+ *
+ * `withPrevious`: `false` se salta las 6 consultas del periodo anterior (los `kpiDeltas` salen
+ * vacíos/planos) para quien solo consume `points` de un rango, como el heatmap anual de Resumen.
  */
-export function useStatsData(range: StatsRange | ResolvedRange, includeArchivedHabits = false): StatsData {
+export function useStatsData(
+  range: StatsRange | ResolvedRange,
+  includeArchivedHabits = false,
+  withPrevious = true,
+): StatsData {
   const resolved = useMemo(() => (typeof range === 'string' ? resolveRange(range) : range), [range])
   const previous = useMemo(() => previousRangeOf(resolved), [resolved])
 
@@ -95,14 +102,14 @@ export function useStatsData(range: StatsRange | ResolvedRange, includeArchivedH
       ] = await Promise.all([
         listHabits(includeArchivedHabits),
         getHabitLogsInRange(resolved.from, resolved.to),
-        getHabitLogsInRange(previous.from, previous.to),
+        withPrevious ? getHabitLogsInRange(previous.from, previous.to) : Promise.resolve([]),
         getTasksCompletedInRange(resolved.from, resolved.to),
-        getTasksCompletedInRange(previous.from, previous.to),
+        withPrevious ? getTasksCompletedInRange(previous.from, previous.to) : Promise.resolve([]),
         getTasksCreatedInRange(resolved.from, resolved.to),
         getFocusSessionsInRange(currentTs.fromTs, currentTs.toTs),
-        getFocusSessionsInRange(previousTs.fromTs, previousTs.toTs),
+        withPrevious ? getFocusSessionsInRange(previousTs.fromTs, previousTs.toTs) : Promise.resolve([]),
         getCheckInsInRange(resolved.from, resolved.to),
-        getCheckInsInRange(previous.from, previous.to),
+        withPrevious ? getCheckInsInRange(previous.from, previous.to) : Promise.resolve([]),
         getGoalsInRange(resolved.from, resolved.to),
         getAchievementsInRange(resolved.from, resolved.to),
       ])
@@ -121,7 +128,7 @@ export function useStatsData(range: StatsRange | ResolvedRange, includeArchivedH
         achievements,
       }
     },
-    [resolved.from, resolved.to, previous.from, previous.to, includeArchivedHabits],
+    [resolved.from, resolved.to, previous.from, previous.to, includeArchivedHabits, withPrevious],
   )
 
   return useMemo((): StatsData => {

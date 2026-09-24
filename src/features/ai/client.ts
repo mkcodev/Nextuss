@@ -2,19 +2,7 @@
 // del usuario (`Settings.claudeApiKey`, guardada en texto plano — ver el aviso en Ajustes). Sin
 // backend propio, así que `dangerouslyAllowBrowser` es intencional, no un descuido.
 import Anthropic from '@anthropic-ai/sdk'
-import { updateSettings } from '../../db/repositories/settings'
-import type { Settings } from '../../db/types'
-
-export type AiErrorKind = 'no-key' | 'invalid-key' | 'rate-limited' | 'network' | 'malformed' | 'unknown'
-
-export class AiError extends Error {
-  kind: AiErrorKind
-  constructor(kind: AiErrorKind, message: string) {
-    super(message)
-    this.kind = kind
-    this.name = 'AiError'
-  }
-}
+import { AiError } from './errors'
 
 const MODEL = 'claude-opus-5'
 
@@ -67,11 +55,6 @@ async function callTool<T>({ apiKey, system, user, tool, effort = 'medium', maxT
   return validate(block.input)
 }
 
-/** Incrementa el contador de uso estimado — llamada aparte (no bloqueante) tras cada éxito. */
-export async function recordAiUsage(current: Settings | undefined): Promise<void> {
-  await updateSettings({ aiUsageCount: (current?.aiUsageCount ?? 0) + 1 })
-}
-
 /** Prueba mínima de conexión: una petición barata y rápida solo para validar la clave. */
 export async function testAiConnection(apiKey: string): Promise<{ ok: true } | { ok: false; message: string }> {
   if (!apiKey) return { ok: false, message: 'No hay clave configurada.' }
@@ -90,4 +73,4 @@ export async function testAiConnection(apiKey: string): Promise<{ ok: true } | {
   }
 }
 
-export { callTool, type Anthropic }
+export { callTool, AiError, type Anthropic }

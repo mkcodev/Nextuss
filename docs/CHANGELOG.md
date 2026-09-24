@@ -1,5 +1,20 @@
 # Changelog
 
+## Fase 16 — Rendimiento y carga
+- Bundle inicial: 1 567 kB -> 166 kB (`index`) + 312 kB (`vendor-react`); ningún chunk supera 500 kB.
+  Rutas (salvo Hoy) con `React.lazy` + `Suspense`; Recharts queda tras `/estadisticas` (409 kB).
+- SDK de Anthropic (188 kB) solo se descarga al usar la IA: `AiError`/`recordAiUsage` viven en
+  `ai/errors.ts` y `client`/`prompts` se cargan con `import()`.
+- `CommandPalette` (cmdk) y `TaskBreakdownDialog` se montan (y descargan) en su primera apertura
+  (`MountOnFirstOpen`).
+- `vendor-react` como chunk estable; todos los chunks siguen en el precache del service worker.
+- Resumen: el heatmap anual ya no consulta el año anterior (6 consultas menos).
+- `getGoalForTask`/`unlinkTaskFromAllGoals` usan el índice `*taskIds`.
+- `RightDock`: el redimensionado va por rAF en estado local y solo persiste al soltar (antes escribía
+  localStorage en cada `pointermove`).
+- `/tareas`: 100 filas por tanda + "Mostrar más" (en lugar de virtualizar: sin dependencia nueva y sin
+  romper la selección con Shift).
+
 ## Fase 15 — Interacción
 - Arrastre con destino visible (#4): hook `useDragReorder` + `DropIndicator` compartidos por la bandeja
   de tareas, proyectos, hábitos y vistas de `/tareas`. Preview propio del arrastre, fila atenuada y línea

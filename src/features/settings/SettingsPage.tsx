@@ -22,7 +22,6 @@ import {
   type NotificationPermissionState,
 } from '../notifications/permission'
 import { DEFAULT_DURATIONS_MIN } from '../focus/durations'
-import { testAiConnection } from '../ai/client'
 import { getMe, resolveChatId } from '../telegram/client'
 import type { Settings, ThemePreference } from '../../db/types'
 
@@ -383,9 +382,15 @@ function AiSection() {
   const runTest = async () => {
     setTesting(true)
     setTestResult(null)
-    const result = await testAiConnection(key.trim())
-    setTestResult(result.ok ? { ok: true } : { ok: false, message: result.message })
-    setTesting(false)
+    try {
+      const { testAiConnection } = await import('../ai/client')
+      const result = await testAiConnection(key.trim())
+      setTestResult(result.ok ? { ok: true } : { ok: false, message: result.message })
+    } catch {
+      setTestResult({ ok: false, message: 'No se pudo cargar el módulo de IA. Comprueba tu conexión.' })
+    } finally {
+      setTesting(false)
+    }
   }
 
   return (

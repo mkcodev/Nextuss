@@ -228,7 +228,8 @@ export async function listOpenGoals(): Promise<Goal[]> {
  * can tell "still loading" (`undefined`) apart from "resolved, no goal linked" (`null`).
  */
 export async function getGoalForTask(taskId: number): Promise<Goal | null> {
-  const goal = await db.goals.filter((g) => g.deletedAt === 0 && g.taskIds.includes(taskId)).first()
+  // Índice multiEntry `*taskIds`: búsqueda directa en vez de recorrer todos los objetivos.
+  const goal = await db.goals.where('taskIds').equals(taskId).filter((g) => g.deletedAt === 0).first()
   return goal ?? null
 }
 
@@ -244,7 +245,7 @@ export async function setGoalForTask(taskId: number, goalId: number | undefined)
 }
 
 export async function unlinkTaskFromAllGoals(taskId: number): Promise<void> {
-  const goals = await db.goals.filter((g) => g.taskIds.includes(taskId)).toArray()
+  const goals = await db.goals.where('taskIds').equals(taskId).toArray()
   await Promise.all(goals.map((g) => unlinkTaskFromGoal(g.id!, taskId)))
 }
 
