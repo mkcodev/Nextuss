@@ -23,6 +23,8 @@ import { GoalForm } from '../features/planner/GoalForm'
 import { useGoalFormStore } from '../features/planner/goalFormStore'
 import { ProjectForm } from '../features/projects/ProjectForm'
 import { useProjectFormStore } from '../features/projects/projectFormStore'
+import { LogTimeDialog } from '../features/tasks/LogTimeDialog'
+import { useLogTimeStore } from '../features/tasks/logTimeStore'
 import { WeeklyReviewDialog } from '../features/planner/WeeklyReviewDialog'
 import { TaskBreakdownDialog } from '../features/ai/TaskBreakdownDialog'
 import { OnboardingFlow } from '../features/onboarding/OnboardingFlow'
@@ -42,6 +44,7 @@ export function AppShell() {
   const formTaskNonce = useTaskFormStore((s) => s.nonce)
   const formGoalNonce = useGoalFormStore((s) => s.nonce)
   const formProjectNonce = useProjectFormStore((s) => s.nonce)
+  const logTimeNonce = useLogTimeStore((s) => s.nonce)
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
@@ -69,6 +72,7 @@ export function AppShell() {
       <TaskForm key={`task-${formTaskNonce}`} />
       <GoalForm key={`goal-${formGoalNonce}`} />
       <ProjectForm key={`project-${formProjectNonce}`} />
+      <LogTimeDialog key={`logtime-${logTimeNonce}`} />
       <QuickAddDialog />
       <WeeklyReviewDialog />
       <TaskBreakdownDialog />

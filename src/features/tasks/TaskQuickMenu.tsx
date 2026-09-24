@@ -9,6 +9,7 @@ import {
   Sparkles,
   TimerReset,
   Archive,
+  Clock,
 } from 'lucide-react'
 import { Menu, MenuItem, MenuSeparator } from '../../design/primitives'
 import { dateKey } from '../../lib/dates'
@@ -16,6 +17,7 @@ import { ZOMBIE_THRESHOLD, parkTask, trashTask, unscheduleTask, updateTask } fro
 import { startFocusOnTask } from '../focus/startFocusOnTask'
 import { useAiAvailable } from '../ai/useAiAvailable'
 import { useTaskBreakdownStore } from '../ai/taskBreakdownStore'
+import { useLogTimeStore } from './logTimeStore'
 import type { Task } from '../../db/types'
 
 /** Menú contextual de reprogramado rápido (Fase 8.5) — mismas acciones que la sección "Reprogramar"
@@ -23,6 +25,7 @@ import type { Task } from '../../db/types'
 export function TaskQuickMenu({ task }: { task: Task }) {
   const { available: aiAvailable } = useAiAvailable()
   const openBreakdown = useTaskBreakdownStore((s) => s.openFor)
+  const openLogTime = useLogTimeStore((s) => s.openFor)
   const isZombie = task.postponedCount >= ZOMBIE_THRESHOLD
 
   return (
@@ -57,6 +60,9 @@ export function TaskQuickMenu({ task }: { task: Task }) {
           Quitar del calendario
         </MenuItem>
       )}
+      <MenuItem icon={<Clock size={14} strokeWidth={1.75} />} onSelect={() => openLogTime(task)}>
+        Registrar tiempo
+      </MenuItem>
       {isZombie && (
         <>
           <MenuSeparator />
