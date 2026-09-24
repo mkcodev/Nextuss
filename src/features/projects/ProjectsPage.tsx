@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Archive, FolderKanban, LayoutTemplate, Plus } from 'lucide-react'
-import { Button, EmptyState } from '../../design/primitives'
+import { Button, DropIndicator, EmptyState } from '../../design/primitives'
 import { listAttributes } from '../../db/repositories/gamification'
 import { archiveProject, listProjects, moveProjectBetween } from '../../db/repositories/projects'
 import { useProjectFormStore } from './projectFormStore'
 import { useTemplatePickerStore } from '../templates/templatePickerStore'
 import { ProjectCard } from './ProjectCard'
-import type { Project } from '../../db/types'
+import { useDragReorder } from '../../lib/useDragReorder'
+import { reorderNeighbors, type DropPosition } from '../../lib/reorder'
+import { cn } from '../../lib/cn'
 
 const PROJECT_DRAG_MIME = 'application/x-nextuss-project'
 
@@ -21,12 +23,11 @@ export function ProjectsPage() {
   const openTemplatePicker = useTemplatePickerStore((s) => s.openFor)
   const [expandedId, setExpandedId] = useState<number | null>(null)
 
-  const handleReorderDrop = (draggedId: number, target: Project) => {
-    const targetIndex = activeProjects.findIndex((p) => p.id === target.id)
-    const prev = activeProjects[targetIndex - 1]
-    const beforeSortKey = prev && prev.id !== draggedId ? prev.sortKey : null
-    moveProjectBetween(draggedId, beforeSortKey, target.sortKey)
+  const handleMove = (draggedId: number, targetId: number, position: DropPosition) => {
+    const n = reorderNeighbors(activeProjects, (p) => p.id, draggedId, targetId, position)
+    if (n) void moveProjectBetween(draggedId, n.before, n.after)
   }
+  const dnd = useDragReorder({ mime: PROJECT_DRAG_MIME, onMove: handleMove })
 
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-6 lg:p-8">
@@ -67,21 +68,8 @@ export function ProjectsPage() {
         {activeProjects.map((project) => (
           <div
             key={project.id}
-            draggable
-            onDragStart={(e) => {
-              e.dataTransfer.setData(PROJECT_DRAG_MIME, String(project.id))
-              e.dataTransfer.effectAllowed = 'move'
-            }}
-            onDragOver={(e) => {
-              e.preventDefault()
-              e.dataTransfer.dropEffect = 'move'
-            }}
-            onDrop={(e) => {
-              e.preventDefault()
-              const draggedId = Number(e.dataTransfer.getData(PROJECT_DRAG_MIME))
-              if (draggedId && draggedId !== project.id) handleReorderDrop(draggedId, project)
-            }}
-            className="cursor-grab active:cursor-grabbing"
+            {...dnd.rowProps(project.id!)}
+            className={cn('relative cursor-grab transition-opacity active:cursor-grabbing', dnd.dragging(project.id!) && 'opacity-40')}
           >
             <ProjectCard
               project={project}
@@ -89,6 +77,7 @@ export function ProjectsPage() {
               expanded={expandedId === project.id}
               onToggleExpand={() => setExpandedId((id) => (id === project.id ? null : project.id!))}
             />
+            <DropIndicator position={dnd.dropPosition(project.id!)} />
           </div>
         ))}
       </div>

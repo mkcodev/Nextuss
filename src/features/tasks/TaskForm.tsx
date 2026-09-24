@@ -4,7 +4,6 @@ import { Check, Plus, Repeat, Sparkles, Trash2 } from 'lucide-react'
 import { Button, Dialog, Switch } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import type { EnergyLevel, RecurrenceFreq, RecurrenceMode } from '../../db/types'
-import { addDays } from 'date-fns'
 import { createTask, getSubtasks, trashTask, updateTask } from '../../db/repositories/tasks'
 import {
   createRecurrenceRule,
@@ -18,7 +17,7 @@ import { getGoalForTask, listGoalsForPeriod, linkTaskToGoal, setGoalForTask } fr
 import { findOrCreateTag, listTags } from '../../db/repositories/tags'
 import { createProject, listProjects } from '../../db/repositories/projects'
 import { PRIORITY_COLORS, PRIORITY_LABELS } from '../../lib/priority'
-import { dateKey, minutesToTime, monthKey, timeToMinutes, todayKey, weekKey, WEEKDAY_LABELS_ES } from '../../lib/dates'
+import { minutesToTime, monthKey, nextRelativeDate, timeToMinutes, todayKey, weekKey, WEEKDAY_LABELS_ES } from '../../lib/dates'
 import { useTaskFormStore } from './taskFormStore'
 import { useAiAvailable } from '../ai/useAiAvailable'
 import { useTaskBreakdownStore } from '../ai/taskBreakdownStore'
@@ -748,14 +747,14 @@ export function TaskForm() {
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               <button
                 type="button"
-                onClick={() => setSchedDate(dateKey(addDays(new Date(), 1)))}
+                onClick={() => setSchedDate((cur) => nextRelativeDate(cur, todayKey(), 1))}
                 className="rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-text-muted hover:bg-surface-hover"
               >
                 Mañana
               </button>
               <button
                 type="button"
-                onClick={() => setSchedDate(dateKey(addDays(new Date(), 7)))}
+                onClick={() => setSchedDate((cur) => nextRelativeDate(cur, todayKey(), 7))}
                 className="rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-text-muted hover:bg-surface-hover"
               >
                 Próxima semana

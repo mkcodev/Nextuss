@@ -1,4 +1,4 @@
-import { differenceInCalendarDays, format, getDay, getISOWeek, getISOWeekYear, subDays } from 'date-fns'
+import { addDays, differenceInCalendarDays, format, getDay, getISOWeek, getISOWeekYear, subDays } from 'date-fns'
 import type { Habit } from '../db/types'
 
 /** 'YYYY-MM-DD' for a given date, defaults to today. Used as the DB key for daily records. */
@@ -14,6 +14,15 @@ export function todayKey(): string {
 export function parseDateKey(key: string): Date {
   const [year, month, day] = key.split('-').map(Number)
   return new Date(year, month - 1, day)
+}
+
+/**
+ * Fecha destino de "Mañana" (+1) / "Próxima semana" (+7): suma `days` a la fecha actual de la tarea
+ * si es futura, para que pulsar de nuevo avance otro paso; sin fecha o en el pasado/hoy parte de hoy.
+ */
+export function nextRelativeDate(current: string | null | undefined, today: string, days: number): string {
+  const base = current && current > today ? current : today
+  return dateKey(addDays(parseDateKey(base), days))
 }
 
 /** `key` menos `n` días, como clave. */

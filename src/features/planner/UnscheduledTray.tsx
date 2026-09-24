@@ -10,6 +10,9 @@ import { PRIORITY_COLORS } from '../../lib/priority'
 import { TaskQuickMenu } from '../tasks/TaskQuickMenu'
 import type { Tag, Task } from '../../db/types'
 import { TASK_DRAG_MIME } from './constants'
+import { DropIndicator } from '../../design/primitives'
+import { useDragReorder } from '../../lib/useDragReorder'
+import { reorderNeighbors, type DropPosition } from '../../lib/reorder'
 
 function SubtaskRow({ subtask, onOpen }: { subtask: Task; onOpen: (t: Task) => void }) {
   const done = subtask.status === 'done'
@@ -38,12 +41,12 @@ function TaskRow({
   task,
   onOpen,
   tagsById,
-  onReorderDrop,
+  dnd,
 }: {
   task: Task
   onOpen: (t: Task) => void
   tagsById: Map<number, Tag>
-  onReorderDrop: (draggedId: number, targetTask: Task) => void
+  dnd: ReturnType<typeof useDragReorder>
 }) {
   const subtasks = useLiveQuery(() => (task.id ? getSubtasks(task.id) : Promise.resolve([])), [task.id]) ?? []
   const done = subtasks.filter((s) => s.status === 'done').length
@@ -52,23 +55,13 @@ function TaskRow({
   return (
     <div className="space-y-1.5">
       <div
-        draggable
-        onDragStart={(e) => {
-          e.dataTransfer.setData(TASK_DRAG_MIME, String(task.id))
-          e.dataTransfer.effectAllowed = 'move'
-        }}
-        onDragOver={(e) => {
-          e.preventDefault()
-          e.dataTransfer.dropEffect = 'move'
-        }}
-        onDrop={(e) => {
-          e.preventDefault()
-          const draggedId = Number(e.dataTransfer.getData(TASK_DRAG_MIME))
-          if (draggedId && draggedId !== task.id) onReorderDrop(draggedId, task)
-        }}
+        {...dnd.rowProps(task.id!)}
         onClick={() => onOpen(task)}
         title="Arrastra al timeline para programarla, o sobre otra tarea para reordenar"
-        className="flex cursor-grab items-center gap-2 rounded-lg border border-l-[3px] border-border bg-surface px-3 py-2 transition-colors hover:border-border-strong active:cursor-grabbing"
+        className={cn(
+          'relative flex cursor-grab items-center gap-2 rounded-lg border border-l-[3px] border-border bg-surface px-3 py-2 transition-all hover:border-border-strong active:cursor-grabbing',
+          dnd.dragging(task.id!) && 'opacity-40',
+        )}
         style={{ borderLeftColor: task.color ?? '#5EC8FF' }}
       >
         {task.priority && (
@@ -96,6 +89,7 @@ function TaskRow({
         )}
         <span className="shrink-0 text-xs tabular-nums text-text-faint">{task.estimateMin ?? 30} min</span>
         <TaskQuickMenu task={task} />
+        <DropIndicator position={dnd.dropPosition(task.id!)} />
       </div>
       {subtasks.map((s) => (
         <SubtaskRow key={s.id} subtask={s} onOpen={onOpen} />
@@ -118,14 +112,12 @@ export function UnscheduledTray({ date }: { date: string }) {
     setQuickTitle('')
   }
 
-  /** Suelta sobre `targetTask`: la tarea arrastrada pasa a ocupar el hueco justo antes de ella. */
-  const handleReorderDrop = (draggedId: number, targetTask: Task) => {
+  const handleMove = (draggedId: number, targetId: number, position: DropPosition) => {
     if (!tasks) return
-    const targetIndex = tasks.findIndex((t) => t.id === targetTask.id)
-    const prev = tasks[targetIndex - 1]
-    const beforeSortKey = prev && prev.id !== draggedId ? prev.sortKey : null
-    moveTaskBetween(draggedId, beforeSortKey, targetTask.sortKey)
+    const n = reorderNeighbors(tasks, (t) => t.id, draggedId, targetId, position)
+    if (n) void moveTaskBetween(draggedId, n.before, n.after)
   }
+  const dnd = useDragReorder({ mime: TASK_DRAG_MIME, onMove: handleMove })
 
   return (
     <div className="space-y-2">
@@ -151,7 +143,7 @@ export function UnscheduledTray({ date }: { date: string }) {
 
       <div className="space-y-2">
         {tasks?.map((t) => (
-          <TaskRow key={t.id} task={t} onOpen={openEdit} tagsById={tagsById} onReorderDrop={handleReorderDrop} />
+          <TaskRow key={t.id} task={t} onOpen={openEdit} tagsById={tagsById} dnd={dnd} />
         ))}
       </div>
     </div>

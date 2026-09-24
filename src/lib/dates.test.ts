@@ -1,6 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import type { Habit } from '../db/types'
-import { describeHabitSchedule, isHabitScheduledOn } from './dates'
+import { describeHabitSchedule, isHabitScheduledOn, nextRelativeDate } from './dates'
+
+describe('nextRelativeDate', () => {
+  const today = '2026-09-24'
+  it('sin fecha, hoy o pasada: parte de hoy', () => {
+    expect(nextRelativeDate(null, today, 1)).toBe('2026-09-25')
+    expect(nextRelativeDate('', today, 7)).toBe('2026-10-01')
+    expect(nextRelativeDate(today, today, 1)).toBe('2026-09-25')
+    expect(nextRelativeDate('2026-09-01', today, 1)).toBe('2026-09-25')
+  })
+  it('fecha futura: avanza desde ella (incremental)', () => {
+    expect(nextRelativeDate('2026-09-25', today, 1)).toBe('2026-09-26')
+    expect(nextRelativeDate('2026-10-01', today, 7)).toBe('2026-10-08')
+  })
+})
 
 function makeHabit(overrides: Partial<Habit> = {}): Habit {
   return {

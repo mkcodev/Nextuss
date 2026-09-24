@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Archive, ChevronDown, ChevronUp, Plus } from 'lucide-react'
-import { Button } from '../../design/primitives'
+import { Button, DropIndicator } from '../../design/primitives'
 import { CalendarHeatmap } from '../stats/charts/CalendarHeatmap'
 import { describeHabitSchedule, subDaysKey, todayKey } from '../../lib/dates'
 import { archiveHabit, getHabitLogs, moveHabitBetween } from '../../db/repositories/habits'
@@ -11,6 +11,9 @@ import { activateHabitEntry } from './activateHabit'
 import { useHabitFormStore } from './habitFormStore'
 import { useContextPanel } from '../../app/dock/contextPanelStore'
 import { useListNav } from '../../app/shortcuts/listNavStore'
+import { useDragReorder } from '../../lib/useDragReorder'
+import { reorderNeighbors, type DropPosition } from '../../lib/reorder'
+import { cn } from '../../lib/cn'
 
 const HABIT_DRAG_MIME = 'application/x-nextuss-habit'
 const HISTORY_DAYS = 90
@@ -101,14 +104,12 @@ export function HabitsPage() {
       : null,
   )
 
-  /** Suelta sobre `target`: el hábito arrastrado pasa a ocupar el hueco justo antes de él. */
-  const handleReorderDrop = (draggedId: number, target: HabitWithStats) => {
+  const handleMove = (draggedId: number, targetId: number, position: DropPosition) => {
     if (!activeEntries) return
-    const targetIndex = activeEntries.findIndex((e) => e.habit.id === target.habit.id)
-    const prev = activeEntries[targetIndex - 1]
-    const beforeSortKey = prev && prev.habit.id !== draggedId ? prev.habit.sortKey : null
-    moveHabitBetween(draggedId, beforeSortKey, target.habit.sortKey)
+    const n = reorderNeighbors(activeEntries.map((e) => e.habit), (h) => h.id, draggedId, targetId, position)
+    if (n) void moveHabitBetween(draggedId, n.before, n.after)
   }
+  const dnd = useDragReorder({ mime: HABIT_DRAG_MIME, onMove: handleMove })
 
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-6 lg:p-8">
@@ -142,21 +143,8 @@ export function HabitsPage() {
         {activeEntries?.map((entry, i) => (
           <div key={entry.habit.id}>
             <div
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData(HABIT_DRAG_MIME, String(entry.habit.id))
-                e.dataTransfer.effectAllowed = 'move'
-              }}
-              onDragOver={(e) => {
-                e.preventDefault()
-                e.dataTransfer.dropEffect = 'move'
-              }}
-              onDrop={(e) => {
-                e.preventDefault()
-                const draggedId = Number(e.dataTransfer.getData(HABIT_DRAG_MIME))
-                if (draggedId && draggedId !== entry.habit.id) handleReorderDrop(draggedId, entry)
-              }}
-              className="cursor-grab active:cursor-grabbing"
+              {...dnd.rowProps(entry.habit.id!)}
+              className={cn('relative cursor-grab transition-opacity active:cursor-grabbing', dnd.dragging(entry.habit.id!) && 'opacity-40')}
             >
               <HabitCard
                 entry={entry}
@@ -164,6 +152,7 @@ export function HabitsPage() {
                 selected={i === selectedIndex}
                 onEdit={() => openEdit(entry.habit)}
               />
+              <DropIndicator position={dnd.dropPosition(entry.habit.id!)} />
             </div>
             <button
               type="button"

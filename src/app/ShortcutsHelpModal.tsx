@@ -28,6 +28,13 @@ const GROUPS: { title: string; items: [string, string][] }[] = [
     ],
   },
   {
+    title: 'Vista Día (Hoy)',
+    items: [
+      ['[ / ]', 'Día anterior / siguiente'],
+      ['t', 'Volver a hoy'],
+    ],
+  },
+  {
     title: 'Listas',
     items: [
       ['j / k', 'Moverse abajo / arriba'],

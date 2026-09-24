@@ -15,8 +15,10 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
-import { Button, Card, Checkbox, EmptyState, Menu, MenuItem, MenuSeparator, Select } from '../../design/primitives'
+import { Button, Card, Checkbox, DropIndicator, EmptyState, Menu, MenuItem, MenuSeparator, Select } from '../../design/primitives'
 import { cn } from '../../lib/cn'
+import { useDragReorder } from '../../lib/useDragReorder'
+import { reorderNeighbors, type DropPosition } from '../../lib/reorder'
 import { todayKey } from '../../lib/dates'
 import { PRIORITY_COLORS, PRIORITY_LABELS } from '../../lib/priority'
 import {
@@ -193,12 +195,11 @@ export function TasksPage() {
     clearSelection()
   }
 
-  const handleReorderDrop = (draggedId: number, target: TaskView) => {
-    const targetIndex = views.findIndex((v) => v.id === target.id)
-    const prev = views[targetIndex - 1]
-    const beforeSortKey = prev && prev.id !== draggedId ? prev.sortKey : null
-    moveTaskViewBetween(draggedId, beforeSortKey, target.sortKey)
+  const handleMoveView = (draggedId: number, targetId: number, position: DropPosition) => {
+    const n = reorderNeighbors(views, (v) => v.id, draggedId, targetId, position)
+    if (n) void moveTaskViewBetween(draggedId, n.before, n.after)
   }
+  const dnd = useDragReorder({ mime: VIEW_DRAG_MIME, orientation: 'horizontal', onMove: handleMoveView })
 
   const handleDeleteView = async (view: TaskView) => {
     setConfirmingDeleteId(null)
@@ -223,22 +224,10 @@ export function TasksPage() {
         {views.map((view) => (
           <div
             key={view.id}
-            draggable
-            onDragStart={(e) => {
-              e.dataTransfer.setData(VIEW_DRAG_MIME, String(view.id))
-              e.dataTransfer.effectAllowed = 'move'
-            }}
-            onDragOver={(e) => {
-              e.preventDefault()
-              e.dataTransfer.dropEffect = 'move'
-            }}
-            onDrop={(e) => {
-              e.preventDefault()
-              const draggedId = Number(e.dataTransfer.getData(VIEW_DRAG_MIME))
-              if (draggedId && draggedId !== view.id) handleReorderDrop(draggedId, view)
-            }}
+            {...dnd.rowProps(view.id!)}
             className={cn(
-              'flex cursor-grab items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium active:cursor-grabbing',
+              'relative flex cursor-grab items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity active:cursor-grabbing',
+              dnd.dragging(view.id!) && 'opacity-40',
               effectiveViewId === view.id
                 ? 'border-accent bg-accent-soft text-accent'
                 : 'border-border text-text-muted hover:text-text',
@@ -294,6 +283,7 @@ export function TasksPage() {
                 </button>
               </>
             )}
+            <DropIndicator position={dnd.dropPosition(view.id!)} orientation="horizontal" />
           </div>
         ))}
       </div>

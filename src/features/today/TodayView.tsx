@@ -14,6 +14,7 @@ import { useHabitFormStore } from '../habits/habitFormStore'
 import { useContextPanel } from '../../app/dock/contextPanelStore'
 import { usePageTitle } from '../../app/pageTitleStore'
 import { useListNav } from '../../app/shortcuts/listNavStore'
+import { useDayNav } from '../../app/shortcuts/dayNavStore'
 import { Timeline } from '../planner/Timeline'
 import { UnscheduledTray } from '../planner/UnscheduledTray'
 import { CapacityBanner } from '../planner/CapacityBanner'
@@ -69,6 +70,12 @@ export function TodayView() {
 
   const goToDate = (next: string) =>
     setSearchParams(next === today ? {} : { d: next }, { replace: true })
+
+  useDayNav({
+    onPrev: () => goToDate(dateKey(subDays(parseDateKey(date), 1))),
+    onNext: () => goToDate(dateKey(addDays(parseDateKey(date), 1))),
+    onToday: () => goToDate(today),
+  })
 
   // Rituales del día (Fase 12) — solo evaluados para el "hoy" real, nunca al navegar a otro día.
   const checkin = useLiveQuery(

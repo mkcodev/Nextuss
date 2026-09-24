@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useUIStore } from '../uiStore'
 import { useOverlayStore } from './overlayStore'
 import { useListNavStore } from './listNavStore'
+import { useDayNavStore } from './dayNavStore'
 import { useCaptureRequestStore } from './captureRequestStore'
 import { useQuickAddStore } from '../../features/tasks/quickAddStore'
 import { useUndoStore } from '../../lib/undoStore'
@@ -112,6 +113,18 @@ export function useGlobalShortcuts() {
         if (target) {
           e.preventDefault()
           navigate(target)
+        }
+        return
+      }
+
+      // [ / ] / t — navegación entre días, solo mientras la vista Día registra sus handlers.
+      if (!e.altKey && !e.ctrlKey && !e.metaKey && (e.key === '[' || e.key === ']' || e.key === 't')) {
+        const dayNav = useDayNavStore.getState().handlers
+        if (dayNav) {
+          e.preventDefault()
+          if (e.key === '[') dayNav.onPrev()
+          else if (e.key === ']') dayNav.onNext()
+          else dayNav.onToday()
         }
         return
       }

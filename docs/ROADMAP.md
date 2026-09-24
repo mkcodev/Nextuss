@@ -1,6 +1,6 @@
 # Hoja de ruta
 
-Estado tras la Fase 14. Cada fase se detalla con su propia pasada de plan-mode solo si tiene
+Estado tras la Fase 15. Cada fase se detalla con su propia pasada de plan-mode solo si tiene
 superficie de diseño abierta; las mecánicas se ejecutan directamente. Reglas transversales: un commit
 por fase, una versión Dexie por porción entregable (ninguna fase de este plan la necesita), cero emoji
 (solo Lucide), nunca `confirm()` nativo, diálogos hermanos en `AppShell` (nunca anidados), y
@@ -11,7 +11,7 @@ por fase, una versión Dexie por porción entregable (ninguna fase de este plan 
 | Fase | Contenido | Estado |
 |---|---|---|
 | 14 | Bugs y pérdida de datos (borrador de vistas en `/tareas`, confirmaciones, `getProject`, foco de `Menu`, emojis) | Hecha |
-| 15 | Interacción: issues #4 (arrastre), #5 (Mañana/Próxima semana incremental), #8 (`[`/`]`/`t`) | Pendiente |
+| 15 | Interacción: issues #4 (arrastre), #5 (Mañana/Próxima semana incremental), #8 (`[`/`]`/`t`) | Hecha |
 | 16 | Rendimiento: code-splitting de Recharts (~370 KB) y SDK de Anthropic (~190 KB), virtualizar `/tareas` | Pendiente |
 | 17 | Convención de carga/error para `useLiveQuery` (101 usos, 3 patrones) | Pendiente |
 | 18 | Huecos funcionales (detalle de proyecto, marcadores de XP, tiempo por atributo, `actualMin`, plantillas editables) | Pendiente |

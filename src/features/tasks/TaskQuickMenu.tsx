@@ -1,4 +1,3 @@
-import { addDays } from 'date-fns'
 import {
   MoreHorizontal,
   CalendarX,
@@ -13,7 +12,7 @@ import {
   Clock,
 } from 'lucide-react'
 import { Menu, MenuItem, MenuSeparator } from '../../design/primitives'
-import { dateKey } from '../../lib/dates'
+import { nextRelativeDate, todayKey } from '../../lib/dates'
 import { ZOMBIE_THRESHOLD, parkTask, trashTask, unscheduleTask, updateTask } from '../../db/repositories/tasks'
 import { saveTaskAsTemplate } from '../../db/repositories/templates'
 import { startFocusOnTask } from '../focus/startFocusOnTask'
@@ -58,10 +57,10 @@ export function TaskQuickMenu({ task }: { task: Task }) {
           Empezar foco
         </MenuItem>
       )}
-      <MenuItem icon={<CalendarClock size={14} strokeWidth={1.75} />} onSelect={() => updateTask(task.id!, { scheduledDate: dateKey(addDays(new Date(), 1)) })}>
+      <MenuItem icon={<CalendarClock size={14} strokeWidth={1.75} />} onSelect={() => updateTask(task.id!, { scheduledDate: nextRelativeDate(task.scheduledDate, todayKey(), 1) })}>
         Mañana
       </MenuItem>
-      <MenuItem icon={<CalendarPlus size={14} strokeWidth={1.75} />} onSelect={() => updateTask(task.id!, { scheduledDate: dateKey(addDays(new Date(), 7)) })}>
+      <MenuItem icon={<CalendarPlus size={14} strokeWidth={1.75} />} onSelect={() => updateTask(task.id!, { scheduledDate: nextRelativeDate(task.scheduledDate, todayKey(), 7) })}>
         Próxima semana
       </MenuItem>
       {task.scheduledDate && (
