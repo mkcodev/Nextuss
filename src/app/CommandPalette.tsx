@@ -9,6 +9,7 @@ import {
   FileText,
   FolderKanban,
   Keyboard,
+  LayoutTemplate,
   ListTodo,
   Monitor,
   Moon,
@@ -34,6 +35,7 @@ import { useTaskFormStore } from '../features/tasks/taskFormStore'
 import { useGoalFormStore } from '../features/planner/goalFormStore'
 import { useWeeklyReviewStore } from '../features/planner/weeklyReviewStore'
 import { useProjectFormStore } from '../features/projects/projectFormStore'
+import { useTemplatePickerStore } from '../features/templates/templatePickerStore'
 import { searchIndex, type SearchDoc } from '../features/search/searchIndex'
 import { NAV_ITEMS } from './navItems'
 
@@ -65,6 +67,7 @@ export function CommandPalette() {
   const openGoalEdit = useGoalFormStore((s) => s.openEdit)
   const openWeeklyReview = useWeeklyReviewStore((s) => s.openReview)
   const openProjectCreate = useProjectFormStore((s) => s.openCreate)
+  const openTemplatePicker = useTemplatePickerStore((s) => s.openFor)
 
   const [query, setQuery] = useState('')
   const results = useMemo(() => (query.trim() ? searchIndex.search(query) : []), [query])
@@ -182,6 +185,12 @@ export function CommandPalette() {
             className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <FolderKanban size={15} strokeWidth={1.75} /> Crear proyecto
+          </Command.Item>
+          <Command.Item onSelect={() => run(() => openTemplatePicker('task'))} className={ITEM_CLASS}>
+            <LayoutTemplate size={15} strokeWidth={1.75} /> Tarea desde plantilla
+          </Command.Item>
+          <Command.Item onSelect={() => run(() => openTemplatePicker('project'))} className={ITEM_CLASS}>
+            <LayoutTemplate size={15} strokeWidth={1.75} /> Proyecto desde plantilla
           </Command.Item>
           <Command.Item
             onSelect={() => run(() => openWeeklyReview(weekKey()))}

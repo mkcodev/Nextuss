@@ -12,11 +12,13 @@ import type {
   NotificationLogRecord,
   Progress,
   Project,
+  ProjectTemplate,
   QuickNote,
   RecurrenceRule,
   Settings,
   Tag,
   Task,
+  TaskTemplate,
   TaskView,
   TrashEntry,
   WeeklyReview,
@@ -50,6 +52,8 @@ export class NextussDB extends Dexie {
   projects!: EntityTable<Project, 'id'>
   recurrenceRules!: EntityTable<RecurrenceRule, 'id'>
   taskViews!: EntityTable<TaskView, 'id'>
+  taskTemplates!: EntityTable<TaskTemplate, 'id'>
+  projectTemplates!: EntityTable<ProjectTemplate, 'id'>
 
   constructor() {
     // Nombre real de la base de datos IndexedDB — deliberadamente NO sigue el rebranding a
@@ -170,6 +174,13 @@ export class NextussDB extends Dexie {
     // mismo caso que `recurrenceRules`/`tags` al nacer, sin `.upgrade()`.
     this.version(12).stores({
       taskViews: '++id, sortKey',
+    })
+
+    // Plantillas (Fase 13.5): tablas nuevas, sin datos previos que migrar — mismo caso que
+    // `recurrenceRules`/`tags`/`taskViews` al nacer, sin `.upgrade()`.
+    this.version(13).stores({
+      taskTemplates: '++id, sortKey',
+      projectTemplates: '++id, sortKey',
     })
   }
 }

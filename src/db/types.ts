@@ -146,6 +146,43 @@ export interface TaskView {
   createdAt: number
 }
 
+/** Hijo de una plantilla: subtarea de `TaskTemplate` o tarea inicial de `ProjectTemplate`. */
+export interface TemplateChild {
+  title: string
+  estimateMin?: number
+}
+
+/** Plantilla de tarea (Fase 13.5) — igual que `RecurrenceRule`, copia sus campos al crear una tarea
+ * real, pero a demanda en vez de por calendario, y sí guarda subtareas. Sin papelera ni índice de
+ * búsqueda: es andamiaje reutilizable, no contenido (mismo criterio que `TaskView`). */
+export interface TaskTemplate {
+  id?: number
+  title: string
+  notes?: string
+  energy?: EnergyLevel
+  estimateMin?: number
+  priority?: number
+  color?: string
+  tagIds: number[]
+  projectId?: number
+  subtasks: TemplateChild[]
+  createdAt: number
+  sortKey: number
+}
+
+/** Plantilla de arranque de proyecto (Fase 13.5): crea un proyecto + su lote inicial de tareas raíz. */
+export interface ProjectTemplate {
+  id?: number
+  name: string
+  color: string
+  icon?: string
+  description?: string
+  attributeId?: number
+  tasks: TemplateChild[]
+  createdAt: number
+  sortKey: number
+}
+
 export type RecurrenceFreq = 'daily' | 'weekly' | 'monthly'
 /** `schedule`: fechas de calendario fijas (p.ej. "cada lunes"), se generan por adelantado.
  * `completion`: la siguiente ocurrencia se genera solo al completar la anterior, desplazada

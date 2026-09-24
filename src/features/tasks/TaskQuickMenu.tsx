@@ -4,6 +4,7 @@ import {
   CalendarX,
   CalendarClock,
   CalendarPlus,
+  Copy,
   Play,
   Trash2,
   Sparkles,
@@ -14,10 +15,12 @@ import {
 import { Menu, MenuItem, MenuSeparator } from '../../design/primitives'
 import { dateKey } from '../../lib/dates'
 import { ZOMBIE_THRESHOLD, parkTask, trashTask, unscheduleTask, updateTask } from '../../db/repositories/tasks'
+import { saveTaskAsTemplate } from '../../db/repositories/templates'
 import { startFocusOnTask } from '../focus/startFocusOnTask'
 import { useAiAvailable } from '../ai/useAiAvailable'
 import { useTaskBreakdownStore } from '../ai/taskBreakdownStore'
 import { useLogTimeStore } from './logTimeStore'
+import { useToastStore } from '../../lib/toastStore'
 import type { Task } from '../../db/types'
 
 /** Menú contextual de reprogramado rápido (Fase 8.5) — mismas acciones que la sección "Reprogramar"
@@ -26,7 +29,13 @@ export function TaskQuickMenu({ task }: { task: Task }) {
   const { available: aiAvailable } = useAiAvailable()
   const openBreakdown = useTaskBreakdownStore((s) => s.openFor)
   const openLogTime = useLogTimeStore((s) => s.openFor)
+  const push = useToastStore((s) => s.push)
   const isZombie = task.postponedCount >= ZOMBIE_THRESHOLD
+
+  const handleSaveAsTemplate = async () => {
+    await saveTaskAsTemplate(task.id!)
+    push({ title: 'Plantilla guardada', description: `"${task.title}"`, variant: 'success' })
+  }
 
   return (
     <Menu
@@ -62,6 +71,9 @@ export function TaskQuickMenu({ task }: { task: Task }) {
       )}
       <MenuItem icon={<Clock size={14} strokeWidth={1.75} />} onSelect={() => openLogTime(task)}>
         Registrar tiempo
+      </MenuItem>
+      <MenuItem icon={<Copy size={14} strokeWidth={1.75} />} onSelect={() => void handleSaveAsTemplate()}>
+        Guardar como plantilla
       </MenuItem>
       {isZombie && (
         <>

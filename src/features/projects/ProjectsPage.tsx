@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Archive, FolderKanban, Plus } from 'lucide-react'
+import { Archive, FolderKanban, LayoutTemplate, Plus } from 'lucide-react'
 import { Button, EmptyState } from '../../design/primitives'
 import { listAttributes } from '../../db/repositories/gamification'
 import { archiveProject, listProjects, moveProjectBetween } from '../../db/repositories/projects'
 import { useProjectFormStore } from './projectFormStore'
+import { useTemplatePickerStore } from '../templates/templatePickerStore'
 import { ProjectCard } from './ProjectCard'
 import type { Project } from '../../db/types'
 
@@ -17,6 +18,7 @@ export function ProjectsPage() {
   const archivedProjects = allProjects?.filter((p) => p.archived) ?? []
   const attributes = useLiveQuery(() => listAttributes(), []) ?? []
   const openCreate = useProjectFormStore((s) => s.openCreate)
+  const openTemplatePicker = useTemplatePickerStore((s) => s.openFor)
   const [expandedId, setExpandedId] = useState<number | null>(null)
 
   const handleReorderDrop = (draggedId: number, target: Project) => {
@@ -36,6 +38,9 @@ export function ProjectsPage() {
         <div className="flex gap-2">
           <Button variant="ghost" onClick={() => setShowArchived((v) => !v)}>
             <Archive size={14} strokeWidth={2} /> {showArchived ? 'Ocultar archivados' : 'Ver archivados'}
+          </Button>
+          <Button variant="ghost" onClick={() => openTemplatePicker('project')}>
+            <LayoutTemplate size={14} strokeWidth={2} /> Desde plantilla
           </Button>
           <Button onClick={() => openCreate()}>
             <Plus size={14} strokeWidth={2} /> Nuevo proyecto

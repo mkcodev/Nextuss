@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { AlertTriangle, Archive, ChevronDown, ChevronUp, Clock, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
+import { AlertTriangle, Archive, ChevronDown, ChevronUp, Clock, Copy, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import { Card, Icon, Menu, MenuItem, MenuSeparator, RingProgress } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { todayKey } from '../../lib/dates'
 import { formatMinutes } from '../stats/format'
 import { createTask } from '../../db/repositories/tasks'
 import { archiveProject, getProjectProgress, getProjectTimeSpentMin, getTasksForProject, trashProject } from '../../db/repositories/projects'
+import { saveProjectAsTemplate } from '../../db/repositories/templates'
+import { useToastStore } from '../../lib/toastStore'
 import { useProjectFormStore } from './projectFormStore'
 import type { Attribute, Project } from '../../db/types'
 
@@ -20,6 +22,7 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, attribute, expanded, onToggleExpand }: ProjectCardProps) {
   const openEdit = useProjectFormStore((s) => s.openEdit)
+  const push = useToastStore((s) => s.push)
   const progress = useLiveQuery(() => getProjectProgress(project.id!), [project.id])
   const timeSpent = useLiveQuery(() => getProjectTimeSpentMin(project.id!), [project.id])
   const tasks = useLiveQuery(() => getTasksForProject(project.id!), [project.id])
@@ -34,6 +37,11 @@ export function ProjectCard({ project, attribute, expanded, onToggleExpand }: Pr
     if (!title) return
     await createTask({ title, projectId: project.id })
     setNewTaskTitle('')
+  }
+
+  const handleSaveAsTemplate = async () => {
+    await saveProjectAsTemplate(project.id!)
+    push({ title: 'Plantilla guardada', description: `"${project.name}"`, variant: 'success' })
   }
 
   return (
@@ -98,6 +106,9 @@ export function ProjectCard({ project, attribute, expanded, onToggleExpand }: Pr
             onSelect={() => archiveProject(project.id!, !project.archived)}
           >
             {project.archived ? 'Reactivar' : 'Archivar'}
+          </MenuItem>
+          <MenuItem icon={<Copy size={14} strokeWidth={1.75} />} onSelect={() => void handleSaveAsTemplate()}>
+            Guardar como plantilla
           </MenuItem>
           <MenuSeparator />
           <MenuItem icon={<Trash2 size={14} strokeWidth={1.75} />} destructive onSelect={() => trashProject(project.id!)}>
