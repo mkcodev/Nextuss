@@ -42,9 +42,13 @@ export function Menu({ trigger, children, align = 'right', className }: MenuProp
     return () => document.removeEventListener('mousedown', onPointerDown)
   }, [open])
 
+  // Solo devolvemos el foco al trigger al CERRAR: sin `wasOpen`, el efecto corría también en el
+  // primer render (open=false) y cada `Menu` montado robaba el foco (en /tareas, uno por fila).
+  const wasOpen = useRef(false)
   useEffect(() => {
     if (open) itemsRef.current[0]?.focus()
-    else document.getElementById(triggerId)?.focus()
+    else if (wasOpen.current) document.getElementById(triggerId)?.focus()
+    wasOpen.current = open
   }, [open, triggerId])
 
   function close() {

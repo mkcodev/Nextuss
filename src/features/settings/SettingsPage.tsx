@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Bell, BellOff, Bot, CalendarClock, Database, Eye, EyeOff, Monitor, Moon, Send, Sparkles, Sun, Timer, TriangleAlert, Trash2 } from 'lucide-react'
 import { Button, Card, Dialog, Icon, Select, Switch } from '../../design/primitives'
@@ -558,6 +559,14 @@ function TelegramSection() {
 }
 
 export function SettingsPage() {
+  const { hash } = useLocation()
+  // Anclas desde la paleta (`/ajustes#backup`, `/ajustes#papelera`): el contenedor con scroll es
+  // <main>, así que hay que desplazar a mano en vez de fiarse del salto nativo del navegador.
+  useEffect(() => {
+    if (!hash) return
+    const el = document.getElementById(hash.slice(1))
+    if (el) el.scrollIntoView({ block: 'start' })
+  }, [hash])
   const { theme, setTheme } = useTheme()
   const settings = useLiveQuery(() => db.settings.get(1), [])
   const unlocked = useLiveQuery(() => listAchievements(), []) ?? []

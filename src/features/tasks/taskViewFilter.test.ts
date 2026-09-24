@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyTaskView } from './taskViewFilter'
+import { applyTaskView, mergeViewDraft } from './taskViewFilter'
 import type { Task, TaskView } from '../../db/types'
 
 function task(overrides: Partial<Task> = {}): Task {
@@ -120,5 +120,22 @@ describe('applyTaskView — sort', () => {
     const tasks = [task({ id: 1, title: 'Zapato' }), task({ id: 2, title: 'Avión' })]
     const result = applyTaskView(tasks, view({ sortField: 'title', sortDir: 'asc' }), 't')
     expect(result.map((t) => t.id)).toEqual([2, 1])
+  })
+})
+
+describe('mergeViewDraft', () => {
+  it('returns the saved view untouched when there is no draft', () => {
+    const saved = view({ sortField: 'title' })
+    expect(mergeViewDraft(saved, null)).toBe(saved)
+  })
+
+  it('overlays only the drafted fields and never mutates the saved view', () => {
+    const saved = view({ sortField: 'title', sortDir: 'asc', filters: { priority: [1] } })
+    const merged = mergeViewDraft(saved, { sortDir: 'desc', filters: { priority: [1, 2] } })
+    expect(merged.sortField).toBe('title')
+    expect(merged.sortDir).toBe('desc')
+    expect(merged.filters.priority).toEqual([1, 2])
+    expect(saved.sortDir).toBe('asc')
+    expect(saved.filters.priority).toEqual([1])
   })
 })

@@ -4,6 +4,7 @@ import {
   Archive,
   ArrowDown,
   ArrowUp,
+  Check,
   ChevronDown,
   ChevronUp,
   FolderKanban,
@@ -36,7 +37,7 @@ import {
   moveTaskViewBetween,
   updateTaskView,
 } from '../../db/repositories/taskViews'
-import { applyTaskView } from './taskViewFilter'
+import { applyTaskView, mergeViewDraft, type TaskViewDraft } from './taskViewFilter'
 import { useTaskFormStore } from './taskFormStore'
 import { TaskQuickMenu } from './TaskQuickMenu'
 import type { Task, TaskColumnKey, TaskSortField, TaskStatus, TaskView } from '../../db/types'
@@ -81,6 +82,8 @@ export function TasksPage() {
   const [renamingId, setRenamingId] = useState<number | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
   const [lastCheckedIndex, setLastCheckedIndex] = useState<number | null>(null)
+  const [draft, setDraft] = useState<{ viewId: number; changes: TaskViewDraft } | null>(null)
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<number | null>(null)
 
   useEffect(() => {
     void ensureDefaultTaskViews(today)
@@ -98,31 +101,51 @@ export function TasksPage() {
   // se deriva directamente de `views[0]` en cada render — evita depender de la referencia (nueva en
   // cada emisión de `useLiveQuery`) dentro de un efecto.
   const effectiveViewId = activeViewId ?? views[0]?.id ?? null
-  const activeView = views.find((v) => v.id === effectiveViewId)
+  const savedView = views.find((v) => v.id === effectiveViewId)
+  const activeDraft = draft && draft.viewId === effectiveViewId ? draft.changes : null
+  const activeView = savedView ? mergeViewDraft(savedView, activeDraft) : undefined
   const projectsById = new Map(projects.map((p) => [p.id!, p]))
   const tagsById = new Map(tags.map((t) => [t.id!, t]))
   const rows = activeView ? applyTaskView(allTasks, activeView, today) : []
   const rowsAllSelected = rows.length > 0 && rows.every((t) => t.id != null && selectedIds.has(t.id))
   const rowsSomeSelected = rows.some((t) => t.id != null && selectedIds.has(t.id))
 
+  // Filtros/columnas/orden van a un borrador local, no a la vista guardada: explorar no debe
+  // reescribir las vistas de fábrica. Solo "Guardar" (o "Guardar como nueva") las persiste.
+  const patchDraft = (changes: TaskViewDraft) => {
+    if (effectiveViewId == null) return
+    setDraft((prev) => ({
+      viewId: effectiveViewId,
+      changes: { ...(prev?.viewId === effectiveViewId ? prev.changes : {}), ...changes },
+    }))
+  }
+
   const patchFilters = (changes: Partial<TaskView['filters']>) => {
     if (!activeView) return
-    updateTaskView(activeView.id!, { filters: { ...activeView.filters, ...changes } })
+    patchDraft({ filters: { ...activeView.filters, ...changes } })
   }
 
   const toggleColumn = (col: TaskColumnKey) => {
     if (!activeView) return
-    updateTaskView(activeView.id!, { columns: toggleInArray(activeView.columns, col) })
+    patchDraft({ columns: toggleInArray(activeView.columns, col) })
   }
 
   const toggleSort = (field: TaskSortField) => {
     if (!activeView) return
     if (activeView.sortField === field) {
-      updateTaskView(activeView.id!, { sortDir: activeView.sortDir === 'asc' ? 'desc' : 'asc' })
+      patchDraft({ sortDir: activeView.sortDir === 'asc' ? 'desc' : 'asc' })
     } else {
-      updateTaskView(activeView.id!, { sortField: field, sortDir: 'asc' })
+      patchDraft({ sortField: field, sortDir: 'asc' })
     }
   }
+
+  const handleSaveDraft = async () => {
+    if (!savedView || !activeDraft) return
+    await updateTaskView(savedView.id!, activeDraft)
+    setDraft(null)
+  }
+
+  const handleResetDraft = () => setDraft(null)
 
   const handleNewView = async () => {
     const base = activeView
@@ -133,6 +156,7 @@ export function TasksPage() {
       sortDir: base?.sortDir ?? 'desc',
       columns: base?.columns ?? ['priority', 'project', 'scheduledDate'],
     })
+    setDraft(null)
     setActiveViewId(id)
   }
 
@@ -177,8 +201,10 @@ export function TasksPage() {
   }
 
   const handleDeleteView = async (view: TaskView) => {
+    setConfirmingDeleteId(null)
     await deleteTaskView(view.id!)
     if (activeViewId === view.id) setActiveViewId(null)
+    if (draft?.viewId === view.id) setDraft(null)
   }
 
   return (
@@ -233,18 +259,65 @@ export function TasksPage() {
             ) : (
               <button onClick={() => setActiveViewId(view.id!)}>{view.name}</button>
             )}
-            <button onClick={() => setRenamingId(view.id!)} className="text-text-faint hover:text-text">
-              <Pencil size={10} strokeWidth={2} />
-            </button>
-            <button onClick={() => handleDeleteView(view)} className="text-text-faint hover:text-danger">
-              <Trash2 size={10} strokeWidth={2} />
-            </button>
+            {confirmingDeleteId === view.id ? (
+              <>
+                <button
+                  onClick={() => void handleDeleteView(view)}
+                  aria-label={`Confirmar eliminar la vista ${view.name}`}
+                  className="text-danger hover:opacity-80"
+                >
+                  <Check size={12} strokeWidth={2} />
+                </button>
+                <button
+                  onClick={() => setConfirmingDeleteId(null)}
+                  aria-label="Cancelar"
+                  className="text-text-faint hover:text-text"
+                >
+                  <X size={12} strokeWidth={2} />
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setRenamingId(view.id!)}
+                  aria-label={`Renombrar la vista ${view.name}`}
+                  className="text-text-faint hover:text-text"
+                >
+                  <Pencil size={10} strokeWidth={2} />
+                </button>
+                <button
+                  onClick={() => setConfirmingDeleteId(view.id!)}
+                  aria-label={`Eliminar la vista ${view.name}`}
+                  className="text-text-faint hover:text-danger"
+                >
+                  <Trash2 size={10} strokeWidth={2} />
+                </button>
+              </>
+            )}
           </div>
         ))}
       </div>
 
       {activeView && (
         <>
+          {activeDraft && (
+            <Card className="flex flex-wrap items-center gap-2 border-warning/40 bg-warning/10 p-3" role="status">
+              <span className="text-xs font-semibold text-warning">Vista modificada sin guardar</span>
+              <span className="text-xs text-text-muted">Los cambios solo se ven aquí hasta que los guardes.</span>
+              <div className="ml-auto flex gap-1.5">
+                <Button variant="ghost" onClick={handleResetDraft} className="px-2.5 py-1 text-xs">
+                  Restablecer
+                </Button>
+                <Button variant="secondary" onClick={() => void handleNewView()} className="px-2.5 py-1 text-xs">
+                  Guardar como nueva
+                </Button>
+                <Button onClick={() => void handleSaveDraft()} className="px-2.5 py-1 text-xs">
+                  Guardar en "{savedView?.name}"
+                </Button>
+              </div>
+            </Card>
+          )}
+
           {selectedIds.size > 0 && (
             <Card className="flex flex-wrap items-center gap-2 border-accent bg-accent-soft p-3">
               <span className="text-xs font-semibold text-accent">{selectedIds.size} seleccionada{selectedIds.size === 1 ? '' : 's'}</span>

@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { CheckCheck, Clock, ListTodo, Pencil, Target } from 'lucide-react'
-import { Card, Icon, RingProgress, SegmentedControl } from '../../design/primitives'
+import { CheckCheck, Clock, FolderKanban, ListTodo, Pencil, Target } from 'lucide-react'
+import { Card, EmptyState, Icon, RingProgress, SegmentedControl } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { StatTile } from '../stats/charts/StatTile'
 import { usePageTitle } from '../../app/pageTitleStore'
@@ -32,7 +32,21 @@ export function ProjectDetailPage() {
   usePageTitle(project?.name ?? null, [project?.name])
 
   if (project === undefined) return <div className="mx-auto max-w-4xl p-6 lg:p-8">Cargando…</div>
-  if (project === null) return <div className="mx-auto max-w-4xl p-6 lg:p-8">Proyecto no encontrado.</div>
+  if (project === null)
+    return (
+      <div className="mx-auto max-w-4xl p-6 lg:p-8">
+        <EmptyState
+          icon={FolderKanban}
+          title="Proyecto no encontrado"
+          description="Puede que se haya eliminado o que el enlace ya no sea válido."
+          action={
+            <Link to="/proyectos" className="text-xs font-medium text-accent hover:underline">
+              Volver a proyectos
+            </Link>
+          }
+        />
+      </div>
+    )
 
   const timeSpentMin = tasks.reduce((sum, t) => sum + (t.actualMin ?? 0), 0)
   const accuracy = buildEstimateAccuracy(tasks)

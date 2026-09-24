@@ -84,3 +84,11 @@ export function applyTaskView(tasks: Task[], view: TaskView, today: string): Tas
     .filter((t) => matchesFilters(t, view, today))
     .sort((a, b) => compareTasks(a, b, view.sortField, view.sortDir))
 }
+
+/** Cambios de una vista aún sin guardar (filtros, columnas, orden): `/tareas` los mantiene en un
+ * borrador local para que explorar no reescriba las vistas guardadas — solo "Guardar" las persiste. */
+export type TaskViewDraft = Partial<Pick<TaskView, 'filters' | 'columns' | 'sortField' | 'sortDir'>>
+
+export function mergeViewDraft(view: TaskView, draft: TaskViewDraft | null): TaskView {
+  return draft ? { ...view, ...draft } : view
+}

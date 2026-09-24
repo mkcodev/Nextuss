@@ -4,7 +4,6 @@ import { useUIStore } from '../uiStore'
 import { useOverlayStore } from './overlayStore'
 import { useListNavStore } from './listNavStore'
 import { useCaptureRequestStore } from './captureRequestStore'
-import { useHabitFormStore } from '../../features/habits/habitFormStore'
 import { useQuickAddStore } from '../../features/tasks/quickAddStore'
 import { useUndoStore } from '../../lib/undoStore'
 import { NAV_ITEMS } from '../navItems'
@@ -141,7 +140,9 @@ export function useGlobalShortcuts() {
         if (handlers?.onCreate) {
           handlers.onCreate()
         } else {
-          useHabitFormStore.getState().openCreate()
+          // La tarea es la entidad central: sin lista que registre su propio "crear", `c` abre la
+          // captura rápida de tarea (antes caía en el formulario de hábito, incluso en /tareas).
+          useQuickAddStore.getState().openQuickAdd()
         }
         return
       }

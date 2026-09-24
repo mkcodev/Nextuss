@@ -55,7 +55,7 @@ async function replyHabitos(today: string): Promise<CommandResult> {
   if (scheduled.length === 0) return { reply: 'Sin hábitos programados para hoy.' }
   const logs = await getLogsForDate(today)
   const byHabit = new Map(logs.map((l) => [l.habitId, l]))
-  const lines = scheduled.map((h, i) => `${i + 1}. ${byHabit.get(h.id!)?.completed ? '✅' : '⬜'} ${h.name}`)
+  const lines = scheduled.map((h, i) => `${i + 1}. ${byHabit.get(h.id!)?.completed ? '[x]' : '[ ]'} ${h.name}`)
   return { reply: `Hábitos de hoy:\n${lines.join('\n')}\n\nUsa /habito <n> para marcar uno como hecho.` }
 }
 

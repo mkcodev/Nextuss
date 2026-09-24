@@ -1,18 +1,25 @@
+import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Trash2, RotateCcw, X } from 'lucide-react'
+import { Check, Trash2, RotateCcw, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Button, Card, EmptyState } from '../../design/primitives'
 import { listTrash, purgeTrashEntry, restoreTrashEntry } from '../../db/trash'
 import { useToastStore } from '../../lib/toastStore'
 
-const TABLE_LABELS: Record<string, string> = { tasks: 'Tarea', habits: 'Hábito', goals: 'Objetivo' }
+const TABLE_LABELS: Record<string, string> = {
+  tasks: 'Tarea',
+  habits: 'Hábito',
+  goals: 'Objetivo',
+  projects: 'Proyecto',
+}
 
 /** Papelera: lo que `trashRows` ha ido apuntando — cada fila sigue viva (`deletedAt` puesto) hasta
  * que se restaura aquí, o hasta que `runDailyMaintenance` la purga de verdad a los 30 días. */
 export function TrashSection() {
   const entries = useLiveQuery(() => listTrash(), [])
   const push = useToastStore((s) => s.push)
+  const [confirmingId, setConfirmingId] = useState<number | null>(null)
 
   const handleRestore = async (id: number, label: string) => {
     await restoreTrashEntry(id)
@@ -20,12 +27,13 @@ export function TrashSection() {
   }
 
   const handlePurge = async (id: number, label: string) => {
+    setConfirmingId(null)
     await purgeTrashEntry(id)
     push({ title: `Eliminado para siempre: ${label}`, variant: 'default' })
   }
 
   return (
-    <Card className="p-5">
+    <Card id="papelera" className="p-5">
       <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-text">
         <Trash2 size={15} strokeWidth={1.75} /> Papelera
       </h3>
@@ -53,9 +61,25 @@ export function TrashSection() {
                 <Button variant="ghost" onClick={() => void handleRestore(entry.id!, entry.label)} className="px-2 text-xs">
                   <RotateCcw size={13} strokeWidth={1.75} /> Restaurar
                 </Button>
-                <Button variant="ghost" onClick={() => void handlePurge(entry.id!, entry.label)} className="px-2 text-xs text-danger">
-                  <X size={13} strokeWidth={1.75} /> Eliminar ya
-                </Button>
+                {confirmingId === entry.id ? (
+                  <>
+                    <Button
+                      variant="ghost"
+                      onClick={() => void handlePurge(entry.id!, entry.label)}
+                      className="px-2 text-xs text-danger"
+                      aria-label="Confirmar eliminar para siempre"
+                    >
+                      <Check size={13} strokeWidth={2} /> ¿Seguro?
+                    </Button>
+                    <Button variant="ghost" onClick={() => setConfirmingId(null)} className="px-2 text-xs" aria-label="Cancelar">
+                      <X size={13} strokeWidth={1.75} />
+                    </Button>
+                  </>
+                ) : (
+                  <Button variant="ghost" onClick={() => setConfirmingId(entry.id!)} className="px-2 text-xs text-danger">
+                    <X size={13} strokeWidth={1.75} /> Eliminar ya
+                  </Button>
+                )}
               </div>
             </div>
           ))}

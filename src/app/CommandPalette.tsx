@@ -214,13 +214,13 @@ export function CommandPalette() {
             <Download size={15} strokeWidth={1.75} /> Exportar datos
           </Command.Item>
           <Command.Item
-            onSelect={() => run(() => navigate('/estadisticas?tab=informes'))}
+            onSelect={() => run(() => navigate('/ajustes#backup'))}
             className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <Database size={15} strokeWidth={1.75} /> Backup
           </Command.Item>
           <Command.Item
-            onSelect={() => run(() => navigate('/ajustes'))}
+            onSelect={() => run(() => navigate('/ajustes#papelera'))}
             className={ITEM_CLASS}
           >
             <Trash2 size={15} strokeWidth={1.75} /> Papelera

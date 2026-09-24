@@ -5,6 +5,7 @@ import { createTask } from './repositories/tasks'
 import { purgeTrashEntry } from './trash'
 import {
   createProject,
+  getProject,
   getProjectProgress,
   getProjectTimeSpentMin,
   getTasksForProject,
@@ -84,5 +85,22 @@ describe('trashProject', () => {
     expect(await db.projects.get(projectId)).toBeUndefined()
     const task = await db.tasks.get(taskId)
     expect(task?.projectId).toBeUndefined()
+  })
+})
+
+describe('getProject', () => {
+  it('returns the project when it is alive', async () => {
+    const id = await createProject({ name: 'Viva', color: '#5EC8FF' })
+    expect((await getProject(id))?.name).toBe('Viva')
+  })
+
+  it('returns null (not undefined) for a missing id, so "not found" is distinguishable from "loading"', async () => {
+    expect(await getProject(999999)).toBeNull()
+  })
+
+  it('returns null for a trashed project, so its detail page cannot be reached by URL', async () => {
+    const id = await createProject({ name: 'Borrada', color: '#5EC8FF' })
+    await trashProject(id)
+    expect(await getProject(id)).toBeNull()
   })
 })

@@ -197,7 +197,7 @@ export function WeeklyReviewDialog() {
           <div className="space-y-3">
             <p className="text-xs text-text-faint">Objetivos que quedaron incompletos</p>
             {incompleteGoals.length === 0 ? (
-              <p className="text-sm text-text-muted">No quedó ninguno pendiente. 🎉</p>
+              <p className="text-sm text-text-muted">No quedó ninguno pendiente.</p>
             ) : (
               <div className="space-y-1.5">
                 {incompleteGoals.map((g) => (

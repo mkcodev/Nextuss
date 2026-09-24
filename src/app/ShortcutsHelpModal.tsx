@@ -32,7 +32,7 @@ const GROUPS: { title: string; items: [string, string][] }[] = [
     items: [
       ['j / k', 'Moverse abajo / arriba'],
       ['Enter', 'Marcar el elemento seleccionado'],
-      ['c', 'Crear un hábito nuevo'],
+      ['c', 'Crear (en Hábitos y Objetivos, uno nuevo; en el resto, una tarea)'],
     ],
   },
 ]

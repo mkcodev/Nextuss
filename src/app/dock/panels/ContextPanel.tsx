@@ -10,7 +10,7 @@ export function ContextPanel() {
       <EmptyState
         icon={PanelRight}
         title="Sin contenido contextual"
-        description="Esta página no aporta nada a este panel — prueba en Hoy o Planificación."
+        description="Esta página no aporta nada a este panel — prueba en Hoy o Hábitos."
         className="p-4"
       />
     )

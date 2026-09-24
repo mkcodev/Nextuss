@@ -3,7 +3,7 @@ import { LayoutPanelTop, Plus } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { NAV_ITEMS } from './navItems'
 import { useUIStore } from './uiStore'
-import { useHabitFormStore } from '../features/habits/habitFormStore'
+import { useQuickAddStore } from '../features/tasks/quickAddStore'
 
 // Ajustes is left out (reachable via the avatar menu and the palette); Tareas and Proyectos are left
 // out too (both reachable via the palette) to leave room for the two action buttons every phone user
@@ -14,7 +14,7 @@ const MOBILE_NAV_ITEMS = NAV_ITEMS.filter((item) => !MOBILE_EXCLUDED.has(item.to
 
 export function MobileNav() {
   const openMobileDock = useUIStore((s) => s.openMobileDock)
-  const openHabitCreate = useHabitFormStore((s) => s.openCreate)
+  const openQuickAdd = useQuickAddStore((s) => s.openQuickAdd)
 
   return (
     <nav
@@ -44,7 +44,7 @@ export function MobileNav() {
       ))}
 
       <button
-        onClick={() => openHabitCreate()}
+        onClick={() => openQuickAdd()}
         className="flex flex-1 flex-col items-center gap-0.5 px-3 py-2 text-xs font-medium text-text-faint transition-colors hover:text-text"
       >
         <Plus size={18} strokeWidth={1.75} />

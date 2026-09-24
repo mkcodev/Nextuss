@@ -51,7 +51,7 @@ export function BackupSection() {
 
   return (
     <>
-      <Card className="p-5">
+      <Card id="backup" className="p-5">
         <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-text">
           <Database size={15} strokeWidth={1.75} /> Backup completo
         </h3>

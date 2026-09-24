@@ -49,6 +49,8 @@ export function ProjectCard({ project, attribute, expanded, onToggleExpand }: Pr
       <div className="flex items-center gap-3.5">
         <button
           onClick={onToggleExpand}
+          aria-hidden="true"
+          tabIndex={-1}
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition-colors"
           style={{ backgroundColor: `${project.color}14`, borderColor: `${project.color}33`, color: project.color }}
         >

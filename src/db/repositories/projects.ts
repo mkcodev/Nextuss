@@ -9,8 +9,11 @@ export async function listProjects(includeArchived = false): Promise<Project[]> 
     .sort((a, b) => a.sortKey - b.sortKey)
 }
 
-export function getProject(id: number) {
-  return db.projects.get(id)
+/** `null` (nunca `undefined`) para "no existe o está en la papelera": `useLiveQuery` devuelve
+ * `undefined` mientras carga, así que el estado "no encontrado" tiene que ser distinguible. */
+export async function getProject(id: number): Promise<Project | null> {
+  const project = await db.projects.get(id)
+  return project && project.deletedAt === 0 ? project : null
 }
 
 export async function createProject(input: {

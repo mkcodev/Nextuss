@@ -86,7 +86,7 @@ export function DayCloseFlow() {
           <div className="space-y-3">
             <p className="text-xs text-text-faint">¿Qué quedó sin hacer y a dónde va?</p>
             {pendingTasks.length === 0 ? (
-              <p className="text-sm text-text-muted">Nada pendiente. 🎉</p>
+              <p className="text-sm text-text-muted">Nada pendiente.</p>
             ) : (
               <div className="space-y-1.5">
                 {pendingTasks.map((t) => (
