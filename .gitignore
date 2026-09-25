@@ -34,3 +34,8 @@ __pycache__/
 docs/design/refs/*.png
 docs/design/refs/*.jpg
 docs/design/refs/NOTAS.md
+
+# Impeccable: estado local (servidor live, sesiones, instantáneas de crítica)
+.impeccable/live/
+.impeccable/server.json
+.impeccable/critique/
