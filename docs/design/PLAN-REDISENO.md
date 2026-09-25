@@ -22,12 +22,13 @@ Comandos de Impeccable más útiles: `critique` (jerarquía/claridad), `audit` (
 - [x] CLAUDE: instalar skills, versionarlas y crear esta guía (#30).
 
 ### 1. Contexto de diseño
-- [ ] TÚ: reiniciar Claude Code (`/exit` y abrir de nuevo) para que carguen las skills.
-- [ ] TÚ + CLAUDE: `/impeccable init`. Te preguntará por el público, la personalidad de la marca, etc. Responde con lo que sientas;
+- [x] TÚ: reiniciar Claude Code (`/exit` y abrir de nuevo) para que carguen las skills.
+- [x] TÚ + CLAUDE: `/impeccable init` → `PRODUCT.md` (#32). Te preguntará por el público, la personalidad de la marca, etc. Responde con lo que sientas;
       Claude te ayuda a redactarlo. Idea base: app personal de productividad para TDAH → calma, claridad, poca carga visual, rapidez.
 
 ### 2. Referencias visuales
-- [ ] TÚ: guarda 5–10 capturas en `docs/design/refs/` (ver `refs/README.md`: qué capturar y de dónde).
+- [x] CLAUDE: 9 capturas en `docs/design/refs/` con `refs/NOTAS.md` (solo locales: repo público).
+- [ ] TÚ: escribir en `refs/NOTAS.md` qué te gusta / no de cada una. Opcional: capturas de Todoist/TickTick por dentro.
 
 ### 3. Diagnóstico (sin tocar código)
 - [ ] CLAUDE: `/impeccable critique` sobre la app (formularios, Hoy, Tareas, Hábitos).
