@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Claude Code: solo local
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+# Binario de Impeccable (17 MB): se reinstala con `npx impeccable install`
+.claude/skills/impeccable/scripts/bin/
+__pycache__/

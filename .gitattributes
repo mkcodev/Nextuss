@@ -1,0 +1,2 @@
+# Script bash de Impeccable: siempre LF (con CRLF bash falla)
+.claude/skills/impeccable/scripts/impeccable text eol=lf

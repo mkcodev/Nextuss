@@ -27,5 +27,8 @@ por fase, una versión Dexie por porción entregable (ninguna fase de este plan 
 | 22 | Rediseño de `TaskForm` (issue #6) — con plan-mode propio | Pendiente |
 | 23 | Sistema de diseño: tokens, primitivos, páginas "ensambladas", estados vacío/carga, motion, colores | Pendiente |
 
+Guía paso a paso, herramientas y prompt: [`docs/design/PLAN-REDISENO.md`](design/PLAN-REDISENO.md).
+Orden recomendado dentro del bloque: dirección visual (`DESIGN.md`) → base del sistema (23) → TaskForm (22) → resto.
+
 Decisión cerrada: "Mañana"/"Próxima semana" (#5) suma +1 / +7 días sobre la fecha actual de la
 tarea si es futura; sin fecha o en el pasado parte de hoy.
