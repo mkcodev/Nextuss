@@ -48,6 +48,7 @@ export function TaskForm() {
   const [notes, setNotes] = useState(task?.notes ?? '')
   const [energy, setEnergy] = useState<EnergyLevel | undefined>(task?.energy ?? prefill?.energy)
   const [estimateMin, setEstimateMin] = useState(task?.estimateMin ?? prefill?.estimateMin ?? 30)
+  const [actualMin, setActualMin] = useState(task?.actualMin != null ? String(task.actualMin) : '')
   const [priority, setPriority] = useState<number | undefined>(task?.priority ?? prefill?.priority)
   const [dueDate, setDueDate] = useState(task?.dueDate ?? '')
   const [color, setColor] = useState(task?.color ?? COLOR_PRESETS[0])
@@ -175,6 +176,7 @@ export function TaskForm() {
         const scheduledEnd = schedStart ? minutesToTime(timeToMinutes(schedStart) + estimateMin) : undefined
         await updateTask(task.id, {
           ...payload,
+          actualMin: actualMin === '' ? undefined : Math.max(0, Number(actualMin) || 0),
           scheduledDate: schedDate || undefined,
           scheduledStart: schedStart || undefined,
           scheduledEnd,
@@ -354,6 +356,23 @@ export function TaskForm() {
             ))}
           </div>
         </div>
+
+        {isEdit && (
+          <div>
+            <label htmlFor="task-actual-min" className="mb-1 block text-xs font-medium text-text-muted">
+              Tiempo real invertido (min, opcional)
+            </label>
+            <input
+              id="task-actual-min"
+              type="number"
+              min={0}
+              value={actualMin}
+              onChange={(e) => setActualMin(e.target.value)}
+              placeholder="Sin registrar"
+              className="w-full rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
+            />
+          </div>
+        )}
 
         <div className="flex gap-3">
           <div className="flex-1">
