@@ -1,7 +1,8 @@
 # Hoja de ruta
 
 Estado tras la Fase 17. Cada fase se detalla con su propia pasada de plan-mode solo si tiene
-superficie de diseño abierta; las mecánicas se ejecutan directamente. Reglas transversales: un commit
+superficie de diseño abierta; las mecánicas se ejecutan directamente. Flujo issue → rama → PR en
+`docs/FLUJO.md`. Reglas transversales: una PR
 por fase, una versión Dexie por porción entregable (ninguna fase de este plan la necesita), cero emoji
 (solo Lucide), nunca `confirm()` nativo, diálogos hermanos en `AppShell` (nunca anidados), y
 `npm run build && npm run test -- --run && npm run lint` en verde al cerrar cada fase.
