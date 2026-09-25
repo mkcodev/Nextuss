@@ -12,3 +12,10 @@ Una unidad de trabajo = un issue = una rama = una PR.
 
 Se mantienen las reglas de `docs/ROADMAP.md`: una versión Dexie por porción entregable, cero emoji,
 nunca `confirm()` nativo.
+
+## Deploy (Vercel)
+
+El repo está conectado a Vercel: cada PR genera un deploy de preview (URL comentada en la PR) y cada
+merge a `main` despliega a producción. `vercel.json` reenvía todas las rutas a `index.html` (la app
+usa `createBrowserRouter`; Vercel sirve antes los archivos reales como `sw.js` o `assets/`) y evita
+cachear `sw.js` para que la PWA se actualice.
