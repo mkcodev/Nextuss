@@ -16,6 +16,7 @@ import { InstallPrompt } from '../pwa/InstallPrompt'
 import { BackupSection } from './BackupSection'
 import { TrashSection } from './TrashSection'
 import { TagsSection } from './TagsSection'
+import { DismissedInsightsSection } from './DismissedInsightsSection'
 import {
   getNotificationPermissionState,
   requestNotificationPermission,
@@ -656,6 +657,8 @@ export function SettingsPage() {
       <PlannerSection />
 
       <TagsSection />
+
+      <DismissedInsightsSection />
 
       <AiSection />
 
