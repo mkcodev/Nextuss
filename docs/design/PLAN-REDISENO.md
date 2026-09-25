@@ -28,12 +28,12 @@ Comandos de Impeccable más útiles: `critique` (jerarquía/claridad), `audit` (
 
 ### 2. Referencias visuales
 - [x] CLAUDE: 9 capturas en `docs/design/refs/` con `refs/NOTAS.md` (solo locales: repo público).
-- [ ] TÚ: escribir en `refs/NOTAS.md` qué te gusta / no de cada una. Opcional: capturas de Todoist/TickTick por dentro.
+- [-] TÚ (omitido por decisión): escribir en `refs/NOTAS.md` qué te gusta / no de cada una. Opcional: capturas de Todoist/TickTick por dentro.
 
 ### 3. Diagnóstico (sin tocar código)
-- [ ] CLAUDE: `/impeccable critique` sobre la app (formularios, Hoy, Tareas, Hábitos).
-- [ ] CLAUDE: `/web-design-guidelines` sobre los 4 formularios.
-- [ ] CLAUDE: juntar ambos en `docs/design/AUDITORIA.md` con prioridades. TÚ lo lees y dices qué te importa más.
+- [x] CLAUDE: `/impeccable critique` sobre la app (formularios, Hoy, Tareas, Hábitos).
+- [x] CLAUDE: `/web-design-guidelines` sobre los 4 formularios.
+- [x] CLAUDE: juntar ambos en `docs/design/AUDITORIA.md` con prioridades. TÚ lo lees y dices qué te importa más. → Hecho (#34): formularios primero, estética sobria tipo Linear.
 
 ### 4. Dirección visual → `DESIGN.md`
 - [ ] CLAUDE: proponer **3 direcciones visuales** distintas (paleta, tipografía, densidad, radios, sombras) con mockup de una pantalla.
