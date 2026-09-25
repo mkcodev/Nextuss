@@ -29,7 +29,7 @@ import { DayPlanSuggestion } from '../ai/DayPlanSuggestion'
 import { CheckInCard } from './CheckInCard'
 import { db } from '../../db/schema'
 import { shouldShowDayClose, shouldShowDayStart } from '../rituals/gates'
-import type { CheckIn, Task } from '../../db/types'
+import type { Task } from '../../db/types'
 import { useDayStartStore } from '../rituals/dayStartStore'
 import { useDayCloseStore } from '../rituals/dayCloseStore'
 
@@ -60,7 +60,7 @@ export function TodayView() {
   // semana hasta que exista una revisión para la semana pasada.
   const lastWeekKey = previousPeriodKey('week', currentWeekKey)
   const lastWeekReview = useLiveQuery(() => getReview(lastWeekKey), [lastWeekKey])
-  const needsReview = isToday && lastWeekReview === undefined
+  const needsReview = isToday && lastWeekReview === null
   const openWeeklyReview = useWeeklyReviewStore((s) => s.openReview)
   const navigate = useNavigate()
   const { insights } = useInsights('30d')
@@ -79,7 +79,7 @@ export function TodayView() {
 
   // Rituales del día (Fase 12) — solo evaluados para el "hoy" real, nunca al navegar a otro día.
   const checkin = useLiveQuery(
-    () => (isToday ? getCheckInForDate(date) : Promise.resolve(undefined as CheckIn | undefined)),
+    () => (isToday ? getCheckInForDate(date) : Promise.resolve(null)),
     [isToday, date],
   )
   const overdueForGate = useLiveQuery(() => (isToday ? getOverdueTasks(date) : Promise.resolve([] as Task[])), [isToday, date])
@@ -97,13 +97,10 @@ export function TodayView() {
   const promptedDayStartRef = useRef<string | null>(null)
   const promptedDayCloseRef = useRef<string | null>(null)
 
-  // `checkin` deliberately NOT part of the "still loading" guard below: a missing check-in row
-  // (the normal "haven't checked in today" case) resolves to `undefined` from Dexie exactly like
-  // an unresolved query does, so gating on it would mean the flow could never open for anyone who
-  // hasn't checked in yet. `overdueForGate`/`tasksToday`/`settings` are unambiguous (they always
-  // resolve to a real array/object, never object).
+  // Convención de carga (docs/CONVENCIONES.md): `undefined` = cargando, `null` = sin fila. Las
+  // puertas esperan a todas sus entradas, `checkin` incluido — un día sin check-in resuelve a `null`.
   useEffect(() => {
-    if (!isToday || dayStartOpen || dayCloseOpen || overdueForGate === undefined) return
+    if (!isToday || dayStartOpen || dayCloseOpen || overdueForGate === undefined || checkin === undefined) return
     if (promptedDayStartRef.current === date) return
     if (shouldShowDayStart(checkin, overdueForGate.length)) {
       promptedDayStartRef.current = date
@@ -112,10 +109,11 @@ export function TodayView() {
   }, [isToday, dayStartOpen, dayCloseOpen, checkin, overdueForGate, date, openDayStart])
 
   useEffect(() => {
-    if (!isToday || dayStartOpen || dayCloseOpen || tasksToday === undefined || !settings) return
+    if (!isToday || dayStartOpen || dayCloseOpen || checkin === undefined || tasksToday === undefined) return
+    if (todaysEntries === undefined || !settings) return
     if (promptedDayCloseRef.current === date) return
     const pendingCount =
-      tasksToday.filter((t) => t.status !== 'done').length + (todaysEntries?.filter((e) => !e.log?.completed).length ?? 0)
+      tasksToday.filter((t) => t.status !== 'done').length + todaysEntries.filter((e) => !e.log?.completed).length
     if (shouldShowDayClose(checkin, pendingCount, new Date(), settings.eveningSummaryTime ?? '21:00')) {
       promptedDayCloseRef.current = date
       openDayClose(date)

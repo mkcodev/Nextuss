@@ -9,7 +9,7 @@ import { getTasksForDate, parkTask, trashTask, updateTask } from '../../db/repos
 import { getCheckInForDate, markRitualClose, upsertCheckIn } from '../../db/repositories/checkins'
 import { useHabitsWithStats } from '../habits/useHabitsWithStats'
 import { useDayCloseStore } from './dayCloseStore'
-import type { CheckIn, Task } from '../../db/types'
+import type { Task } from '../../db/types'
 
 type Step = 1 | 2 | 3
 
@@ -29,7 +29,7 @@ export function DayCloseFlow() {
   const doneHabits = scheduledHabits?.filter((e) => e.log?.completed).length ?? 0
 
   const checkin = useLiveQuery(
-    () => (date ? getCheckInForDate(date) : Promise.resolve(undefined as CheckIn | undefined)),
+    () => (date ? getCheckInForDate(date) : Promise.resolve(null)),
     [date],
   )
 

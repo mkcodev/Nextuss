@@ -24,8 +24,8 @@ export function PlanningPage() {
 
   const currentWeekKey = weekKey()
   const currentMonthKey = monthKey()
-  const weekGoals = useLiveQuery(() => listGoalsForPeriod('week', currentWeekKey), [currentWeekKey]) ?? []
-  const monthGoals = useLiveQuery(() => listGoalsForPeriod('month', currentMonthKey), [currentMonthKey]) ?? []
+  const weekGoals = useLiveQuery(() => listGoalsForPeriod('week', currentWeekKey), [currentWeekKey])
+  const monthGoals = useLiveQuery(() => listGoalsForPeriod('month', currentMonthKey), [currentMonthKey])
   const openCreate = useGoalFormStore((s) => s.openCreate)
 
   const setTab = (t: Tab) => {

@@ -93,7 +93,7 @@ export function TaskForm() {
   // regla real (una sola vez, igual que el patrón de `goalIdInitialized`) para poder ofrecer
   // "esta y futuras" con la plantilla actual, no con valores en blanco.
   const currentRule = useLiveQuery(
-    () => (isEdit && task?.recurrenceId ? getRecurrenceRule(task.recurrenceId) : Promise.resolve(undefined)),
+    () => (isEdit && task?.recurrenceId ? getRecurrenceRule(task.recurrenceId) : Promise.resolve(null)),
     [task?.recurrenceId],
   )
   if (isEdit && task?.recurrenceId && !repeatInitialized && currentRule) {

@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Plus } from 'lucide-react'
-import { Card } from '../../design/primitives'
+import { Card, Skeleton } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { listAttributes } from '../../db/repositories/gamification'
 import { GoalCard } from './GoalCard'
@@ -9,7 +9,8 @@ import type { Goal } from '../../db/types'
 interface GoalSectionProps {
   title: string
   emptyLabel: string
-  goals: Goal[]
+  /** `undefined` = cargando (pinta un skeleton en lugar del estado vacío). */
+  goals: Goal[] | undefined
   onCreate: () => void
   /** Only meaningful when the section can genuinely be wide (the Objetivos tab) — never in the narrow rail. */
   twoColOnWide?: boolean
@@ -26,7 +27,9 @@ export function GoalSection({ title, emptyLabel, goals, onCreate, twoColOnWide =
           <Plus size={13} /> Nuevo
         </button>
       </div>
-      {goals.length === 0 ? (
+      {goals === undefined ? (
+        <Skeleton className="h-20 w-full" />
+      ) : goals.length === 0 ? (
         <Card className="p-4 text-sm text-text-faint">{emptyLabel}</Card>
       ) : (
         <div className={cn('grid grid-cols-1 gap-3', twoColOnWide && goals.length > 1 && 'md:grid-cols-2')}>

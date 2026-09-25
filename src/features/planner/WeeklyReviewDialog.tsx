@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ArrowRight, Check, Loader2, Plus, Sparkles, X } from 'lucide-react'
-import { Button, Dialog } from '../../design/primitives'
+import { Button, Dialog, Skeleton } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { listGoalsForPeriod, carryOverGoal, createGoal } from '../../db/repositories/goals'
 import { getReview, saveReview } from '../../db/repositories/reviews'
@@ -30,8 +30,8 @@ export function WeeklyReviewDialog() {
     [previousWeekKey],
   )
   const existingReview = useLiveQuery(
-    (): Promise<WeeklyReview | undefined> =>
-      previousWeekKey ? getReview(previousWeekKey) : Promise.resolve(undefined),
+    (): Promise<WeeklyReview | null> =>
+      previousWeekKey ? getReview(previousWeekKey) : Promise.resolve(null),
     [previousWeekKey],
   )
 
@@ -145,16 +145,18 @@ export function WeeklyReviewDialog() {
         {step === 1 && (
           <div className="space-y-3">
             <p className="text-xs text-text-faint">Semana pasada ({previousWeekKey})</p>
-            {(previousGoals ?? []).length === 0 ? (
+            {previousGoals === undefined ? (
+              <Skeleton className="h-16 w-full" />
+            ) : previousGoals.length === 0 ? (
               <p className="text-sm text-text-muted">No hubo objetivos la semana pasada.</p>
             ) : (
               <>
                 <p className="text-sm text-text">
                   Completaste <span className="font-semibold text-accent">{completedCount}</span> de{' '}
-                  {(previousGoals ?? []).length}.
+                  {previousGoals.length}.
                 </p>
                 <ul className="space-y-1">
-                  {(previousGoals ?? []).map((g) => (
+                  {previousGoals.map((g) => (
                     <li key={g.id} className="flex items-center gap-2 text-sm">
                       {g.done ? (
                         <Check size={14} className="shrink-0 text-accent" />

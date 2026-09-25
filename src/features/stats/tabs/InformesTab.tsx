@@ -51,8 +51,8 @@ export function InformesTab() {
 
   const data = useStatsData(resolvedRange, true)
   const { insights } = useInsights(resolvedRange)
-  const review = useLiveQuery(async (): Promise<WeeklyReview | undefined> => {
-    if (period !== 'week') return undefined
+  const review = useLiveQuery(async (): Promise<WeeklyReview | null> => {
+    if (period !== 'week') return null
     return getReview(periodKey)
   }, [period, periodKey])
   const northStarStreak = useLiveQuery(

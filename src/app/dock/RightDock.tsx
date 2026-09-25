@@ -4,6 +4,7 @@ import { ChevronsDown, ChevronsUp, X } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useUIStore, type DockZone } from '../uiStore'
 import { PANEL_REGISTRY, type PanelKey } from './panels'
+import { SectionErrorBoundary } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 
 const DRAG_MIME = 'application/x-nextuss-panel-order'
@@ -108,7 +109,9 @@ function DockZoneBody({ panelKey }: { panelKey: PanelKey | null }) {
   return (
     <div className="min-h-0 flex-1 overflow-y-auto p-3">
       {PanelComponent ? (
-        <PanelComponent />
+        <SectionErrorBoundary resetKey={panelKey} label={`el panel ${def.label}`}>
+          <PanelComponent />
+        </SectionErrorBoundary>
       ) : (
         <p className="text-xs text-text-faint">Elige un panel arriba.</p>
       )}

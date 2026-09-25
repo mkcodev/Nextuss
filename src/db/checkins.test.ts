@@ -55,3 +55,9 @@ describe('markRitualStart / markRitualClose', () => {
     expect(checkin?.ritualCloseDismissedAt).toBeGreaterThan(0)
   })
 })
+
+describe('getCheckInForDate', () => {
+  it('returns null (not undefined) when there is no row, so "not found" is distinguishable from "loading"', async () => {
+    expect(await getCheckInForDate('2026-09-23')).toBeNull()
+  })
+})

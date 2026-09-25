@@ -1,5 +1,15 @@
 # Changelog
 
+## Fase 17 — Convención de carga/error para `useLiveQuery`
+- Convención documentada en `docs/CONVENCIONES.md`: `undefined` = cargando, `null` = sin fila; `?? []` solo
+  para datos auxiliares; las puertas esperan a todas sus entradas; los errores suben a un límite.
+- `getReview`, `getCheckInForDate` y `getRecurrenceRule` devuelven `null` si no existe.
+- Bugs: el aviso de revisión semanal ya no aparece mientras carga; "Empezar el día" / "Cerrar el día" esperan
+  a `checkin` (y a los hábitos) antes de decidir si abrirse.
+- Sin parpadeo de estado vacío en `/tareas`, Planificación, Objetivos, detalle de proyecto y revisión
+  semanal (`Skeleton` mientras carga; `GoalSection` acepta `goals` `undefined`).
+- `SectionErrorBoundary` (primitivo): un panel del dock que falla ya no tira la pantalla entera.
+
 ## Fase 16 — Rendimiento y carga
 - Bundle inicial: 1 567 kB -> 166 kB (`index`) + 312 kB (`vendor-react`); ningún chunk supera 500 kB.
   Rutas (salvo Hoy) con `React.lazy` + `Suspense`; Recharts queda tras `/estadisticas` (409 kB).

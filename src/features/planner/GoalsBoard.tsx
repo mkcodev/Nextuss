@@ -17,14 +17,13 @@ export function GoalsBoard() {
   const [showCompleted, setShowCompleted] = useState(false)
   const monthCursor = monthKey(parsePeriodKey('week', weekCursor))
 
-  const monthGoals = useLiveQuery(() => listGoalsForPeriod('month', monthCursor), [monthCursor]) ?? []
-  const weekGoals = useLiveQuery(() => listGoalsForPeriod('week', weekCursor), [weekCursor]) ?? []
+  const monthGoals = useLiveQuery(() => listGoalsForPeriod('month', monthCursor), [monthCursor])
+  const weekGoals = useLiveQuery(() => listGoalsForPeriod('week', weekCursor), [weekCursor])
   const attributes = useLiveQuery(() => listAttributes(), []) ?? []
 
-  const standaloneWeekGoals = weekGoals.filter((g) => g.parentGoalId == null)
-  const visibleMonthGoals = monthGoals.filter((g) => showCompleted || !g.done)
-  const visibleWeekGoals = standaloneWeekGoals.filter((g) => showCompleted || !g.done)
-  const allGoalsThisScope = [...monthGoals, ...weekGoals]
+  const visibleMonthGoals = monthGoals?.filter((g) => showCompleted || !g.done)
+  const visibleWeekGoals = weekGoals?.filter((g) => g.parentGoalId == null && (showCompleted || !g.done))
+  const allGoalsThisScope = [...(monthGoals ?? []), ...(weekGoals ?? [])]
 
   const openCreate = useGoalFormStore((s) => s.openCreate)
   const openReview = useWeeklyReviewStore((s) => s.openReview)

@@ -8,7 +8,7 @@ function checkin(overrides: Partial<CheckIn> = {}): CheckIn {
 
 describe('shouldShowDayStart', () => {
   it('shows when there is no check-in yet at all', () => {
-    expect(shouldShowDayStart(undefined, 0)).toBe(true)
+    expect(shouldShowDayStart(null, 0)).toBe(true)
   })
 
   it('shows when the check-in exists but is fully unanswered', () => {
@@ -33,15 +33,15 @@ describe('shouldShowDayClose', () => {
   const afternoon = new Date(2026, 8, 23, 15, 0)
 
   it('does not show before the configured evening time', () => {
-    expect(shouldShowDayClose(undefined, 3, afternoon, '21:00')).toBe(false)
+    expect(shouldShowDayClose(null, 3, afternoon, '21:00')).toBe(false)
   })
 
   it('shows in the evening if something is still pending', () => {
-    expect(shouldShowDayClose(undefined, 3, evening, '21:00')).toBe(true)
+    expect(shouldShowDayClose(null, 3, evening, '21:00')).toBe(true)
   })
 
   it('does not show in the evening if nothing is pending', () => {
-    expect(shouldShowDayClose(undefined, 0, evening, '21:00')).toBe(false)
+    expect(shouldShowDayClose(null, 0, evening, '21:00')).toBe(false)
   })
 
   it('never shows again once dismissed today', () => {

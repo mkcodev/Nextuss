@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { CheckCheck, Clock, FolderKanban, ListTodo, Pencil, Target } from 'lucide-react'
-import { Card, EmptyState, Icon, RingProgress, SegmentedControl } from '../../design/primitives'
+import { Card, EmptyState, Icon, RingProgress, SegmentedControl, Skeleton } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { StatTile } from '../stats/charts/StatTile'
 import { usePageTitle } from '../../app/pageTitleStore'
@@ -22,7 +22,8 @@ export function ProjectDetailPage() {
   const projectId = Number(id)
   const project = useLiveQuery(() => getProject(projectId), [projectId])
   const progress = useLiveQuery(() => getProjectProgress(projectId), [projectId])
-  const tasks = useLiveQuery(() => getTasksForProject(projectId), [projectId]) ?? []
+  const tasksQuery = useLiveQuery(() => getTasksForProject(projectId), [projectId])
+  const tasks = tasksQuery ?? []
   const attributes = useLiveQuery(() => listAttributes(), []) ?? []
   const attribute = attributes.find((a) => a.id === project?.attributeId)
   const openEditTask = useTaskFormStore((s) => s.openEdit)
@@ -31,7 +32,13 @@ export function ProjectDetailPage() {
 
   usePageTitle(project?.name ?? null, [project?.name])
 
-  if (project === undefined) return <div className="mx-auto max-w-4xl p-6 lg:p-8">Cargando…</div>
+  if (project === undefined)
+    return (
+      <div className="mx-auto max-w-4xl space-y-4 p-6 lg:p-8">
+        <Skeleton className="h-8 w-56" />
+        <Skeleton className="h-40 w-full" />
+      </div>
+    )
   if (project === null)
     return (
       <div className="mx-auto max-w-4xl p-6 lg:p-8">
@@ -125,7 +132,9 @@ export function ProjectDetailPage() {
           />
         </div>
 
-        {visibleTasks.length === 0 ? (
+        {tasksQuery === undefined ? (
+          <Skeleton className="h-16 w-full" />
+        ) : visibleTasks.length === 0 ? (
           <p className="text-sm text-text-faint">Nada aquí.</p>
         ) : (
           <div className="space-y-1.5">

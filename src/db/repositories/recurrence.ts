@@ -16,8 +16,9 @@ export function listRecurrenceRules(): Promise<RecurrenceRule[]> {
   return db.recurrenceRules.toArray()
 }
 
-export async function getRecurrenceRule(id: number): Promise<RecurrenceRule | undefined> {
-  return db.recurrenceRules.get(id)
+/** `null` (no `undefined`) si no existe: `undefined` queda reservado para "cargando" en `useLiveQuery`. */
+export async function getRecurrenceRule(id: number): Promise<RecurrenceRule | null> {
+  return (await db.recurrenceRules.get(id)) ?? null
 }
 
 function taskPayloadFromRule(rule: RecurrenceRule, occurrenceDate: string) {

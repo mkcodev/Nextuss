@@ -1,8 +1,9 @@
 import { db } from '../schema'
 import type { WeeklyReview } from '../types'
 
-export function getReview(weekKey: string) {
-  return db.reviews.where('weekKey').equals(weekKey).first()
+/** `null` (no `undefined`) si no hay revisión: `undefined` queda reservado para "cargando" en `useLiveQuery`. */
+export async function getReview(weekKey: string): Promise<WeeklyReview | null> {
+  return (await db.reviews.where('weekKey').equals(weekKey).first()) ?? null
 }
 
 export async function saveReview(input: Omit<WeeklyReview, 'id' | 'createdAt'> & { id?: number }) {

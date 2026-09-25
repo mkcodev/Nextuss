@@ -1,8 +1,9 @@
 import { db } from '../schema'
 import type { CheckIn } from '../types'
 
-export function getCheckInForDate(date: string) {
-  return db.checkins.where('date').equals(date).first()
+/** `null` (no `undefined`) si no hay check-in: `undefined` queda reservado para "cargando" en `useLiveQuery`. */
+export async function getCheckInForDate(date: string): Promise<CheckIn | null> {
+  return (await db.checkins.where('date').equals(date).first()) ?? null
 }
 
 /**

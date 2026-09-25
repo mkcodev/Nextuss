@@ -15,7 +15,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
-import { Button, Card, Checkbox, DropIndicator, EmptyState, Menu, MenuItem, MenuSeparator, Select } from '../../design/primitives'
+import { Button, Card, Checkbox, DropIndicator, EmptyState, Menu, MenuItem, MenuSeparator, Select, Skeleton } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { useDragReorder } from '../../lib/useDragReorder'
 import { reorderNeighbors, type DropPosition } from '../../lib/reorder'
@@ -77,7 +77,8 @@ function toggleInArray<T>(arr: T[] | undefined, value: T): T[] {
 export function TasksPage() {
   const today = todayKey()
   const views = useLiveQuery(() => listTaskViews(), []) ?? []
-  const allTasks = useLiveQuery(() => listAllTasks(), []) ?? []
+  const allTasksQuery = useLiveQuery(() => listAllTasks(), [])
+  const allTasks = allTasksQuery ?? []
   const projects = useLiveQuery(() => listProjects(true), []) ?? []
   const tags = useLiveQuery(() => listTags(), []) ?? []
   const openEditTask = useTaskFormStore((s) => s.openEdit)
@@ -535,7 +536,13 @@ export function TasksPage() {
             )}
           </Card>
 
-          {rows.length === 0 ? (
+          {allTasksQuery === undefined ? (
+            <div className="space-y-2">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : rows.length === 0 ? (
             <EmptyState icon={ListTodo} title="Nada aquí" description="Ninguna tarea cumple los filtros de esta vista." />
           ) : (
             <Card className="overflow-hidden p-0">

@@ -3,7 +3,7 @@ import type { CheckIn } from '../../db/types'
 
 /** ¿Hay algo pendiente que justifique abrir el flujo de inicio del día? Nunca se repite el mismo
  * día una vez descartado/completado (`ritualStartDismissedAt`). */
-export function shouldShowDayStart(checkin: CheckIn | undefined, overdueCount: number): boolean {
+export function shouldShowDayStart(checkin: CheckIn | null, overdueCount: number): boolean {
   if (checkin?.ritualStartDismissedAt) return false
   const answered = checkin?.energy != null || checkin?.mood != null || checkin?.focus != null
   return !answered || overdueCount > 0
@@ -12,7 +12,7 @@ export function shouldShowDayStart(checkin: CheckIn | undefined, overdueCount: n
 /** Igual que `shouldShowDayStart`, pero solo a partir de `eveningTime` ('HH:mm') y solo si queda
  * algo sin terminar hoy. */
 export function shouldShowDayClose(
-  checkin: CheckIn | undefined,
+  checkin: CheckIn | null,
   pendingCount: number,
   now: Date,
   eveningTime: string,
