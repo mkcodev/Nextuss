@@ -139,3 +139,6 @@ export function formatShortDate(key: string, today: string = todayKey()): string
   const sameYear = key.slice(0, 4) === today.slice(0, 4)
   return (sameYear ? SHORT_DATE : SHORT_DATE_YEAR).format(date).replace('.', '')
 }
+
+/** Orden de los días en los selectores (España): lunes primero. Valores 0-6 como `Date.getDay()`. */
+export const WEEKDAY_ORDER_MON_FIRST = [1, 2, 3, 4, 5, 6, 0] as const
