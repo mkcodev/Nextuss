@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Habit } from '../db/types'
-import { describeHabitSchedule, isHabitScheduledOn, nextRelativeDate } from './dates'
+import { describeHabitSchedule, isHabitScheduledOn, nextRelativeDate, formatShortDate } from './dates'
 
 describe('nextRelativeDate', () => {
   const today = '2026-09-24'
@@ -88,5 +88,14 @@ describe('describeHabitSchedule', () => {
     expect(describeHabitSchedule(makeHabit({ schedule: { type: 'timesPerWeek', times: 3 } }))).toBe('3×/semana')
     expect(describeHabitSchedule(makeHabit({ schedule: { type: 'timesPerMonth', times: 5 } }))).toBe('5×/mes')
     expect(describeHabitSchedule(makeHabit({ schedule: { type: 'monthDays', days: [15, 1] } }))).toBe('Días 1, 15 del mes')
+  })
+})
+
+describe('formatShortDate', () => {
+  it('muestra día y mes abreviado sin año si es del año en curso', () => {
+    expect(formatShortDate('2026-04-01', '2026-09-26')).toBe('1 abr')
+  })
+  it('añade el año si es de otro año', () => {
+    expect(formatShortDate('2025-12-31', '2026-09-26')).toBe('31 dic 2025')
   })
 })

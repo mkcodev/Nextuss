@@ -128,3 +128,14 @@ export const WEEKDAY_LABELS_ES_FULL = [
   'Viernes',
   'Sábado',
 ]
+
+const SHORT_DATE = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short' })
+const SHORT_DATE_YEAR = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short', year: 'numeric' })
+
+/** 'YYYY-MM-DD' → "1 abr" (o "1 abr 2025" si no es del año en curso). Para tablas y listas, en vez
+ *  de mostrar la clave ISO cruda. */
+export function formatShortDate(key: string, today: string = todayKey()): string {
+  const date = parseDateKey(key)
+  const sameYear = key.slice(0, 4) === today.slice(0, 4)
+  return (sameYear ? SHORT_DATE : SHORT_DATE_YEAR).format(date).replace('.', '')
+}

@@ -73,8 +73,7 @@ export function ProjectDetailPage() {
             <Icon name={project.icon ?? 'folder'} size={26} strokeWidth={1.75} />
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-text-faint">Proyecto</p>
-            <h1 className="mt-0.5 text-2xl font-semibold text-text">{project.name}</h1>
+            <h1 className="text-xl font-semibold tracking-tight text-text">{project.name}</h1>
             {project.description && <p className="mt-1 max-w-xl text-sm text-text-muted">{project.description}</p>}
             {attribute && (
               <span className="mt-1.5 inline-flex items-center gap-1 text-xs" style={{ color: attribute.color }}>

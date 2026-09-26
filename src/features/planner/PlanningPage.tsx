@@ -36,10 +36,9 @@ export function PlanningPage() {
     <div className={cn('mx-auto p-6 lg:p-8', tab === 'objetivos' ? 'max-w-5xl' : 'max-w-6xl')}>
       <header className="mb-6 flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-text-faint">Planificación</p>
-          <h1 className="mt-1 text-2xl font-semibold text-text">Semana y mes</h1>
+          <h1 className="text-xl font-semibold tracking-tight text-text">{tab === 'objetivos' ? 'Objetivos' : 'Planificación'}</h1>
         </div>
-        <Tabs tabs={TABS} value={tab} onChange={setTab} />
+        <Tabs tabs={TABS} value={tab} onChange={setTab} label="Vista de planificación" />
       </header>
 
       {tab === 'objetivos' ? (

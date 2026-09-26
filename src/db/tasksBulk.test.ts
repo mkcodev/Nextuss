@@ -4,6 +4,7 @@ import { useUndoStore } from '../lib/undoStore'
 import {
   addTagBulk,
   createTask,
+  moveTasksToDateBulk,
   moveToProjectBulk,
   parkTasksBulk,
   setPriorityBulk,
@@ -110,5 +111,25 @@ describe('trashTasksBulk', () => {
     await useUndoStore.getState().undo()
     expect((await db.tasks.get(a))!.deletedAt).toBe(0)
     expect((await db.tasks.get(b))!.deletedAt).toBe(0)
+  })
+})
+
+describe('moveTasksToDateBulk', () => {
+  it('moves every task to the date, clears its slot, counts the postponement, undoable', async () => {
+    const a = await createTask({ title: 'a', scheduledDate: '2026-09-20', scheduledStart: '09:00', scheduledEnd: '10:00' })
+    const b = await createTask({ title: 'b', scheduledDate: '2026-09-21' })
+
+    await moveTasksToDateBulk([a, b], '2026-09-27')
+    const ta = await db.tasks.get(a)
+    expect(ta!.scheduledDate).toBe('2026-09-27')
+    expect(ta!.scheduledStart).toBeUndefined()
+    expect(ta!.postponedCount).toBe(1)
+    expect((await db.tasks.get(b))!.scheduledDate).toBe('2026-09-27')
+
+    await useUndoStore.getState().undo()
+    const back = await db.tasks.get(a)
+    expect(back!.scheduledDate).toBe('2026-09-20')
+    expect(back!.scheduledStart).toBe('09:00')
+    expect(back!.postponedCount).toBe(0)
   })
 })

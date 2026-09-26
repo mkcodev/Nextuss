@@ -41,8 +41,7 @@ export function StatsPage() {
     <div className="mx-auto max-w-6xl space-y-6 p-6 lg:p-8">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-text-faint">Estadísticas</p>
-          <h1 className="mt-1 text-2xl font-semibold text-text">Cómo te ha ido</h1>
+          <h1 className="text-xl font-semibold tracking-tight text-text">Cómo te ha ido</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {tab !== 'informes' && <SegmentedControl options={STATS_RANGE_OPTIONS} value={range} onChange={setRange} />}

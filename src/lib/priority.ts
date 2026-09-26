@@ -19,6 +19,14 @@ export function priorityBadgeStyle(p: number): { color: string; backgroundColor:
   }
 }
 
+/** Nombre en palabras, para donde "P1" sería jerga (bloque Ahora, lectores de pantalla). */
+export const PRIORITY_NAMES: Record<number, string> = {
+  1: 'Urgente',
+  2: 'Alta',
+  3: 'Media',
+  4: 'Baja',
+}
+
 export const PRIORITY_LABELS: Record<number, string> = {
   1: 'P1',
   2: 'P2',

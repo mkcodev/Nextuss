@@ -43,29 +43,31 @@ export function NorthStarCallout({ period, periodKey }: { period: GoalPeriod; pe
   }))
 
   return (
-    <Card className="flex items-center gap-4 border-accent/40 p-5">
-      <RingProgress
-        value={goal.done ? 1 : progress.ratio}
-        segments={goal.done ? undefined : ringSegments}
-        size={64}
-        strokeWidth={5}
-        className="shrink-0"
-      >
-        <Compass size={22} className="text-accent" />
-      </RingProgress>
-      <div className="min-w-0 flex-1">
-        <p className="text-xs font-semibold uppercase tracking-wide text-accent">Objetivo principal · {label}</p>
-        <button onClick={() => openEdit(goal)} className="mt-0.5 truncate text-left text-lg font-semibold text-text hover:underline">
-          {goal.title}
-        </button>
-        {goal.notes && <p className="mt-0.5 truncate text-xs italic text-text-muted">"{goal.notes}"</p>}
-      </div>
-      {streak > 0 && (
-        <div className="flex shrink-0 items-center gap-1.5 rounded-xl bg-accent-soft px-3 py-2 text-accent">
-          <Flame size={16} />
-          <span className="text-sm font-semibold tabular-nums">{streak}</span>
+    <section aria-label={`Objetivo principal ${label}`}>
+      <h2 className="mb-1.5 text-sm font-semibold text-text">Objetivo principal {label}</h2>
+      <Card className="flex items-center gap-3 p-3.5">
+        <RingProgress
+          value={goal.done ? 1 : progress.ratio}
+          segments={goal.done ? undefined : ringSegments}
+          size={44}
+          strokeWidth={4}
+          className="shrink-0"
+        >
+          <Compass size={16} className="text-accent" />
+        </RingProgress>
+        <div className="min-w-0 flex-1">
+          <button onClick={() => openEdit(goal)} className="block max-w-full truncate text-left text-sm font-semibold text-text hover:underline hover:underline-offset-4">
+            {goal.title}
+          </button>
+          {goal.notes && <p className="mt-0.5 truncate text-xs text-text-muted">{goal.notes}</p>}
         </div>
-      )}
-    </Card>
+        {streak > 0 && (
+          <span className="flex shrink-0 items-center gap-1 text-xs font-medium tabular-nums text-text-muted" title={`${streak} semanas seguidas cumpliéndolo`}>
+            <Flame size={14} strokeWidth={1.75} />
+            {streak}
+          </span>
+        )}
+      </Card>
+    </section>
   )
 }

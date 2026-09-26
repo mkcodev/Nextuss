@@ -19,7 +19,7 @@ import { Button, Card, Checkbox, DropIndicator, EmptyState, Menu, MenuItem, Menu
 import { cn } from '../../lib/cn'
 import { useDragReorder } from '../../lib/useDragReorder'
 import { reorderNeighbors, type DropPosition } from '../../lib/reorder'
-import { todayKey } from '../../lib/dates'
+import { todayKey, formatShortDate } from '../../lib/dates'
 import { PRIORITY_COLORS, PRIORITY_LABELS, priorityBadgeStyle } from '../../lib/priority'
 import {
   addTagBulk,
@@ -82,9 +82,11 @@ export function TasksPage() {
   const projects = useLiveQuery(() => listProjects(true), []) ?? []
   const tags = useLiveQuery(() => listTags(), []) ?? []
   const openEditTask = useTaskFormStore((s) => s.openEdit)
+  const openCreateTask = useTaskFormStore((s) => s.openCreate)
 
   const [activeViewId, setActiveViewId] = useState<number | null>(null)
-  const [showFilters, setShowFilters] = useState(true)
+  // Plegados por defecto: son ~20 controles; se abren cuando hacen falta (AUDITORIA P2 #5).
+  const [showFilters, setShowFilters] = useState(false)
   const [renamingId, setRenamingId] = useState<number | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
   const [lastCheckedIndex, setLastCheckedIndex] = useState<number | null>(null)
@@ -219,12 +221,16 @@ export function TasksPage() {
     <div className="mx-auto max-w-5xl space-y-4 p-6 lg:p-8">
       <header className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-text-faint">Gestión</p>
-          <h1 className="mt-1 text-2xl font-semibold text-text">Tareas</h1>
+          <h1 className="text-xl font-semibold tracking-tight text-text">Tareas</h1>
         </div>
-        <Button onClick={handleNewView}>
-          <Plus size={14} strokeWidth={2} /> Nueva vista
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" onClick={handleNewView}>
+            <Plus size={14} strokeWidth={2} /> Nueva vista
+          </Button>
+          <Button onClick={() => openCreateTask()}>
+            <Plus size={14} strokeWidth={2} /> Nueva tarea
+          </Button>
+        </div>
       </header>
 
       <div className="flex flex-wrap items-center gap-1.5">
@@ -678,8 +684,8 @@ function TaskViewRow({
               ))}
             </span>
           )}
-          {col === 'scheduledDate' && task.scheduledDate}
-          {col === 'dueDate' && task.dueDate}
+          {col === 'scheduledDate' && task.scheduledDate && formatShortDate(task.scheduledDate)}
+          {col === 'dueDate' && task.dueDate && formatShortDate(task.dueDate)}
           {col === 'estimateMin' && task.estimateMin != null && `${task.estimateMin} min`}
         </td>
       ))}

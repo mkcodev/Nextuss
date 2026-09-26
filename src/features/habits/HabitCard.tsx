@@ -33,7 +33,8 @@ export function HabitCard({ entry, date, onEdit, selected }: HabitCardProps) {
       className={cn(
         'group flex items-center gap-3.5 p-3.5 transition-all hover:border-border-strong hover:shadow-card',
         completed && 'border-accent/30 bg-accent-soft/40',
-        selected && 'ring-2 ring-accent ring-offset-2 ring-offset-bg',
+        // Selección de teclado (j/k): gris de fila seleccionada, no un anillo índigo que parezca "hecho" o foco.
+        selected && 'border-border-strong bg-surface-hover',
       )}
     >
       <button

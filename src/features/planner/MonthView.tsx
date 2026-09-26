@@ -130,12 +130,12 @@ export function MonthView() {
                     }}
                     title={t.title}
                     className={cn(
-                      'truncate rounded border-l-2 bg-surface px-1 py-0.5 text-xs text-text',
+                      'flex items-center gap-1 truncate rounded-xs bg-surface px-1 py-0.5 text-xs text-text',
                       t.status === 'done' && 'opacity-50 line-through',
                     )}
-                    style={{ borderLeftColor: t.color ?? DEFAULT_ENTITY_COLOR }}
                   >
-                    {t.title}
+                    <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full" style={{ backgroundColor: t.color ?? DEFAULT_ENTITY_COLOR }} />
+                    <span className="truncate">{t.title}</span>
                   </div>
                 ))}
                 {dayTasks.length > MAX_CHIPS && (
