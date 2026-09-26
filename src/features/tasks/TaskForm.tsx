@@ -30,7 +30,7 @@ import {
 import { getGoalForTask, listGoalsForPeriod, linkTaskToGoal, setGoalForTask } from '../../db/repositories/goals'
 import { findOrCreateTag, listTags } from '../../db/repositories/tags'
 import { createProject, listProjects } from '../../db/repositories/projects'
-import { PRIORITY_COLORS, PRIORITY_NAMES } from '../../lib/priority'
+import { PRIORITY_NAMES } from '../../lib/priority'
 import { formatShortDate, minutesToTime, monthKey, nextRelativeDate, timeToMinutes, todayKey, weekKey } from '../../lib/dates'
 import { ENTITY_COLORS } from '../../lib/colors'
 import { useSubmitGuard } from '../../lib/useSubmitGuard'
@@ -40,6 +40,7 @@ import { useAiAvailable } from '../ai/useAiAvailable'
 import { useTaskBreakdownStore } from '../ai/taskBreakdownStore'
 import { RepeatSection, type RepeatValue } from './form/RepeatSection'
 import { SubtasksSection } from './form/SubtasksSection'
+import { PriorityBars } from './PriorityBars'
 
 const ESTIMATE_PRESETS = [15, 30, 45, 60, 90, 120]
 const ENERGY_OPTIONS: { value: EnergyLevel; label: string }[] = [
@@ -52,22 +53,6 @@ const DEFAULT_REPEAT: RepeatValue = { freq: 'daily', interval: 1, byWeekday: [],
 const HOURS = new Intl.NumberFormat('es', { maximumFractionDigits: 1 })
 function formatEstimate(min: number): string {
   return min < 60 ? `${min} min` : `${HOURS.format(min / 60)} h`
-}
-
-/** Barras de prioridad (como en Linear): cuántas llenas = cuánto urge. Decorativo; el texto va al lado. */
-function PriorityBars({ p }: { p?: number }) {
-  const filled = p ? 5 - p : 0 // P1 → 4 barras … P4 → 1
-  return (
-    <span aria-hidden="true" className="inline-flex h-3 items-end gap-px">
-      {[4, 7, 10, 13].map((h, i) => (
-        <i
-          key={h}
-          className="w-[3px] rounded-[1px]"
-          style={{ height: h * 0.8, backgroundColor: i < filled && p ? PRIORITY_COLORS[p] : 'var(--color-border-strong)' }}
-        />
-      ))}
-    </span>
-  )
 }
 
 /** Ficha de propiedad de la fila principal: muestra el valor o, vacía, el nombre de la propiedad. */
