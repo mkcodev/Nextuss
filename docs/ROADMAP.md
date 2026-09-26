@@ -1,6 +1,6 @@
 # Hoja de ruta
 
-Estado tras la Fase 17. Cada fase se detalla con su propia pasada de plan-mode solo si tiene
+Estado tras el rediseño (Bloque B completo, 2026-09-26). Cada fase se detalla con su propia pasada de plan-mode solo si tiene
 superficie de diseño abierta; las mecánicas se ejecutan directamente. Flujo issue → rama → PR en
 `docs/FLUJO.md`. Reglas transversales: una PR
 por fase, una versión Dexie por porción entregable (ninguna fase de este plan la necesita), cero emoji
@@ -24,8 +24,8 @@ por fase, una versión Dexie por porción entregable (ninguna fase de este plan 
 
 | Fase | Contenido | Estado |
 |---|---|---|
-| 22 | Rediseño de `TaskForm` (issue #6) — con plan-mode propio | Pendiente |
-| 23 | Sistema de diseño: tokens, primitivos, páginas "ensambladas", estados vacío/carga, motion, colores | Pendiente |
+| 22 | Rediseño de `TaskForm` (issue #6) | Hecha (#44) |
+| 23 | Sistema de diseño: tokens, primitivos, páginas, estados vacío/carga, motion, colores | Hecha (#39, #41, #43, #52, #55, #56) |
 
 Guía paso a paso, herramientas y prompt: [`docs/design/PLAN-REDISENO.md`](design/PLAN-REDISENO.md).
 Orden recomendado dentro del bloque: dirección visual (`DESIGN.md`) → base del sistema (23) → TaskForm (22) → resto.

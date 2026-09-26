@@ -50,7 +50,7 @@ const SEARCH_ICON: Record<SearchDoc['type'], typeof ListTodo> = {
 const EXTRA_NAV_ITEMS = [{ to: '/planificacion?tab=objetivos', label: 'Ir a Objetivos', icon: Compass }]
 
 const ITEM_CLASS =
-  'flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent'
+  'flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent'
 
 export function CommandPalette() {
   const paletteOpen = useOverlayStore((s) => s.paletteOpen)
@@ -170,19 +170,19 @@ export function CommandPalette() {
           </Command.Item>
           <Command.Item
             onSelect={() => run(openCreate)}
-            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <Plus size={15} strokeWidth={1.75} /> Crear hábito
           </Command.Item>
           <Command.Item
             onSelect={() => run(() => openGoalCreate({ period: 'week', periodKey: weekKey() }))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <Target size={15} strokeWidth={1.75} /> Crear objetivo
           </Command.Item>
           <Command.Item
             onSelect={() => run(openProjectCreate)}
-            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <FolderKanban size={15} strokeWidth={1.75} /> Crear proyecto
           </Command.Item>
@@ -194,7 +194,7 @@ export function CommandPalette() {
           </Command.Item>
           <Command.Item
             onSelect={() => run(() => openWeeklyReview(weekKey()))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <ClipboardCheck size={15} strokeWidth={1.75} /> Revisión semanal
           </Command.Item>
@@ -203,19 +203,19 @@ export function CommandPalette() {
         <Command.Group heading="Informes">
           <Command.Item
             onSelect={() => run(() => navigate('/estadisticas?tab=informes'))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <FileText size={15} strokeWidth={1.75} /> Informe semanal
           </Command.Item>
           <Command.Item
             onSelect={() => run(() => navigate('/estadisticas?tab=informes'))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <Download size={15} strokeWidth={1.75} /> Exportar datos
           </Command.Item>
           <Command.Item
             onSelect={() => run(() => navigate('/ajustes#backup'))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <Database size={15} strokeWidth={1.75} /> Backup
           </Command.Item>
@@ -230,13 +230,13 @@ export function CommandPalette() {
         <Command.Group heading="Vista">
           <Command.Item
             onSelect={() => run(toggleLeft)}
-            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <PanelLeft size={15} strokeWidth={1.75} /> Colapsar/expandir navegación
           </Command.Item>
           <Command.Item
             onSelect={() => run(toggleRight)}
-            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <PanelRight size={15} strokeWidth={1.75} /> Mostrar/ocultar panel
           </Command.Item>
@@ -245,19 +245,19 @@ export function CommandPalette() {
         <Command.Group heading="Tema">
           <Command.Item
             onSelect={() => run(() => updateSettings({ theme: 'light' }))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <Sun size={15} strokeWidth={1.75} /> Tema claro
           </Command.Item>
           <Command.Item
             onSelect={() => run(() => updateSettings({ theme: 'dark' }))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <Moon size={15} strokeWidth={1.75} /> Tema oscuro
           </Command.Item>
           <Command.Item
             onSelect={() => run(() => updateSettings({ theme: 'system' }))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <Monitor size={15} strokeWidth={1.75} /> Tema del sistema
           </Command.Item>
@@ -266,7 +266,7 @@ export function CommandPalette() {
         <Command.Group heading="Ayuda">
           <Command.Item
             onSelect={() => run(openHelp)}
-            className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
+            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
           >
             <Keyboard size={15} strokeWidth={1.75} /> Ver atajos de teclado
           </Command.Item>

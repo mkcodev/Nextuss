@@ -6,7 +6,8 @@ import { listTags } from '../../db/repositories/tags'
 import { useTaskFormStore } from '../tasks/taskFormStore'
 import { toggleTaskDoneWithFeedback } from '../tasks/actions'
 import { cn } from '../../lib/cn'
-import { priorityBadgeStyle } from '../../lib/priority'
+import { PRIORITY_NAMES } from '../../lib/priority'
+import { PriorityBars } from '../tasks/PriorityBars'
 import { TaskQuickMenu } from '../tasks/TaskQuickMenu'
 import type { Tag, Task } from '../../db/types'
 import { TASK_DRAG_MIME } from './constants'
@@ -66,11 +67,9 @@ function TaskRow({
       >
         <span aria-hidden="true" className="size-2 shrink-0 rounded-full" style={{ backgroundColor: task.color ?? DEFAULT_ENTITY_COLOR }} />
         {task.priority && (
-          <span
-            className="shrink-0 rounded px-1 py-0.5 text-xs font-semibold"
-            style={priorityBadgeStyle(task.priority)}
-          >
-            P{task.priority}
+<span className="flex shrink-0 items-center" title={PRIORITY_NAMES[task.priority]}>
+            <PriorityBars p={task.priority} />
+            <span className="sr-only">{PRIORITY_NAMES[task.priority]}</span>
           </span>
         )}
         <span className="min-w-0 flex-1 truncate text-sm text-text">{task.title}</span>

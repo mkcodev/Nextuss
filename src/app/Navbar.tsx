@@ -114,7 +114,7 @@ export function Navbar() {
       <div className="ml-auto flex items-center gap-2">
         {!online && (
           <div
-            className="flex items-center gap-1 rounded-lg border border-warning/30 bg-warning/10 px-2 py-1.5 text-warning"
+            className="flex items-center gap-1 rounded-sm border border-warning/30 bg-warning/10 px-2 py-1.5 text-warning"
             title="Sin conexión — sigues pudiendo trabajar, tus datos están en este dispositivo"
           >
             <WifiOff size={13} strokeWidth={1.75} />
@@ -135,7 +135,7 @@ export function Navbar() {
         </button>
 
         <div
-          className="hidden items-center gap-1 rounded-lg border border-border px-2 py-1.5 text-text-muted sm:flex"
+          className="hidden items-center gap-1 rounded-sm border border-border px-2 py-1.5 text-text-muted sm:flex"
           title="Tu nivel"
         >
           <span className="text-xs font-semibold tabular-nums text-accent">Nv. {level}</span>

@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
-import { Check, Flag, Play, Repeat } from 'lucide-react'
+import { Check, Play, Repeat } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import { minutesToTime, timeToMinutes } from '../../lib/dates'
-import { PRIORITY_COLORS } from '../../lib/priority'
+import { PRIORITY_NAMES } from '../../lib/priority'
+import { PriorityBars } from '../tasks/PriorityBars'
 import { toggleTaskDoneWithFeedback } from '../tasks/actions'
 import { useTaskFormStore } from '../tasks/taskFormStore'
 import { startFocusOnTask } from '../focus/startFocusOnTask'
@@ -204,12 +205,9 @@ export function TaskBlock({
         </p>
         {task.recurrenceId && <Repeat size={10} strokeWidth={2} className="ml-auto shrink-0 text-text-faint" />}
         {task.priority && (
-          <Flag
-            size={10}
-            strokeWidth={2}
-            className={cn('shrink-0', !task.recurrenceId && 'ml-auto')}
-            style={{ color: PRIORITY_COLORS[task.priority] }}
-          />
+          <span className={cn('flex shrink-0', !task.recurrenceId && 'ml-auto')} title={PRIORITY_NAMES[task.priority]}>
+            <PriorityBars p={task.priority} />
+          </span>
         )}
       </div>
       {height > 34 && (
