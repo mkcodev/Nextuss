@@ -31,7 +31,7 @@ export function HabitCard({ entry, date, onEdit, selected }: HabitCardProps) {
   return (
     <Card
       className={cn(
-        'group flex items-center gap-3.5 p-3.5 transition-all hover:border-border-strong hover:shadow-card',
+        'group flex items-center gap-3.5 p-3.5 transition-colors hover:border-border-strong',
         completed && 'border-accent/30 bg-accent-soft/40',
         // Selección de teclado (j/k): gris de fila seleccionada, no un anillo índigo que parezca "hecho" o foco.
         selected && 'border-border-strong bg-surface-hover',
@@ -40,7 +40,7 @@ export function HabitCard({ entry, date, onEdit, selected }: HabitCardProps) {
       <button
         type="button"
         onClick={onEdit}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border transition-colors"
         style={{
           backgroundColor: `${habit.color}14`,
           borderColor: `${habit.color}33`,
@@ -55,7 +55,7 @@ export function HabitCard({ entry, date, onEdit, selected }: HabitCardProps) {
         <div className="flex items-center gap-2">
           <p className="truncate text-sm font-medium text-text">{habit.name}</p>
           {streak.current > 0 && (
-            <span className="flex shrink-0 items-center gap-0.5 text-xs font-medium text-warning">
+            <span className="flex shrink-0 items-center gap-0.5 text-xs font-medium tabular-nums text-text-muted">
               <Flame size={12} strokeWidth={2} />
               {streak.current}
             </span>

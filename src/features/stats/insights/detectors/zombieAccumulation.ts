@@ -5,8 +5,8 @@ export const zombieAccumulation: Detector = (ctx) => {
 
   return {
     key: 'zombieAccumulation',
-    title: ctx.zombieCount === 1 ? 'Tienes una tarea zombie' : `Tienes ${ctx.zombieCount} tareas zombie`,
-    body: 'Llevan pospuestas 3 veces o más. O las haces, o las rompes en algo más pequeño, o las sueltas — dejarlas ahí solo pesa.',
+    title: ctx.zombieCount === 1 ? 'Una tarea lleva tiempo aplazándose' : `${ctx.zombieCount} tareas llevan tiempo aplazándose`,
+    body: 'Se han pospuesto 3 veces o más. Puedes partirlas en algo más pequeño, aparcarlas o soltarlas: cualquiera vale.',
     severity: ctx.zombieCount >= 3 ? 'warn' : 'neutral',
     confidence: Math.min(1, ctx.zombieCount / 5),
   }

@@ -483,6 +483,9 @@ export function HabitForm() {
             </Button>
             <Button type="submit" loading={saving} title="Ctrl + Enter" aria-keyshortcuts="Control+Enter">
               {isEdit ? 'Guardar hábito' : 'Crear hábito'}
+                <kbd aria-hidden="true" className="ml-1 rounded-xs bg-black/15 px-1 text-xs font-medium">
+                  Ctrl&nbsp;↵
+                </kbd>
             </Button>
           </div>
         </div>

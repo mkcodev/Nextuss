@@ -76,7 +76,7 @@ export function NowBlock({ date }: { date: string }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: reduceMotion ? 0.12 : 0.22, ease: [0.25, 1, 0.5, 1] }}
       aria-labelledby={titleId}
-      className="rounded-lg border border-border bg-surface p-5"
+      className="rounded-md border border-border bg-surface p-5"
     >
       <div className="flex items-center gap-2 text-sm">
         <span

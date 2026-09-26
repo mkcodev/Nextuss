@@ -11,8 +11,9 @@ export function ProgressBar({ value, className, barClassName }: ProgressBarProps
   return (
     <div className={cn('h-2 w-full overflow-hidden rounded-full bg-border', className)}>
       <div
-        className={cn('h-full rounded-full bg-accent transition-[width] duration-500 ease-out', barClassName)}
-        style={{ width: `${pct}%` }}
+        // scaleX en vez de `width`: anima sin recalcular el layout.
+        className={cn('h-full w-full origin-left rounded-full bg-accent transition-transform duration-500 ease-out', barClassName)}
+        style={{ transform: `scaleX(${pct / 100})` }}
       />
     </div>
   )

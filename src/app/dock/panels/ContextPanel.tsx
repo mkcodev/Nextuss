@@ -19,7 +19,7 @@ export function ContextPanel() {
   return (
     <div>
       {title && (
-        <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-faint">
+        <p className="mb-3 text-xs font-semibold text-text-muted">
           {title}
         </p>
       )}

@@ -5,11 +5,10 @@ import { NAV_ITEMS } from './navItems'
 import { useUIStore } from './uiStore'
 import { useQuickAddStore } from '../features/tasks/quickAddStore'
 
-// Ajustes is left out (reachable via the avatar menu and the palette); Tareas and Proyectos are left
-// out too (both reachable via the palette) to leave room for the two action buttons every phone user
-// actually needs: create, and the dock — an 8-tab bottom bar on a phone-width screen is "technically
-// reachable", not "usable".
-const MOBILE_EXCLUDED = new Set(['/ajustes', '/proyectos', '/tareas'])
+// En el móvil caben 4 destinos + Crear + Panel. Tareas entra (es la lista principal); Estadísticas,
+// Proyectos y Ajustes quedan en la paleta y el menú del avatar — una barra de 8 en un teléfono es
+// "técnicamente alcanzable", no usable.
+const MOBILE_EXCLUDED = new Set(['/ajustes', '/proyectos', '/estadisticas'])
 const MOBILE_NAV_ITEMS = NAV_ITEMS.filter((item) => !MOBILE_EXCLUDED.has(item.to))
 
 export function MobileNav() {
@@ -28,8 +27,8 @@ export function MobileNav() {
           end={end}
           className={({ isActive }) =>
             cn(
-              'relative flex flex-1 flex-col items-center gap-0.5 px-3 py-2 text-xs font-medium transition-colors',
-              isActive ? 'text-accent' : 'text-text-faint hover:text-text',
+              'relative flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 py-2 text-xs font-medium transition-colors',
+              isActive ? 'text-accent' : 'text-text-muted hover:text-text',
             )
           }
         >
@@ -37,23 +36,25 @@ export function MobileNav() {
             <>
               {isActive && <span className="absolute top-0 h-0.5 w-6 rounded-full bg-accent" />}
               <Icon size={18} strokeWidth={1.75} />
-              <span>{label}</span>
+              <span className="max-w-full truncate">{label}</span>
             </>
           )}
         </NavLink>
       ))}
 
       <button
+        type="button"
         onClick={() => openQuickAdd()}
-        className="flex flex-1 flex-col items-center gap-0.5 px-3 py-2 text-xs font-medium text-text-faint transition-colors hover:text-text"
+        className="flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 py-2 text-xs font-medium text-text-muted transition-colors hover:text-text"
       >
         <Plus size={18} strokeWidth={1.75} />
         <span>Crear</span>
       </button>
 
       <button
+        type="button"
         onClick={openMobileDock}
-        className="flex flex-1 flex-col items-center gap-0.5 px-3 py-2 text-xs font-medium text-text-faint transition-colors hover:text-text"
+        className="flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 py-2 text-xs font-medium text-text-muted transition-colors hover:text-text"
       >
         <LayoutPanelTop size={18} strokeWidth={1.75} />
         <span>Panel</span>

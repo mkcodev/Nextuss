@@ -73,7 +73,7 @@ export function OverdueTasks({ date }: { date: string }) {
         </div>
       </div>
 
-      <ul className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface">
+      <ul className="divide-y divide-border overflow-hidden rounded-md border border-border bg-surface">
         <AnimatePresence initial={false}>
         {visible.map((t) => {
           const isZombie = t.postponedCount >= ZOMBIE_THRESHOLD
