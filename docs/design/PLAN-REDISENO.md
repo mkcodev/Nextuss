@@ -51,7 +51,7 @@ Comandos de Impeccable más útiles: `critique` (jerarquía/claridad), `audit` (
 - [ ] TÚ: probarlo creando y editando 3 tareas reales.
 
 ### 7. Resto de formularios (misma receta, 1 rama/PR cada uno)
-- [ ] ProjectForm  - [ ] HabitForm  - [ ] GoalForm
+- [x] ProjectForm (#48)  - [x] HabitForm (#49)  - [x] GoalForm (#47)
 
 ### 8. Páginas y estados
 - [ ] TasksPage, HabitsPage, SettingsPage con el nuevo sistema.

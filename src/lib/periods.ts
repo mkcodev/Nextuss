@@ -2,7 +2,7 @@
 // features/planner/goalProgress.ts junto a los objetivos, pero dejaron de ser cosa del planner en
 // cuanto las estadísticas (Fase 4) también necesitan resolver/recorrer rangos de periodos.
 import { addMonths, addWeeks, endOfISOWeek, endOfMonth, startOfISOWeek } from 'date-fns'
-import { dateKey, monthKey, weekKey } from './dates'
+import { dateKey, formatShortDate, monthKey, weekKey } from './dates'
 import type { GoalPeriod } from '../db/types'
 
 /** Inverso de `weekKey`/`monthKey` en `src/lib/dates.ts` — debe mantenerse en sincronía con ellas. */
@@ -67,4 +67,19 @@ export function goalElapsedRatio(
   const totalMs = periodEnd.getTime() - effectiveStart
   if (totalMs <= 0) return 1
   return Math.max(0, Math.min(1, (now.getTime() - effectiveStart) / totalMs))
+}
+
+const MONTH_LABEL = new Intl.DateTimeFormat('es', { month: 'long', year: 'numeric' })
+
+/** Nombre legible del periodo: "Semana del 21 al 27 sep" o "Septiembre de 2026". Sustituye a los
+ *  `<input type="week"/"month">`, que Firefox y Safari de escritorio muestran como texto libre. */
+export function formatPeriodLabel(period: GoalPeriod, key: string, today?: string): string {
+  if (period === 'month') {
+    const label = MONTH_LABEL.format(parsePeriodKey('month', key))
+    return label.charAt(0).toUpperCase() + label.slice(1)
+  }
+  const { from, to } = periodDateRange('week', key)
+  const sameMonth = from.slice(0, 7) === to.slice(0, 7)
+  const fromLabel = sameMonth ? String(Number(from.slice(8))) : formatShortDate(from, today)
+  return `Semana del ${fromLabel} al ${formatShortDate(to, today)}`
 }
