@@ -195,6 +195,13 @@ body {
   border-radius: var(--radius-sm);
 }
 
+/* Campos "sin caja" (título y notas del formulario de tarea): su foco se marca con la línea inferior
+   que aparece al enfocar, así que se quita el contorno global. Va aquí, fuera de las capas de Tailwind,
+   porque el `:focus-visible` global de arriba ganaría a cualquier utilidad `outline-none`. */
+.field-bare:focus-visible {
+  outline: none;
+}
+
 .skip-link {
   position: fixed;
   top: -100%;
