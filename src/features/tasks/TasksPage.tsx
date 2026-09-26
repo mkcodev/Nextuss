@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import {
   Archive,
@@ -212,7 +212,13 @@ export function TasksPage() {
     const n = reorderNeighbors(views, (v) => v.id, draggedId, targetId, position)
     if (n) void moveTaskViewBetween(draggedId, n.before, n.after)
   }
-  const dnd = useDragReorder({ mime: VIEW_DRAG_MIME, orientation: 'horizontal', onMove: handleMoveView })
+  const dnd = useDragReorder({
+    mime: VIEW_DRAG_MIME,
+    orientation: 'horizontal',
+    onMove: handleMoveView,
+    ids: views.map((v) => v.id!),
+    labelOf: (id) => views.find((v) => v.id === id)?.name ?? 'Vista',
+  })
 
   const handleDeleteView = async (view: TaskView) => {
     setConfirmingDeleteId(null)
@@ -220,6 +226,9 @@ export function TasksPage() {
     if (activeViewId === view.id) setActiveViewId(null)
     if (draft?.viewId === view.id) setDraft(null)
   }
+
+  const ariaSort = (field: string) =>
+    activeView?.sortField !== field ? 'none' : activeView.sortDir === 'asc' ? 'ascending' : 'descending'
 
   const shownCount = Math.min(rows.length, visibleRows)
   const listNav = {
@@ -232,6 +241,29 @@ export function TasksPage() {
     onCreate: () => openCreateTask(),
   }
   useListNav(listNav)
+
+  // Esc vacía la selección y Ctrl/Cmd+A selecciona todas las filas filtradas (fuera de campos y diálogos).
+  const selectionKeys = useRef({ rows, selected: selectedIds.size })
+  useEffect(() => {
+    selectionKeys.current = { rows, selected: selectedIds.size }
+  })
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const { rows, selected } = selectionKeys.current
+      if (e.defaultPrevented || document.querySelector('[role="dialog"], [role="menu"]')) return
+      const t = e.target as HTMLElement | null
+      if (t?.closest('input:not([type="checkbox"]), textarea, select, [contenteditable="true"]')) return
+      if (e.key === 'Escape' && selected > 0) {
+        e.preventDefault()
+        setSelectedIds(new Set())
+      } else if (e.key.toLowerCase() === 'a' && (e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && rows.length > 0) {
+        e.preventDefault()
+        setSelectedIds(new Set(rows.map((r) => r.id!).filter((id) => id != null)))
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <div className="mx-auto max-w-5xl space-y-4 p-6 lg:p-8">
@@ -249,7 +281,7 @@ export function TasksPage() {
         </div>
       </header>
 
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div role="group" aria-label="Vistas" className="flex flex-wrap items-center gap-1.5">
         {views.map((view) => (
           <div
             key={view.id}
@@ -275,7 +307,9 @@ export function TasksPage() {
                 className="w-24 border-b border-accent bg-transparent outline-none"
               />
             ) : (
-              <button onClick={() => setActiveViewId(view.id!)}>{view.name}</button>
+              <button type="button" aria-current={effectiveViewId === view.id ? 'true' : undefined} onClick={() => setActiveViewId(view.id!)}>
+                {view.name}
+              </button>
             )}
             {confirmingDeleteId === view.id ? (
               <>
@@ -337,6 +371,9 @@ export function TasksPage() {
             </Card>
           )}
 
+          <p aria-live="polite" className="sr-only">
+            {selectedIds.size > 0 ? `${selectedIds.size} seleccionada${selectedIds.size === 1 ? '' : 's'}. Esc para quitar la selección.` : ''}
+          </p>
           {selectedIds.size > 0 && (
             <Card className="flex flex-wrap items-center gap-2 bg-bg-soft p-3" role="region" aria-label="Acciones en bloque">
               <span className="text-sm font-semibold text-text">{selectedIds.size} seleccionada{selectedIds.size === 1 ? '' : 's'}</span>
@@ -594,17 +631,18 @@ export function TasksPage() {
                           aria-label="Seleccionar todas"
                         />
                       </th>
-                      <th className="px-3 py-2 font-medium">
-                        <button onClick={() => toggleSort('title')} className="flex items-center gap-1">
+                      <th className="px-3 py-2 font-medium" aria-sort={ariaSort('title')}>
+                        <button type="button" onClick={() => toggleSort('title')} className="flex items-center gap-1">
                           Título {activeView.sortField === 'title' && <SortIcon dir={activeView.sortDir} />}
                         </button>
                       </th>
                       {activeView.columns.map((col) => {
                         const sortable = col === 'priority' || col === 'scheduledDate' || col === 'dueDate' || col === 'estimateMin'
                         return (
-                          <th key={col} className="px-3 py-2 font-medium">
+                          <th key={col} className="px-3 py-2 font-medium" aria-sort={sortable ? ariaSort(col) : undefined}>
                             {sortable ? (
                               <button
+                                type="button"
                                 onClick={() => toggleSort(col as TaskSortField)}
                                 className="flex items-center gap-1"
                               >
