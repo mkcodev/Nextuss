@@ -46,3 +46,16 @@ export function progressForXp(totalXp: number): LevelProgress {
     xpForNextLevel: nextFloor - floor,
   }
 }
+
+/** Fechas de la curva de XP en las que se subió de nivel (Fase 18: marcas sobre el gráfico).
+ *  `curve` es XP acumulado DENTRO del periodo; `startXp` es el XP total que había al empezarlo. */
+export function levelUpsInCurve(curve: { date: string; xp: number }[], startXp: number): { date: string; level: number }[] {
+  const out: { date: string; level: number }[] = []
+  let prevLevel = levelForXp(startXp)
+  for (const point of curve) {
+    const level = levelForXp(startXp + point.xp)
+    if (level > prevLevel) out.push({ date: point.date, level })
+    prevLevel = level
+  }
+  return out
+}

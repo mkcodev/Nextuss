@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  timeByGroup,
   buildDailySeries,
   buildEstimateAccuracy,
   buildHabitMatrix,
@@ -196,5 +197,32 @@ describe('summarizePeriod / comparePeriods', () => {
     const tasksDelta = deltas.find((d) => d.key === 'tasksCompleted')!
     expect(tasksDelta.direction).toBe('up')
     expect(tasksDelta.significant).toBe(true)
+  })
+})
+
+describe('timeByGroup', () => {
+  it('suma minutos por grupo, manda lo suelto a "Sin …" y ordena de más a menos', () => {
+    const groups: Record<number, { key: string; label: string } | null> = {
+      1: { key: 'a', label: 'Trabajo' },
+      2: { key: 'b', label: 'Salud' },
+      3: { key: 'a', label: 'Trabajo' },
+      4: null,
+    }
+    const out = timeByGroup(
+      [
+        { taskId: 1, minutes: 30 },
+        { taskId: 2, minutes: 45 },
+        { taskId: 3, minutes: 20 },
+        { taskId: 4, minutes: 10 },
+        { taskId: 2, minutes: 0 },
+      ],
+      (id) => groups[id],
+      'Sin atributo',
+    )
+    expect(out.map((b) => [b.label, b.minutes])).toEqual([
+      ['Trabajo', 50],
+      ['Salud', 45],
+      ['Sin atributo', 10],
+    ])
   })
 })

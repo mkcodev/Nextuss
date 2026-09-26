@@ -20,9 +20,13 @@ import { computeGoalProgress, computeGoalSegments, isGoalAtRisk } from './goalPr
 import { goalElapsedRatio } from '../../lib/periods'
 import { useGoalFormStore } from './goalFormStore'
 
+/** Solo tareas vivas: `goal.taskIds` sigue apuntando a las que están en la papelera (para poder
+ * restaurarlas con su vínculo intacto), pero no deben listarse — `computeGoalSegments` ya las omite
+ * del progreso y la lista tiene que cuadrar con el contador. */
 function useGoalTasks(goal: Goal) {
   return useLiveQuery(
-    (): Promise<(Task | undefined)[]> => (goal.taskIds.length ? db.tasks.bulkGet(goal.taskIds) : Promise.resolve([])),
+    async (): Promise<(Task | undefined)[]> =>
+      goal.taskIds.length ? (await db.tasks.bulkGet(goal.taskIds)).filter((t) => t?.deletedAt === 0) : [],
     [goal.taskIds.join(',')],
   )
 }

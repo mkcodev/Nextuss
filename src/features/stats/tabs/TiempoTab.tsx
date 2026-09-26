@@ -7,6 +7,11 @@ import { ChartCard, BarSeries, LineTrend, StatTile } from '../charts'
 import { getOverdueTasks, ZOMBIE_THRESHOLD } from '../../../db/repositories/tasks'
 import { todayKey } from '../../../lib/dates'
 import { formatMinutes } from '../format'
+import { timeByGroup } from '../aggregate'
+import { TimeBreakdown } from '../charts/TimeBreakdown'
+import { listProjects } from '../../../db/repositories/projects'
+import { listAttributes } from '../../../db/repositories/gamification'
+import { db } from '../../../db/schema'
 
 interface TiempoTabProps {
   range: StatsRange
@@ -24,6 +29,48 @@ export function TiempoTab({ range }: TiempoTabProps) {
   const data = useStatsData(range)
   const overdueTasks = useLiveQuery(() => getOverdueTasks(todayKey()), []) ?? []
   const zombieCount = overdueTasks.filter((t) => t.postponedCount >= ZOMBIE_THRESHOLD).length
+
+  // Tiempo por tarea completada: el real registrado o, si no, el de sus sesiones de foco.
+  const taskMinutes = useMemo(() => {
+    const focusByTask = new Map<number, number>()
+    for (const f of data.focusSessions) {
+      if (f.taskId != null && f.durationMin) focusByTask.set(f.taskId, (focusByTask.get(f.taskId) ?? 0) + f.durationMin)
+    }
+    return data.tasksCompleted
+      .filter((t) => t.id != null)
+      .map((t) => ({ taskId: t.id!, minutes: t.actualMin ?? focusByTask.get(t.id!) ?? 0 }))
+  }, [data.tasksCompleted, data.focusSessions])
+  const taskIdsKey = taskMinutes.map((t) => t.taskId).join(',')
+  const lookups = useLiveQuery(async () => {
+    const ids = taskIdsKey ? taskIdsKey.split(',').map(Number) : []
+    const [projects, attributes, goals] = await Promise.all([
+      listProjects(true),
+      listAttributes(),
+      ids.length ? db.goals.where('taskIds').anyOf(ids).filter((g) => g.deletedAt === 0).toArray() : Promise.resolve([]),
+    ])
+    const goalByTask = new Map<number, { key: string; label: string; attributeId?: number }>()
+    for (const g of goals) for (const id of g.taskIds) if (!goalByTask.has(id)) goalByTask.set(id, { key: String(g.id), label: g.title, attributeId: g.attributeId })
+    return { projects: new Map(projects.map((p) => [p.id!, p])), attributes: new Map(attributes.map((a) => [a.id!, a])), goalByTask }
+  }, [taskIdsKey])
+  const byAttribute = useMemo(() => {
+    if (!lookups) return []
+    const projectOf = new Map(data.tasksCompleted.map((t) => [t.id!, t.projectId]))
+    return timeByGroup(
+      taskMinutes,
+      (taskId) => {
+        // Atributo del proyecto y, si no tiene, el del objetivo al que está vinculada la tarea.
+        const project = lookups.projects.get(projectOf.get(taskId) ?? -1)
+        const attrId = project?.attributeId ?? lookups.goalByTask.get(taskId)?.attributeId
+        const attr = attrId != null ? lookups.attributes.get(attrId) : undefined
+        return attr ? { key: String(attr.id), label: attr.name, color: attr.color } : null
+      },
+      'Sin atributo',
+    )
+  }, [lookups, taskMinutes, data.tasksCompleted])
+  const byGoal = useMemo(
+    () => (lookups ? timeByGroup(taskMinutes, (taskId) => lookups.goalByTask.get(taskId) ?? null, 'Sin objetivo') : []),
+    [lookups, taskMinutes],
+  )
 
   const plannedVsActualByDay = useMemo(() => {
     const buckets = new Map<string, { date: string; planned: number; actual: number }>()
@@ -167,6 +214,15 @@ export function TiempoTab({ range }: TiempoTabProps) {
             xKey="label"
             series={[{ key: 'count', label: 'Tareas', color: 'var(--nx-accent)' }]}
           />
+        </ChartCard>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <ChartCard title="Tiempo por atributo" subtitle="Tareas completadas: tiempo real o de foco" loading={data.loading}>
+          <TimeBreakdown buckets={byAttribute} emptyText="Aún no hay tiempo registrado en tareas completadas." />
+        </ChartCard>
+        <ChartCard title="Tiempo por objetivo" subtitle="Tareas completadas vinculadas a un objetivo" loading={data.loading}>
+          <TimeBreakdown buckets={byGoal} emptyText="Aún no hay tiempo registrado en tareas completadas." />
         </ChartCard>
       </div>
 

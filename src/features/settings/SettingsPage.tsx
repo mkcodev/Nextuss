@@ -16,6 +16,10 @@ import { InstallPrompt } from '../pwa/InstallPrompt'
 import { BackupSection } from './BackupSection'
 import { TrashSection } from './TrashSection'
 import { TagsSection } from './TagsSection'
+import { DismissedInsightsSection } from './DismissedInsightsSection'
+import { RecurrenceSection } from './RecurrenceSection'
+import { TemplatesSection } from './TemplatesSection'
+import { ReviewsHistorySection } from './ReviewsHistorySection'
 import {
   getNotificationPermissionState,
   requestNotificationPermission,
@@ -656,6 +660,14 @@ export function SettingsPage() {
       <PlannerSection />
 
       <TagsSection />
+
+      <RecurrenceSection />
+
+      <TemplatesSection />
+
+      <ReviewsHistorySection />
+
+      <DismissedInsightsSection />
 
       <AiSection />
 

@@ -11,6 +11,7 @@ export function usePlayerProgress() {
 
   return {
     loading: !progress,
+    totalXp,
     level: levelInfo.level,
     xpIntoLevel: levelInfo.xpIntoLevel,
     xpForNextLevel: levelInfo.xpForNextLevel,

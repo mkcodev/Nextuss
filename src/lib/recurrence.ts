@@ -6,7 +6,7 @@
 //   en que se completó la ocurrencia anterior — no tiene sentido enumerar un rango por adelantado
 //   porque depende de cuándo el usuario complete cada una, no del calendario.
 import { addDays, addMonths, addWeeks, differenceInCalendarDays, getDay, startOfWeek } from 'date-fns'
-import { dateKey, parseDateKey } from './dates'
+import { dateKey, parseDateKey, WEEKDAY_LABELS_ES_FULL, WEEKDAY_ORDER_MON_FIRST } from './dates'
 
 export interface RecurrenceRuleLike {
   freq: 'daily' | 'weekly' | 'monthly'
@@ -15,6 +15,8 @@ export interface RecurrenceRuleLike {
   byMonthDay?: number[]
   startDate: string
   until?: string
+  /** Solo para describirla: 'completion' = la siguiente se crea al completar la anterior. */
+  mode?: 'schedule' | 'completion'
 }
 
 function matchesRule(rule: RecurrenceRuleLike, date: Date, anchor: Date): boolean {
@@ -77,4 +79,24 @@ export function nextCompletionOccurrence(rule: RecurrenceRuleLike, completedOn: 
   const key = dateKey(next)
   if (rule.until && key > rule.until) return null
   return key
+}
+
+const LIST = new Intl.ListFormat('es', { type: 'conjunction' })
+
+/** Regla de repetición en lenguaje llano: "Cada día", "Cada 2 semanas: lunes y jueves",
+ *  "Cada mes: días 1 y 15", y "tras completarla" cuando la siguiente depende de terminar esta. */
+export function describeRecurrence(rule: RecurrenceRuleLike): string {
+  const n = rule.interval
+  const unit = { daily: ['día', 'días'], weekly: ['semana', 'semanas'], monthly: ['mes', 'meses'] }[rule.freq]
+  let text = n === 1 ? `Cada ${unit[0]}` : `Cada ${n} ${unit[1]}`
+  if (rule.mode === 'completion') return `${text}, tras completarla`
+  if (rule.freq === 'weekly' && rule.byWeekday?.length) {
+    const days = WEEKDAY_ORDER_MON_FIRST.filter((d) => rule.byWeekday!.includes(d)).map((d) => WEEKDAY_LABELS_ES_FULL[d].toLowerCase())
+    text += `: ${LIST.format(days)}`
+  }
+  if (rule.freq === 'monthly' && rule.byMonthDay?.length) {
+    const days = [...rule.byMonthDay].sort((a, b) => a - b).map(String)
+    text += `: ${days.length === 1 ? 'día' : 'días'} ${LIST.format(days)}`
+  }
+  return text
 }

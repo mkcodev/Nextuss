@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { CheckCheck, Clock, FolderKanban, ListTodo, Pencil, Target } from 'lucide-react'
+import { ArrowLeft, Archive, Check, CheckCheck, Clock, FolderKanban, ListTodo, Pencil, Target } from 'lucide-react'
 import { Card, EmptyState, Icon, RingProgress, SegmentedControl, Skeleton } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { StatTile } from '../stats/charts/StatTile'
@@ -9,9 +9,11 @@ import { usePageTitle } from '../../app/pageTitleStore'
 import { formatMinutes } from '../stats/format'
 import { buildEstimateAccuracy } from '../stats/aggregate'
 import { getProject, getProjectProgress, getTasksForProject } from '../../db/repositories/projects'
+import { createTask } from '../../db/repositories/tasks'
 import { listAttributes } from '../../db/repositories/gamification'
 import { PRIORITY_NAMES } from '../../lib/priority'
 import { PriorityBars } from '../tasks/PriorityBars'
+import { toggleTaskDoneWithFeedback } from '../tasks/actions'
 import { useTaskFormStore } from '../tasks/taskFormStore'
 import { TaskQuickMenu } from '../tasks/TaskQuickMenu'
 import { useProjectFormStore } from './projectFormStore'
@@ -30,8 +32,16 @@ export function ProjectDetailPage() {
   const openEditTask = useTaskFormStore((s) => s.openEdit)
   const openEditProject = useProjectFormStore((s) => s.openEdit)
   const [filter, setFilter] = useState<Filter>('pendientes')
+  const [newTaskTitle, setNewTaskTitle] = useState('')
 
   usePageTitle(project?.name ?? null, [project?.name])
+
+  const handleAddTask = async () => {
+    const title = newTaskTitle.trim()
+    if (!title) return
+    await createTask({ title, projectId })
+    setNewTaskTitle('')
+  }
 
   if (project === undefined)
     return (
@@ -65,20 +75,33 @@ export function ProjectDetailPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6 lg:p-8">
+      <Link to="/proyectos" className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text">
+        <ArrowLeft size={13} strokeWidth={2} /> Proyectos
+      </Link>
       <header className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4">
           <div
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border"
             style={{ backgroundColor: `${project.color}14`, borderColor: `${project.color}33`, color: project.color }}
           >
             <Icon name={project.icon ?? 'folder'} size={26} strokeWidth={1.75} />
           </div>
           <div>
-            <h1 className="text-xl font-semibold tracking-tight text-text">{project.name}</h1>
+            <h1 className="flex items-center gap-2 text-xl font-semibold tracking-tight text-text">
+              {project.name}
+              {project.archived && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs font-medium text-text-muted">
+                  <Archive size={12} /> Archivado
+                </span>
+              )}
+            </h1>
             {project.description && <p className="mt-1 max-w-xl text-sm text-text-muted">{project.description}</p>}
             {attribute && (
-              <span className="mt-1.5 inline-flex items-center gap-1 text-xs" style={{ color: attribute.color }}>
-                <Icon name={attribute.icon} size={12} /> {attribute.name}
+              <span className="mt-1.5 inline-flex items-center gap-1 text-xs text-text-muted">
+                <span style={{ color: attribute.color }} aria-hidden="true">
+                  <Icon name={attribute.icon} size={12} />
+                </span>
+                {attribute.name}
               </span>
             )}
           </div>
@@ -96,7 +119,7 @@ export function ProjectDetailPage() {
           <Target size={22} className="text-accent" />
         </RingProgress>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-accent">Progreso</p>
+          <h2 className="text-sm font-semibold text-text">Progreso</h2>
           <p className="mt-0.5 text-lg font-semibold text-text">
             {progress?.done ?? 0} / {progress?.total ?? 0} tareas
           </p>
@@ -143,6 +166,16 @@ export function ProjectDetailPage() {
                 key={t.id}
                 className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2"
               >
+                <button
+                  onClick={() => toggleTaskDoneWithFeedback(t.id!, t.title)}
+                  aria-label={t.status === 'done' ? `Reabrir "${t.title}"` : `Completar "${t.title}"`}
+                  className={cn(
+                    'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
+                    t.status === 'done' ? 'border-accent bg-accent text-white' : 'border-text-faint',
+                  )}
+                >
+                  {t.status === 'done' && <Check size={10} strokeWidth={3} />}
+                </button>
                 {t.priority && (
 <span className="flex shrink-0 items-center" title={PRIORITY_NAMES[t.priority]}>
             <PriorityBars p={t.priority} />
@@ -163,6 +196,20 @@ export function ProjectDetailPage() {
             ))}
           </div>
         )}
+
+        <input
+          value={newTaskTitle}
+          onChange={(e) => setNewTaskTitle(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              void handleAddTask()
+            }
+          }}
+          placeholder="Añadir tarea al proyecto…"
+          aria-label="Añadir tarea al proyecto"
+          className="mt-2 w-full rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
+        />
       </div>
     </div>
   )

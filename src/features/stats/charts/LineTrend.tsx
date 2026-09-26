@@ -1,4 +1,4 @@
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useChartTheme } from './chartTheme'
 import { ChartTooltip } from './ChartTooltip'
 
@@ -14,9 +14,11 @@ interface LineTrendProps {
   series: ChartSeriesSpec[]
   height?: number
   formatValue?: (value: number | string | undefined) => string
+  /** Marcas verticales (p. ej. subidas de nivel): valor del eje X y etiqueta corta. */
+  markers?: { x: string; label: string }[]
 }
 
-export function LineTrend({ data, xKey, series, height = 220, formatValue }: LineTrendProps) {
+export function LineTrend({ data, xKey, series, height = 220, formatValue, markers = [] }: LineTrendProps) {
   const theme = useChartTheme()
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -25,6 +27,15 @@ export function LineTrend({ data, xKey, series, height = 220, formatValue }: Lin
         <XAxis dataKey={xKey} stroke={theme.textFaint} fontSize={11} tickLine={false} axisLine={false} />
         <YAxis stroke={theme.textFaint} fontSize={11} tickLine={false} axisLine={false} width={40} />
         <Tooltip content={<ChartTooltip formatValue={formatValue} />} cursor={{ stroke: theme.grid }} />
+        {markers.map((m) => (
+          <ReferenceLine
+            key={m.x}
+            x={m.x}
+            stroke={theme.textFaint}
+            strokeDasharray="3 3"
+            label={{ value: m.label, position: 'insideTopLeft', fill: theme.textFaint, fontSize: 11 }}
+          />
+        ))}
         {series.map((s) => (
           <Line
             key={s.key}

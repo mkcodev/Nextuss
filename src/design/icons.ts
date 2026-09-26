@@ -149,17 +149,6 @@ export const HABIT_ICON_KEYS: IconKey[] = [
   'wallet',
 ]
 
-export const ATTRIBUTE_ICON_KEYS: IconKey[] = [
-  'heart',
-  'brain',
-  'dumbbell',
-  'briefcase',
-  'wallet',
-  'palette',
-  'leaf',
-  'star',
-]
-
 export const PROJECT_ICON_KEYS: IconKey[] = [
   'folder',
   'rocket',

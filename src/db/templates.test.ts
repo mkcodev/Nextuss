@@ -11,6 +11,8 @@ import {
   listTaskTemplates,
   saveProjectAsTemplate,
   saveTaskAsTemplate,
+  updateProjectTemplate,
+  updateTaskTemplate,
 } from './repositories/templates'
 
 beforeEach(async () => {
@@ -114,5 +116,26 @@ describe('deleteTaskTemplate / deleteProjectTemplate', () => {
     const projectTemplateId = await saveProjectAsTemplate(projectId)
     await deleteProjectTemplate(projectTemplateId)
     expect(await db.projectTemplates.get(projectTemplateId)).toBeUndefined()
+  })
+})
+
+describe('updateTaskTemplate / updateProjectTemplate', () => {
+  it('renombra y reemplaza los hijos, descartando los vacíos', async () => {
+    const taskId = await createTask({ title: 'Informe' })
+    await createTask({ title: 'Borrador', parentId: taskId, status: 'backlog' })
+    const tplId = await saveTaskAsTemplate(taskId)
+
+    await updateTaskTemplate(tplId, { title: '  Informe mensual ', subtasks: [{ title: 'Datos' }, { title: '  ' }, { title: 'Revisar ' }] })
+    const tpl = await db.taskTemplates.get(tplId)
+    expect(tpl!.title).toBe('Informe mensual')
+    expect(tpl!.subtasks.map((c) => c.title)).toEqual(['Datos', 'Revisar'])
+
+    const projectId = await createProject({ name: 'Web', color: '#5058C8' })
+    await createTask({ title: 'Portada', projectId })
+    const pTplId = await saveProjectAsTemplate(projectId)
+    await updateProjectTemplate(pTplId, { name: 'Web nueva', tasks: [{ title: 'Portada' }, { title: 'Contacto' }] })
+    const pTpl = await db.projectTemplates.get(pTplId)
+    expect(pTpl!.name).toBe('Web nueva')
+    expect(pTpl!.tasks.map((c) => c.title)).toEqual(['Portada', 'Contacto'])
   })
 })

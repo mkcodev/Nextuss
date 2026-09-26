@@ -421,3 +421,29 @@ export function comparePeriods(current: PeriodSummary, previous: PeriodSummary):
     return { key, current: c, previous: p, delta, deltaRatio, direction, significant }
   })
 }
+
+export interface TimeBucket {
+  key: string
+  label: string
+  minutes: number
+  color?: string
+}
+
+/** Minutos por grupo (atributo u objetivo) a partir del tiempo de cada tarea (Fase 18, pestaña Tiempo).
+ *  `groupOf` devuelve el grupo de una tarea o `null` → va a "Sin …". Ordenado de más a menos; los
+ *  grupos con 0 minutos no aparecen. */
+export function timeByGroup(
+  taskMinutes: { taskId: number; minutes: number }[],
+  groupOf: (taskId: number) => { key: string; label: string; color?: string } | null,
+  noneLabel: string,
+): TimeBucket[] {
+  const buckets = new Map<string, TimeBucket>()
+  for (const { taskId, minutes } of taskMinutes) {
+    if (minutes <= 0) continue
+    const g = groupOf(taskId) ?? { key: '__none__', label: noneLabel }
+    const b = buckets.get(g.key) ?? { key: g.key, label: g.label, color: g.color, minutes: 0 }
+    b.minutes += minutes
+    buckets.set(g.key, b)
+  }
+  return [...buckets.values()].sort((a, b) => b.minutes - a.minutes)
+}

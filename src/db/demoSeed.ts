@@ -4,7 +4,7 @@
 // para que el motor de insights tenga patrones reales que detectar.
 import { addDays, subDays } from 'date-fns'
 import { db } from './schema'
-import type { CheckIn, EnergyLevel, FocusSession, Goal, Habit, HabitLog, Task, WeeklyReview } from './types'
+import type { CheckIn, EnergyLevel, FocusSession, Goal, Habit, HabitLog, Project, Task, WeeklyReview } from './types'
 import { dateKey, isHabitScheduledOn, minutesToTime, monthKey, weekKey, weekdayOf } from '../lib/dates'
 import { levelForXp, XP_PER_COMPLETION, XP_PER_GOAL_MONTH, XP_PER_GOAL_WEEK } from '../lib/xp'
 import { nextPeriodKey, parsePeriodKey as parsePeriodStart } from '../lib/periods'
@@ -50,6 +50,12 @@ const DEMO_ATTRIBUTES = [
   { key: 'relaciones', name: 'Relaciones', icon: 'sparkles', color: '#F5A524' },
 ] as const
 type AttrKey = (typeof DEMO_ATTRIBUTES)[number]['key']
+
+const DEMO_PROJECTS: { name: string; icon: string; color: string; attrKey: AttrKey }[] = [
+  { name: 'Lanzamiento web', icon: 'rocket', color: '#5058C8', attrKey: 'trabajo' },
+  { name: 'Casa en orden', icon: 'folder', color: '#C9822B', attrKey: 'relaciones' },
+  { name: 'Ponerse en forma', icon: 'dumbbell', color: '#2E9E6B', attrKey: 'salud' },
+]
 
 const DEMO_HABITS: Array<{
   name: string
@@ -168,6 +174,7 @@ const SEEDABLE_TABLES = [
   'goals',
   'reviews',
   'achievements',
+  'projects',
 ] as const
 
 export async function isDemoDataPresent(): Promise<boolean> {
@@ -194,6 +201,7 @@ export async function generateDemoData(): Promise<DemoSeedResult> {
     goals: [],
     reviews: [],
     achievements: [],
+    projects: [],
   }
 
   try {
@@ -205,6 +213,25 @@ export async function generateDemoData(): Promise<DemoSeedResult> {
       attributeIdByKey.set(a.key, id)
       createdIds.attributes.push(id)
     }
+
+    // --- Proyectos (para que "Tiempo por atributo" y el detalle de proyecto tengan contenido) ---
+    const demoProjectIds: (number | undefined)[] = []
+    for (const [i, p] of DEMO_PROJECTS.entries()) {
+      const id = (await db.projects.add({
+        name: p.name,
+        color: p.color,
+        icon: p.icon,
+        attributeId: attributeIdByKey.get(p.attrKey),
+        archived: false,
+        createdAt: Date.now(),
+        deletedAt: 0,
+        sortKey: i * 1000,
+      } as Project)) as number
+      demoProjectIds.push(id)
+      createdIds.projects.push(id)
+    }
+    // Una de cada cuatro tareas se queda sin proyecto, como en la vida real.
+    demoProjectIds.push(undefined)
 
     // --- Hábitos ---
     const habitIds: number[] = []
@@ -320,6 +347,8 @@ export async function generateDemoData(): Promise<DemoSeedResult> {
           sortKey: tasksToAdd.length * 1000,
           tagIds: [],
           xpAwarded: 0,
+          // Reparto por posición (sin tirar más números aleatorios, para no cambiar el resto de la demo).
+          projectId: demoProjectIds[tasksToAdd.length % demoProjectIds.length],
         }
 
         if (scheduled) {
