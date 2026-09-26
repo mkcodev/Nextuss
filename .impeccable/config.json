@@ -1,0 +1,80 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "docs/design/direcciones/a-plano-tecnico.html"
+        ],
+        "createdAt": "2026-09-26T07:45:38.322Z",
+        "reason": "Claude: página de comparación de direcciones; carga a propósito las fuentes de las direcciones no elegidas (A, B, D, E)"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "docs/design/direcciones/b-cabina.html"
+        ],
+        "createdAt": "2026-09-26T07:45:38.487Z",
+        "reason": "Claude: página de comparación de direcciones; carga a propósito las fuentes de las direcciones no elegidas (A, B, D, E)"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "docs/design/direcciones/c-herramienta.html"
+        ],
+        "createdAt": "2026-09-26T07:45:38.645Z",
+        "reason": "Claude: página de comparación de direcciones; carga a propósito las fuentes de las direcciones no elegidas (A, B, D, E)"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "docs/design/direcciones/d-tablero.html"
+        ],
+        "createdAt": "2026-09-26T07:45:38.813Z",
+        "reason": "Claude: página de comparación de direcciones; carga a propósito las fuentes de las direcciones no elegidas (A, B, D, E)"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "docs/design/direcciones/e-aparato.html"
+        ],
+        "createdAt": "2026-09-26T07:45:38.983Z",
+        "reason": "Claude: página de comparación de direcciones; carga a propósito las fuentes de las direcciones no elegidas (A, B, D, E)"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "docs/design/direcciones/f-herramienta-plano.html"
+        ],
+        "createdAt": "2026-09-26T07:45:39.150Z",
+        "reason": "Claude: página de comparación de direcciones; carga a propósito las fuentes de las direcciones no elegidas (A, B, D, E)"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "docs/design/direcciones/g-aparato-plano.html"
+        ],
+        "createdAt": "2026-09-26T07:45:39.315Z",
+        "reason": "Claude: página de comparación de direcciones; carga a propósito las fuentes de las direcciones no elegidas (A, B, D, E)"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "docs/design/direcciones/index.html"
+        ],
+        "createdAt": "2026-09-26T07:45:39.479Z",
+        "reason": "Claude: página de comparación de direcciones; carga a propósito las fuentes de las direcciones no elegidas (A, B, D, E)"
+      }
+    ]
+  }
+}

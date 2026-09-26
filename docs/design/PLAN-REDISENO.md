@@ -36,9 +36,9 @@ Comandos de Impeccable más útiles: `critique` (jerarquía/claridad), `audit` (
 - [x] CLAUDE: juntar ambos en `docs/design/AUDITORIA.md` con prioridades. TÚ lo lees y dices qué te importa más. → Hecho (#34): formularios primero, estética sobria tipo Linear.
 
 ### 4. Dirección visual → `DESIGN.md`
-- [ ] CLAUDE: proponer **3 direcciones visuales** distintas (paleta, tipografía, densidad, radios, sombras) con mockup de una pantalla.
-- [ ] TÚ: elegir una (o mezclar: "la A con los colores de la C").
-- [ ] CLAUDE: escribirla en `docs/design/DESIGN.md`. Es la fuente de verdad: todas las pantallas se basan en ella.
+- [x] CLAUDE: proponer direcciones visuales con páginas de ejemplo (`docs/design/direcciones/`, 7 direcciones + mezclas, #36).
+- [x] TÚ: elegir. → **F · Herramienta precisa + bloque "Ahora" del plano técnico**.
+- [x] CLAUDE: escribirla en `DESIGN.md` (raíz del repo, lo leen las skills) + contrato en `.impeccable/surfaces/src-app.md`.
 
 ### 5. Sistema de diseño base (#22, rama propia)
 - [ ] Tokens: escala tipográfica (quitar `text-[10px]`/`[11px]`), elevación, usar `--dur-*`/`--ease-*`, radios en Card/Button.

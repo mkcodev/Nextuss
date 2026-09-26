@@ -1,0 +1,529 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-26T07:44:33.311Z",
+  "title": "Design System: Nextuss",
+  "extensions": {
+    "colorMeta": {
+      "indigo-accent": {
+        "role": "primary",
+        "displayName": "Índigo de acción",
+        "canonical": "oklch(51.7% 0.172 275.5)",
+        "tonalRamp": [
+          "#060031",
+          "#1a0171",
+          "#2f2c9a",
+          "#4a51c0",
+          "#6874e7",
+          "#8c9cfe",
+          "#bac5ff",
+          "#eaeeff"
+        ]
+      },
+      "indigo-accent-night": {
+        "role": "primary",
+        "displayName": "Índigo de acción (oscuro)",
+        "canonical": "oklch(56.2% 0.169 276.4)",
+        "tonalRamp": [
+          "#070031",
+          "#1b0171",
+          "#312d99",
+          "#4c51be",
+          "#6a74e5",
+          "#8e9bff",
+          "#bbc5ff",
+          "#eaeeff"
+        ]
+      },
+      "on-accent": {
+        "role": "primary",
+        "displayName": "Blanco sobre acento",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Papel",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "paper-side": {
+        "role": "neutral",
+        "displayName": "Lateral",
+        "canonical": "oklch(97.6% 0.001 286.4)",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#252526",
+          "#424243",
+          "#616162",
+          "#828283",
+          "#a5a5a6",
+          "#c9c9ca",
+          "#eeeeef"
+        ]
+      },
+      "paper-hover": {
+        "role": "neutral",
+        "displayName": "Gris de selección",
+        "canonical": "oklch(94.7% 0.004 286.3)",
+        "tonalRamp": [
+          "#0b0b0d",
+          "#252527",
+          "#424244",
+          "#616163",
+          "#828285",
+          "#a5a5a7",
+          "#c9c9cc",
+          "#eeeef1"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Filete",
+        "canonical": "oklch(92.9% 0.005 286.3)",
+        "tonalRamp": [
+          "#0b0b0d",
+          "#252528",
+          "#424245",
+          "#616164",
+          "#828285",
+          "#a4a4a8",
+          "#c9c9cc",
+          "#eeeef2"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "oklch(22.4% 0.010 285.6)",
+        "tonalRamp": [
+          "#0b0b0f",
+          "#24242a",
+          "#414147",
+          "#606067",
+          "#818288",
+          "#a4a4ab",
+          "#c8c8cf",
+          "#eeeef5"
+        ]
+      },
+      "ink-dim": {
+        "role": "neutral",
+        "displayName": "Tinta atenuada",
+        "canonical": "oklch(52.8% 0.017 285.8)",
+        "tonalRamp": [
+          "#0a0a12",
+          "#24242d",
+          "#41414b",
+          "#60606b",
+          "#81818c",
+          "#a4a4b0",
+          "#c8c8d4",
+          "#ededfa"
+        ]
+      },
+      "ink-faint": {
+        "role": "neutral",
+        "displayName": "Tinta tenue",
+        "canonical": "oklch(68.9% 0.014 286.0)",
+        "tonalRamp": [
+          "#0b0a11",
+          "#24242c",
+          "#41414a",
+          "#606069",
+          "#81818b",
+          "#a4a4ae",
+          "#c8c8d2",
+          "#ededf8"
+        ]
+      },
+      "overdue-orange": {
+        "role": "tertiary",
+        "displayName": "Naranja de atraso",
+        "canonical": "oklch(55.7% 0.145 49.4)",
+        "tonalRamp": [
+          "#180600",
+          "#3e1901",
+          "#6b2e00",
+          "#9a4501",
+          "#c56323",
+          "#ec874b",
+          "#feb68f",
+          "#feeadf"
+        ]
+      },
+      "night": {
+        "role": "neutral",
+        "displayName": "Noche",
+        "canonical": "oklch(18.8% 0.006 285.8)",
+        "tonalRamp": [
+          "#0b0b0e",
+          "#252528",
+          "#414245",
+          "#616165",
+          "#828286",
+          "#a4a4a9",
+          "#c8c9cd",
+          "#eeeef2"
+        ]
+      },
+      "night-side": {
+        "role": "neutral",
+        "displayName": "Lateral (oscuro)",
+        "canonical": "oklch(16.9% 0.004 286.0)",
+        "tonalRamp": [
+          "#0b0b0d",
+          "#252527",
+          "#424244",
+          "#616163",
+          "#828285",
+          "#a5a5a7",
+          "#c9c9cc",
+          "#eeeef1"
+        ]
+      },
+      "night-hover": {
+        "role": "neutral",
+        "displayName": "Gris de selección (oscuro)",
+        "canonical": "oklch(24.1% 0.009 285.7)",
+        "tonalRamp": [
+          "#0b0b0f",
+          "#24242a",
+          "#414147",
+          "#606166",
+          "#828288",
+          "#a4a4ab",
+          "#c8c8cf",
+          "#eeeef5"
+        ]
+      },
+      "night-hairline": {
+        "role": "neutral",
+        "displayName": "Filete (oscuro)",
+        "canonical": "oklch(27.1% 0.011 285.6)",
+        "tonalRamp": [
+          "#0b0b10",
+          "#24242a",
+          "#414148",
+          "#606067",
+          "#818189",
+          "#a4a4ac",
+          "#c8c8d0",
+          "#edeef6"
+        ]
+      },
+      "night-ink": {
+        "role": "neutral",
+        "displayName": "Tinta (oscuro)",
+        "canonical": "oklch(92.9% 0.005 286.3)",
+        "tonalRamp": [
+          "#0b0b0d",
+          "#252528",
+          "#424245",
+          "#616164",
+          "#828285",
+          "#a4a4a8",
+          "#c9c9cc",
+          "#eeeef2"
+        ]
+      },
+      "night-ink-dim": {
+        "role": "neutral",
+        "displayName": "Tinta atenuada (oscuro)",
+        "canonical": "oklch(69.9% 0.016 286.0)",
+        "tonalRamp": [
+          "#0a0a12",
+          "#24242d",
+          "#41414a",
+          "#60606a",
+          "#81818c",
+          "#a4a4af",
+          "#c8c8d3",
+          "#ededf9"
+        ]
+      },
+      "night-ink-faint": {
+        "role": "neutral",
+        "displayName": "Tinta tenue (oscuro)",
+        "canonical": "oklch(54.5% 0.017 285.8)",
+        "tonalRamp": [
+          "#0a0a12",
+          "#24242d",
+          "#41414b",
+          "#60606b",
+          "#81818c",
+          "#a4a4b0",
+          "#c8c8d4",
+          "#ededfa"
+        ]
+      },
+      "overdue-orange-night": {
+        "role": "tertiary",
+        "displayName": "Naranja de atraso (oscuro)",
+        "canonical": "oklch(77.6% 0.125 60.4)",
+        "tonalRamp": [
+          "#150700",
+          "#3a1d00",
+          "#633502",
+          "#8e4f04",
+          "#b86e25",
+          "#de914d",
+          "#feb87d",
+          "#ffeada"
+        ]
+      },
+      "scrim": {
+        "role": "neutral",
+        "displayName": "Velo",
+        "canonical": "rgba(0, 0, 0, 0.35)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Titular",
+        "purpose": "Título de la tarea en el bloque Ahora y del formulario de tarea; único tamaño grande."
+      },
+      "title": {
+        "displayName": "Título",
+        "purpose": "Título de página en la cabecera; 13px/600 en cabeceras de grupo."
+      },
+      "body": {
+        "displayName": "Cuerpo",
+        "purpose": "Títulos de fila y texto general."
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "Botones, fichas de propiedad, pestañas, segmentos."
+      },
+      "meta": {
+        "displayName": "Metadatos",
+        "purpose": "Hora, estimación, racha, subtítulos."
+      },
+      "measure": {
+        "displayName": "Medida",
+        "purpose": "Duraciones y horas con dígitos tabulares en la línea de medida."
+      },
+      "label": {
+        "displayName": "Etiqueta",
+        "purpose": "Etiquetas de casilla, grupo de navegación, píldoras y kbd. Suelo de 12px."
+      }
+    },
+    "shadows": [
+      {
+        "name": "dialog",
+        "value": "0 24px 60px -12px rgba(0,0,0,.35)",
+        "purpose": "Única sombra ambiental: diálogos sobre el velo."
+      },
+      {
+        "name": "focus-ring",
+        "value": "0 0 0 2px #5058c8",
+        "purpose": "Foco de teclado en fichas y controles (borde transparente). En oscuro usar #5e66d6."
+      },
+      {
+        "name": "today-ring",
+        "value": "0 0 0 2px #ffffff, 0 0 0 3.5px #1b1b20",
+        "purpose": "Día actual en la semana de un hábito. En oscuro: papel #131316 y tinta #e7e7eb."
+      }
+    ],
+    "themes": {
+      "light": {
+        "selector": ".dC",
+        "tokens": [
+          "paper",
+          "paper-side",
+          "paper-hover",
+          "hairline",
+          "ink",
+          "ink-dim",
+          "ink-faint",
+          "indigo-accent",
+          "on-accent",
+          "overdue-orange"
+        ]
+      },
+      "dark": {
+        "selector": ".dC[data-theme=\"dark\"]",
+        "tokens": [
+          "night",
+          "night-side",
+          "night-hover",
+          "night-hairline",
+          "night-ink",
+          "night-ink-dim",
+          "night-ink-faint",
+          "indigo-accent-night",
+          "on-accent",
+          "overdue-orange-night"
+        ]
+      }
+    },
+    "contrast": {
+      "on-accent/indigo-accent": "5.88:1 AA",
+      "on-accent/indigo-accent-night": "4.83:1 AA",
+      "ink-dim/paper": "5.34:1",
+      "night-ink-dim/night": "6.91:1",
+      "overdue-orange/paper": "4.98:1",
+      "overdue-orange-night/night": "8.86:1",
+      "ink-faint/paper": "2.79:1 (no apto para información)",
+      "night-ink-faint/night": "3.74:1 (no apto para información)"
+    },
+    "source": {
+      "artifact": "docs/design/direcciones/f-herramienta-plano.html",
+      "stylesheet": "docs/design/direcciones/estilos.css (.dC)",
+      "status": "Derivado del mock aprobado; revisar contra la app tras los issues #22 y #6."
+    }
+  },
+  "components": [
+    {
+      "name": "Botón primario",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Única acción índigo de la cabecera o del bloque Ahora; nombra su objeto y muestra su atajo.",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg>Nueva tarea <kbd class=\"ds-kbd\">C</kbd></button>",
+      "css": ".ds-btn-primary{font-family:Inter,system-ui,sans-serif;letter-spacing:-.005em;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:6px;border:1px solid #5058c8;background:#5058c8;color:#fff;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s;}.ds-btn-primary:hover{background:#4a51c0;border-color:#4a51c0;}.ds-btn-primary:focus-visible{outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px #5058c8;}.ds-btn-primary .ds-kbd{font-family:inherit;font-size:12px;border-radius:4px;padding:1px 5px;background:rgba(255,255,255,.18);color:inherit;}"
+    },
+    {
+      "name": "Botón secundario",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Acciones de apoyo: Hecha, Foco, Cancelar, Filtros.",
+      "html": "<button class=\"ds-btn-secondary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"/></svg>Hecha <kbd class=\"ds-kbd\">X</kbd></button>",
+      "css": ".ds-btn-secondary{font-family:Inter,system-ui,sans-serif;letter-spacing:-.005em;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:6px;border:1px solid #e7e7eb;background:#fff;color:#1b1b20;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s;}.ds-btn-secondary:hover{background:#ededf0;}.ds-btn-secondary:focus-visible{outline:none;box-shadow:0 0 0 2px #5058c8;border-color:transparent;}.ds-kbd{font-family:inherit;font-size:12px;color:#6a6a75;background:#ededf0;border-radius:4px;padding:1px 5px;}"
+    },
+    {
+      "name": "Botón discreto",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Acciones terciarias sin borde: Aplazar, Eliminar.",
+      "html": "<button class=\"ds-btn-quiet\">Aplazar</button>",
+      "css": ".ds-btn-quiet{font-family:Inter,system-ui,sans-serif;letter-spacing:-.005em;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:6px;border:1px solid transparent;background:transparent;color:#6a6a75;font-size:13px;font-weight:500;cursor:pointer;}.ds-btn-quiet:hover{background:#ededf0;color:#1b1b20;}.ds-btn-quiet:focus-visible{outline:none;box-shadow:0 0 0 2px #5058c8;}"
+    },
+    {
+      "name": "Buscador",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Buscador de la barra lateral con atajo Ctrl K.",
+      "html": "<label class=\"ds-search\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><input placeholder=\"Buscar\" /><kbd class=\"ds-kbd\">Ctrl K</kbd></label>",
+      "css": ".ds-search{font-family:Inter,system-ui,sans-serif;letter-spacing:-.005em;display:flex;align-items:center;gap:8px;width:204px;height:30px;padding:0 8px;border:1px solid #e7e7eb;border-radius:6px;background:#fff;color:#9a9aa4;font-size:13px;}.ds-search input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;color:#1b1b20;}.ds-search input::placeholder{color:#9a9aa4;}.ds-search:focus-within{box-shadow:0 0 0 2px #5058c8;border-color:transparent;}.ds-kbd{font-family:inherit;font-size:12px;color:#6a6a75;background:#ededf0;border-radius:4px;padding:1px 5px;}"
+    },
+    {
+      "name": "Ficha de propiedad",
+      "kind": "chip",
+      "refersTo": "property-chip",
+      "description": "Propiedades de la tarea en una fila dentro del formulario; la enfocada lleva anillo índigo.",
+      "html": "<div class=\"ds-props\"><span class=\"ds-pc\" tabindex=\"0\"><span class=\"ds-prio\"><i style=\"height:5px\"></i><i style=\"height:8px\"></i><i style=\"height:11px\"></i></span>Alta</span><span class=\"ds-pc\" tabindex=\"0\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 2v4\"/><path d=\"M16 2v4\"/><rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M3 10h18\"/></svg>Lun 28, 10:00</span><span class=\"ds-pc\" tabindex=\"0\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><polyline points=\"12 6 12 12 16 14\"/></svg>45 min</span></div>",
+      "css": ".ds-props{display:flex;gap:6px;flex-wrap:wrap;}.ds-pc{font-family:Inter,system-ui,sans-serif;letter-spacing:-.005em;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid #e7e7eb;border-radius:6px;font-size:13px;font-weight:500;color:#1b1b20;background:#fff;cursor:pointer;}.ds-pc:hover{background:#ededf0;}.ds-pc:focus-visible{outline:none;box-shadow:0 0 0 2px #5058c8;border-color:transparent;}.ds-prio{display:inline-flex;gap:1.5px;align-items:flex-end;height:12px;}.ds-prio i{width:3px;background:#6a6a75;border-radius:1px;}.ds-prio i.off{background:#e7e7eb;}"
+    },
+    {
+      "name": "Navegación lateral",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Secciones con icono Lucide y atajo; activo en gris de selección.",
+      "html": "<nav class=\"ds-nav\"><a class=\"on\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2\"/><path d=\"M12 20v2\"/><path d=\"m4.93 4.93 1.41 1.41\"/><path d=\"m17.66 17.66 1.41 1.41\"/><path d=\"M2 12h2\"/><path d=\"M20 12h2\"/><path d=\"m6.34 17.66-1.41 1.41\"/><path d=\"m19.07 4.93-1.41 1.41\"/></svg>Hoy<kbd>G H</kbd></a><a href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m3 17 2 2 4-4\"/><path d=\"m3 7 2 2 4-4\"/><path d=\"M13 6h8\"/><path d=\"M13 12h8\"/><path d=\"M13 18h8\"/></svg>Tareas<kbd>G T</kbd></a><div class=\"ds-grp\">Proyectos</div><a href=\"#\"><span class=\"ds-dot\"></span>Lanzamiento web</a></nav>",
+      "css": ".ds-nav{font-family:Inter,system-ui,sans-serif;letter-spacing:-.005em;width:224px;background:#f7f7f8;border-right:1px solid #e7e7eb;padding:12px 10px;display:flex;flex-direction:column;gap:1px;}.ds-nav a{display:flex;align-items:center;gap:9px;height:30px;padding:0 8px;border-radius:6px;color:#6a6a75;text-decoration:none;font-weight:500;font-size:13.5px;}.ds-nav a:hover{background:#ededf0;}.ds-nav a.on{background:#ededf0;color:#1b1b20;}.ds-nav a:focus-visible{outline:none;box-shadow:0 0 0 2px #5058c8;}.ds-nav kbd{margin-left:auto;font-family:inherit;font-size:12px;color:#6a6a75;background:transparent;}.ds-grp{font-size:12px;color:#6a6a75;padding:14px 8px 4px;font-weight:500;}.ds-dot{width:8px;height:8px;border-radius:50%;margin:0 4px;background:#5058c8;}"
+    },
+    {
+      "name": "Lista agrupada",
+      "kind": "custom",
+      "refersTo": "list-row",
+      "description": "Cabecera de grupo y filas de 40px con estado por forma, prioridad en barras y atraso en texto naranja.",
+      "html": "<div class=\"ds-list\"><div class=\"ds-gh\">Hoy<span class=\"c\">3</span></div><div class=\"ds-it sel\"><span class=\"ds-circ prog\"></span><span class=\"ds-prio\"><i style=\"height:5px\"></i><i style=\"height:8px\"></i><i style=\"height:11px\"></i></span><span class=\"t\">Revisar la propuesta del cliente</span><span class=\"ds-tag\"><i></i>Lanzamiento web</span><span class=\"meta\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><polyline points=\"12 6 12 12 16 14\"/></svg>10:30</span></div><div class=\"ds-it done\"><span class=\"ds-circ done\"></span><span class=\"t\">Meditar</span><span class=\"meta\">18 días</span></div><div class=\"ds-gh\">Atrasadas<span class=\"c\">2</span><span class=\"sp\"></span><a href=\"#\">Mover todas a mañana</a></div><div class=\"ds-it late\"><span class=\"ds-circ\"></span><span class=\"ds-prio\"><i style=\"height:5px\"></i><i style=\"height:8px\"></i><i style=\"height:11px\" class=\"off\"></i></span><span class=\"t\">Llamar al dentista</span><span class=\"meta\">hace 12 días</span></div></div>",
+      "css": ".ds-list{font-family:Inter,system-ui,sans-serif;letter-spacing:-.005em;width:640px;background:#fff;color:#1b1b20;font-size:14px;}.ds-gh{display:flex;align-items:center;gap:8px;height:36px;padding:0 24px;background:#f7f7f8;border-top:1px solid #e7e7eb;border-bottom:1px solid #e7e7eb;font-size:13px;font-weight:600;}.ds-gh .c{color:#6a6a75;font-weight:400;}.ds-gh .sp{flex:1;}.ds-gh a{font-weight:500;color:#6a6a75;font-size:12.5px;text-decoration:none;}.ds-it{display:flex;align-items:center;gap:10px;height:40px;padding:0 24px;border-bottom:1px solid #e7e7eb;}.ds-it:hover{background:#f7f7f8;}.ds-it.sel{background:#ededf0;}.ds-it .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.ds-it.done .t{color:#9a9aa4;}.ds-it .meta{color:#6a6a75;font-size:12.5px;display:inline-flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums;}.ds-it.late .meta{color:#b4540a;}.ds-tag{font-size:12px;color:#6a6a75;border:1px solid #e7e7eb;border-radius:99px;padding:1px 8px;display:inline-flex;gap:5px;align-items:center;}.ds-tag i{width:7px;height:7px;border-radius:50%;background:#5058c8;}.ds-circ{width:14px;height:14px;border-radius:50%;border:1.5px solid #6a6a75;flex:none;position:relative;}.ds-circ.prog{border-color:#5058c8;background:conic-gradient(#5058c8 0 50%,transparent 0);}.ds-circ.done{border-color:#5058c8;background:#5058c8;}.ds-circ.done::after{content:\"\";position:absolute;left:3.5px;top:1px;width:3px;height:6px;border:solid #fff;border-width:0 1.5px 1.5px 0;transform:rotate(45deg);}.ds-prio{display:inline-flex;gap:1.5px;align-items:flex-end;height:12px;}.ds-prio i{width:3px;background:#6a6a75;border-radius:1px;}.ds-prio i.off{background:#e7e7eb;}"
+    },
+    {
+      "name": "Bloque Ahora",
+      "kind": "custom",
+      "refersTo": "property-cells",
+      "description": "Componente firma: la tarea actual como ficha medida con línea de medida y cuatro casillas.",
+      "html": "<section class=\"ds-now\"><div class=\"nh\"><span class=\"ds-circ\"></span>Ahora<span class=\"meta\">quedan 13 min</span></div><p class=\"nt\">Revisar la propuesta del cliente</p><div class=\"ds-cota\"><span class=\"fill\"></span><span class=\"lab\">45 min</span><span class=\"l\">10:30</span><span class=\"r\">11:15</span></div><div class=\"ds-cells\"><div><span>Proyecto</span><b><i></i>Lanzamiento web</b></div><div><span>Prioridad</span><b><span class=\"ds-prio\"><i style=\"height:5px\"></i><i style=\"height:8px\"></i><i style=\"height:11px\"></i></span>Alta</b></div><div><span>Energía</span><b>Media</b></div><div><span>Objetivo</span><b>Publicar la nueva web</b></div></div><div class=\"acts\"><button class=\"ds-b p\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polygon points=\"6 3 20 12 6 21 6 3\"/></svg>Empezar foco <kbd>F</kbd></button><button class=\"ds-b\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"/></svg>Hecha <kbd>X</kbd></button><button class=\"ds-b q\">Aplazar</button></div></section>",
+      "css": ".ds-now{font-family:Inter,system-ui,sans-serif;letter-spacing:-.005em;width:620px;padding:18px 24px 20px;border-bottom:1px solid #e7e7eb;background:#fff;color:#1b1b20;font-size:14px;}.ds-now .nh{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#6a6a75;}.ds-now .nh .meta{margin-left:auto;font-weight:400;font-variant-numeric:tabular-nums;}.ds-now .nt{font-size:20px;font-weight:600;letter-spacing:-.015em;margin:8px 0 14px;}.ds-cota{position:relative;height:2px;border-radius:1px;background:#e7e7eb;margin:10px 0 30px;}.ds-cota::before,.ds-cota::after{content:\"\";position:absolute;top:-5px;width:1.5px;height:12px;border-radius:1px;background:#9a9aa4;}.ds-cota::before{left:0;}.ds-cota::after{right:0;}.ds-cota .fill{position:absolute;left:0;top:0;bottom:0;width:71%;border-radius:1px;background:#5058c8;}.ds-cota .lab{position:absolute;left:50%;top:-10px;transform:translateX(-50%);background:#fff;padding:0 8px;font-size:12.5px;font-weight:500;font-variant-numeric:tabular-nums;}.ds-cota .l,.ds-cota .r{position:absolute;top:10px;font-size:12px;color:#6a6a75;font-variant-numeric:tabular-nums;}.ds-cota .l{left:0;}.ds-cota .r{right:0;}.ds-cells{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #e7e7eb;border-radius:8px;overflow:hidden;margin-bottom:14px;}.ds-cells>div{padding:8px 12px;border-left:1px solid #e7e7eb;min-width:0;}.ds-cells>div:first-child{border-left:0;}.ds-cells span{display:block;font-size:12px;font-weight:500;color:#6a6a75;margin-bottom:2px;}.ds-cells b{display:flex;align-items:center;gap:6px;font-weight:500;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.ds-cells b>i{width:8px;height:8px;border-radius:50%;flex:none;background:#5058c8;}.ds-now .acts{display:flex;gap:8px;}.ds-b{font:inherit;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:6px;border:1px solid #e7e7eb;background:#fff;color:#1b1b20;font-size:13px;font-weight:500;cursor:pointer;}.ds-b:hover{background:#ededf0;}.ds-b:focus-visible{outline:none;box-shadow:0 0 0 2px #5058c8;}.ds-b kbd{font-family:inherit;font-size:12px;color:#6a6a75;background:#ededf0;border-radius:4px;padding:1px 5px;}.ds-b.p{background:#5058c8;border-color:#5058c8;color:#fff;}.ds-b.p:hover{background:#4a51c0;}.ds-b.p kbd{background:rgba(255,255,255,.18);color:#fff;}.ds-b.q{border-color:transparent;background:transparent;color:#6a6a75;}.ds-circ{width:14px;height:14px;border-radius:50%;border:1.5px solid #5058c8;flex:none;background:conic-gradient(#5058c8 0 50%,transparent 0);}.ds-prio{display:inline-flex;gap:1.5px;align-items:flex-end;height:12px;}.ds-prio i{width:3px;background:#6a6a75;border-radius:1px;}.ds-prio i.off{background:#e7e7eb;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "La herramienta precisa",
+    "overview": "Nextuss se ve como una herramienta profesional sobria, del tipo Linear: listas agrupadas en filas de altura fija, bordes de 1px casi invisibles, una sola familia tipográfica (Inter) y un único acento índigo reservado para acción, selección y progreso. Nada brilla, nada flota sin motivo. La densidad es alta pero ordenada: el ojo recorre columnas que no se mueven y lee la información por posición, no por color.\n\nLo que distingue a Nextuss de cualquier lista es la **ficha medida**: la tarea actual no es una fila más, sino un bloque \"Ahora\" con una línea de medida (inicio, fin, duración y avance) y cuatro casillas de propiedades. Es la firma del sistema y el único sitio donde la pantalla sube de tamaño tipográfico. Los estados se leen por forma (círculo vacío, medio lleno, lleno con marca; prioridad como barras de altura creciente), no por manchas de color.\n\nAnti-referencia confirmada: la estética anterior de la app (tablero SaaS oscuro con brillo cian `#5EC8FF` y sombras de resplandor). Este DESIGN.md se deriva del mock aprobado `docs/design/direcciones/f-herramienta-plano.html` (dirección F, estilos `.dC` de `estilos.css`), no de la app construida: **hay que volver a comprobarlo contra el código real cuando se cierren los issues #22 (base del sistema de diseño) y #6 (TaskForm)**, y corregir aquí lo que la implementación haya resuelto de otro modo.",
+    "keyCharacteristics": [
+      "Claro: blanco con laterales gris 1%; oscuro: casi negro, igual de cuidado que el claro.",
+      "Un solo acento índigo; naranja solo como texto de atraso.",
+      "Bordes de 1px suaves y radios de 6-8px; sin sombras salvo el diálogo.",
+      "Inter en todo; jerarquía por peso (400/500/600) más que por tamaño.",
+      "Estados por forma, no por color; cifras con dígitos tabulares.",
+      "Teclado visible: cada acción principal muestra su atajo en `kbd`."
+    ],
+    "rules": [
+      {
+        "name": "La Regla de la Voz Única",
+        "body": "El índigo marca acción, selección y progreso, y nada más. Cada pantalla tiene un solo botón primario índigo en la cabecera; el bloque Ahora puede tener el suyo porque es la acción del momento.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla del Atraso sin Culpa",
+        "body": "Lo atrasado se dice con texto naranja y se resume (3 visibles + \"Ver las N restantes\" + acción en bloque). Ni fondos rojos, ni insignias, ni iconos de alarma.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla del Suelo de 12px",
+        "body": "Ningún texto baja de 12px (ni `text-[10px]` ni `text-[11px]`), tampoco atajos, iniciales de día ni el logotipo.",
+        "section": "typography"
+      },
+      {
+        "name": "La Regla de las Cifras Quietas",
+        "body": "Horas, duraciones y contadores que cambian usan dígitos tabulares para que no bailen.",
+        "section": "typography"
+      },
+      {
+        "name": "La Regla del Plano por Defecto",
+        "body": "Superficies planas en reposo; la única sombra ambiental es la del diálogo. Sin resplandores.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do usar solo iconos lineales Lucide a través de `src/design/icons.ts`, a 16px con trazo de 1,75 (14px en pestañas y selects).",
+      "Do reservar el índigo para acción, selección y progreso; un solo botón primario por cabecera.",
+      "Do comprobar que el texto blanco sobre el acento pasa WCAG AA (4,5:1) en ambos temas.",
+      "Do nombrar el objeto en las acciones primarias: \"Crear tarea\", \"Guardar tarea\", \"Nuevo hábito\".",
+      "Do mostrar el atajo de teclado en `kbd` junto a cada acción y sección que lo tenga.",
+      "Do marcar el atraso solo con texto naranja en los metadatos y resumirlo (3 visibles + acción en bloque).",
+      "Do expresar estado y prioridad por forma: círculo vacío / medio / lleno con marca; tres barras de prioridad.",
+      "Do usar el bloque Ahora (línea de medida + 4 casillas) para la tarea en curso; es el componente firma.",
+      "Do construir el formulario de tarea como título + notas + fichas de propiedad en una fila + sección \"Más\" (energía, etiquetas, objetivo, repetir, subtareas).",
+      "Do cuidar el tema oscuro igual que el claro, con sus propios valores de acento y naranja."
+    ],
+    "donts": [
+      "Don't usar emoji en la interfaz.",
+      "Don't usar sombras de resplandor (`shadow-glow`) ni el cian antiguo `#5EC8FF`.",
+      "Don't bajar de 12px (`text-[10px]`, `text-[11px]`) en ningún texto.",
+      "Don't poner fondos de alarma (rojos, naranjas o rellenos) en tareas atrasadas.",
+      "Don't usar la tinta tenue para información que haga falta leer: en claro no llega a 3:1.",
+      "Don't añadir sombras a tarjetas, filas o fichas; la profundidad es tonal y de filete.",
+      "Don't usar botones genéricos sin objeto (\"Guardar\", \"Aceptar\", \"Enviar\") como acción primaria."
+    ]
+  }
+}
