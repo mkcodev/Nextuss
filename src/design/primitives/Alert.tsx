@@ -29,7 +29,7 @@ export function Alert({ tone = 'info', children, className }: AlertProps) {
   return (
     <div
       role={tone === 'danger' || tone === 'warning' ? 'alert' : 'status'}
-      className={cn('flex items-start gap-2 rounded-lg border px-3 py-2 text-xs', TONE_CLASSES[tone], className)}
+      className={cn('flex items-start gap-2 rounded-md border px-3 py-2 text-sm', TONE_CLASSES[tone], className)}
     >
       <ToneIcon size={15} strokeWidth={1.75} className="mt-0.5 shrink-0" />
       <div className="text-text">{children}</div>

@@ -7,7 +7,8 @@ import { getTasksForDate, moveTasksToDateBulk } from '../../db/repositories/task
 import { getProject } from '../../db/repositories/projects'
 import { getGoalForTask } from '../../db/repositories/goals'
 import { nextRelativeDate, timeToMinutes } from '../../lib/dates'
-import { PRIORITY_NAMES, PRIORITY_COLORS } from '../../lib/priority'
+import { PRIORITY_NAMES } from '../../lib/priority'
+import { PriorityBars } from '../tasks/PriorityBars'
 import { cn } from '../../lib/cn'
 import { useSubmitGuard } from '../../lib/useSubmitGuard'
 import { startFocusOnTask } from '../focus/startFocusOnTask'
@@ -62,9 +63,9 @@ export function NowBlock({ date }: { date: string }) {
     ? `quedan ${formatDuration(end - nowMin)}`
     : `empieza en ${formatDuration(start - nowMin)}`
 
-  const cells: { label: string; value: string; dot?: string }[] = [
+  const cells: { label: string; value: string; dot?: string; bars?: number }[] = [
     { label: 'Proyecto', value: project?.name ?? '—', dot: project?.color },
-    { label: 'Prioridad', value: task.priority ? PRIORITY_NAMES[task.priority] : '—', dot: task.priority ? PRIORITY_COLORS[task.priority] : undefined },
+    { label: 'Prioridad', value: task.priority ? PRIORITY_NAMES[task.priority] : '—', bars: task.priority },
     { label: 'Energía', value: task.energy ? ENERGY_NAMES[task.energy] : '—' },
     { label: 'Objetivo', value: goal?.title ?? '—' },
   ]
@@ -130,6 +131,7 @@ export function NowBlock({ date }: { date: string }) {
             <dt className="text-xs text-text-muted">{c.label}</dt>
             <dd className="mt-0.5 flex items-center gap-1.5 truncate text-sm font-medium text-text">
               {c.dot && <span aria-hidden="true" className="size-2 shrink-0 rounded-full" style={{ backgroundColor: c.dot }} />}
+              {c.bars && <PriorityBars p={c.bars} />}
               <span className="truncate" title={c.value}>
                 {c.value}
               </span>

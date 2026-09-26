@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Calendar, Clock, Flag, Hourglass, Loader2, Sparkles, Tag, Target } from 'lucide-react'
+import { Calendar, Clock, Hourglass, Loader2, Sparkles, Tag, Target } from 'lucide-react'
 import { Button, Dialog, Input, Kbd } from '../../design/primitives'
 import { quickParse } from '../../lib/quickParse'
 import { foldText } from '../../lib/text'
@@ -15,13 +15,8 @@ import type { ParsedCapture } from '../ai/prompts'
 import { AiError, recordAiUsage } from '../ai/errors'
 import { getOrCreateSettings } from '../../db/repositories/settings'
 import { useToastStore } from '../../lib/toastStore'
-
-const PRIORITY_COLORS: Record<number, string> = {
-  1: 'text-danger',
-  2: 'text-warning',
-  3: 'text-accent',
-  4: 'text-text-faint',
-}
+import { PriorityBars } from './PriorityBars'
+import { PRIORITY_NAMES } from '../../lib/priority'
 
 const WEEKDAY_LABEL = new Intl.DateTimeFormat('es', { weekday: 'short', day: 'numeric', month: 'short' })
 
@@ -159,10 +154,8 @@ export function QuickAddDialog() {
               </span>
             )}
             {parsed.priority && (
-              <span
-                className={`flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs font-medium ${PRIORITY_COLORS[parsed.priority]}`}
-              >
-                <Flag size={11} strokeWidth={1.75} /> P{parsed.priority}
+              <span className="flex items-center gap-1.5 rounded-full border border-border bg-surface px-2 py-0.5 text-xs font-medium text-text">
+                <PriorityBars p={parsed.priority} /> {PRIORITY_NAMES[parsed.priority]}
               </span>
             )}
             {finalEstimateMin != null && (

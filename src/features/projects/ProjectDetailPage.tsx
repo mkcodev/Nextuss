@@ -10,7 +10,8 @@ import { formatMinutes } from '../stats/format'
 import { buildEstimateAccuracy } from '../stats/aggregate'
 import { getProject, getProjectProgress, getTasksForProject } from '../../db/repositories/projects'
 import { listAttributes } from '../../db/repositories/gamification'
-import { priorityBadgeStyle } from '../../lib/priority'
+import { PRIORITY_NAMES } from '../../lib/priority'
+import { PriorityBars } from '../tasks/PriorityBars'
 import { useTaskFormStore } from '../tasks/taskFormStore'
 import { TaskQuickMenu } from '../tasks/TaskQuickMenu'
 import { useProjectFormStore } from './projectFormStore'
@@ -143,12 +144,10 @@ export function ProjectDetailPage() {
                 className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2"
               >
                 {t.priority && (
-                  <span
-                    className="shrink-0 rounded px-1 py-0.5 text-xs font-semibold"
-                    style={priorityBadgeStyle(t.priority)}
-                  >
-                    P{t.priority}
-                  </span>
+<span className="flex shrink-0 items-center" title={PRIORITY_NAMES[t.priority]}>
+            <PriorityBars p={t.priority} />
+            <span className="sr-only">{PRIORITY_NAMES[t.priority]}</span>
+          </span>
                 )}
                 <button
                   onClick={() => openEditTask(t)}

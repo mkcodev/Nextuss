@@ -109,7 +109,7 @@ export function MonthView() {
               className={cn(
                 'flex min-h-[92px] flex-col items-stretch gap-1 bg-bg p-1.5 text-left transition-colors hover:bg-surface-hover',
                 !inMonth && 'opacity-40',
-                today && 'relative z-10 scale-[1.06] rounded-lg shadow-md ring-1 ring-accent/40',
+                today && 'ring-1 ring-inset ring-accent',
               )}
             >
               <span

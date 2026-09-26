@@ -20,7 +20,7 @@ import { cn } from '../../lib/cn'
 import { useDragReorder } from '../../lib/useDragReorder'
 import { reorderNeighbors, type DropPosition } from '../../lib/reorder'
 import { todayKey, formatShortDate } from '../../lib/dates'
-import { PRIORITY_LABELS, PRIORITY_NAMES, priorityBadgeStyle } from '../../lib/priority'
+import { PRIORITY_NAMES } from '../../lib/priority'
 import {
   addTagBulk,
   listAllTasks,
@@ -445,15 +445,16 @@ export function TasksPage() {
                       <button
                         key={p}
                         onClick={() => patchFilters({ priority: toggleInArray(activeView.filters.priority, p) })}
+                        type="button"
+                        aria-pressed={!!activeView.filters.priority?.includes(p)}
                         className={cn(
-                          'rounded-md border px-2 py-1 text-xs font-semibold',
+                          'flex items-center gap-1.5 rounded-sm border px-2 py-1 text-xs font-medium',
                           activeView.filters.priority?.includes(p)
-                            ? ''
-                            : 'border-border text-text-faint',
+                            ? 'border-accent bg-accent-soft text-accent'
+                            : 'border-border text-text-muted hover:text-text',
                         )}
-                        style={activeView.filters.priority?.includes(p) ? priorityBadgeStyle(p) : undefined}
                       >
-                        {PRIORITY_LABELS[p]}
+                        <PriorityBars p={p} /> {PRIORITY_NAMES[p]}
                       </button>
                     ))}
                   </div>

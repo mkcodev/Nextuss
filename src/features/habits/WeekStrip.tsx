@@ -35,7 +35,7 @@ export function WeekStrip({ habit, completedDates, today }: WeekStripProps) {
             className={cn(
               'grid size-6 place-items-center rounded-full border text-xs font-medium',
               done && 'border-accent bg-accent text-on-accent',
-              !done && scheduled && 'border-border-strong text-text-muted',
+              !done && scheduled && 'border-text-faint text-text-muted',
               !done && !scheduled && 'border-dashed border-border-strong text-text-faint',
               isToday && 'ring-2 ring-text ring-offset-2 ring-offset-bg',
             )}
