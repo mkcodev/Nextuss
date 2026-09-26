@@ -454,14 +454,191 @@ INFO.G = {
   raises: ['Del plano técnico: línea de medida con la duración y casillas de propiedades en el bloque Ahora.','Ley de color: el naranja aparece una sola vez por pantalla.']
 };
 
+
+/* ---------------- Pantallas extra para F (base C) y G (base E) ---------------- */
+const TASKS = {
+  late: [['Llamar al dentista', 2, 'Casa', '#c9822b', 'hace 12 días', '10 min', ''], ['Enviar la factura de agosto', 1, 'Trabajo', '#5058c8', 'hace 5 días', '15 min', ''], ['Renovar el seguro del coche', 1, 'Casa', '#c9822b', 'hace 3 días', '30 min', '']],
+  today: [['Revisar la propuesta del cliente', 3, 'Lanzamiento web', '#5058c8', '10:30', '45 min', '2/5'], ['Llamada con Marta', 2, 'Lanzamiento web', '#5058c8', '12:00', '30 min', ''], ['Gimnasio', 1, 'Salud', '#2e9e6b', '16:00', '1 h', ''], ['Preparar la semana', 1, 'Ritual', '#6a6a75', '18:30', '30 min', '']],
+  tomorrow: [['Preparar la presentación del viernes', 3, 'Lanzamiento web', '#5058c8', 'Lun 10:00', '45 min', '0/3'], ['Comprar regalo de cumpleaños', 1, 'Casa', '#c9822b', 'Lun', '20 min', '']],
+  week: [['Escribir el texto de la portada', 2, 'Lanzamiento web', '#5058c8', 'Mié', '1 h', ''], ['Pedir cita en el fisio', 1, 'Salud', '#2e9e6b', 'Jue', '5 min', ''], ['Revisar gastos del mes', 2, 'Casa', '#c9822b', 'Vie', '30 min', '']]
+};
+const HABITS = [
+  ['brain', 'Meditar', 'Duración · 10 min', 'Todos los días', [1,1,1,1,1,1,0], 18, 1],
+  ['book-open', 'Leer', 'Cantidad · 20 páginas', 'Todos los días', [1,1,0,1,1,0,0], 4, 0],
+  ['glass-water', 'Beber agua', 'Cantidad · 8 vasos', 'Todos los días', [1,1,1,1,1,1,0], 9, 0],
+  ['dumbbell', 'Ejercicio', 'Sí / no', 'L · X · V · S', [1,-1,1,-1,1,1,-1], 3, 1],
+  ['smartphone', 'Sin redes antes de las 12', 'Evitar', 'Todos los días', [1,0,1,1,1,1,0], 2, 0]
+];
+const DAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+const NAV_ITEMS = [['sun','Hoy','G H','today'],['calendar-range','Planificación','G P'],['repeat','Hábitos','G B','habits'],['list-checks','Tareas','G T','tasks'],['folder','Proyectos','G R'],['bar-chart-3','Estadísticas','G E']];
+
+function navC(active){
+  return `<nav>
+    <div class="ws"><span class="lg">N</span>Nextuss</div>
+    <div class="srch">${ic('search')}Buscar<kbd>Ctrl K</kbd></div>
+    ${NAV_ITEMS.map(([i,n,k,v])=>`<a class="${v===active?'on':''}">${ic(i)}${n}<kbd>${k}</kbd></a>`).join('')}
+    <div class="grp">Proyectos</div>
+    <a><span class="dot" style="background:#5058c8"></span>Lanzamiento web</a>
+    <a><span class="dot" style="background:#2e9e6b"></span>Salud</a>
+    <a><span class="dot" style="background:#c9822b"></span>Casa</a>
+  </nav>`;
+}
+function navE(active){
+  return `<nav>
+    <div class="brand"><span class="led"></span>Nextuss</div>
+    ${NAV_ITEMS.map(([i,n,k,v])=>`<a class="${v===active?'on':''}"><span class="dot"></span>${n}<kbd>${k}</kbd></a>`).join('')}
+    <div class="foot">Captura rápida <kbd>I</kbd></div>
+  </nav>`;
+}
+const prioC = n => `<span class="prio">${[5,8,11].map((h,i)=>`<i style="height:${h}px" class="${i<n?'':'off'}"></i>`).join('')}</span>`;
+
+/* ---------- F: Tareas ---------- */
+function tasksC(){
+  const row = ([t,p,proj,col,when,est,sub], cls='') => `<div class="it ${cls}"><span class="circ"></span>${prioC(p)}<span class="t">${t}</span>${sub?`<span class="meta">${ic('list-tree')}${sub}</span>`:''}<span class="tag"><i style="background:${col}"></i>${proj}</span><span class="meta w">${when}</span><span class="meta e">${est}</span></div>`;
+  const grp = (n, c, extra='') => `<div class="gh">${n}<span class="c">${c}</span><span class="sp"></span>${extra}</div>`;
+  return `${navC('tasks')}
+  <div class="main">
+    <header>${ic('list-checks')}<h1>Tareas</h1><span class="d">32 abiertas</span><span class="sp"></span><button class="btn">${ic('sliders-horizontal')}Filtros</button><button class="btn p">${ic('plus')}Nueva tarea <kbd>C</kbd></button></header>
+    <div class="tabs"><a class="on">Todas</a><a>Hoy</a><a>Próximas</a><a>Aparcadas</a><a class="add">${ic('plus')}Vista</a></div>
+    <div class="list tl">
+      ${grp('Atrasadas', 93, '<a>Mover todas a mañana</a><a>Aparcar</a>')}
+      ${TASKS.late.map(r=>row(r,'late')).join('')}
+      <div class="more-row">Ver las 90 restantes</div>
+      ${grp('Hoy', 4)}
+      ${TASKS.today.map((r,i)=>row(r, i===0?'sel':'')).join('')}
+      ${grp('Mañana', 2)}
+      ${TASKS.tomorrow.map(r=>row(r)).join('')}
+      ${grp('Esta semana', 3)}
+      ${TASKS.week.map(r=>row(r)).join('')}
+    </div>
+    <div class="kbar"><span><kbd>J</kbd><kbd>K</kbd> moverse</span><span><kbd>Enter</kbd> abrir</span><span><kbd>X</kbd> hecha</span><span><kbd>[</kbd><kbd>]</kbd> mover fecha</span><span><kbd>T</kbd> hoy</span></div>
+  </div>`;
+}
+/* ---------- F: Hábitos ---------- */
+function habitsC(){
+  const week = w => `<span class="wk">${w.map((d,i)=>`<span class="wd ${d===1?'on':d===-1?'off':''} ${i===5?'today':''}" title="${DAYS[i]}">${DAYS[i]}</span>`).join('')}</span>`;
+  return `${navC('habits')}
+  <div class="main">
+    <header>${ic('repeat')}<h1>Hábitos</h1><span class="d">2 de 5 hoy</span><span class="sp"></span><button class="btn">${ic('archive')}Archivados</button><button class="btn p">${ic('plus')}Nuevo hábito <kbd>H</kbd></button></header>
+    <div class="list hl">
+      <div class="gh">Esta semana<span class="c">22 de 31 marcas</span></div>
+      ${HABITS.map(([i,n,type,freq,w,streak,done])=>`<div class="hrow"><span class="circ ${done?'done':''}"></span><span class="hi">${ic(i)}</span><span class="hn">${n}<small>${type} · ${freq}</small></span>${week(w)}<span class="meta">${ic('flame')}${streak} días</span></div>`).join('')}
+      <div class="gh">Mejor racha<span class="c"></span></div>
+      <div class="best"><span>Meditar · <b>42 días</b> (marzo–abril)</span><span>Beber agua · <b>31 días</b></span><span>Leer · <b>19 días</b></span></div>
+    </div>
+  </div>`;
+}
+/* ---------- F: Tarea completa ---------- */
+function formFullC(){
+  return `<div class="scrim tall"><div class="modal full" role="dialog" aria-label="Editar tarea">
+    <div class="top"><span class="pill"><i style="width:8px;height:8px;border-radius:50%;background:#5058c8;display:inline-block"></i>Lanzamiento web</span>› Preparar la presentación del viernes<span class="x">${ic('x')}</span></div>
+    <div class="ttl">Preparar la presentación del viernes</div>
+    <div class="notes on">Diapositivas con el resumen del lanzamiento y las fechas clave.</div>
+    <div class="props">
+      <span class="pc">${prioC(3)}Alta</span>
+      <span class="pc">${ic('calendar')}Lun 28, 10:00</span>
+      <span class="pc">${ic('folder')}Lanzamiento web</span>
+      <span class="pc">${ic('timer')}45 min</span>
+    </div>
+    <div class="more">
+      <div class="fr"><span class="fl">${ic('zap')}Energía</span><span class="segc"><span>Baja</span><span class="on">Media</span><span>Alta</span></span></div>
+      <div class="fr"><span class="fl">${ic('tag')}Etiquetas</span><span class="tags"><span class="tg">reunión</span><span class="tg">cliente</span><span class="tg add">${ic('plus')}Añadir</span></span></div>
+      <div class="fr"><span class="fl">${ic('target')}Objetivo</span><span class="selbox">Publicar la nueva web ${ic('chevron-down')}</span></div>
+      <div class="fr"><span class="fl">${ic('repeat')}Repetir</span><span class="sw"></span><span class="hint">No se repite</span></div>
+      <div class="fr top"><span class="fl">${ic('list-tree')}Subtareas <b>1/3</b></span>
+        <span class="subs">
+          <span class="sb done"><span class="circ done"></span>Reunir las cifras del trimestre</span>
+          <span class="sb"><span class="circ"></span>Montar las diapositivas</span>
+          <span class="sb"><span class="circ"></span>Ensayar en voz alta</span>
+          <span class="sb add">${ic('plus')}Añadir subtarea</span>
+        </span></div>
+    </div>
+    <div class="foot"><button class="btn ghostdanger">${ic('trash-2')}Eliminar</button><span class="sp"></span><span>Guardado automático</span><button class="btn">Cancelar</button><button class="btn p">Guardar tarea <kbd>Ctrl ↵</kbd></button></div>
+  </div></div>`;
+}
+
+/* ---------- G: Tareas ---------- */
+function tasksE(){
+  const row = ([t,p,proj,col,when,est,sub], cls='') => `<div class="tr ${cls}"><span class="key ${cls==='cur'?'cur':''}"></span><span class="tt">${t}${sub?` <small>${sub}</small>`:''}</span><span class="p">${proj}</span><span class="pr">${['','Baja','Media','Alta'][p]}</span><span class="w n">${when}</span><span class="d n">${est}</span></div>`;
+  return `${navE('tasks')}
+  <div class="main one">
+    <div class="mod head"><h1>Tareas</h1><span class="meta">32 abiertas</span><span class="segE"><span class="on">Todas</span><span>Hoy</span><span>Próximas</span><span>Aparcadas</span></span><span class="sp"></span><button class="btn">${ic('sliders-horizontal')}Filtros</button><button class="btn p">${ic('plus')}Nueva tarea <kbd>C</kbd></button></div>
+    <div class="cols2">
+      <div class="mod tl">
+        <h2>Atrasadas <span class="n">3 de 93 · <a>Mover todas a mañana</a> · <a>Ver todas</a></span></h2>
+        ${TASKS.late.map(r=>row([r[0],r[1],r[2],r[3],r[4].replace('hace ',''),r[5],r[6]],'late')).join('')}
+        <h2 class="sp2">Hoy <span class="n">4</span></h2>
+        ${TASKS.today.map((r,i)=>row(r, i===0?'cur':'')).join('')}
+      </div>
+      <div class="mod tl">
+        <h2>Mañana <span class="n">2</span></h2>
+        ${TASKS.tomorrow.map(r=>row(r)).join('')}
+        <h2 class="sp2">Esta semana <span class="n">3</span></h2>
+        ${TASKS.week.map(r=>row(r)).join('')}
+        <div class="kbar"><span><kbd>J</kbd><kbd>K</kbd> moverse</span><span><kbd>Enter</kbd> abrir</span><span><kbd>X</kbd> hecha</span><span><kbd>[</kbd><kbd>]</kbd> fecha</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+/* ---------- G: Hábitos ---------- */
+function habitsE(){
+  return `${navE('habits')}
+  <div class="main one">
+    <div class="mod head"><h1>Hábitos</h1><span class="meta">2 de 5 hoy · 22 de 31 marcas esta semana</span><span class="sp"></span><button class="btn">${ic('archive')}Archivados</button><button class="btn p">${ic('plus')}Nuevo hábito <kbd>H</kbd></button></div>
+    <div class="mod hl">
+      <div class="hhead"><span></span><span></span>${DAYS.map((d,i)=>`<span class="dh ${i===5?'today':''}">${d}</span>`).join('')}<span class="dh r">Racha</span></div>
+      ${HABITS.map(([i,n,type,freq,w,streak,done])=>`<div class="hrowE"><span class="hic">${ic(i)}</span><span class="hn">${n}<small>${type} · ${freq}</small></span>${w.map((d,k)=>`<span class="key ${d===1?'on':''} ${d===-1?'rest':''} ${k===5?'todayk':''}"></span>`).join('')}<span class="st n">${streak} días</span></div>`).join('')}
+    </div>
+    <div class="mod best"><h2>Mejores rachas</h2><div class="bests"><span><b class="n">42</b> días · Meditar</span><span><b class="n">31</b> días · Beber agua</span><span><b class="n">19</b> días · Leer</span></div></div>
+  </div>`;
+}
+/* ---------- G: Tarea completa ---------- */
+function formFullE(){
+  return `<div class="scrim tall"><div class="unit full" role="dialog" aria-label="Editar tarea">
+    <div class="top">${ic('pencil')}Editar tarea<span class="sp"></span><kbd>Esc</kbd></div>
+    <div class="inner">
+      <div class="ttl">Preparar la presentación del viernes</div>
+      <div class="notes on">Diapositivas con el resumen del lanzamiento y las fechas clave.</div>
+    </div>
+    <div class="props">
+      <div class="pk"><small>Prioridad · P</small><b>Alta</b></div>
+      <div class="pk"><small>Fecha · D</small><b class="n">Lun 28 · 10:00</b></div>
+      <div class="pk"><small>Proyecto · M</small><b>Lanzamiento web</b></div>
+      <div class="pk"><small>Duración · E</small><b class="n">45 min</b></div>
+    </div>
+    <div class="moreE">
+      <div class="fr"><span class="fl">Energía</span><span class="segE"><span>Baja</span><span class="on">Media</span><span>Alta</span></span></div>
+      <div class="fr"><span class="fl">Etiquetas</span><span class="tags"><span class="tg">reunión</span><span class="tg">cliente</span><span class="tg add">${ic('plus')}Añadir</span></span></div>
+      <div class="fr"><span class="fl">Objetivo</span><span class="selbox">Publicar la nueva web ${ic('chevron-down')}</span></div>
+      <div class="fr"><span class="fl">Repetir</span><span class="sw"></span><span class="hint">No se repite</span></div>
+      <div class="fr top"><span class="fl">Subtareas <b class="n">1/3</b></span>
+        <span class="subs">
+          <span class="sb done"><span class="key on"></span>Reunir las cifras del trimestre</span>
+          <span class="sb"><span class="key"></span>Montar las diapositivas</span>
+          <span class="sb"><span class="key"></span>Ensayar en voz alta</span>
+          <span class="sb add">${ic('plus')}Añadir subtarea</span>
+        </span></div>
+    </div>
+    <div class="foot"><button class="btn q">${ic('trash-2')}Eliminar</button><span class="sp"></span><span>Guardado automático</span><button class="btn">Cancelar</button><button class="btn p">Guardar tarea <kbd>Ctrl ↵</kbd></button></div>
+  </div></div>`;
+}
+
+function fgScreen(base, view){
+  if (view === 'tasks') return base === 'C' ? tasksC() : tasksE();
+  if (view === 'habits') return base === 'C' ? habitsC() : habitsE();
+  const today = base === 'C' ? mockC('form', true) : mockE('form', true);
+  return today.slice(0, today.lastIndexOf('<div class="scrim">')) + (base === 'C' ? formFullC() : formFullE());
+}
+const EXTRA_VIEWS = ['tasks', 'habits', 'formfull'];
+
 /* ------------------------------ montaje ------------------------------ */
-const MOCKS = { A: mockA, B: mockB, C: mockC, D: mockD, E: mockE, F: v => mockC(v, true), G: v => mockE(v, true) };
+const MOCKS = { A: mockA, B: mockB, C: mockC, D: mockD, E: mockE, F: v => EXTRA_VIEWS.includes(v) ? fgScreen('C', v) : mockC(v, true), G: v => EXTRA_VIEWS.includes(v) ? fgScreen('E', v) : mockE(v, true) };
 const NATIVE = { A: 'light', B: 'dark', C: 'light', D: 'dark', E: 'light', F: 'light', G: 'light' };
 const ORDER = ['F', 'G', 'A', 'B', 'C', 'D', 'E'];
 
 function mockHTML(dir, theme, view){
   const base = { F: 'C', G: 'E' }[dir] || dir;
-  return `<div class="m d${base} ${view === 'form' ? 'form-open' : ''} ${view === 'focus' ? 'view-focus' : ''}" data-theme="${theme}">${MOCKS[dir](view)}</div>`;
+  return `<div class="m d${base} ${view === 'form' || view === 'formfull' ? 'form-open' : ''} ${view === 'focus' ? 'view-focus' : ''}" data-theme="${theme}">${MOCKS[dir](view)}</div>`;
 }
 function scaleTo(box, stage, w, h){
   const s = Math.min(w / 1280, h / 800);
@@ -506,7 +683,11 @@ function gallery(){
 function viewer(dir){
   const i = INFO[dir], idx = ORDER.indexOf(dir);
   const prev = ORDER[(idx + ORDER.length - 1) % ORDER.length], next = ORDER[(idx + 1) % ORDER.length];
+  const views = ['F', 'G'].includes(dir)
+    ? [['today','Hoy'],['form','Nueva tarea'],['formfull','Tarea completa'],['tasks','Tareas'],['habits','Hábitos'],['focus','Modo foco']]
+    : [['today','Hoy'],['form','Nueva tarea'],['focus','Modo foco']];
   const st = { theme: load('nx-dir-theme-' + dir, NATIVE[dir]), view: load('nx-dir-view', 'today') };
+  if (!views.some(([v]) => v === st.view)) st.view = 'today';
   document.title = i.name.replace(/^. · /, '');
   const root = document.getElementById('app');
   root.innerHTML = `
@@ -514,7 +695,7 @@ function viewer(dir){
       <a class="back" href="index.html">← Todas</a>
       <h1>${i.name}</h1>
       <div class="seg" role="group" aria-label="Tema"><button data-theme-btn="light">Claro</button><button data-theme-btn="dark">Oscuro</button></div>
-      <div class="seg" role="group" aria-label="Vista"><button data-view="today">Hoy</button><button data-view="form">Nueva tarea</button><button data-view="focus">Modo foco</button></div>
+      <div class="seg" role="group" aria-label="Vista">${views.map(([v,n])=>`<button data-view="${v}">${n}</button>`).join('')}</div>
       <span class="sp"></span>
       <span class="nav"><a href="${FILES[prev]}">← ${INFO[prev].name}</a><a href="${FILES[next]}">${INFO[next].name} →</a></span>
     </div>
