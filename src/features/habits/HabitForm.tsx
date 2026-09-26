@@ -18,6 +18,7 @@ import {
 import { useAttributesWithCreate } from '../gamification/useAttributesWithCreate'
 import { useHabitFormStore } from './habitFormStore'
 import { ENTITY_COLORS } from '../../lib/colors'
+import { useSubmitGuard } from '../../lib/useSubmitGuard'
 
 const ICON_PRESETS = HABIT_ICON_KEYS
 const TYPE_LABELS: Record<HabitType, string> = {
@@ -177,6 +178,7 @@ export function HabitForm() {
     }
     handleClose()
   }
+  const [saving, guardedSubmit] = useSubmitGuard(handleSubmit)
 
   const handlePause = async () => {
     if (!habit?.id || !pausedFrom || !pausedUntil) return
@@ -204,7 +206,7 @@ export function HabitForm() {
 
   return (
     <Dialog open={open} onClose={handleClose} title={isEdit ? 'Editar hábito' : 'Nuevo hábito'}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={guardedSubmit} className="space-y-4">
         <div>
           <label className="mb-1 block text-xs font-medium text-text-muted">Nombre</label>
           <input
@@ -498,7 +500,7 @@ export function HabitForm() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-2">
+        <div className="sticky bottom-0 -mx-6 -mb-6 flex items-center justify-between border-t border-border bg-surface px-6 py-3">
           {isEdit ? (
             <div className="flex gap-1">
               <Button type="button" variant="ghost" onClick={handleArchive} className="px-2.5 text-xs">
@@ -515,7 +517,7 @@ export function HabitForm() {
             <Button type="button" variant="ghost" onClick={handleClose}>
               Cancelar
             </Button>
-            <Button type="submit">{isEdit ? 'Guardar' : 'Crear hábito'}</Button>
+            <Button type="submit" loading={saving}>{isEdit ? 'Guardar hábito' : 'Crear hábito'}</Button>
           </div>
         </div>
       </form>

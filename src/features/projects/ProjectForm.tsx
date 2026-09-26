@@ -7,6 +7,7 @@ import { archiveProject, createProject, trashProject, updateProject } from '../.
 import { useAttributesWithCreate } from '../gamification/useAttributesWithCreate'
 import { useProjectFormStore } from './projectFormStore'
 import { ENTITY_COLORS } from '../../lib/colors'
+import { useSubmitGuard } from '../../lib/useSubmitGuard'
 
 
 /** Único diálogo global (montado en AppShell), mismo patrón que `HabitForm`/`GoalForm`. */
@@ -63,6 +64,7 @@ export function ProjectForm() {
     }
     handleClose()
   }
+  const [saving, guardedSubmit] = useSubmitGuard(handleSubmit)
 
   const handleArchive = async () => {
     if (!project?.id) return
@@ -78,7 +80,7 @@ export function ProjectForm() {
 
   return (
     <Dialog open={open} onClose={handleClose} title={isEdit ? 'Editar proyecto' : 'Nuevo proyecto'}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={guardedSubmit} className="space-y-4">
         <div>
           <label className="mb-1 block text-xs font-medium text-text-muted">Nombre</label>
           <input
@@ -170,7 +172,7 @@ export function ProjectForm() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-2">
+        <div className="sticky bottom-0 -mx-6 -mb-6 flex items-center justify-between border-t border-border bg-surface px-6 py-3">
           {isEdit ? (
             <div className="flex gap-1">
               <Button type="button" variant="ghost" onClick={handleArchive} className="px-2.5 text-xs">
@@ -187,7 +189,7 @@ export function ProjectForm() {
             <Button type="button" variant="ghost" onClick={handleClose}>
               Cancelar
             </Button>
-            <Button type="submit">{isEdit ? 'Guardar' : 'Crear proyecto'}</Button>
+            <Button type="submit" loading={saving}>{isEdit ? 'Guardar proyecto' : 'Crear proyecto'}</Button>
           </div>
         </div>
       </form>
