@@ -5,3 +5,6 @@
 export const ENTITY_COLORS = ['#5058C8', '#2E9E6B', '#C9822B', '#D0506A', '#8B5CF6', '#1F9BB0'] as const
 
 export const DEFAULT_ENTITY_COLOR: string = ENTITY_COLORS[0]
+
+/** Nombre de cada color de `ENTITY_COLORS`, para lectores de pantalla. */
+export const ENTITY_COLOR_NAMES = ['Índigo', 'Verde', 'Ámbar', 'Rosa', 'Violeta', 'Turquesa'] as const

@@ -85,6 +85,46 @@ export const ICON_REGISTRY = {
 
 export type IconKey = keyof typeof ICON_REGISTRY
 
+/** Nombre de cada icono para lectores de pantalla (los selectores de icono son solo dibujo). */
+export const ICON_LABELS: Record<IconKey, string> = {
+  target: 'Diana',
+  flame: 'Llama',
+  droplet: 'Vaso de agua',
+  book: 'Libro',
+  dumbbell: 'Pesa',
+  run: 'Pasos',
+  bike: 'Bicicleta',
+  moon: 'Luna',
+  sun: 'Sol',
+  pill: 'Pastilla',
+  salad: 'Ensalada',
+  coffee: 'Café',
+  brain: 'Cerebro',
+  heart: 'Corazón',
+  ban: 'Prohibido',
+  smartphone: 'Móvil',
+  music: 'Música',
+  palette: 'Paleta',
+  leaf: 'Hoja',
+  briefcase: 'Maletín',
+  graduation: 'Birrete',
+  wallet: 'Cartera',
+  timer: 'Temporizador',
+  alarm: 'Despertador',
+  zap: 'Rayo',
+  sparkles: 'Destellos',
+  star: 'Estrella',
+  trophy: 'Trofeo',
+  shield: 'Escudo',
+  gem: 'Gema',
+  award: 'Medalla',
+  compass: 'Brújula',
+  flag: 'Bandera',
+  folder: 'Carpeta',
+  rocket: 'Cohete',
+  layers: 'Capas',
+}
+
 export const HABIT_ICON_KEYS: IconKey[] = [
   'target',
   'droplet',
