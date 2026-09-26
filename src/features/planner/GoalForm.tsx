@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Trash2 } from 'lucide-react'
-import { Button, Dialog } from '../../design/primitives'
-import { cn } from '../../lib/cn'
+import { Button, Dialog, ToggleGroup } from '../../design/primitives'
 import { monthKey, weekKey } from '../../lib/dates'
 import { createGoal, listGoalsForPeriod, trashGoal, updateGoal } from '../../db/repositories/goals'
 import { listAttributes } from '../../db/repositories/gamification'
 import { parsePeriodKey } from '../../lib/periods'
 import { useGoalFormStore } from './goalFormStore'
 import type { Goal, GoalPeriod } from '../../db/types'
+import { useSubmitGuard } from '../../lib/useSubmitGuard'
 
 /** Single global instance mounted once in AppShell, remounted via `key` when the target goal changes. */
 export function GoalForm() {
@@ -78,6 +78,7 @@ export function GoalForm() {
     }
     handleClose()
   }
+  const [saving, guardedSubmit] = useSubmitGuard(handleSubmit)
 
   const handleDelete = async () => {
     if (!goal?.id) return
@@ -87,27 +88,19 @@ export function GoalForm() {
 
   return (
     <Dialog open={open} onClose={handleClose} title={isEdit ? 'Editar objetivo' : 'Nuevo objetivo'}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={guardedSubmit} className="space-y-4">
         {!isEdit && !prefill?.period && (
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-muted">Periodo</label>
-            <div className="flex gap-1.5">
-              {(['week', 'month'] as GoalPeriod[]).map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => handlePeriodChange(p)}
-                  className={cn(
-                    'flex-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors',
-                    period === p
-                      ? 'border-accent bg-accent-soft text-accent'
-                      : 'border-border text-text-muted hover:bg-surface-hover',
-                  )}
-                >
-                  {p === 'week' ? 'Semana' : 'Mes'}
-                </button>
-              ))}
-            </div>
+            <p className="mb-1 text-xs font-medium text-text-muted">Periodo</p>
+            <ToggleGroup
+              label="Periodo"
+              options={[
+                { value: 'week' as GoalPeriod, label: 'Semana' },
+                { value: 'month' as GoalPeriod, label: 'Mes' },
+              ]}
+              value={period}
+              onChange={(p) => p && handlePeriodChange(p)}
+            />
           </div>
         )}
 
@@ -180,7 +173,7 @@ export function GoalForm() {
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-2">
+        <div className="sticky bottom-0 -mx-6 -mb-6 flex items-center justify-between border-t border-border bg-surface px-6 py-3">
           {isEdit ? (
             <Button type="button" variant="danger" onClick={handleDelete} className="px-2.5 text-xs">
               <Trash2 size={13} /> Eliminar
@@ -192,7 +185,7 @@ export function GoalForm() {
             <Button type="button" variant="ghost" onClick={handleClose}>
               Cancelar
             </Button>
-            <Button type="submit">{isEdit ? 'Guardar' : 'Crear objetivo'}</Button>
+            <Button type="submit" loading={saving}>{isEdit ? 'Guardar objetivo' : 'Crear objetivo'}</Button>
           </div>
         </div>
       </form>
