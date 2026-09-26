@@ -1,7 +1,22 @@
 import { useId, useRef, useState, type ReactNode } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { CalendarDays, ChevronRight, Folder, Plus, Sparkles, Timer, Trash2 } from 'lucide-react'
-import { Button, Dialog, Menu, MenuItem, MenuSeparator, Popover, Select, Switch, ToggleGroup } from '../../design/primitives'
+import {
+  Button,
+  ColorPicker,
+  Dialog,
+  FormRow,
+  FormRows,
+  Menu,
+  MenuItem,
+  MenuSeparator,
+  NotesField,
+  Popover,
+  Select,
+  Switch,
+  TitleField,
+  ToggleGroup,
+} from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import type { EnergyLevel } from '../../db/types'
 import { createTask, trashTask, updateTask } from '../../db/repositories/tasks'
@@ -31,7 +46,6 @@ const ENERGY_OPTIONS: { value: EnergyLevel; label: string }[] = [
   { value: 'medium', label: 'Media' },
   { value: 'high', label: 'Alta' },
 ]
-const COLOR_NAMES = ['Índigo', 'Verde', 'Ámbar', 'Rosa', 'Violeta', 'Turquesa']
 const DEFAULT_REPEAT: RepeatValue = { freq: 'daily', interval: 1, byWeekday: [], byMonthDay: [], mode: 'schedule', until: '' }
 
 const HOURS = new Intl.NumberFormat('es', { maximumFractionDigits: 1 })
@@ -71,18 +85,6 @@ function Chip({ empty, children, ...props }: { empty: boolean; children: ReactNo
   )
 }
 
-function Row({ label, htmlFor, children, top }: { label: string; htmlFor?: string; children: ReactNode; top?: boolean }) {
-  const Label = htmlFor ? 'label' : 'span'
-  return (
-    <div className={cn('grid grid-cols-[7.5rem_minmax(0,1fr)] gap-3 py-2', top ? 'items-start' : 'items-center')}>
-      <Label {...(htmlFor ? { htmlFor } : {})} className={cn('text-sm text-text-muted', top && 'pt-1')}>
-        {label}
-      </Label>
-      <div className="min-w-0">{children}</div>
-    </div>
-  )
-}
-
 /** Single global instance mounted once in AppShell, remounted via `key` when the target task changes. */
 export function TaskForm() {
   const { open, task, prefill, close, openEdit } = useTaskFormStore()
@@ -91,7 +93,7 @@ export function TaskForm() {
   const { available: aiAvailable } = useAiAvailable()
   const openBreakdown = useTaskBreakdownStore((s) => s.openFor)
   const titleRef = useRef<HTMLInputElement>(null)
-  const ids = { title: useId(), titleError: useId(), notes: useId(), goal: useId(), due: useId(), more: useId() }
+  const ids = { goal: useId(), due: useId(), more: useId() }
 
   const [title, setTitle] = useState(task?.title ?? prefill?.title ?? '')
   const [notes, setNotes] = useState(task?.notes ?? '')
@@ -335,41 +337,19 @@ export function TaskForm() {
           }
         }}
       >
-        <label htmlFor={ids.title} className="sr-only">
-          Título
-        </label>
-        <input
+        <TitleField
           ref={titleRef}
-          id={ids.title}
+          label="Título"
           autoFocus
-          autoComplete="off"
           value={title}
-          onChange={(e) => {
-            setTitle(e.target.value)
+          onChange={(v) => {
+            setTitle(v)
             if (titleError) setTitleError(false)
           }}
           placeholder="Título de la tarea"
-          aria-invalid={titleError}
-          aria-describedby={titleError ? ids.titleError : undefined}
-          className="w-full border-b border-transparent bg-transparent pb-1 text-xl font-semibold tracking-tight text-text placeholder:text-text-muted focus:border-border field-bare aria-invalid:border-danger"
+          error={titleError ? 'Ponle un título para poder guardarla.' : undefined}
         />
-        {titleError && (
-          <p id={ids.titleError} role="alert" className="mt-1 text-sm text-danger">
-            Ponle un título para poder guardarla.
-          </p>
-        )}
-
-        <label htmlFor={ids.notes} className="sr-only">
-          Notas
-        </label>
-        <textarea
-          id={ids.notes}
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Añade notas…"
-          rows={notes.split('\n').length > 2 ? 4 : 2}
-          className="mt-2 w-full resize-none border-b border-transparent bg-transparent text-sm text-text placeholder:text-text-muted focus:border-border field-bare"
-        />
+        <NotesField label="Notas" value={notes} onChange={setNotes} placeholder="Añade notas…" />
 
         {/* Fila de fichas: lo que casi siempre se toca, a un clic. */}
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
@@ -549,12 +529,13 @@ export function TaskForm() {
         </button>
 
         {moreOpen && (
-          <div id={ids.more} className="mt-2 divide-y divide-border rounded-md border border-border bg-bg-soft px-4 py-1">
-            <Row label="Energía">
+          <div className="mt-2">
+          <FormRows id={ids.more}>
+            <FormRow label="Energía">
               <ToggleGroup label="Energía necesaria" options={ENERGY_OPTIONS} value={energy} onChange={setEnergy} allowDeselect />
-            </Row>
+            </FormRow>
 
-            <Row label="Etiquetas" top>
+            <FormRow label="Etiquetas" top>
               <div className="flex flex-wrap items-center gap-1.5">
                 {tags.map((t) => (
                   <button
@@ -585,10 +566,10 @@ export function TaskForm() {
                   className="h-6 w-32 rounded-full border border-dashed border-border-strong bg-transparent px-2.5 text-xs text-text placeholder:text-text-muted focus:border-accent"
                 />
               </div>
-            </Row>
+            </FormRow>
 
             {showGoal && (
-              <Row label="Objetivo" htmlFor={ids.goal}>
+              <FormRow label="Objetivo" htmlFor={ids.goal}>
                 <Select id={ids.goal} value={goalId ?? ''} onChange={(e) => setGoalId(e.target.value ? Number(e.target.value) : undefined)}>
                   <option value="">Sin objetivo</option>
                   {goalOptions(weekGoals).length > 0 && (
@@ -614,10 +595,10 @@ export function TaskForm() {
                     <option value={currentGoal.id}>{currentGoal.title}</option>
                   )}
                 </Select>
-              </Row>
+              </FormRow>
             )}
 
-            <Row label="Fecha límite" htmlFor={ids.due}>
+            <FormRow label="Fecha límite" htmlFor={ids.due}>
               <input
                 id={ids.due}
                 type="date"
@@ -625,31 +606,14 @@ export function TaskForm() {
                 onChange={(e) => setDueDate(e.target.value)}
                 className="h-7 rounded-sm border border-border bg-surface px-2 text-sm text-text focus:border-accent"
               />
-            </Row>
+            </FormRow>
 
-            <Row label="Color">
-              <div role="radiogroup" aria-label="Color" className="flex gap-1.5">
-                {ENTITY_COLORS.map((opt, i) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    role="radio"
-                    aria-checked={color === opt}
-                    aria-label={COLOR_NAMES[i]}
-                    title={COLOR_NAMES[i]}
-                    onClick={() => setColor(opt)}
-                    className={cn(
-                      'size-6 rounded-full ring-offset-2 ring-offset-bg-soft transition-shadow',
-                      color === opt ? 'ring-2 ring-text' : 'hover:ring-2 hover:ring-border-strong',
-                    )}
-                    style={{ backgroundColor: opt }}
-                  />
-                ))}
-              </div>
-            </Row>
+            <FormRow label="Color">
+              <ColorPicker value={color} onChange={setColor} label="Color de la tarea" />
+            </FormRow>
 
             {(!isEdit || isSeries) && (
-              <Row label="Repetir" top>
+              <FormRow label="Repetir" top>
                 {!isEdit && (
                   <div className="flex items-center gap-2 pt-0.5">
                     <Switch checked={repeatEnabled} onChange={setRepeatEnabled} label="Repetir tarea" />
@@ -671,11 +635,11 @@ export function TaskForm() {
                     />
                   </div>
                 )}
-              </Row>
+              </FormRow>
             )}
 
             {!(repeatEnabled && !isEdit) && (
-              <Row label="Subtareas" top>
+              <FormRow label="Subtareas" top>
                 <SubtasksSection
                   taskId={isEdit ? task?.id : undefined}
                   pending={pendingSubtasks}
@@ -691,8 +655,9 @@ export function TaskForm() {
                     <Sparkles size={14} strokeWidth={1.75} /> Desglosar con IA
                   </button>
                 )}
-              </Row>
+              </FormRow>
             )}
+          </FormRows>
           </div>
         )}
 
