@@ -486,3 +486,36 @@ a { color: inherit; }
 .viewer .info ul { margin: 6px 0 0; padding-left: 18px; font-size: 14px; }
 .viewer .info li { margin-bottom: 4px; }
 @media (max-width: 760px) { .viewer .info { grid-template-columns: 1fr; } .grid { grid-template-columns: 1fr; } }
+
+/* ======================================================================
+   F · C + bloque Ahora del plano   /   G · E + bloque Ahora del plano
+   ====================================================================== */
+.dC .nowblk { padding: 18px 24px 20px; border-bottom: 1px solid var(--line); }
+.dC .nowblk .nh { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--dim); }
+.dC .nowblk .nh .meta { margin-left: auto; font-weight: 400; font-variant-numeric: tabular-nums; }
+.dC .nowblk .nt { font-size: 20px; font-weight: 600; letter-spacing: -.015em; margin: 8px 0 14px; }
+.dC .cota { position: relative; height: 2px; border-radius: 1px; background: var(--line); margin: 10px 0 30px; }
+.dC .cota::before, .dC .cota::after { content: ""; position: absolute; top: -5px; width: 1.5px; height: 12px; border-radius: 1px; background: var(--faint); }
+.dC .cota::before { left: 0; } .dC .cota::after { right: 0; }
+.dC .cota .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 71%; border-radius: 1px; background: var(--acc); }
+.dC .cota .lab { position: absolute; left: 50%; top: -10px; transform: translateX(-50%); background: var(--bg); padding: 0 8px; font-size: 12.5px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.dC .cota .l, .dC .cota .r { position: absolute; top: 10px; font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.dC .cota .l { left: 0; } .dC .cota .r { right: 0; }
+.dC .cells { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+.dC .cells > div { padding: 8px 12px; border-left: 1px solid var(--line); min-width: 0; }
+.dC .cells > div:first-child { border-left: 0; }
+.dC .cells span { display: block; font-size: 12px; color: var(--dim); margin-bottom: 2px; }
+.dC .cells b { display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dC .cells b > i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.dC .nowblk .acts { display: flex; gap: 8px; }
+.dC .btn.q { border-color: transparent; background: transparent; color: var(--dim); }
+
+.dE .cota { position: relative; height: 6px; border-radius: 3px; background: var(--well); box-shadow: inset 0 1px 2px rgba(0,0,0,.15); margin: 18px 0 30px; }
+.dE .cota .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 71%; border-radius: 3px; background: var(--text); }
+.dE .cota .lab { position: absolute; left: 50%; top: -22px; transform: translateX(-50%); font-size: 12.5px; font-weight: 600; }
+.dE .cota .l, .dE .cota .r { position: absolute; top: 12px; font-size: 12px; color: var(--dim); }
+.dE .cota .l { left: 0; } .dE .cota .r { right: 0; }
+.dE .cells { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: var(--groove); border-radius: 12px; overflow: hidden; margin-bottom: 16px; box-shadow: inset 0 1px 2px rgba(0,0,0,.12); }
+.dE .cells > div { background: var(--well); padding: 9px 14px; min-width: 0; }
+.dE .cells span { display: block; font-size: 12px; color: var(--dim); }
+.dE .cells b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }

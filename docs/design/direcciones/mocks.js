@@ -196,7 +196,7 @@ function mockB(view){
   </div></div>`;
 }
 
-function mockC(view){
+function mockC(view, hy){
   const focus = view === 'focus';
   const prio = n => `<span class="prio">${[5,8,11].map((h,i)=>`<i style="height:${h}px" class="${i<n?'':'off'}"></i>`).join('')}</span>`;
   const f = focus ? 'style="opacity:.35"' : '';
@@ -218,8 +218,19 @@ function mockC(view){
     <header>${ic('sun')}<h1>Hoy</h1><span class="d">Sábado, 26 de septiembre</span><span class="sp"></span><button class="btn">${ic('play')}Foco</button><button class="btn p">${ic('plus')}Nueva tarea <kbd>C</kbd></button></header>
     <div class="body">
       <div class="list">
-        <div class="gh">Ahora<span class="c">1</span></div>
-        <div class="it sel"><span class="circ prog"></span>${prio(3)}<span class="t">Revisar la propuesta del cliente</span><span class="tag"><i style="background:#5058c8"></i>Lanzamiento web</span><span class="meta">${ic('clock')}10:30 – 11:15</span></div>
+        ${hy ? `<section class="nowblk">
+          <div class="nh"><span class="circ prog"></span>Ahora<span class="meta">quedan 13 min</span></div>
+          <p class="nt">Revisar la propuesta del cliente</p>
+          <div class="cota"><span class="fill"></span><span class="lab">45 min</span><span class="l">10:30</span><span class="r">11:15</span></div>
+          <div class="cells">
+            <div><span>Proyecto</span><b><i style="background:#5058c8"></i>Lanzamiento web</b></div>
+            <div><span>Prioridad</span><b>${prio(3)}Alta</b></div>
+            <div><span>Energía</span><b>Media</b></div>
+            <div><span>Objetivo</span><b>Publicar la nueva web</b></div>
+          </div>
+          <div class="acts"><button class="btn p">${ic('play')}Empezar foco <kbd>F</kbd></button><button class="btn">${ic('check')}Hecha <kbd>X</kbd></button><button class="btn q">Aplazar</button></div>
+        </section>` : `<div class="gh">Ahora<span class="c">1</span></div>
+        <div class="it sel"><span class="circ prog"></span>${prio(3)}<span class="t">Revisar la propuesta del cliente</span><span class="tag"><i style="background:#5058c8"></i>Lanzamiento web</span><span class="meta">${ic('clock')}10:30 – 11:15</span></div>`}
         <div ${f}>
         <div class="gh">Más tarde<span class="c">3</span></div>
         <div class="it"><span class="circ"></span>${prio(2)}<span class="t">Llamada con Marta</span><span class="tag"><i style="background:#5058c8"></i>Lanzamiento web</span><span class="meta">${ic('clock')}12:00</span></div>
@@ -278,8 +289,8 @@ INFO.E = {
   risk: 'Las sombras suaves y las teclas redondas pueden parecer "de aparato" si se exageran. Nativa en claro.',
   raises: ['Ley de color (del arcade): el naranja aparece una sola vez por pantalla.','Estados por forma (de la tensegridad): tecla vacía, verde con marca, con anillo (ahora) o discontinua (aparcada).']
 };
-const FILES = { A: 'a-plano-tecnico.html', B: 'b-cabina.html', C: 'c-herramienta.html', D: 'd-tablero.html', E: 'e-aparato.html' };
-const TAGS = { A: 'La que eligió el dado', B: 'Mi favorita', C: 'Lo que pediste: tipo Linear', D: 'Carta competitiva, más atrevida', E: 'Mi segunda candidata' };
+const FILES = { A: 'a-plano-tecnico.html', B: 'b-cabina.html', C: 'c-herramienta.html', D: 'd-tablero.html', E: 'e-aparato.html', F: 'f-herramienta-plano.html', G: 'g-aparato-plano.html' };
+const TAGS = { A: 'La que eligió el dado', B: 'Mi favorita', C: 'Lo que pediste: tipo Linear', D: 'Carta competitiva, más atrevida', E: 'Mi segunda candidata', F: 'Mezcla que pediste: C + bloque Ahora de A', G: 'Mezcla que pediste: E + bloque Ahora de A' };
 
 const flaps = t => [...t].map(ch => ch === ':' ? '<span class="c">:</span>' : `<span class="flap">${ch}</span>`).join('');
 
@@ -342,7 +353,7 @@ function mockD(view){
   </div></div>`;
 }
 
-function mockE(view){
+function mockE(view, hy){
   const X = m => ((m - 480) / 720 * 100).toFixed(2) + '%';
   return `
   <nav>
@@ -353,7 +364,17 @@ function mockE(view){
   <div class="main">
     <div class="mod head"><h1>Hoy</h1><span class="meta">Sábado, 26 de septiembre · objetivo de la semana: Publicar la nueva web (3/5)</span><span class="sp"></span><span class="clock n">11:02</span></div>
     <div class="left">
-      <div class="mod now">
+      ${hy ? `<div class="mod now">
+        <h2>Ahora <span class="n">quedan 13 min</span></h2>
+        <p class="t">Revisar la propuesta del cliente</p>
+        <div class="cota"><span class="fill"></span><span class="lab n">45 min</span><span class="l n">10:30</span><span class="r n">11:15</span></div>
+        <div class="cells">
+          <div><span>Proyecto</span><b>Lanzamiento web</b></div>
+          <div><span>Prioridad</span><b>Alta</b></div>
+          <div><span>Energía</span><b>Media</b></div>
+          <div><span>Objetivo</span><b>Publicar la nueva web</b></div>
+        </div>
+        <div class="acts"><button class="btn p">${ic('play')}Empezar foco <kbd>F</kbd></button><button class="btn">${ic('check')}Hecha <kbd>X</kbd></button><button class="btn q">Aplazar</button></div>` : `<div class="mod now">
         <h2>Ahora <span class="n">10:30 – 11:15 · quedan 13 min</span></h2>
         <p class="t">Revisar la propuesta del cliente</p>
         <div class="sub">Lanzamiento web · prioridad alta · energía media</div>
@@ -368,6 +389,7 @@ function mockE(view){
           <span class="ev" style="left:${X(1110)};width:4%"></span>
           <span class="needle" style="left:${X(662)}"></span>
         </div>
+`}
       </div>
       <div class="mod plan dimmable">
         <h2>Plan del día <span class="n">5 bloques</span></h2>
@@ -413,13 +435,33 @@ function mockE(view){
   </div></div>`;
 }
 
+INFO.F = {
+  name: 'F · Herramienta precisa + plano',
+  thesis: 'La base de C (tipo Linear: listas agrupadas, bordes sutiles, un acento índigo) con el bloque "Ahora" del plano técnico: la línea de medida muestra cuánto dura la tarea y cuánto llevas, y las casillas ponen a la vista proyecto, prioridad, energía y objetivo.',
+  why: 'Lo familiar y probado de C, con un momento propio: la tarea actual se lee como una ficha medida, no como una fila más.',
+  palette: [['#ffffff','Fondo'],['#f7f7f8','Barra lateral'],['#1b1b20','Texto'],['#5058c8','Índigo: acción y progreso']],
+  type: 'Inter',
+  risk: 'Sigue pareciéndose mucho a Linear fuera del bloque Ahora.',
+  raises: ['Del plano técnico: línea de medida con la duración y casillas de propiedades en el bloque Ahora.']
+};
+INFO.G = {
+  name: 'G · Aparato Braun + plano',
+  thesis: 'La base de E ("menos, pero mejor": módulos suaves, teclas redondas, naranja solo para la acción principal) con el bloque "Ahora" del plano técnico: línea de medida y casillas de propiedades hundidas en el panel, como la pantalla de un aparato.',
+  why: 'Más identidad propia que F y más cálida. El bloque Ahora encaja como el visor de un aparato Braun.',
+  palette: [['#dcdad5','Carcasa'],['#eceae6','Panel'],['#232220','Grafito'],['#d4501c','Naranja: acción'],['#2f7d45','Verde: activo']],
+  type: 'Hanken Grotesk',
+  risk: 'Las sombras y teclas redondas pueden parecer "de aparato" si se exageran. Nativa en claro.',
+  raises: ['Del plano técnico: línea de medida con la duración y casillas de propiedades en el bloque Ahora.','Ley de color: el naranja aparece una sola vez por pantalla.']
+};
+
 /* ------------------------------ montaje ------------------------------ */
-const MOCKS = { A: mockA, B: mockB, C: mockC, D: mockD, E: mockE };
-const NATIVE = { A: 'light', B: 'dark', C: 'light', D: 'dark', E: 'light' };
-const ORDER = ['A', 'B', 'C', 'D', 'E'];
+const MOCKS = { A: mockA, B: mockB, C: mockC, D: mockD, E: mockE, F: v => mockC(v, true), G: v => mockE(v, true) };
+const NATIVE = { A: 'light', B: 'dark', C: 'light', D: 'dark', E: 'light', F: 'light', G: 'light' };
+const ORDER = ['F', 'G', 'A', 'B', 'C', 'D', 'E'];
 
 function mockHTML(dir, theme, view){
-  return `<div class="m d${dir} ${view === 'form' ? 'form-open' : ''} ${view === 'focus' ? 'view-focus' : ''}" data-theme="${theme}">${MOCKS[dir](view)}</div>`;
+  const base = { F: 'C', G: 'E' }[dir] || dir;
+  return `<div class="m d${base} ${view === 'form' ? 'form-open' : ''} ${view === 'focus' ? 'view-focus' : ''}" data-theme="${theme}">${MOCKS[dir](view)}</div>`;
 }
 function scaleTo(box, stage, w, h){
   const s = Math.min(w / 1280, h / 800);
@@ -433,8 +475,8 @@ const save = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 function gallery(){
   const root = document.getElementById('app');
   root.innerHTML = `<main class="pg">
-    <h1>Nextuss · 5 direcciones visuales</h1>
-    <p class="lead">Todas sobrias, todas con el mismo contenido de ejemplo (datos inventados). Abre cada una a pantalla completa: dentro puedes cambiar entre claro y oscuro, abrir el formulario de nueva tarea y probar el modo foco.</p>
+    <h1>Nextuss · direcciones visuales</h1>
+    <p class="lead">Arriba, las dos mezclas que pediste; debajo, las 5 originales. Todas sobrias, con el mismo contenido de ejemplo (datos inventados). Abre cada una a pantalla completa: dentro puedes cambiar entre claro y oscuro, abrir el formulario de nueva tarea y probar el modo foco.</p>
     <div class="grid">${ORDER.map(d => `
       <article class="card">
         <div class="thumb" data-thumb="${d}"><div class="stage">${mockHTML(d, NATIVE[d], 'today')}</div></div>
