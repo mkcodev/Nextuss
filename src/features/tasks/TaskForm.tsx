@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useId, useRef, useState, type ReactNode } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Check, Plus, Repeat, Sparkles, Trash2 } from 'lucide-react'
-import { Button, Dialog, Switch } from '../../design/primitives'
+import { CalendarDays, ChevronRight, Folder, Plus, Sparkles, Timer, Trash2 } from 'lucide-react'
+import { Button, Dialog, Menu, MenuItem, MenuSeparator, Popover, Select, Switch, ToggleGroup } from '../../design/primitives'
 import { cn } from '../../lib/cn'
-import type { EnergyLevel, RecurrenceFreq, RecurrenceMode } from '../../db/types'
-import { createTask, getSubtasks, trashTask, updateTask } from '../../db/repositories/tasks'
+import type { EnergyLevel } from '../../db/types'
+import { createTask, trashTask, updateTask } from '../../db/repositories/tasks'
 import {
   createRecurrenceRule,
   detachOccurrence,
@@ -12,17 +12,18 @@ import {
   stopRecurrence,
   updateRuleAndFutureOccurrences,
 } from '../../db/repositories/recurrence'
-import { toggleTaskDoneWithFeedback } from './actions'
 import { getGoalForTask, listGoalsForPeriod, linkTaskToGoal, setGoalForTask } from '../../db/repositories/goals'
 import { findOrCreateTag, listTags } from '../../db/repositories/tags'
 import { createProject, listProjects } from '../../db/repositories/projects'
-import { PRIORITY_LABELS, priorityBadgeStyle } from '../../lib/priority'
-import { minutesToTime, monthKey, nextRelativeDate, timeToMinutes, todayKey, weekKey, WEEKDAY_LABELS_ES } from '../../lib/dates'
+import { PRIORITY_COLORS, PRIORITY_NAMES } from '../../lib/priority'
+import { formatShortDate, minutesToTime, monthKey, nextRelativeDate, timeToMinutes, todayKey, weekKey } from '../../lib/dates'
+import { ENTITY_COLORS } from '../../lib/colors'
+import { useSubmitGuard } from '../../lib/useSubmitGuard'
 import { useTaskFormStore } from './taskFormStore'
 import { useAiAvailable } from '../ai/useAiAvailable'
 import { useTaskBreakdownStore } from '../ai/taskBreakdownStore'
-import { ENTITY_COLORS } from '../../lib/colors'
-import { useSubmitGuard } from '../../lib/useSubmitGuard'
+import { RepeatSection, type RepeatValue } from './form/RepeatSection'
+import { SubtasksSection } from './form/SubtasksSection'
 
 const ESTIMATE_PRESETS = [15, 30, 45, 60, 90, 120]
 const ENERGY_OPTIONS: { value: EnergyLevel; label: string }[] = [
@@ -30,20 +31,67 @@ const ENERGY_OPTIONS: { value: EnergyLevel; label: string }[] = [
   { value: 'medium', label: 'Media' },
   { value: 'high', label: 'Alta' },
 ]
-const REPEAT_FREQ_OPTIONS: { value: RecurrenceFreq; label: string }[] = [
-  { value: 'daily', label: 'Días' },
-  { value: 'weekly', label: 'Semanas' },
-  { value: 'monthly', label: 'Meses' },
-]
-const MONTH_DAYS = Array.from({ length: 31 }, (_, i) => i + 1)
+const COLOR_NAMES = ['Índigo', 'Verde', 'Ámbar', 'Rosa', 'Violeta', 'Turquesa']
+const DEFAULT_REPEAT: RepeatValue = { freq: 'daily', interval: 1, byWeekday: [], byMonthDay: [], mode: 'schedule', until: '' }
+
+const HOURS = new Intl.NumberFormat('es', { maximumFractionDigits: 1 })
+function formatEstimate(min: number): string {
+  return min < 60 ? `${min} min` : `${HOURS.format(min / 60)} h`
+}
+
+/** Barras de prioridad (como en Linear): cuántas llenas = cuánto urge. Decorativo; el texto va al lado. */
+function PriorityBars({ p }: { p?: number }) {
+  const filled = p ? 5 - p : 0 // P1 → 4 barras … P4 → 1
+  return (
+    <span aria-hidden="true" className="inline-flex h-3 items-end gap-px">
+      {[4, 7, 10, 13].map((h, i) => (
+        <i
+          key={h}
+          className="w-[3px] rounded-[1px]"
+          style={{ height: h * 0.8, backgroundColor: i < filled && p ? PRIORITY_COLORS[p] : 'var(--color-border-strong)' }}
+        />
+      ))}
+    </span>
+  )
+}
+
+/** Ficha de propiedad de la fila principal: muestra el valor o, vacía, el nombre de la propiedad. */
+function Chip({ empty, children, ...props }: { empty: boolean; children: ReactNode } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      type="button"
+      {...props}
+      className={cn(
+        'inline-flex h-7 max-w-[14rem] items-center gap-1.5 rounded-sm border border-border px-2.5 text-[13px] font-medium transition-colors hover:bg-surface-hover aria-expanded:bg-surface-hover',
+        empty ? 'text-text-muted' : 'text-text',
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+
+function Row({ label, htmlFor, children, top }: { label: string; htmlFor?: string; children: ReactNode; top?: boolean }) {
+  const Label = htmlFor ? 'label' : 'span'
+  return (
+    <div className={cn('grid grid-cols-[7.5rem_minmax(0,1fr)] gap-3 py-2', top ? 'items-start' : 'items-center')}>
+      <Label {...(htmlFor ? { htmlFor } : {})} className={cn('text-sm text-text-muted', top && 'pt-1')}>
+        {label}
+      </Label>
+      <div className="min-w-0">{children}</div>
+    </div>
+  )
+}
 
 /** Single global instance mounted once in AppShell, remounted via `key` when the target task changes. */
 export function TaskForm() {
   const { open, task, prefill, close, openEdit } = useTaskFormStore()
   const isEdit = !!task
+  const isSeries = !!(isEdit && task?.recurrenceId)
   const { available: aiAvailable } = useAiAvailable()
   const openBreakdown = useTaskBreakdownStore((s) => s.openFor)
-  const [newSubtask, setNewSubtask] = useState('')
+  const titleRef = useRef<HTMLInputElement>(null)
+  const ids = { title: useId(), titleError: useId(), notes: useId(), goal: useId(), due: useId(), more: useId() }
 
   const [title, setTitle] = useState(task?.title ?? prefill?.title ?? '')
   const [notes, setNotes] = useState(task?.notes ?? '')
@@ -59,17 +107,16 @@ export function TaskForm() {
   const [projectId, setProjectId] = useState<number | undefined>(task?.projectId)
   const [newProjectName, setNewProjectName] = useState('')
   const [showNewProject, setShowNewProject] = useState(false)
-  const [schedDate, setSchedDate] = useState(task?.scheduledDate ?? '')
-  const [schedStart, setSchedStart] = useState(task?.scheduledStart ?? '')
+  const [schedDate, setSchedDate] = useState(task?.scheduledDate ?? prefill?.scheduledDate ?? '')
+  const [schedStart, setSchedStart] = useState(task?.scheduledStart ?? prefill?.scheduledStart ?? '')
   const [repeatEnabled, setRepeatEnabled] = useState(false)
-  const [repeatFreq, setRepeatFreq] = useState<RecurrenceFreq>('daily')
-  const [repeatInterval, setRepeatInterval] = useState(1)
-  const [repeatByWeekday, setRepeatByWeekday] = useState<number[]>([])
-  const [repeatByMonthDay, setRepeatByMonthDay] = useState<number[]>([])
-  const [repeatMode, setRepeatMode] = useState<RecurrenceMode>('schedule')
-  const [repeatUntil, setRepeatUntil] = useState('')
-  const [repeatInitialized, setRepeatInitialized] = useState(!isEdit || !task?.recurrenceId)
+  const [repeat, setRepeat] = useState<RepeatValue>(DEFAULT_REPEAT)
+  const [repeatInitialized, setRepeatInitialized] = useState(!isSeries)
+  const [pendingSubtasks, setPendingSubtasks] = useState<string[]>([])
   const [titleError, setTitleError] = useState(false)
+  // Las series se editan sobre todo desde "Más" (repetición), así que se abre de entrada.
+  const [moreOpen, setMoreOpen] = useState(isSeries)
+  const [createMore, setCreateMore] = useState(false)
 
   const weekGoals = useLiveQuery(() => listGoalsForPeriod('week', weekKey()), []) ?? []
   const monthGoals = useLiveQuery(() => listGoalsForPeriod('month', monthKey()), []) ?? []
@@ -82,31 +129,36 @@ export function TaskForm() {
     () => (isEdit && task?.id ? getGoalForTask(task.id) : Promise.resolve(undefined)),
     [task?.id],
   )
-
-  const subtasks =
-    useLiveQuery(() => (isEdit && task?.id ? getSubtasks(task.id) : Promise.resolve([])), [task?.id]) ?? []
   if (isEdit && !goalIdInitialized && currentGoal !== undefined) {
     setGoalId(currentGoal?.id)
     setGoalIdInitialized(true)
   }
 
-  // En edición, si la tarea pertenece a una serie, precarga los controles de repetición con la
-  // regla real (una sola vez, igual que el patrón de `goalIdInitialized`) para poder ofrecer
-  // "esta y futuras" con la plantilla actual, no con valores en blanco.
+  // En edición, si la tarea pertenece a una serie, precarga la repetición con la regla real (una sola
+  // vez) para poder ofrecer "esta y futuras" con la plantilla actual, no con valores en blanco.
   const currentRule = useLiveQuery(
-    () => (isEdit && task?.recurrenceId ? getRecurrenceRule(task.recurrenceId) : Promise.resolve(null)),
+    () => (isSeries && task?.recurrenceId ? getRecurrenceRule(task.recurrenceId) : Promise.resolve(null)),
     [task?.recurrenceId],
   )
-  if (isEdit && task?.recurrenceId && !repeatInitialized && currentRule) {
+  if (isSeries && !repeatInitialized && currentRule) {
     setRepeatEnabled(true)
-    setRepeatFreq(currentRule.freq)
-    setRepeatInterval(currentRule.interval)
-    setRepeatByWeekday(currentRule.byWeekday ?? [])
-    setRepeatByMonthDay(currentRule.byMonthDay ?? [])
-    setRepeatMode(currentRule.mode)
-    setRepeatUntil(currentRule.until ?? '')
+    setRepeat({
+      freq: currentRule.freq,
+      interval: currentRule.interval,
+      byWeekday: currentRule.byWeekday ?? [],
+      byMonthDay: currentRule.byMonthDay ?? [],
+      mode: currentRule.mode,
+      until: currentRule.until ?? '',
+    })
     setRepeatInitialized(true)
   }
+
+  // "Cambios sin guardar" explícito: compara con cómo se abrió el formulario, así "Crear otra" (que
+  // vacía el título) no deja el aviso de descartar colgado.
+  const snapshot = () =>
+    JSON.stringify([title.trim(), notes.trim(), energy, estimateMin, priority, dueDate, color, tagIds, projectId, schedDate, schedStart, pendingSubtasks, repeatEnabled && repeat])
+  const [initialSnapshot, setInitialSnapshot] = useState(snapshot)
+  const dirty = snapshot() !== initialSnapshot
 
   const reset = () => {
     setTitle('')
@@ -119,6 +171,7 @@ export function TaskForm() {
     setTagIds([])
     setProjectId(undefined)
     setPriority(undefined)
+    setPendingSubtasks([])
   }
 
   const handleClose = () => {
@@ -127,12 +180,12 @@ export function TaskForm() {
   }
 
   const repeatTemplateFields = () => ({
-    freq: repeatFreq,
-    interval: repeatInterval,
-    byWeekday: repeatFreq === 'weekly' ? repeatByWeekday : undefined,
-    byMonthDay: repeatFreq === 'monthly' ? repeatByMonthDay : undefined,
-    mode: repeatMode,
-    until: repeatUntil || undefined,
+    freq: repeat.freq,
+    interval: repeat.interval,
+    byWeekday: repeat.freq === 'weekly' ? repeat.byWeekday : undefined,
+    byMonthDay: repeat.freq === 'monthly' ? repeat.byMonthDay : undefined,
+    mode: repeat.mode,
+    until: repeat.until || undefined,
     title: title.trim(),
     notes: notes.trim() || undefined,
     energy,
@@ -146,6 +199,7 @@ export function TaskForm() {
   const save = async (applyToFuture: boolean) => {
     if (!title.trim()) {
       setTitleError(true)
+      titleRef.current?.focus()
       return
     }
 
@@ -160,10 +214,12 @@ export function TaskForm() {
       projectId,
       priority,
     }
+    // La franja se estira a la estimación elegida.
+    const scheduledEnd = schedStart ? minutesToTime(timeToMinutes(schedStart) + estimateMin) : undefined
 
     if (isEdit && task?.id) {
       if (task.recurrenceId && applyToFuture) {
-        // "Esta y futuras": la plantilla de la serie cambia, y el ancla (startDate) se conserva tal
+        // "Esta y futuras": cambia la plantilla de la serie; el ancla (startDate) se conserva tal
         // cual — reescribirla desplazaría el cálculo de intervalos de toda la serie ya generada.
         await updateRuleAndFutureOccurrences(task.recurrenceId, {
           ...repeatTemplateFields(),
@@ -173,7 +229,6 @@ export function TaskForm() {
         // Edición normal, o "solo esta" sobre una ocurrencia: si pertenecía a una serie, se
         // desvincula primero — a partir de aquí es una tarea normal, ajena a futuras regeneraciones.
         if (task.recurrenceId) await detachOccurrence(task.id)
-        const scheduledEnd = schedStart ? minutesToTime(timeToMinutes(schedStart) + estimateMin) : undefined
         await updateTask(task.id, {
           ...payload,
           scheduledDate: schedDate || undefined,
@@ -182,27 +237,37 @@ export function TaskForm() {
         })
       }
       await setGoalForTask(task.id, goalId)
-    } else if (repeatEnabled) {
-      // La primera ocurrencia la genera `createRecurrenceRule` — no hace falta un `createTask` aparte.
-      // El vínculo a objetivo se omite para series recurrentes: no está claro que TODAS las
-      // ocurrencias futuras deban heredarlo, y es una decisión de diseño que no toca esta fase.
+      handleClose()
+      return
+    }
+
+    if (repeatEnabled) {
+      // La primera ocurrencia la genera `createRecurrenceRule`. El vínculo a objetivo y las subtareas
+      // se omiten en series: no está claro que TODAS las ocurrencias futuras deban heredarlos.
       await createRecurrenceRule({
         ...repeatTemplateFields(),
-        startDate: prefill?.scheduledDate ?? todayKey(),
-        scheduledStart: prefill?.scheduledStart,
+        startDate: schedDate || todayKey(),
+        scheduledStart: schedStart || undefined,
       })
     } else {
-      // The prefilled slot defaults to 30min; stretch it to match the chosen estimate.
-      const scheduledEnd = prefill?.scheduledStart
-        ? minutesToTime(timeToMinutes(prefill.scheduledStart) + estimateMin)
-        : prefill?.scheduledEnd
       const newId = await createTask({
         ...payload,
-        scheduledDate: prefill?.scheduledDate,
-        scheduledStart: prefill?.scheduledStart,
+        scheduledDate: schedDate || undefined,
+        scheduledStart: schedStart || undefined,
         scheduledEnd,
       })
+      for (const subtitle of pendingSubtasks) await createTask({ title: subtitle, parentId: newId, status: 'backlog' })
       if (goalId) await linkTaskToGoal(goalId, newId)
+    }
+
+    if (createMore) {
+      // "Crear otra": se queda abierto con las mismas propiedades y el título vacío, listo para la siguiente.
+      setTitle('')
+      setNotes('')
+      setPendingSubtasks([])
+      setInitialSnapshot(JSON.stringify(['', '', energy, estimateMin, priority, dueDate, color, tagIds, projectId, schedDate, schedStart, [], repeatEnabled && repeat]))
+      titleRef.current?.focus()
+      return
     }
     handleClose()
   }
@@ -226,16 +291,7 @@ export function TaskForm() {
     handleClose()
   }
 
-  const addSubtask = async () => {
-    const subtitle = newSubtask.trim()
-    if (!subtitle || !task?.id) return
-    await createTask({ title: subtitle, parentId: task.id, status: 'backlog' })
-    setNewSubtask('')
-  }
-
-  const toggleTag = (id: number) => {
-    setTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]))
-  }
+  const toggleTag = (id: number) => setTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]))
 
   const addTag = async () => {
     const name = newTagName.trim()
@@ -254,549 +310,410 @@ export function TaskForm() {
     setShowNewProject(false)
   }
 
+  const project = projects.find((p) => p.id === projectId)
+  const goalOptions = (list: typeof weekGoals) => list.filter((g) => !g.done || g.id === goalId)
+  const showGoal = goalIdInitialized && (openGoals.length > 0 || goalId != null)
+
+  // Resumen de lo que hay dentro de "Más", para que plegado no esconda información.
+  const moreSummary = [
+    energy && `energía ${ENERGY_OPTIONS.find((o) => o.value === energy)!.label.toLowerCase()}`,
+    tagIds.length > 0 && `${tagIds.length} etiqueta${tagIds.length > 1 ? 's' : ''}`,
+    goalId != null && 'objetivo',
+    dueDate && `límite ${formatShortDate(dueDate)}`,
+    repeatEnabled && 'se repite',
+    pendingSubtasks.length > 0 && `${pendingSubtasks.length} subtarea${pendingSubtasks.length > 1 ? 's' : ''}`,
+  ].filter(Boolean)
+
   return (
-    <Dialog open={open} onClose={handleClose} title={isEdit ? 'Editar tarea' : 'Nueva tarea'}>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="mb-1 block text-xs font-medium text-text-muted">Título</label>
-          <input
-            autoFocus
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value)
-              if (titleError) setTitleError(false)
-            }}
-            placeholder="Ej. Preparar la reunión"
-            aria-invalid={titleError}
-            className={cn(
-              'w-full rounded-lg border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent',
-              titleError ? 'border-danger' : 'border-border',
+    <Dialog open={open} onClose={handleClose} title={isEdit ? 'Editar tarea' : 'Nueva tarea'} size="lg" dirty={dirty}>
+      <form
+        onSubmit={handleSubmit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault()
+            void guardedSave(false)
+          }
+        }}
+      >
+        <label htmlFor={ids.title} className="sr-only">
+          Título
+        </label>
+        <input
+          ref={titleRef}
+          id={ids.title}
+          autoFocus
+          autoComplete="off"
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value)
+            if (titleError) setTitleError(false)
+          }}
+          placeholder="Título de la tarea"
+          aria-invalid={titleError}
+          aria-describedby={titleError ? ids.titleError : undefined}
+          className="w-full border-b border-transparent bg-transparent pb-1 text-xl font-semibold tracking-tight text-text placeholder:text-text-muted focus:border-border field-bare aria-invalid:border-danger"
+        />
+        {titleError && (
+          <p id={ids.titleError} role="alert" className="mt-1 text-sm text-danger">
+            Ponle un título para poder guardarla.
+          </p>
+        )}
+
+        <label htmlFor={ids.notes} className="sr-only">
+          Notas
+        </label>
+        <textarea
+          id={ids.notes}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Añade notas…"
+          rows={notes.split('\n').length > 2 ? 4 : 2}
+          className="mt-2 w-full resize-none border-b border-transparent bg-transparent text-sm text-text placeholder:text-text-muted focus:border-border field-bare"
+        />
+
+        {/* Fila de fichas: lo que casi siempre se toca, a un clic. */}
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <Menu
+            align="left"
+            trigger={(t) => (
+              <Chip {...t} empty={!priority} aria-label={`Prioridad: ${priority ? PRIORITY_NAMES[priority] : 'sin prioridad'}`}>
+                <PriorityBars p={priority} />
+                {priority ? PRIORITY_NAMES[priority] : 'Prioridad'}
+              </Chip>
             )}
-          />
-          {titleError && <p className="mt-1 text-xs text-danger">Ponle un título a la tarea para poder crearla.</p>}
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-text-muted">Notas (opcional)</label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            rows={2}
-            className="w-full resize-none rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
-          />
-        </div>
-
-        {isEdit && task?.id && aiAvailable && (
-          <button
-            type="button"
-            onClick={() => openBreakdown({ parentTaskId: task.id!, title: title || task.title, notes: notes || undefined })}
-            className="flex items-center gap-1.5 text-xs font-medium text-accent hover:underline"
           >
-            <Sparkles size={13} strokeWidth={1.75} /> Desglosar con IA
-          </button>
-        )}
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-text-muted">Prioridad</label>
-          <div className="flex gap-1.5">
             {[1, 2, 3, 4].map((p) => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => setPriority((cur) => (cur === p ? undefined : p))}
-                className={cn(
-                  'flex-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors',
-                  priority === p ? 'font-semibold' : 'border-border text-text-muted hover:bg-surface-hover',
-                )}
-                style={priority === p ? priorityBadgeStyle(p) : undefined}
-              >
-                {PRIORITY_LABELS[p]}
-              </button>
+              <MenuItem key={p} checked={priority === p} icon={<PriorityBars p={p} />} onSelect={() => setPriority(p)}>
+                {PRIORITY_NAMES[p]}
+              </MenuItem>
             ))}
-          </div>
-        </div>
+            <MenuSeparator />
+            <MenuItem checked={priority === undefined} onSelect={() => setPriority(undefined)}>
+              Sin prioridad
+            </MenuItem>
+          </Menu>
 
-        <div>
-          <label className="mb-1 block text-xs font-medium text-text-muted">Energía necesaria</label>
-          <div className="flex gap-1.5">
-            {ENERGY_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setEnergy((e) => (e === opt.value ? undefined : opt.value))}
-                className={cn(
-                  'flex-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors',
-                  energy === opt.value
-                    ? 'border-accent bg-accent-soft text-accent'
-                    : 'border-border text-text-muted hover:bg-surface-hover',
-                )}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-text-muted">Estimación</label>
-          <div className="flex flex-wrap gap-1.5">
-            {ESTIMATE_PRESETS.map((min) => (
-              <button
-                key={min}
-                type="button"
-                onClick={() => setEstimateMin(min)}
-                className={cn(
-                  'rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors',
-                  estimateMin === min
-                    ? 'border-accent bg-accent-soft text-accent'
-                    : 'border-border text-text-muted hover:bg-surface-hover',
-                )}
-              >
-                {min < 60 ? `${min} min` : `${min / 60} h`}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex gap-3">
-          <div className="flex-1">
-            <label className="mb-1 block text-xs font-medium text-text-muted">Fecha límite (opcional)</label>
-            <input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="w-full rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-text-muted">Color</label>
-            <div className="flex gap-1.5 pt-2">
-              {ENTITY_COLORS.map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  onClick={() => setColor(opt)}
-                  className={cn(
-                    'h-7 w-7 rounded-full border-2',
-                    color === opt ? 'border-text' : 'border-transparent',
-                  )}
-                  style={{ backgroundColor: opt }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex gap-3">
-          <div className="flex-1">
-            <label className="mb-1 block text-xs font-medium text-text-muted">Proyecto (opcional)</label>
-            {showNewProject ? (
-              <div className="flex gap-1.5">
-                <input
-                  autoFocus
-                  value={newProjectName}
-                  onChange={(e) => setNewProjectName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      addProject()
-                    }
-                    if (e.key === 'Escape') {
-                      // Cierra solo el campo de "nuevo proyecto", no el diálogo de la tarea.
-                      e.stopPropagation()
-                      setShowNewProject(false)
-                    }
-                  }}
-                  placeholder="Nombre del proyecto"
-                  className="w-full rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
-                />
-                <Button type="button" onClick={addProject} className="px-2.5 text-xs">
-                  Crear
-                </Button>
-              </div>
-            ) : (
-              <select
-                value={projectId ?? ''}
-                onChange={(e) => {
-                  if (e.target.value === '__new__') {
-                    setShowNewProject(true)
-                    return
-                  }
-                  setProjectId(e.target.value ? Number(e.target.value) : undefined)
-                }}
-                className="w-full rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
-              >
-                <option value="">Sin proyecto</option>
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-                <option value="__new__">+ Nuevo proyecto…</option>
-              </select>
+          <Popover
+            label="Fecha"
+            trigger={(t) => (
+              <Chip {...t} empty={!schedDate} aria-label={`Fecha: ${schedDate ? formatShortDate(schedDate) : 'sin fecha'}`}>
+                <CalendarDays size={14} strokeWidth={1.75} aria-hidden="true" />
+                {schedDate ? `${formatShortDate(schedDate)}${schedStart ? ` · ${schedStart}` : ''}` : 'Fecha'}
+              </Chip>
             )}
-          </div>
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-text-muted">Etiquetas (opcional)</label>
-          <div className="flex flex-wrap gap-1.5">
-            {tags.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => toggleTag(t.id!)}
-                className={cn(
-                  'rounded-full border px-2.5 py-1 text-xs font-medium transition-colors',
-                  tagIds.includes(t.id!)
-                    ? 'border-accent bg-accent-soft text-accent'
-                    : 'border-border text-text-muted hover:bg-surface-hover',
-                )}
-              >
-                {t.name}
-              </button>
-            ))}
-          </div>
-          <div className="mt-1.5 flex gap-1.5">
-            <input
-              value={newTagName}
-              onChange={(e) => setNewTagName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  addTag()
-                }
-              }}
-              placeholder="Nueva etiqueta…"
-              className="flex-1 rounded-lg border border-border bg-bg-soft px-2.5 py-1.5 text-xs text-text outline-none focus:border-accent"
-            />
-            <button
-              type="button"
-              onClick={addTag}
-              className="flex items-center justify-center rounded-lg border border-border px-2 text-text-muted hover:bg-surface-hover hover:text-text"
-            >
-              <Plus size={14} strokeWidth={2} />
-            </button>
-          </div>
-        </div>
-
-        {goalIdInitialized && (openGoals.length > 0 || goalId != null) && (
-          <div>
-            <label className="mb-1 block text-xs font-medium text-text-muted">
-              Vincular a objetivo (opcional)
-            </label>
-            <select
-              value={goalId ?? ''}
-              onChange={(e) => setGoalId(e.target.value ? Number(e.target.value) : undefined)}
-              className="w-full rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
-            >
-              <option value="">Sin objetivo</option>
-              {weekGoals.filter((g) => !g.done || g.id === goalId).length > 0 && (
-                <optgroup label="Esta semana">
-                  {weekGoals
-                    .filter((g) => !g.done || g.id === goalId)
-                    .map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.title}
-                      </option>
-                    ))}
-                </optgroup>
-              )}
-              {monthGoals.filter((g) => !g.done || g.id === goalId).length > 0 && (
-                <optgroup label="Este mes">
-                  {monthGoals
-                    .filter((g) => !g.done || g.id === goalId)
-                    .map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.title}
-                      </option>
-                    ))}
-                </optgroup>
-              )}
-              {/* The linked goal can belong to an older week/month than the lists above cover — keep it selectable. */}
-              {currentGoal &&
-                currentGoal.id === goalId &&
-                ![...weekGoals, ...monthGoals].some((g) => g.id === goalId) && (
-                  <option value={currentGoal.id}>{currentGoal.title}</option>
-                )}
-            </select>
-          </div>
-        )}
-
-        {isEdit && task?.id && (
-          <div>
-            <label className="mb-1 block text-xs font-medium text-text-muted">
-              Subtareas{subtasks.length > 0 && ` (${subtasks.filter((s) => s.status === 'done').length}/${subtasks.length})`}
-            </label>
-            {subtasks.length > 0 && (
-              <ul className="mb-2 space-y-1">
-                {subtasks.map((s) => (
-                  <li
-                    key={s.id}
-                    className="flex items-center gap-2 rounded-lg border border-border bg-bg-soft px-2.5 py-1.5"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => toggleTaskDoneWithFeedback(s.id!, s.title)}
-                      className={cn(
-                        'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
-                        s.status === 'done' ? 'border-accent bg-accent text-on-accent' : 'border-text-faint',
-                      )}
-                    >
-                      {s.status === 'done' && <Check size={10} strokeWidth={3} />}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => openEdit(s)}
-                      className={cn(
-                        'min-w-0 flex-1 truncate text-left text-xs text-text',
-                        s.status === 'done' && 'text-text-faint line-through',
-                      )}
-                    >
-                      {s.title}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => trashTask(s.id!)}
-                      className="shrink-0 text-text-faint hover:text-danger"
-                    >
-                      <Trash2 size={12} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <input
-              value={newSubtask}
-              onChange={(e) => setNewSubtask(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  addSubtask()
-                }
-              }}
-              placeholder="Añadir subtarea…"
-              className="w-full rounded-lg border border-border bg-bg-soft px-2.5 py-1.5 text-xs text-text outline-none focus:border-accent"
-            />
-          </div>
-        )}
-
-        {(!isEdit || task?.recurrenceId) && (
-          <div>
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
-                <Repeat size={13} strokeWidth={1.75} /> Repetir
-              </label>
-              {!isEdit && <Switch checked={repeatEnabled} onChange={setRepeatEnabled} label="Repetir tarea" />}
-            </div>
-
-            {isEdit && task?.recurrenceId && (
-              <p className="mt-1 text-xs text-text-faint">
-                Esta tarea forma parte de una serie recurrente. Los cambios se pueden aplicar solo a
-                esta ocurrencia o a esta y todas las futuras (las ya completadas nunca se tocan).
-              </p>
-            )}
-
-            {repeatEnabled && (
-              <div className="mt-2 space-y-2 rounded-lg border border-border bg-bg-soft p-2.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-text-muted">Cada</span>
-                  <input
-                    type="number"
-                    min={1}
-                    value={repeatInterval}
-                    onChange={(e) => setRepeatInterval(Math.max(1, Number(e.target.value) || 1))}
-                    className="w-14 rounded-lg border border-border bg-bg px-2 py-1 text-xs text-text outline-none focus:border-accent"
-                  />
-                  <div className="flex gap-1">
-                    {REPEAT_FREQ_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => {
-                          setRepeatFreq(opt.value)
-                          // Sin ningún día marcado la regla nunca generaría nada (silenciosamente) —
-                          // arranca con el de hoy preseleccionado en vez de dejarla "vacía".
-                          const today = new Date()
-                          if (opt.value === 'weekly' && repeatByWeekday.length === 0) {
-                            setRepeatByWeekday([today.getDay()])
-                          }
-                          if (opt.value === 'monthly' && repeatByMonthDay.length === 0) {
-                            setRepeatByMonthDay([today.getDate()])
-                          }
-                        }}
-                        className={cn(
-                          'rounded-lg border px-2 py-1 text-xs font-medium transition-colors',
-                          repeatFreq === opt.value
-                            ? 'border-accent bg-accent-soft text-accent'
-                            : 'border-border text-text-muted hover:bg-surface-hover',
-                        )}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
+          >
+            {(closeDate) => (
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-1">
+                  {(
+                    [
+                      ['Hoy', () => setSchedDate(todayKey())],
+                      ['Mañana', () => setSchedDate((cur) => nextRelativeDate(cur, todayKey(), 1))],
+                      ['Próx. semana', () => setSchedDate((cur) => nextRelativeDate(cur, todayKey(), 7))],
+                    ] as const
+                  ).map(([label, fn]) => (
+                    <Button key={label} type="button" variant="secondary" size="sm" onClick={fn}>
+                      {label}
+                    </Button>
+                  ))}
                 </div>
-
-                {repeatFreq === 'weekly' && repeatMode === 'schedule' && (
-                  <div className="flex gap-1">
-                    {WEEKDAY_LABELS_ES.map((label, day) => (
-                      <button
-                        key={day}
-                        type="button"
-                        onClick={() =>
-                          setRepeatByWeekday((prev) =>
-                            prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
-                          )
-                        }
-                        className={cn(
-                          'h-7 w-7 rounded-lg border text-xs font-medium',
-                          repeatByWeekday.includes(day)
-                            ? 'border-accent bg-accent-soft text-accent'
-                            : 'border-border text-text-faint',
-                        )}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {repeatFreq === 'monthly' && repeatMode === 'schedule' && (
-                  <div className="flex flex-wrap gap-1">
-                    {MONTH_DAYS.map((day) => (
-                      <button
-                        key={day}
-                        type="button"
-                        onClick={() =>
-                          setRepeatByMonthDay((prev) =>
-                            prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
-                          )
-                        }
-                        className={cn(
-                          'h-6 w-6 rounded border text-xs font-medium',
-                          repeatByMonthDay.includes(day)
-                            ? 'border-accent bg-accent-soft text-accent'
-                            : 'border-border text-text-faint',
-                        )}
-                      >
-                        {day}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-1.5 text-xs text-text-muted">
-                    <input
-                      type="radio"
-                      checked={repeatMode === 'schedule'}
-                      onChange={() => setRepeatMode('schedule')}
-                    />
-                    Fecha fija
-                  </label>
-                  <label className="flex items-center gap-1.5 text-xs text-text-muted">
-                    <input
-                      type="radio"
-                      checked={repeatMode === 'completion'}
-                      onChange={() => setRepeatMode('completion')}
-                    />
-                    Tras completar
-                  </label>
-                </div>
-                <p className="text-xs text-text-faint">
-                  {repeatMode === 'schedule'
-                    ? 'Se genera en las fechas de calendario indicadas, hayas completado o no la anterior.'
-                    : 'La siguiente ocurrencia se crea solo al completar esta, desplazada el intervalo elegido.'}
-                </p>
-
-                <div>
-                  <label className="mb-1 block text-xs text-text-faint">Hasta (opcional)</label>
+                <label className="flex items-center justify-between gap-2 text-sm text-text-muted">
+                  Día
                   <input
                     type="date"
-                    value={repeatUntil}
-                    onChange={(e) => setRepeatUntil(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-bg px-2.5 py-1.5 text-xs text-text outline-none focus:border-accent"
+                    value={schedDate}
+                    onChange={(e) => setSchedDate(e.target.value)}
+                    className="h-7 rounded-sm border border-border bg-surface px-2 text-sm text-text focus:border-accent"
                   />
-                </div>
-
-                {isEdit && task?.recurrenceId && (
+                </label>
+                <label className="flex items-center justify-between gap-2 text-sm text-text-muted">
+                  Hora
+                  <input
+                    type="time"
+                    value={schedStart}
+                    disabled={!schedDate}
+                    onChange={(e) => setSchedStart(e.target.value)}
+                    className="h-7 rounded-sm border border-border bg-surface px-2 text-sm text-text focus:border-accent disabled:opacity-50"
+                  />
+                </label>
+                {(schedDate || schedStart) && (
                   <button
                     type="button"
-                    onClick={handleStopRecurrence}
-                    className="text-xs font-medium text-danger hover:underline"
+                    onClick={() => {
+                      setSchedDate('')
+                      setSchedStart('')
+                      closeDate()
+                    }}
+                    className="text-sm font-medium text-text-muted hover:text-danger"
                   >
-                    Detener repetición
+                    Quitar fecha
                   </button>
                 )}
               </div>
             )}
+          </Popover>
+
+          <Menu
+            align="left"
+            trigger={(t) => (
+              <Chip {...t} empty={!project} aria-label={`Proyecto: ${project?.name ?? 'sin proyecto'}`}>
+                {project ? (
+                  <span aria-hidden="true" className="size-2 shrink-0 rounded-full" style={{ backgroundColor: project.color }} />
+                ) : (
+                  <Folder size={14} strokeWidth={1.75} aria-hidden="true" />
+                )}
+                <span className="truncate">{project?.name ?? 'Proyecto'}</span>
+              </Chip>
+            )}
+          >
+            <MenuItem checked={projectId === undefined} onSelect={() => setProjectId(undefined)}>
+              Sin proyecto
+            </MenuItem>
+            {projects.map((p) => (
+              <MenuItem
+                key={p.id}
+                checked={projectId === p.id}
+                icon={<span aria-hidden="true" className="size-2 shrink-0 rounded-full" style={{ backgroundColor: p.color }} />}
+                onSelect={() => setProjectId(p.id)}
+              >
+                {p.name}
+              </MenuItem>
+            ))}
+            <MenuSeparator />
+            <MenuItem icon={<Plus size={14} strokeWidth={1.75} />} onSelect={() => setShowNewProject(true)}>
+              Nuevo proyecto…
+            </MenuItem>
+          </Menu>
+
+          <Menu
+            align="left"
+            trigger={(t) => (
+              <Chip {...t} empty={false} aria-label={`Estimación: ${formatEstimate(estimateMin)}`}>
+                <Timer size={14} strokeWidth={1.75} aria-hidden="true" />
+                {formatEstimate(estimateMin)}
+              </Chip>
+            )}
+          >
+            {ESTIMATE_PRESETS.map((min) => (
+              <MenuItem key={min} checked={estimateMin === min} onSelect={() => setEstimateMin(min)}>
+                {formatEstimate(min)}
+              </MenuItem>
+            ))}
+          </Menu>
+        </div>
+
+        {showNewProject && (
+          <div className="mt-2 flex items-center gap-1.5">
+            <input
+              autoFocus
+              aria-label="Nombre del nuevo proyecto"
+              autoComplete="off"
+              value={newProjectName}
+              onChange={(e) => setNewProjectName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  void addProject()
+                }
+                if (e.key === 'Escape') {
+                  // Cierra solo el campo de "nuevo proyecto", no el diálogo de la tarea.
+                  e.stopPropagation()
+                  setShowNewProject(false)
+                }
+              }}
+              placeholder="Nombre del proyecto"
+              className="h-7 flex-1 rounded-sm border border-border bg-surface px-2.5 text-sm text-text placeholder:text-text-muted focus:border-accent"
+            />
+            <Button type="button" size="sm" onClick={() => void addProject()}>
+              Crear proyecto
+            </Button>
+            <Button type="button" size="sm" variant="ghost" onClick={() => setShowNewProject(false)}>
+              Cancelar
+            </Button>
           </div>
         )}
 
-        {isEdit && (
-          <div>
-            <label className="mb-1 block text-xs font-medium text-text-muted">Reprogramar (opcional)</label>
-            <div className="flex gap-2">
-              <input
-                type="date"
-                value={schedDate}
-                onChange={(e) => setSchedDate(e.target.value)}
-                className="flex-1 rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
-              />
-              <input
-                type="time"
-                value={schedStart}
-                onChange={(e) => setSchedStart(e.target.value)}
-                className="w-28 rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
-              />
-            </div>
-            <div className="mt-1.5 flex flex-wrap gap-1.5">
-              <button
-                type="button"
-                onClick={() => setSchedDate((cur) => nextRelativeDate(cur, todayKey(), 1))}
-                className="rounded-full border border-border px-2.5 py-1 text-xs font-medium text-text-muted hover:bg-surface-hover"
-              >
-                Mañana
-              </button>
-              <button
-                type="button"
-                onClick={() => setSchedDate((cur) => nextRelativeDate(cur, todayKey(), 7))}
-                className="rounded-full border border-border px-2.5 py-1 text-xs font-medium text-text-muted hover:bg-surface-hover"
-              >
-                Próxima semana
-              </button>
-              {(schedDate || schedStart) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSchedDate('')
-                    setSchedStart('')
+        {/* "Más": lo que se usa a veces. Plegado muestra un resumen de lo que tiene dentro. */}
+        <button
+          type="button"
+          aria-expanded={moreOpen}
+          aria-controls={ids.more}
+          onClick={() => setMoreOpen((v) => !v)}
+          className="mt-4 flex w-full items-center gap-1.5 border-t border-border pt-3 text-left text-sm font-medium text-text-muted hover:text-text"
+        >
+          <ChevronRight size={15} strokeWidth={2} className={cn('shrink-0 transition-transform', moreOpen && 'rotate-90')} aria-hidden="true" />
+          Más opciones
+          {!moreOpen && moreSummary.length > 0 && (
+            <span className="truncate font-normal text-text-muted">· {moreSummary.join(' · ')}</span>
+          )}
+        </button>
+
+        {moreOpen && (
+          <div id={ids.more} className="mt-2 divide-y divide-border rounded-md border border-border bg-bg-soft px-4 py-1">
+            <Row label="Energía">
+              <ToggleGroup label="Energía necesaria" options={ENERGY_OPTIONS} value={energy} onChange={setEnergy} allowDeselect />
+            </Row>
+
+            <Row label="Etiquetas" top>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {tags.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    aria-pressed={tagIds.includes(t.id!)}
+                    onClick={() => toggleTag(t.id!)}
+                    className={cn(
+                      'h-6 max-w-[10rem] truncate rounded-full border px-2.5 text-xs font-medium transition-colors',
+                      tagIds.includes(t.id!) ? 'border-accent bg-accent-soft text-accent' : 'border-border text-text-muted hover:bg-surface-hover hover:text-text',
+                    )}
+                  >
+                    {t.name}
+                  </button>
+                ))}
+                <input
+                  value={newTagName}
+                  onChange={(e) => setNewTagName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      void addTag()
+                    }
                   }}
-                  className="rounded-full border border-border px-2.5 py-1 text-xs font-medium text-danger hover:bg-danger/10"
-                >
-                  Quitar del calendario
-                </button>
-              )}
-            </div>
+                  aria-label="Nueva etiqueta (Enter para añadir)"
+                  autoComplete="off"
+                  placeholder="Nueva etiqueta…"
+                  className="h-6 w-32 rounded-full border border-dashed border-border-strong bg-transparent px-2.5 text-xs text-text placeholder:text-text-muted focus:border-accent"
+                />
+              </div>
+            </Row>
+
+            {showGoal && (
+              <Row label="Objetivo" htmlFor={ids.goal}>
+                <Select id={ids.goal} value={goalId ?? ''} onChange={(e) => setGoalId(e.target.value ? Number(e.target.value) : undefined)}>
+                  <option value="">Sin objetivo</option>
+                  {goalOptions(weekGoals).length > 0 && (
+                    <optgroup label="Esta semana">
+                      {goalOptions(weekGoals).map((g) => (
+                        <option key={g.id} value={g.id}>
+                          {g.title}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {goalOptions(monthGoals).length > 0 && (
+                    <optgroup label="Este mes">
+                      {goalOptions(monthGoals).map((g) => (
+                        <option key={g.id} value={g.id}>
+                          {g.title}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {/* The linked goal can belong to an older week/month than the lists above cover — keep it selectable. */}
+                  {currentGoal && currentGoal.id === goalId && ![...weekGoals, ...monthGoals].some((g) => g.id === goalId) && (
+                    <option value={currentGoal.id}>{currentGoal.title}</option>
+                  )}
+                </Select>
+              </Row>
+            )}
+
+            <Row label="Fecha límite" htmlFor={ids.due}>
+              <input
+                id={ids.due}
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="h-7 rounded-sm border border-border bg-surface px-2 text-sm text-text focus:border-accent"
+              />
+            </Row>
+
+            <Row label="Color">
+              <div role="radiogroup" aria-label="Color" className="flex gap-1.5">
+                {ENTITY_COLORS.map((opt, i) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    role="radio"
+                    aria-checked={color === opt}
+                    aria-label={COLOR_NAMES[i]}
+                    title={COLOR_NAMES[i]}
+                    onClick={() => setColor(opt)}
+                    className={cn(
+                      'size-6 rounded-full ring-offset-2 ring-offset-bg-soft transition-shadow',
+                      color === opt ? 'ring-2 ring-text' : 'hover:ring-2 hover:ring-border-strong',
+                    )}
+                    style={{ backgroundColor: opt }}
+                  />
+                ))}
+              </div>
+            </Row>
+
+            {(!isEdit || isSeries) && (
+              <Row label="Repetir" top>
+                {!isEdit && (
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <Switch checked={repeatEnabled} onChange={setRepeatEnabled} label="Repetir tarea" />
+                    <span className="text-sm text-text-muted">{repeatEnabled ? 'Se repite' : 'No se repite'}</span>
+                  </div>
+                )}
+                {isSeries && (
+                  <p className="text-sm text-text-muted">
+                    Forma parte de una serie. Al guardar eliges si el cambio es solo para esta o para esta y las
+                    futuras (las completadas no se tocan).
+                  </p>
+                )}
+                {repeatEnabled && (
+                  <div className="mt-3">
+                    <RepeatSection
+                      value={repeat}
+                      onChange={(patch) => setRepeat((r) => ({ ...r, ...patch }))}
+                      onStop={isSeries ? () => void handleStopRecurrence() : undefined}
+                    />
+                  </div>
+                )}
+              </Row>
+            )}
+
+            {!(repeatEnabled && !isEdit) && (
+              <Row label="Subtareas" top>
+                <SubtasksSection
+                  taskId={isEdit ? task?.id : undefined}
+                  pending={pendingSubtasks}
+                  onPendingChange={setPendingSubtasks}
+                  onOpen={openEdit}
+                />
+                {isEdit && task?.id && aiAvailable && (
+                  <button
+                    type="button"
+                    onClick={() => openBreakdown({ parentTaskId: task.id!, title: title || task.title, notes: notes || undefined })}
+                    className="mt-1 flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
+                  >
+                    <Sparkles size={14} strokeWidth={1.75} /> Desglosar con IA
+                  </button>
+                )}
+              </Row>
+            )}
           </div>
         )}
 
-        <div className="sticky bottom-0 -mx-6 -mb-6 flex items-center justify-between border-t border-border bg-surface px-6 py-3">
+        <div className="sticky bottom-0 -mx-6 -mb-6 mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border bg-surface px-6 py-3">
           {isEdit ? (
-            <Button type="button" variant="danger" onClick={handleDelete} className="px-2.5 text-xs">
-              <Trash2 size={13} /> Eliminar
+            <Button type="button" variant="ghost" size="sm" onClick={() => void handleDelete()} className="hover:text-danger">
+              <Trash2 size={14} strokeWidth={1.75} /> Eliminar
             </Button>
           ) : (
-            <span />
+            <label className="flex items-center gap-2 text-sm text-text-muted">
+              <Switch checked={createMore} onChange={setCreateMore} label="Crear otra después de esta" />
+              Crear otra
+            </label>
           )}
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <Button type="button" variant="ghost" onClick={handleClose}>
               Cancelar
             </Button>
-            {isEdit && task?.recurrenceId ? (
+            {isSeries ? (
               <>
-                <Button type="submit" variant="ghost" disabled={saving}>
+                <Button type="submit" variant="secondary" disabled={saving}>
                   Solo esta
                 </Button>
                 <Button type="button" loading={saving} onClick={() => void guardedSave(true)}>
@@ -804,7 +721,10 @@ export function TaskForm() {
                 </Button>
               </>
             ) : (
-              <Button type="submit" loading={saving}>{isEdit ? 'Guardar tarea' : 'Crear tarea'}</Button>
+              <Button type="submit" loading={saving} title="Ctrl + Enter">
+                {isEdit ? 'Guardar tarea' : 'Crear tarea'}
+                <kbd className="ml-1 rounded-xs bg-black/15 px-1 text-xs font-medium">Ctrl ↵</kbd>
+              </Button>
             )}
           </div>
         </div>

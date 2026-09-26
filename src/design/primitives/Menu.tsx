@@ -8,6 +8,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from 'react'
+import { Check } from 'lucide-react'
 import { cn } from '../../lib/cn'
 
 interface MenuContextValue {
@@ -91,7 +92,7 @@ export function Menu({ trigger, children, align = 'right', className }: MenuProp
           role="menu"
           aria-labelledby={triggerId}
           className={cn(
-            'absolute top-[calc(100%+0.5rem)] z-dialog w-52 overflow-hidden rounded-xl border border-border bg-bg-soft py-1 shadow-card',
+            'absolute top-[calc(100%+0.375rem)] z-dialog w-52 overflow-hidden rounded-md border border-border bg-surface py-1 shadow-dialog',
             align === 'right' ? 'right-0' : 'left-0',
           )}
         >
@@ -107,27 +108,32 @@ interface MenuItemProps {
   children: ReactNode
   icon?: ReactNode
   destructive?: boolean
+  /** Marca la opción elegida en menús de selección (prioridad, proyecto…): `menuitemradio` + check. */
+  checked?: boolean
 }
 
-export function MenuItem({ onSelect, children, icon, destructive }: MenuItemProps) {
+export function MenuItem({ onSelect, children, icon, destructive, checked }: MenuItemProps) {
   const ctx = useContext(MenuContext)
   if (!ctx) throw new Error('MenuItem must be used inside Menu')
 
   return (
     <button
       ref={(el) => ctx.registerItem(el)}
-      role="menuitem"
+      type="button"
+      role={checked === undefined ? 'menuitem' : 'menuitemradio'}
+      aria-checked={checked}
       onClick={() => {
         onSelect()
         ctx.close()
       }}
       className={cn(
-        'flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors hover:bg-surface-hover',
-        destructive ? 'text-danger' : 'text-text-muted hover:text-text',
+        'flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-sm transition-colors hover:bg-surface-hover focus-visible:bg-surface-hover',
+        destructive ? 'text-danger' : checked ? 'text-text' : 'text-text-muted hover:text-text',
       )}
     >
       {icon}
-      {children}
+      <span className="min-w-0 flex-1 truncate">{children}</span>
+      {checked && <Check size={14} strokeWidth={2} className="shrink-0 text-accent" aria-hidden="true" />}
     </button>
   )
 }
