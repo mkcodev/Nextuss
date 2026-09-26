@@ -2,6 +2,7 @@
 // resultado antes de devolverlo — nunca se escribe en la base de datos lo que el modelo devuelve sin
 // pasar por el `validate` de `callTool`.
 import { AiError, callTool, type Anthropic } from './client'
+import { validateCapture, validateDayPlan, validateSubtasks, validateSummary } from './validators'
 import type { EnergyLevel } from '../../db/types'
 import type { EstimateAccuracyResult, PeriodSummary } from '../stats/aggregate'
 
@@ -56,18 +57,7 @@ export async function breakdownTask(
       'y un resultado verificable.',
     user: `Tarea: "${task.title}"${task.notes ? `\nNotas: ${task.notes}` : ''}\n\n${biasNote}\n\nDesglósala en entre 2 y 8 subtareas.`,
     tool,
-    validate: (raw) => {
-      const parsed = raw as { subtasks?: unknown }
-      if (!Array.isArray(parsed.subtasks)) throw new AiError('malformed', 'Respuesta con forma inesperada.')
-      return parsed.subtasks
-        .filter((s): s is Record<string, unknown> => typeof s === 'object' && s !== null)
-        .map((s) => ({
-          title: String(s.title ?? '').trim(),
-          estimateMin: Math.min(480, Math.max(5, Math.round(Number(s.estimateMin) || 30))),
-        }))
-        .filter((s) => s.title.length > 0)
-        .slice(0, 8)
-    },
+    validate: validateSubtasks,
   })
   if (subtasks.length === 0) throw new AiError('malformed', 'El modelo no propuso ninguna subtarea válida.')
   return subtasks
@@ -109,16 +99,7 @@ export async function parseQuickCapture(apiKey: string, text: string, today: str
       'Solo rellenas un campo si el texto lo menciona explícita o muy claramente implícito; nunca inventas.',
     user: `Nota: "${text}"`,
     tool,
-    validate: (raw) => {
-      const p = raw as Record<string, unknown>
-      const title = String(p.title ?? '').trim()
-      if (!title) throw new AiError('malformed', 'No se pudo extraer un título.')
-      const scheduledDate = typeof p.scheduledDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(p.scheduledDate) ? p.scheduledDate : undefined
-      const energy = p.energy === 'low' || p.energy === 'medium' || p.energy === 'high' ? p.energy : undefined
-      const estimateMin =
-        typeof p.estimateMin === 'number' && p.estimateMin > 0 ? Math.min(480, Math.max(5, Math.round(p.estimateMin))) : undefined
-      return { title, scheduledDate, energy, estimateMin }
-    },
+    validate: validateCapture,
   })
 }
 
@@ -152,12 +133,7 @@ export async function summarizeWeeklyReview(apiKey: string, summary: PeriodSumma
       'nunca paternalista ni con frases motivacionales genéricas.',
     user,
     tool,
-    validate: (raw) => {
-      const p = raw as Record<string, unknown>
-      const summaryText = String(p.summary ?? '').trim()
-      if (!summaryText) throw new AiError('malformed', 'Resumen vacío.')
-      return summaryText
-    },
+    validate: validateSummary,
   })
 }
 
@@ -215,15 +191,6 @@ export async function suggestDayPlan(
       'optimista — si la energía es baja, prioriza tareas ligeras y aplaza las que requieren mucha energía.',
     user: `Capacidad disponible hoy: ${input.capacityMin} min.\n${checkInNote}\n\nTareas candidatas:\n${taskList}\n\nOrdénalas y decide cuáles no caben hoy.`,
     tool,
-    validate: (raw) => {
-      const p = raw as Record<string, unknown>
-      const ordered = (Array.isArray(p.orderedTaskIds) ? p.orderedTaskIds : []).map(Number).filter((id) => validIds.has(id))
-      const defer = (Array.isArray(p.deferTaskIds) ? p.deferTaskIds : [])
-        .map(Number)
-        .filter((id) => validIds.has(id) && !ordered.includes(id))
-      const note = String(p.note ?? '').trim()
-      if (ordered.length === 0 && defer.length === 0) throw new AiError('malformed', 'Sin sugerencia utilizable.')
-      return { orderedTaskIds: ordered, deferTaskIds: defer, note }
-    },
+    validate: (raw) => validateDayPlan(raw, validIds),
   })
 }
