@@ -20,6 +20,7 @@ import { dateKey, WEEKDAY_LABELS_ES_FULL } from '../../lib/dates'
 import { getTasksForRange } from '../../db/repositories/tasks'
 import { getOrCreateSettings } from '../../db/repositories/settings'
 import { useTaskFormStore } from '../tasks/taskFormStore'
+import { DEFAULT_ENTITY_COLOR } from '../../lib/colors'
 
 const MAX_CHIPS = 3
 
@@ -90,7 +91,7 @@ export function MonthView() {
 
       <div className="grid grid-cols-7 gap-px overflow-hidden rounded-xl border border-border bg-border">
         {WEEKDAY_LABELS_ES_FULL.slice(weekStartsOn).concat(WEEKDAY_LABELS_ES_FULL.slice(0, weekStartsOn)).map((label) => (
-          <div key={label} className="bg-bg-soft px-2 py-1.5 text-center text-[10px] font-medium uppercase text-text-faint">
+          <div key={label} className="bg-bg-soft px-2 py-1.5 text-center text-xs font-medium uppercase text-text-faint">
             {label.slice(0, 3)}
           </div>
         ))}
@@ -114,7 +115,7 @@ export function MonthView() {
               <span
                 className={cn(
                   'self-start rounded-full px-1.5 text-xs tabular-nums',
-                  today ? 'bg-accent text-white' : 'text-text-faint',
+                  today ? 'bg-accent text-on-accent' : 'text-text-faint',
                 )}
               >
                 {format(day, 'd')}
@@ -129,10 +130,10 @@ export function MonthView() {
                     }}
                     title={t.title}
                     className={cn(
-                      'truncate rounded border-l-2 bg-surface px-1 py-0.5 text-[10px] text-text',
+                      'truncate rounded border-l-2 bg-surface px-1 py-0.5 text-xs text-text',
                       t.status === 'done' && 'opacity-50 line-through',
                     )}
-                    style={{ borderLeftColor: t.color ?? '#5EC8FF' }}
+                    style={{ borderLeftColor: t.color ?? DEFAULT_ENTITY_COLOR }}
                   >
                     {t.title}
                   </div>
@@ -151,7 +152,7 @@ export function MonthView() {
                       e.stopPropagation()
                       navigate(`/?d=${key}`)
                     }}
-                    className="block px-1 text-left text-[10px] text-text-faint hover:text-accent hover:underline"
+                    className="block px-1 text-left text-xs text-text-faint hover:text-accent hover:underline"
                   >
                     +{dayTasks.length - MAX_CHIPS} más
                   </span>

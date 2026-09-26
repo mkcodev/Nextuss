@@ -10,7 +10,7 @@ import { formatMinutes } from '../stats/format'
 import { buildEstimateAccuracy } from '../stats/aggregate'
 import { getProject, getProjectProgress, getTasksForProject } from '../../db/repositories/projects'
 import { listAttributes } from '../../db/repositories/gamification'
-import { PRIORITY_COLORS } from '../../lib/priority'
+import { priorityBadgeStyle } from '../../lib/priority'
 import { useTaskFormStore } from '../tasks/taskFormStore'
 import { TaskQuickMenu } from '../tasks/TaskQuickMenu'
 import { useProjectFormStore } from './projectFormStore'
@@ -91,12 +91,12 @@ export function ProjectDetailPage() {
         </button>
       </header>
 
-      <Card glow className="flex items-center gap-4 border-accent/40 p-5">
+      <Card className="flex items-center gap-4 border-accent/40 p-5">
         <RingProgress value={progress?.ratio ?? 0} size={64} strokeWidth={5} className="shrink-0">
           <Target size={22} className="text-accent" />
         </RingProgress>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-accent">Progreso</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-accent">Progreso</p>
           <p className="mt-0.5 text-lg font-semibold text-text">
             {progress?.done ?? 0} / {progress?.total ?? 0} tareas
           </p>
@@ -145,8 +145,8 @@ export function ProjectDetailPage() {
               >
                 {t.priority && (
                   <span
-                    className="shrink-0 rounded px-1 py-0.5 text-[10px] font-semibold text-white"
-                    style={{ backgroundColor: PRIORITY_COLORS[t.priority] }}
+                    className="shrink-0 rounded px-1 py-0.5 text-xs font-semibold"
+                    style={priorityBadgeStyle(t.priority)}
                   >
                     P{t.priority}
                   </span>

@@ -16,13 +16,13 @@ import { toggleTaskDoneWithFeedback } from './actions'
 import { getGoalForTask, listGoalsForPeriod, linkTaskToGoal, setGoalForTask } from '../../db/repositories/goals'
 import { findOrCreateTag, listTags } from '../../db/repositories/tags'
 import { createProject, listProjects } from '../../db/repositories/projects'
-import { PRIORITY_COLORS, PRIORITY_LABELS } from '../../lib/priority'
+import { PRIORITY_LABELS, priorityBadgeStyle } from '../../lib/priority'
 import { minutesToTime, monthKey, nextRelativeDate, timeToMinutes, todayKey, weekKey, WEEKDAY_LABELS_ES } from '../../lib/dates'
 import { useTaskFormStore } from './taskFormStore'
 import { useAiAvailable } from '../ai/useAiAvailable'
 import { useTaskBreakdownStore } from '../ai/taskBreakdownStore'
+import { ENTITY_COLORS } from '../../lib/colors'
 
-const COLOR_PRESETS = ['#5EC8FF', '#34D399', '#FBBF24', '#FB7185', '#A78BFA', '#F472B6']
 const ESTIMATE_PRESETS = [15, 30, 45, 60, 90, 120]
 const ENERGY_OPTIONS: { value: EnergyLevel; label: string }[] = [
   { value: 'low', label: 'Baja' },
@@ -50,7 +50,7 @@ export function TaskForm() {
   const [estimateMin, setEstimateMin] = useState(task?.estimateMin ?? prefill?.estimateMin ?? 30)
   const [priority, setPriority] = useState<number | undefined>(task?.priority ?? prefill?.priority)
   const [dueDate, setDueDate] = useState(task?.dueDate ?? '')
-  const [color, setColor] = useState(task?.color ?? COLOR_PRESETS[0])
+  const [color, setColor] = useState(task?.color ?? ENTITY_COLORS[0])
   const [goalId, setGoalId] = useState<number | undefined>(undefined)
   const [goalIdInitialized, setGoalIdInitialized] = useState(!isEdit)
   const [tagIds, setTagIds] = useState<number[]>(task?.tagIds ?? [])
@@ -113,7 +113,7 @@ export function TaskForm() {
     setEnergy(undefined)
     setEstimateMin(30)
     setDueDate('')
-    setColor(COLOR_PRESETS[0])
+    setColor(ENTITY_COLORS[0])
     setGoalId(undefined)
     setTagIds([])
     setProjectId(undefined)
@@ -245,7 +245,7 @@ export function TaskForm() {
   const addProject = async () => {
     const name = newProjectName.trim()
     if (!name) return
-    const id = await createProject({ name, color: COLOR_PRESETS[0] })
+    const id = await createProject({ name, color: ENTITY_COLORS[0] })
     setProjectId(id)
     setNewProjectName('')
     setShowNewProject(false)
@@ -303,9 +303,9 @@ export function TaskForm() {
                 onClick={() => setPriority((cur) => (cur === p ? undefined : p))}
                 className={cn(
                   'flex-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors',
-                  priority === p ? 'text-white' : 'border-border text-text-muted hover:bg-surface-hover',
+                  priority === p ? 'font-semibold' : 'border-border text-text-muted hover:bg-surface-hover',
                 )}
-                style={priority === p ? { backgroundColor: PRIORITY_COLORS[p], borderColor: PRIORITY_COLORS[p] } : undefined}
+                style={priority === p ? priorityBadgeStyle(p) : undefined}
               >
                 {PRIORITY_LABELS[p]}
               </button>
@@ -368,7 +368,7 @@ export function TaskForm() {
           <div>
             <label className="mb-1 block text-xs font-medium text-text-muted">Color</label>
             <div className="flex gap-1.5 pt-2">
-              {COLOR_PRESETS.map((opt) => (
+              {ENTITY_COLORS.map((opt) => (
                 <button
                   key={opt}
                   type="button"
@@ -533,7 +533,7 @@ export function TaskForm() {
                       onClick={() => toggleTaskDoneWithFeedback(s.id!, s.title)}
                       className={cn(
                         'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
-                        s.status === 'done' ? 'border-accent bg-accent text-white' : 'border-text-faint',
+                        s.status === 'done' ? 'border-accent bg-accent text-on-accent' : 'border-text-faint',
                       )}
                     >
                       {s.status === 'done' && <Check size={10} strokeWidth={3} />}
@@ -667,7 +667,7 @@ export function TaskForm() {
                           )
                         }
                         className={cn(
-                          'h-6 w-6 rounded border text-[10px] font-medium',
+                          'h-6 w-6 rounded border text-xs font-medium',
                           repeatByMonthDay.includes(day)
                             ? 'border-accent bg-accent-soft text-accent'
                             : 'border-border text-text-faint',
@@ -697,14 +697,14 @@ export function TaskForm() {
                     Tras completar
                   </label>
                 </div>
-                <p className="text-[11px] text-text-faint">
+                <p className="text-xs text-text-faint">
                   {repeatMode === 'schedule'
                     ? 'Se genera en las fechas de calendario indicadas, hayas completado o no la anterior.'
                     : 'La siguiente ocurrencia se crea solo al completar esta, desplazada el intervalo elegido.'}
                 </p>
 
                 <div>
-                  <label className="mb-1 block text-[11px] text-text-faint">Hasta (opcional)</label>
+                  <label className="mb-1 block text-xs text-text-faint">Hasta (opcional)</label>
                   <input
                     type="date"
                     value={repeatUntil}
@@ -748,14 +748,14 @@ export function TaskForm() {
               <button
                 type="button"
                 onClick={() => setSchedDate((cur) => nextRelativeDate(cur, todayKey(), 1))}
-                className="rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-text-muted hover:bg-surface-hover"
+                className="rounded-full border border-border px-2.5 py-1 text-xs font-medium text-text-muted hover:bg-surface-hover"
               >
                 Mañana
               </button>
               <button
                 type="button"
                 onClick={() => setSchedDate((cur) => nextRelativeDate(cur, todayKey(), 7))}
-                className="rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-text-muted hover:bg-surface-hover"
+                className="rounded-full border border-border px-2.5 py-1 text-xs font-medium text-text-muted hover:bg-surface-hover"
               >
                 Próxima semana
               </button>
@@ -766,7 +766,7 @@ export function TaskForm() {
                     setSchedDate('')
                     setSchedStart('')
                   }}
-                  className="rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-danger hover:bg-danger/10"
+                  className="rounded-full border border-border px-2.5 py-1 text-xs font-medium text-danger hover:bg-danger/10"
                 >
                   Quitar del calendario
                 </button>

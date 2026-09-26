@@ -6,8 +6,8 @@ import { DEFAULT_PROJECT_ICON_KEY, PROJECT_ICON_KEYS } from '../../design/icons'
 import { archiveProject, createProject, trashProject, updateProject } from '../../db/repositories/projects'
 import { useAttributesWithCreate } from '../gamification/useAttributesWithCreate'
 import { useProjectFormStore } from './projectFormStore'
+import { ENTITY_COLORS } from '../../lib/colors'
 
-const COLOR_PRESETS = ['#5EC8FF', '#34D399', '#FBBF24', '#FB7185', '#A78BFA', '#F472B6']
 
 /** Único diálogo global (montado en AppShell), mismo patrón que `HabitForm`/`GoalForm`. */
 export function ProjectForm() {
@@ -17,7 +17,7 @@ export function ProjectForm() {
 
   const [name, setName] = useState(project?.name ?? '')
   const [icon, setIcon] = useState(project?.icon ?? DEFAULT_PROJECT_ICON_KEY)
-  const [color, setColor] = useState(project?.color ?? COLOR_PRESETS[0])
+  const [color, setColor] = useState(project?.color ?? ENTITY_COLORS[0])
   const [description, setDescription] = useState(project?.description ?? '')
   const [attributeId, setAttributeId] = useState<number | undefined>(project?.attributeId)
   const [newAttrName, setNewAttrName] = useState('')
@@ -25,7 +25,7 @@ export function ProjectForm() {
   const reset = () => {
     setName('')
     setIcon(DEFAULT_PROJECT_ICON_KEY)
-    setColor(COLOR_PRESETS[0])
+    setColor(ENTITY_COLORS[0])
     setDescription('')
     setAttributeId(undefined)
     setNewAttrName('')
@@ -114,7 +114,7 @@ export function ProjectForm() {
         <div>
           <label className="mb-1 block text-xs font-medium text-text-muted">Color</label>
           <div className="flex gap-1.5">
-            {COLOR_PRESETS.map((opt) => (
+            {ENTITY_COLORS.map((opt) => (
               <button
                 key={opt}
                 type="button"
@@ -142,7 +142,7 @@ export function ProjectForm() {
 
         <div>
           <label className="mb-1 block text-xs font-medium text-text-muted">Atributo (opcional)</label>
-          <p className="mb-1.5 text-[11px] text-text-faint">
+          <p className="mb-1.5 text-xs text-text-faint">
             Las tareas de este proyecto suman XP a este atributo al completarse.
           </p>
           <select

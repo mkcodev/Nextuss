@@ -17,9 +17,9 @@ import {
 } from '../../db/repositories/habits'
 import { useAttributesWithCreate } from '../gamification/useAttributesWithCreate'
 import { useHabitFormStore } from './habitFormStore'
+import { ENTITY_COLORS } from '../../lib/colors'
 
 const ICON_PRESETS = HABIT_ICON_KEYS
-const COLOR_PRESETS = ['#5EC8FF', '#34D399', '#FBBF24', '#FB7185', '#A78BFA', '#F472B6']
 const TYPE_LABELS: Record<HabitType, string> = {
   binary: 'Sí / No',
   quantity: 'Cantidad con meta',
@@ -50,7 +50,7 @@ export function HabitForm() {
 
   const [name, setName] = useState(habit?.name ?? prefillName ?? '')
   const [icon, setIcon] = useState(habit?.icon ?? DEFAULT_ICON_KEY)
-  const [color, setColor] = useState(habit?.color ?? COLOR_PRESETS[0])
+  const [color, setColor] = useState(habit?.color ?? ENTITY_COLORS[0])
   const [type, setType] = useState<HabitType>(habit?.type ?? 'binary')
   const [targetValue, setTargetValue] = useState(habit?.targetValue ?? 1)
   const [unit, setUnit] = useState(habit?.unit ?? '')
@@ -80,7 +80,7 @@ export function HabitForm() {
   const reset = () => {
     setName('')
     setIcon(DEFAULT_ICON_KEY)
-    setColor(COLOR_PRESETS[0])
+    setColor(ENTITY_COLORS[0])
     setType('binary')
     setTargetValue(1)
     setUnit('')
@@ -240,7 +240,7 @@ export function HabitForm() {
         <div>
           <label className="mb-1 block text-xs font-medium text-text-muted">Color</label>
           <div className="flex gap-1.5">
-            {COLOR_PRESETS.map((opt) => (
+            {ENTITY_COLORS.map((opt) => (
               <button
                 key={opt}
                 type="button"
@@ -377,7 +377,7 @@ export function HabitForm() {
                     type="button"
                     onClick={() => toggleMonthDay(day)}
                     className={cn(
-                      'flex h-7 w-7 items-center justify-center rounded-lg border text-[11px] font-medium',
+                      'flex h-7 w-7 items-center justify-center rounded-lg border text-xs font-medium',
                       monthDays.includes(day)
                         ? 'border-accent bg-accent-soft text-accent'
                         : 'border-border text-text-faint',
@@ -444,7 +444,7 @@ export function HabitForm() {
               {skipDates.map((d) => (
                 <span
                   key={d}
-                  className="flex items-center gap-1 rounded-full border border-border bg-bg-soft px-2 py-0.5 text-[11px] text-text-muted"
+                  className="flex items-center gap-1 rounded-full border border-border bg-bg-soft px-2 py-0.5 text-xs text-text-muted"
                 >
                   {d}
                   <button
