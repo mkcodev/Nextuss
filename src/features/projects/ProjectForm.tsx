@@ -64,11 +64,15 @@ export function ProjectForm() {
   }
   const [saving, guardedSubmit] = useSubmitGuard(handleSubmit)
 
-  const handleArchive = async () => {
+  // Archivar no tira los cambios sin guardar: si los hay y el nombre es válido, se guardan antes.
+  const [, handleArchive] = useSubmitGuard(async () => {
     if (!project?.id) return
+    if (snapshot() !== initialSnapshot && name.trim()) {
+      await updateProject(project.id, { name: name.trim(), icon, color, description: description.trim() || undefined, attributeId })
+    }
     await archiveProject(project.id, !project.archived)
     handleClose()
-  }
+  })
 
   const handleDelete = async () => {
     if (!project?.id) return
@@ -102,7 +106,7 @@ export function ProjectForm() {
             setName(v)
             if (nameError) setNameError(false)
           }}
-          placeholder="Nombre del proyecto"
+          placeholder="Nombre del proyecto…"
           error={nameError ? 'Ponle un nombre para poder guardarlo.' : undefined}
         />
         <NotesField label="Descripción" value={description} onChange={setDescription} placeholder="¿De qué trata? (opcional)" />
@@ -139,7 +143,7 @@ export function ProjectForm() {
             <Button type="button" variant="ghost" onClick={handleClose}>
               Cancelar
             </Button>
-            <Button type="submit" loading={saving} title="Ctrl + Enter">
+            <Button type="submit" loading={saving} title="Ctrl + Enter" aria-keyshortcuts="Control+Enter">
               {isEdit ? 'Guardar proyecto' : 'Crear proyecto'}
             </Button>
           </div>

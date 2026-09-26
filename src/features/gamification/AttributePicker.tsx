@@ -1,7 +1,8 @@
-import { useId, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button, Select } from '../../design/primitives'
 import { useAttributesWithCreate } from './useAttributesWithCreate'
+import { useSubmitGuard } from '../../lib/useSubmitGuard'
 
 interface AttributePickerProps {
   value: number | undefined
@@ -16,24 +17,33 @@ export function AttributePicker({ value, onChange, id }: AttributePickerProps) {
   const { attributes, createAndSelect } = useAttributesWithCreate()
   const [creating, setCreating] = useState(false)
   const [name, setName] = useState('')
-  const newId = useId()
+  const fallbackId = useId()
+  const newButton = useRef<HTMLButtonElement>(null)
+  const inputId = id ?? fallbackId
 
-  const create = async () => {
+  // Al volver al selector, el foco vuelve al botón "Nuevo" (si no, caía a <body>).
+  const stopCreating = () => {
+    setCreating(false)
+    requestAnimationFrame(() => newButton.current?.focus())
+  }
+
+  const [pending, create] = useSubmitGuard(async () => {
     const trimmed = name.trim()
     if (!trimmed) return
     onChange(await createAndSelect(trimmed))
     setName('')
-    setCreating(false)
-  }
+    stopCreating()
+  })
 
   if (creating) {
     return (
       <div className="flex items-center gap-1.5">
-        <label htmlFor={newId} className="sr-only">
+        {/* Mismo id que el selector: la etiqueta de la fila sigue apuntando a un campo. */}
+        <label htmlFor={inputId} className="sr-only">
           Nombre del nuevo atributo
         </label>
         <input
-          id={newId}
+          id={inputId}
           autoFocus
           autoComplete="off"
           value={name}
@@ -45,16 +55,16 @@ export function AttributePicker({ value, onChange, id }: AttributePickerProps) {
             }
             if (e.key === 'Escape') {
               e.stopPropagation()
-              setCreating(false)
+              stopCreating()
             }
           }}
-          placeholder="Ej. Salud"
+          placeholder="Ej.: Salud…"
           className="h-8 min-w-0 flex-1 rounded-sm border border-border bg-surface px-2.5 text-sm text-text placeholder:text-text-muted focus:border-accent"
         />
-        <Button type="button" size="sm" onClick={() => void create()}>
+        <Button type="button" size="sm" loading={pending} onClick={() => void create()}>
           Crear atributo
         </Button>
-        <Button type="button" size="sm" variant="ghost" onClick={() => setCreating(false)}>
+        <Button type="button" size="sm" variant="ghost" onClick={stopCreating}>
           Cancelar
         </Button>
       </div>
@@ -63,7 +73,7 @@ export function AttributePicker({ value, onChange, id }: AttributePickerProps) {
 
   return (
     <div className="flex items-center gap-1.5">
-      <Select id={id} value={value ?? ''} onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}>
+      <Select id={inputId} value={value ?? ''} onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}>
         <option value="">Sin atributo</option>
         {attributes.map((attr) => (
           <option key={attr.id} value={attr.id}>
@@ -71,7 +81,7 @@ export function AttributePicker({ value, onChange, id }: AttributePickerProps) {
           </option>
         ))}
       </Select>
-      <Button type="button" size="sm" variant="ghost" onClick={() => setCreating(true)} className="shrink-0">
+      <Button ref={newButton} type="button" size="sm" variant="ghost" onClick={() => setCreating(true)} className="shrink-0">
         <Plus size={14} strokeWidth={2} /> Nuevo
       </Button>
     </div>

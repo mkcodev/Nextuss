@@ -7,12 +7,13 @@ import {
   FormRow,
   FormRows,
   IconPicker,
+  NumberInput,
   Select,
   TitleField,
   ToggleGroup,
 } from '../../design/primitives'
 import { cn } from '../../lib/cn'
-import { formatShortDate, todayKey, WEEKDAY_LABELS_ES } from '../../lib/dates'
+import { formatShortDate, todayKey, WEEKDAY_LABELS_ES, WEEKDAY_LABELS_ES_FULL, WEEKDAY_ORDER_MON_FIRST } from '../../lib/dates'
 import { DEFAULT_ICON_KEY, HABIT_ICON_KEYS } from '../../design/icons'
 import type { Habit, HabitSchedule, HabitScheduleType, HabitType } from '../../db/types'
 import { archiveHabit, createHabit, trashHabit, updateHabit } from '../../db/repositories/habits'
@@ -40,7 +41,8 @@ const SCHEDULE_OPTIONS: { value: HabitScheduleType; label: string }[] = [
   { value: 'timesPerMonth', label: 'Unas veces al mes' },
   { value: 'monthDays', label: 'Ciertos días del mes' },
 ]
-const WEEKDAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+
+const LIST = new Intl.ListFormat('es', { type: 'conjunction' })
 
 function scheduleTypeOf(habit: Habit | undefined): HabitScheduleType {
   return habit?.schedule?.type ?? 'weekdays'
@@ -52,7 +54,6 @@ const dayButton = (on: boolean) =>
     on ? 'border-accent bg-accent-soft text-accent' : 'border-border text-text-muted hover:bg-surface-hover hover:text-text',
   )
 
-const numberInput = 'h-8 w-16 rounded-sm border border-border bg-surface px-2 text-sm tabular-nums text-text focus:border-accent'
 const dateInput = 'h-8 rounded-sm border border-border bg-surface px-2 text-sm text-text focus:border-accent'
 
 /**
@@ -147,9 +148,13 @@ export function HabitForm() {
       nameRef.current?.focus()
       return
     }
-    if (next.monthDays) return
+    if (next.monthDays) {
+      document.querySelector<HTMLElement>('[aria-label="Días del mes"] button')?.focus()
+      return
+    }
     if (next.pause) {
       setMoreOpen(true)
+      requestAnimationFrame(() => document.getElementById(pausedFrom ? ids.pauseUntil : ids.pauseFrom)?.focus())
       return
     }
 
@@ -181,11 +186,13 @@ export function HabitForm() {
   }
   const [saving, guardedSubmit] = useSubmitGuard(handleSubmit)
 
-  const handleArchive = async () => {
+  // Archivar no tira los cambios sin guardar: si los hay y son válidos, se guardan antes.
+  const [, handleArchive] = useSubmitGuard(async () => {
     if (!habit?.id) return
+    if (snapshot() !== initialSnapshot && name.trim()) await updateHabit(habit.id, { name: name.trim(), icon, color, reminderTime: reminderTime || undefined, attributeId })
     await archiveHabit(habit.id)
     handleClose()
-  }
+  })
 
   const handleDelete = async () => {
     if (!habit?.id) return
@@ -227,7 +234,7 @@ export function HabitForm() {
             setName(v)
             if (errors.name) setErrors((e) => ({ ...e, name: undefined }))
           }}
-          placeholder="Nombre del hábito"
+          placeholder="Nombre del hábito…"
           error={errors.name}
         />
 
@@ -240,18 +247,7 @@ export function HabitForm() {
             {hasTarget && (
               <FormRow label="Meta diaria" htmlFor={ids.target}>
                 <div className="flex items-center gap-2">
-                  <input
-                    id={ids.target}
-                    type="number"
-                    min={1}
-                    inputMode="numeric"
-                    value={targetValue}
-                    onChange={(e) => {
-                      const n = Number(e.target.value)
-                      setTargetValue(Number.isFinite(n) && n > 0 ? n : 1)
-                    }}
-                    className={numberInput}
-                  />
+                  <NumberInput id={ids.target} value={targetValue} onChange={setTargetValue} />
                   <label htmlFor={ids.unit} className="sr-only">
                     Unidad
                   </label>
@@ -260,7 +256,7 @@ export function HabitForm() {
                     value={unit}
                     onChange={(e) => setUnit(e.target.value)}
                     autoComplete="off"
-                    placeholder={type === 'duration' ? 'min' : 'vasos, páginas…'}
+                    placeholder={type === 'duration' ? 'minutos…' : 'vasos, páginas…'}
                     className="h-8 w-40 rounded-sm border border-border bg-surface px-2.5 text-sm text-text placeholder:text-text-muted focus:border-accent"
                   />
                 </div>
@@ -279,17 +275,17 @@ export function HabitForm() {
               {scheduleType === 'weekdays' && (
                 <div className="mt-2">
                   <div role="group" aria-label="Días de la semana" className="flex gap-1">
-                    {WEEKDAY_LABELS_ES.map((label, day) => (
+                    {WEEKDAY_ORDER_MON_FIRST.map((day) => (
                       <button
                         key={day}
                         type="button"
                         aria-pressed={weekdays.includes(day)}
-                        aria-label={WEEKDAY_NAMES[day]}
-                        title={WEEKDAY_NAMES[day]}
+                        aria-label={WEEKDAY_LABELS_ES_FULL[day]}
+                        title={WEEKDAY_LABELS_ES_FULL[day]}
                         onClick={() => toggleWeekday(day)}
                         className={cn(dayButton(weekdays.includes(day)), 'size-8')}
                       >
-                        {label}
+                        {WEEKDAY_LABELS_ES[day]}
                       </button>
                     ))}
                   </div>
@@ -304,37 +300,14 @@ export function HabitForm() {
               {scheduleType === 'everyNDays' && (
                 <div className="mt-2 flex items-center gap-2 text-sm text-text-muted">
                   <label htmlFor={ids.every}>Cada</label>
-                  <input
-                    id={ids.every}
-                    type="number"
-                    min={1}
-                    inputMode="numeric"
-                    value={everyNDaysInterval}
-                    onChange={(e) => {
-                      const n = Number(e.target.value)
-                      setEveryNDaysInterval(Number.isFinite(n) && n > 0 ? n : 1)
-                    }}
-                    className={numberInput}
-                  />
+                  <NumberInput id={ids.every} value={everyNDaysInterval} onChange={setEveryNDaysInterval} />
                   {everyNDaysInterval === 1 ? 'día' : 'días'}
                 </div>
               )}
 
               {(scheduleType === 'timesPerWeek' || scheduleType === 'timesPerMonth') && (
                 <div className="mt-2 flex items-center gap-2 text-sm text-text-muted">
-                  <input
-                    id={ids.times}
-                    type="number"
-                    min={1}
-                    inputMode="numeric"
-                    aria-label={`Veces por ${scheduleType === 'timesPerWeek' ? 'semana' : 'mes'}`}
-                    value={timesPerPeriod}
-                    onChange={(e) => {
-                      const n = Number(e.target.value)
-                      setTimesPerPeriod(Number.isFinite(n) && n > 0 ? n : 1)
-                    }}
-                    className={numberInput}
-                  />
+                  <NumberInput id={ids.times} aria-label={`Veces por ${scheduleType === 'timesPerWeek' ? 'semana' : 'mes'}`} value={timesPerPeriod} onChange={setTimesPerPeriod} />
                   {timesPerPeriod === 1 ? 'vez' : 'veces'} por {scheduleType === 'timesPerWeek' ? 'semana' : 'mes'}
                 </div>
               )}
@@ -365,7 +338,7 @@ export function HabitForm() {
                       {errors.monthDays}
                     </p>
                   ) : (
-                    monthDays.length > 0 && <p className="mt-1 text-xs text-text-muted">Días {monthDays.join(', ')}.</p>
+                    monthDays.length > 0 && <p className="mt-1 text-xs text-text-muted">Días {LIST.format(monthDays.map(String))}.</p>
                   )}
                 </div>
               )}
@@ -481,8 +454,8 @@ export function HabitForm() {
                       onChange={(e) => setNewSkipDate(e.target.value)}
                       className={dateInput}
                     />
-                    <Button type="button" size="sm" variant="secondary" onClick={addSkip} disabled={!newSkipDate}>
-                      Añadir día
+                    <Button type="button" size="sm" variant="secondary" onClick={addSkip} disabled={!newSkipDate || skipDates.includes(newSkipDate)}>
+                      {newSkipDate && skipDates.includes(newSkipDate) ? 'Ya está añadido' : 'Añadir día'}
                     </Button>
                   </div>
                 </FormRow>
@@ -508,7 +481,7 @@ export function HabitForm() {
             <Button type="button" variant="ghost" onClick={handleClose}>
               Cancelar
             </Button>
-            <Button type="submit" loading={saving} title="Ctrl + Enter">
+            <Button type="submit" loading={saving} title="Ctrl + Enter" aria-keyshortcuts="Control+Enter">
               {isEdit ? 'Guardar hábito' : 'Crear hábito'}
             </Button>
           </div>
