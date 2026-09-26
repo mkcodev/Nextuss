@@ -115,8 +115,7 @@ export function HabitsPage() {
     <div className="mx-auto max-w-3xl space-y-4 p-6 lg:p-8">
       <header className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-text-faint">Gestión</p>
-          <h1 className="mt-1 text-2xl font-semibold text-text">Hábitos</h1>
+          <h1 className="text-xl font-semibold tracking-tight text-text">Hábitos</h1>
         </div>
         <div className="flex gap-2">
           <Button variant="ghost" onClick={() => setShowArchived((v) => !v)}>
@@ -157,7 +156,8 @@ export function HabitsPage() {
             <button
               type="button"
               onClick={() => setExpandedId((id) => (id === entry.habit.id ? null : entry.habit.id!))}
-              className="mt-0.5 flex items-center gap-1 px-3 text-xs text-text-faint hover:text-text-muted"
+              aria-expanded={expandedId === entry.habit.id}
+              className="mt-1 flex items-center gap-1 pl-[68px] text-xs text-text-muted hover:text-text"
             >
               {describeHabitSchedule(entry.habit)}
               {' · racha más larga: '}
@@ -179,7 +179,7 @@ export function HabitsPage() {
 
       {showArchived && (
         <div className="space-y-2 border-t border-border pt-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-text-faint">Archivados</p>
+          <h2 className="text-sm font-semibold text-text-muted">Archivados</h2>
           {archivedEntries?.length === 0 && (
             <p className="text-sm text-text-faint">No hay hábitos archivados.</p>
           )}
