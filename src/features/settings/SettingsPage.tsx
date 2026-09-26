@@ -18,6 +18,7 @@ import { TrashSection } from './TrashSection'
 import { TagsSection } from './TagsSection'
 import { DismissedInsightsSection } from './DismissedInsightsSection'
 import { RecurrenceSection } from './RecurrenceSection'
+import { TemplatesSection } from './TemplatesSection'
 import { ReviewsHistorySection } from './ReviewsHistorySection'
 import {
   getNotificationPermissionState,
@@ -661,6 +662,8 @@ export function SettingsPage() {
       <TagsSection />
 
       <RecurrenceSection />
+
+      <TemplatesSection />
 
       <ReviewsHistorySection />
 

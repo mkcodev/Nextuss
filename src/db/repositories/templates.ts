@@ -116,3 +116,19 @@ export function deleteTaskTemplate(id: number): Promise<void> {
 export function deleteProjectTemplate(id: number): Promise<void> {
   return db.projectTemplates.delete(id)
 }
+
+/** Renombrar / editar una plantilla de tarea (Fase 18). Los hijos vacíos se descartan al guardar. */
+export async function updateTaskTemplate(id: number, changes: { title?: string; subtasks?: TemplateChild[] }): Promise<void> {
+  const patch: Partial<TaskTemplate> = {}
+  if (changes.title !== undefined) patch.title = changes.title.trim()
+  if (changes.subtasks) patch.subtasks = changes.subtasks.map((c) => ({ ...c, title: c.title.trim() })).filter((c) => c.title)
+  await db.taskTemplates.update(id, patch)
+}
+
+/** Renombrar / editar una plantilla de proyecto (Fase 18). Las tareas vacías se descartan al guardar. */
+export async function updateProjectTemplate(id: number, changes: { name?: string; tasks?: TemplateChild[] }): Promise<void> {
+  const patch: Partial<ProjectTemplate> = {}
+  if (changes.name !== undefined) patch.name = changes.name.trim()
+  if (changes.tasks) patch.tasks = changes.tasks.map((c) => ({ ...c, title: c.title.trim() })).filter((c) => c.title)
+  await db.projectTemplates.update(id, patch)
+}
