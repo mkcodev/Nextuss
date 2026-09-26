@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { pickNowTask } from './NowBlock'
+import { pickNowTask } from './pickNowTask'
 import type { Task } from '../../db/types'
 
 const task = (over: Partial<Task>): Task => ({

@@ -11,7 +11,8 @@ import { cn } from '../../lib/cn'
 import { startFocusOnTask } from '../focus/startFocusOnTask'
 import { toggleTaskDoneWithFeedback } from '../tasks/actions'
 import { useTaskFormStore } from '../tasks/taskFormStore'
-import type { EnergyLevel, Task } from '../../db/types'
+import type { EnergyLevel } from '../../db/types'
+import { pickNowTask } from './pickNowTask'
 
 const ENERGY_NAMES: Record<EnergyLevel, string> = { low: 'Baja', medium: 'Media', high: 'Alta' }
 
@@ -20,19 +21,6 @@ function formatDuration(min: number): string {
   const h = Math.floor(min / 60)
   const m = min % 60
   return m === 0 ? `${h} h` : `${h} h ${m} min`
-}
-
-/** Tarea en curso ahora mismo o, si no hay, la siguiente con hora de hoy. Solo tareas raíz con franja. */
-export function pickNowTask(tasks: Task[], nowMin: number): { task: Task; current: boolean } | null {
-  const slotted = tasks
-    .filter((t) => t.status !== 'done' && !t.parentId && t.scheduledStart && t.scheduledEnd)
-    .sort((a, b) => a.scheduledStart!.localeCompare(b.scheduledStart!))
-  const current = slotted.find(
-    (t) => timeToMinutes(t.scheduledStart!) <= nowMin && nowMin < timeToMinutes(t.scheduledEnd!),
-  )
-  if (current) return { task: current, current: true }
-  const next = slotted.find((t) => timeToMinutes(t.scheduledStart!) > nowMin)
-  return next ? { task: next, current: false } : null
 }
 
 function useNowMinutes() {
