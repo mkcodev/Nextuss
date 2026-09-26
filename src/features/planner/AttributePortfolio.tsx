@@ -8,7 +8,7 @@ export function AttributePortfolio({ goals, attributes }: { goals: Goal[]; attri
 
   return (
     <Card className="p-4">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-faint">Áreas activas</p>
+      <p className="mb-2 text-xs font-semibold text-text-muted">Áreas activas</p>
       <div className="flex flex-wrap gap-2">
         {attributes
           .filter((a) => activeIds.has(a.id!))

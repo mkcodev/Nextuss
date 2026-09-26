@@ -49,6 +49,10 @@ export function Popover({ trigger, children, label, align = 'left', className }:
           close()
         }
       }}
+      onBlur={(e) => {
+        // Salir con Tab fuera del disparador y del panel lo cierra.
+        if (open && !rootRef.current?.contains(e.relatedTarget as Node | null)) setOpen(false)
+      }}
     >
       {trigger({ onClick: () => setOpen((v) => !v), 'aria-expanded': open, 'aria-controls': panelId, id: triggerId })}
       {open && (

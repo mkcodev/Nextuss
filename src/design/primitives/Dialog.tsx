@@ -89,6 +89,13 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty }: Omit<Dial
       if (e.key === 'Tab' && panelRef.current) {
         const items = getFocusable(panelRef.current)
         if (items.length === 0) return
+        // Si el foco se perdió (un campo que se desmontó lo dejó en <body>), vuelve al panel en vez de
+        // escaparse a la página de detrás.
+        if (!panelRef.current.contains(document.activeElement)) {
+          e.preventDefault()
+          ;(e.shiftKey ? items[items.length - 1] : items[0]).focus()
+          return
+        }
         const first = items[0]
         const last = items[items.length - 1]
         if (e.shiftKey && document.activeElement === first) {
@@ -136,7 +143,9 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty }: Omit<Dial
         tabIndex={-1}
         onInput={() => setTouched(true)}
         className={cn(
-          'relative max-h-[85vh] w-full overflow-y-auto overscroll-contain rounded-lg border border-border bg-surface p-6 shadow-dialog',
+          // dvh: en móvil la barra del navegador no recorta el panel. (Sin scroll-padding: `sticky`
+          // lo respeta y subiría el pie fijo; el margen para el foco va en index.css, `.dialog-panel`.)
+          'dialog-panel relative max-h-[85dvh] w-full overflow-y-auto overscroll-contain rounded-lg border border-border bg-surface p-6 shadow-dialog',
           SIZE_CLASSES[size],
         )}
         initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.98, y: 6 }}
@@ -151,7 +160,7 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty }: Omit<Dial
         {confirming && (
           <div
             role="alert"
-            className="sticky bottom-0 z-10 -mx-6 -mb-6 mt-4 flex flex-wrap items-center gap-3 border-t border-border bg-surface px-6 py-3"
+            className="sticky -bottom-6 z-10 -mx-6 -mb-6 mt-4 flex flex-wrap items-center gap-3 border-t border-border bg-surface px-6 py-3"
           >
             <p className="flex-1 text-sm text-text">Tienes cambios sin guardar. ¿Descartarlos?</p>
             <button

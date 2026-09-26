@@ -4,7 +4,8 @@ interface SwitchProps {
   checked: boolean
   onChange: (checked: boolean) => void
   disabled?: boolean
-  label?: string
+  /** Obligatorio: sin él el interruptor no tiene nombre para lectores de pantalla. */
+  label: string
   className?: string
 }
 
@@ -19,7 +20,7 @@ export function Switch({ checked, onChange, disabled, label, className }: Switch
       onClick={() => onChange(!checked)}
       className={cn(
         'relative h-5 w-9 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50',
-        checked ? 'bg-accent' : 'bg-border-strong',
+        checked ? 'bg-accent hover:bg-accent-strong' : 'bg-border-strong hover:bg-text-muted/40',
         className,
       )}
     >

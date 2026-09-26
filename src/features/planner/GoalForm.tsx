@@ -144,7 +144,7 @@ export function GoalForm() {
                   >
                     <ChevronLeft size={16} strokeWidth={2} />
                   </button>
-                  <span aria-live="polite" className="min-w-[12.5rem] text-center text-sm font-medium tabular-nums text-text">
+                  <span aria-live="polite" className="min-w-0 flex-1 text-center sm:min-w-[12.5rem] sm:flex-none text-sm font-medium tabular-nums text-text">
                     {formatPeriodLabel(period, periodKey)}
                   </span>
                   <button
@@ -173,7 +173,7 @@ export function GoalForm() {
             {period === 'week' && !forcedParent && (
               <FormRow label="Dentro de" htmlFor={ids.parent} hint="Un objetivo del mes al que contribuye esta semana.">
                 <Select id={ids.parent} value={parentGoalId ?? ''} onChange={(e) => setParentGoalId(e.target.value ? Number(e.target.value) : undefined)}>
-                  <option value="">Ningún objetivo del mes</option>
+                  <option value="">{monthGoals.length === 0 ? 'Aún no hay objetivos este mes' : 'Ningún objetivo del mes'}</option>
                   {monthGoals.map((g) => (
                     <option key={g.id} value={g.id}>
                       {g.title}
@@ -185,7 +185,7 @@ export function GoalForm() {
           </FormRows>
         </div>
 
-        <div className="sticky bottom-0 -mx-6 -mb-6 mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border bg-surface px-6 py-3">
+        <div className="sticky -bottom-6 -mx-6 -mb-6 mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border bg-surface px-6 py-3">
           {isEdit ? (
             <Button type="button" variant="ghost" size="sm" onClick={() => void handleDelete()} className="hover:text-danger">
               <Trash2 size={14} strokeWidth={1.75} /> Eliminar
@@ -197,8 +197,11 @@ export function GoalForm() {
             <Button type="button" variant="ghost" onClick={handleClose}>
               Cancelar
             </Button>
-            <Button type="submit" loading={saving} title="Ctrl + Enter">
+            <Button type="submit" loading={saving} title="Ctrl + Enter" aria-keyshortcuts="Control+Enter">
               {isEdit ? 'Guardar objetivo' : 'Crear objetivo'}
+                <kbd aria-hidden="true" className="ml-1 rounded-xs bg-black/15 px-1 text-xs font-medium">
+                  Ctrl&nbsp;↵
+                </kbd>
             </Button>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { listItemMotion } from '../../design/primitives'
@@ -21,10 +21,11 @@ function useZombieGoalLinks(taskIds: number[]) {
   }, [taskIds.join(',')])
 }
 
+const RELATIVE = new Intl.RelativeTimeFormat('es', { numeric: 'auto' })
+
 function daysLate(scheduledDate: string | undefined, today: string): string {
   if (!scheduledDate) return ''
-  const days = differenceInCalendarDays(parseDateKey(today), parseDateKey(scheduledDate))
-  return days === 1 ? 'ayer' : `hace ${days} días`
+  return RELATIVE.format(-differenceInCalendarDays(parseDateKey(today), parseDateKey(scheduledDate)), 'day')
 }
 
 /** Atrasadas de Hoy: informan, no castigan (PRODUCT.md, "progreso honesto y tranquilo"). Tono neutro,
@@ -34,6 +35,7 @@ export function OverdueTasks({ date }: { date: string }) {
   const openEdit = useTaskFormStore((s) => s.openEdit)
   const [expanded, setExpanded] = useState(false)
   const reduceMotion = useReducedMotion()
+  const titleId = useId()
   const zombieTaskIds = (tasks ?? [])
     .filter((t) => t.postponedCount >= ZOMBIE_THRESHOLD)
     .map((t) => t.id!)
@@ -48,9 +50,9 @@ export function OverdueTasks({ date }: { date: string }) {
   const tomorrow = nextRelativeDate(date, date, 1)
 
   return (
-    <section aria-labelledby="overdue-title">
+    <section aria-labelledby={titleId}>
       <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-        <h2 id="overdue-title" className="text-sm font-semibold text-text">
+        <h2 id={titleId} className="text-sm font-semibold text-text">
           Atrasadas <span className="font-normal tabular-nums text-text-muted">{tasks.length}</span>
         </h2>
         <div className="ml-auto flex items-center gap-1">
@@ -71,7 +73,7 @@ export function OverdueTasks({ date }: { date: string }) {
         </div>
       </div>
 
-      <ul className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface">
+      <ul className="divide-y divide-border overflow-hidden rounded-md border border-border bg-surface">
         <AnimatePresence initial={false}>
         {visible.map((t) => {
           const isZombie = t.postponedCount >= ZOMBIE_THRESHOLD
@@ -85,7 +87,7 @@ export function OverdueTasks({ date }: { date: string }) {
                 {t.title}
               </button>
               {isZombie && (
-                <span className="shrink-0 text-xs text-text-muted" title="Usa el menú ··· para desglosarla, reducirla o aparcarla">
+                <span className="hidden shrink-0 text-xs text-text-muted sm:inline" title="Usa el menú ··· para desglosarla, reducirla o aparcarla">
                   aplazada {t.postponedCount} veces
                 </span>
               )}
@@ -93,7 +95,8 @@ export function OverdueTasks({ date }: { date: string }) {
                 <button
                   type="button"
                   onClick={() => openEdit(t)}
-                  className="flex shrink-0 items-center gap-1 rounded-sm px-1.5 py-0.5 text-xs font-medium text-text-muted hover:bg-surface-hover hover:text-text"
+                  aria-label={`Vincular "${t.title}" a un objetivo`}
+                  className="hidden shrink-0 items-center gap-1 rounded-sm px-1.5 py-0.5 text-xs font-medium text-text-muted hover:bg-surface-hover hover:text-text sm:flex"
                 >
                   <Target size={12} strokeWidth={2} /> Vincular a un objetivo
                 </button>

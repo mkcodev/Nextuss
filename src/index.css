@@ -94,8 +94,8 @@
   --nx-border: #e7e7eb;
   --nx-border-strong: #d4d4db;
   --nx-text: #1b1b20;
-  --nx-text-muted: #6a6a75;
-  --nx-text-faint: #72727c;
+  --nx-text-muted: #5c5c66;
+  --nx-text-faint: #6a6a75;
 
   --nx-accent: #5058c8;
   --nx-accent-soft: rgba(80, 88, 200, 0.1);
@@ -200,6 +200,11 @@ body {
    porque el `:focus-visible` global de arriba ganaría a cualquier utilidad `outline-none`. */
 .field-bare:focus-visible {
   outline: none;
+}
+
+/* Al tabular por un formulario largo, el campo enfocado no queda escondido bajo el pie fijo. */
+.dialog-panel :focus {
+  scroll-margin-bottom: 5rem;
 }
 
 .skip-link {

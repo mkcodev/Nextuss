@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from 'react'
+import type { ButtonHTMLAttributes, Ref } from 'react'
 import { Loader2 } from 'lucide-react'
 import { cn } from '../../lib/cn'
 
@@ -11,6 +11,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: Size
   /** Muestra un indicador y bloquea el botón mientras se guarda (evita dobles envíos). */
   loading?: boolean
+  /** React 19: `ref` llega como prop y se pasa al <button>. */
+  ref?: Ref<HTMLButtonElement>
 }
 
 const variantClasses: Record<Variant, string> = {
@@ -25,13 +27,22 @@ const sizeClasses: Record<Size, string> = {
   md: 'h-8 px-3 text-sm gap-2',
 }
 
-export function Button({ variant = 'primary', size = 'md', loading, disabled, className, children, ...props }: ButtonProps) {
+export function Button({ variant = 'primary', size = 'md', loading, disabled, className, children, onClick, ...props }: ButtonProps) {
   return (
     <button
-      disabled={disabled || loading}
+      // Mientras guarda no se usa `disabled`: eso le quitaría el foco (se iría a <body>). Se bloquea el clic.
+      disabled={disabled}
+      aria-disabled={loading || undefined}
       aria-busy={loading || undefined}
+      onClick={(e) => {
+        if (loading) {
+          e.preventDefault()
+          return
+        }
+        onClick?.(e)
+      }}
       className={cn(
-        'inline-flex items-center justify-center rounded-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 disabled:pointer-events-none',
+        'inline-flex items-center justify-center rounded-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 disabled:pointer-events-none aria-busy:cursor-progress',
         sizeClasses[size],
         variantClasses[variant],
         className,

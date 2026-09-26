@@ -102,7 +102,6 @@ export function TodayView() {
   // round-trip a Dexie para no reabrirse dejaba una ventana real en la que el diálogo se
   // reabría solo a sí mismo justo después de terminarlo.
   const promptedDayStartRef = useRef<string | null>(null)
-  const promptedDayCloseRef = useRef<string | null>(null)
 
   // Convención de carga (docs/CONVENCIONES.md): `undefined` = cargando, `null` = sin fila. Las
   // puertas esperan a todas sus entradas, `checkin` incluido — un día sin check-in resuelve a `null`.
@@ -119,17 +118,22 @@ export function TodayView() {
     }
   }, [isToday, dayStartOpen, dayCloseOpen, checkin, overdueForGate, date, openDayStart, settings, entries, tasksToday])
 
-  useEffect(() => {
-    if (!isToday || dayStartOpen || dayCloseOpen || checkin === undefined || tasksToday === undefined) return
-    if (todaysEntries === undefined || !settings?.onboardingCompleted) return
-    if (promptedDayCloseRef.current === date) return
-    const pendingCount =
-      tasksToday.filter((t) => t.status !== 'done').length + todaysEntries.filter((e) => !e.log?.completed).length
-    if (shouldShowDayClose(checkin, pendingCount, new Date(), settings.eveningSummaryTime ?? '21:00')) {
-      promptedDayCloseRef.current = date
-      openDayClose(date)
-    }
-  }, [isToday, dayStartOpen, dayCloseOpen, checkin, tasksToday, settings, todaysEntries, date, openDayClose])
+  // Cierre del día: se sugiere en línea en vez de abrir un modal por sorpresa (a última hora del día,
+  // un recuento de lo pendiente delante de todo era un valle emocional al abrir la app).
+  const [closeDismissed, setCloseDismissed] = useState<string | null>(null)
+  const pendingForClose =
+    tasksToday && todaysEntries
+      ? tasksToday.filter((t) => t.status !== 'done').length + todaysEntries.filter((e) => !e.log?.completed).length
+      : 0
+  const suggestClose =
+    isToday &&
+    closeDismissed !== date &&
+    !dayCloseOpen &&
+    checkin !== undefined &&
+    tasksToday !== undefined &&
+    todaysEntries !== undefined &&
+    !!settings?.onboardingCompleted &&
+    shouldShowDayClose(checkin, pendingForClose, new Date(), settings.eveningSummaryTime ?? '21:00')
 
   useContextPanel(
     'Resumen del día',
@@ -149,9 +153,7 @@ export function TodayView() {
       </p>
       {pending.length > 0 ? (
         <div>
-          <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-text-faint">
-            Pendientes
-          </p>
+          <p className="mb-1.5 text-xs font-semibold text-text-muted">Pendientes</p>
           <ul className="space-y-1">
             {pending.map((e) => (
               <li key={e.habit.id} className="truncate text-xs text-text-muted">
@@ -228,11 +230,23 @@ export function TodayView() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
         <div className="space-y-6 lg:order-1">
+          {suggestClose && (
+            <div role="status" className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-bg-soft px-4 py-3 text-sm">
+              <Moon size={16} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />
+              <span className="min-w-[12rem] flex-1 text-text">Buen momento para cerrar el día.</span>
+              <Button size="sm" variant="secondary" onClick={() => openDayClose(date)}>
+                Cerrar el día
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setCloseDismissed(date)}>
+                Ahora no
+              </Button>
+            </div>
+          )}
           {isToday && <NowBlock date={date} />}
           {needsReview && (
             <Alert tone="info">
-              <button onClick={() => openWeeklyReview(currentWeekKey)} className="hover:underline">
-                Toca hacer la revisión semanal →
+              <button type="button" onClick={() => openWeeklyReview(currentWeekKey)} className="inline-flex items-center gap-1 hover:underline">
+                Toca hacer la revisión semanal <ChevronRight size={14} strokeWidth={2} aria-hidden="true" />
               </button>
             </Alert>
           )}

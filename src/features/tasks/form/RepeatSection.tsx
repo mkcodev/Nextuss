@@ -1,7 +1,7 @@
-import { useId } from 'react'
-import { ToggleGroup } from '../../../design/primitives'
+import { useId, useState } from 'react'
+import { NumberInput, ToggleGroup } from '../../../design/primitives'
 import { cn } from '../../../lib/cn'
-import { WEEKDAY_LABELS_ES } from '../../../lib/dates'
+import { WEEKDAY_LABELS_ES, WEEKDAY_LABELS_ES_FULL, WEEKDAY_ORDER_MON_FIRST } from '../../../lib/dates'
 import type { RecurrenceFreq, RecurrenceMode } from '../../../db/types'
 
 const FREQ_OPTIONS: { value: RecurrenceFreq; label: string }[] = [
@@ -9,7 +9,6 @@ const FREQ_OPTIONS: { value: RecurrenceFreq; label: string }[] = [
   { value: 'weekly', label: 'Semanas' },
   { value: 'monthly', label: 'Meses' },
 ]
-const WEEKDAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 const MONTH_DAYS = Array.from({ length: 31 }, (_, i) => i + 1)
 
 export interface RepeatValue {
@@ -26,6 +25,8 @@ interface RepeatSectionProps {
   onChange: (patch: Partial<RepeatValue>) => void
   /** Solo en una ocurrencia de una serie ya existente. */
   onStop?: () => void
+  /** Error de validación (p. ej. semanal sin ningún día marcado). */
+  error?: string
 }
 
 const dayButton = (on: boolean) =>
@@ -36,10 +37,13 @@ const dayButton = (on: boolean) =>
 
 /** Controles de repetición de una tarea: cada N días/semanas/meses, en qué días, fecha fija o tras
  *  completar, y hasta cuándo. Estado controlado por el formulario. */
-export function RepeatSection({ value, onChange, onStop }: RepeatSectionProps) {
+export function RepeatSection({ value, onChange, onStop, error }: RepeatSectionProps) {
   const intervalId = useId()
   const untilId = useId()
   const modeName = useId()
+  const untilHintId = useId()
+  const errorId = useId()
+  const [confirmStop, setConfirmStop] = useState(false)
 
   const toggle = (list: number[], n: number) => (list.includes(n) ? list.filter((d) => d !== n) : [...list, n])
 
@@ -49,19 +53,7 @@ export function RepeatSection({ value, onChange, onStop }: RepeatSectionProps) {
         <label htmlFor={intervalId} className="text-sm text-text-muted">
           Cada
         </label>
-        <input
-          id={intervalId}
-          type="number"
-          min={1}
-          inputMode="numeric"
-          value={value.interval}
-          onChange={(e) => {
-            // Mientras se escribe se deja vacío; el mínimo se aplica al salir del campo.
-            const n = Number(e.target.value)
-            onChange({ interval: Number.isFinite(n) && n > 0 ? n : 1 })
-          }}
-          className="h-7 w-14 rounded-sm border border-border bg-surface px-2 text-sm tabular-nums text-text focus:border-accent"
-        />
+        <NumberInput id={intervalId} value={value.interval} onChange={(interval) => onChange({ interval })} className="h-7 w-14" />
         <ToggleGroup
           label="Unidad de repetición"
           options={FREQ_OPTIONS}
@@ -80,25 +72,25 @@ export function RepeatSection({ value, onChange, onStop }: RepeatSectionProps) {
       </div>
 
       {value.freq === 'weekly' && value.mode === 'schedule' && (
-        <div role="group" aria-label="Días de la semana" className="flex gap-1">
-          {WEEKDAY_LABELS_ES.map((label, day) => (
+        <div role="group" aria-label="Días de la semana" aria-describedby={error ? errorId : undefined} className="flex gap-1">
+          {WEEKDAY_ORDER_MON_FIRST.map((day) => (
             <button
               key={day}
               type="button"
               aria-pressed={value.byWeekday.includes(day)}
-              aria-label={WEEKDAY_NAMES[day]}
-              title={WEEKDAY_NAMES[day]}
+              aria-label={WEEKDAY_LABELS_ES_FULL[day]}
+              title={WEEKDAY_LABELS_ES_FULL[day]}
               onClick={() => onChange({ byWeekday: toggle(value.byWeekday, day) })}
               className={cn(dayButton(value.byWeekday.includes(day)), 'size-8')}
             >
-              {label}
+              {WEEKDAY_LABELS_ES[day]}
             </button>
           ))}
         </div>
       )}
 
       {value.freq === 'monthly' && value.mode === 'schedule' && (
-        <div role="group" aria-label="Días del mes" className="grid grid-cols-[repeat(auto-fill,minmax(1.75rem,1fr))] gap-1">
+        <div role="group" aria-label="Días del mes" aria-describedby={error ? errorId : undefined} className="grid grid-cols-[repeat(auto-fill,minmax(1.75rem,1fr))] gap-1">
           {MONTH_DAYS.map((day) => (
             <button
               key={day}
@@ -112,6 +104,12 @@ export function RepeatSection({ value, onChange, onStop }: RepeatSectionProps) {
             </button>
           ))}
         </div>
+      )}
+
+      {error && (
+        <p id={errorId} role="alert" className="text-sm text-danger">
+          {error}
+        </p>
       )}
 
       <fieldset>
@@ -151,16 +149,31 @@ export function RepeatSection({ value, onChange, onStop }: RepeatSectionProps) {
           type="date"
           value={value.until}
           onChange={(e) => onChange({ until: e.target.value })}
+          aria-describedby={untilHintId}
           className="h-7 rounded-sm border border-border bg-surface px-2 text-sm text-text focus:border-accent"
         />
-        <span className="text-xs text-text-muted">opcional</span>
+        <span id={untilHintId} className="text-xs text-text-muted">
+          opcional
+        </span>
       </div>
 
-      {onStop && (
-        <button type="button" onClick={onStop} className="text-sm font-medium text-danger hover:underline">
-          Dejar de repetir
-        </button>
-      )}
+      {onStop &&
+        (confirmStop ? (
+          // Es irreversible (borra la regla), así que se pide confirmación en el sitio.
+          <div role="group" aria-label="Confirmar dejar de repetir" className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-text">¿Dejar de repetir? Las próximas no se crearán.</span>
+            <button type="button" autoFocus onClick={() => setConfirmStop(false)} className="rounded-sm px-2 py-1 font-medium text-text-muted hover:bg-surface-hover hover:text-text">
+              No
+            </button>
+            <button type="button" onClick={onStop} className="rounded-sm bg-danger/10 px-2 py-1 font-medium text-danger hover:bg-danger/15">
+              Sí, dejar de repetir
+            </button>
+          </div>
+        ) : (
+          <button type="button" onClick={() => setConfirmStop(true)} className="text-sm font-medium text-danger hover:underline">
+            Dejar de repetir
+          </button>
+        ))}
     </div>
   )
 }

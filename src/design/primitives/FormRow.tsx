@@ -16,7 +16,8 @@ interface FormRowProps {
 export function FormRow({ label, htmlFor, top, hint, children }: FormRowProps) {
   const labelClass = cn('text-sm text-text-muted', top && 'pt-1')
   return (
-    <div className={cn('grid grid-cols-[7.5rem_minmax(0,1fr)] gap-3 py-2', top ? 'items-start' : 'items-center')}>
+    // En pantallas estrechas la etiqueta va encima; a partir de sm, a la izquierda.
+    <div className={cn('grid grid-cols-1 gap-1.5 py-2 sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:gap-3', top ? 'items-start' : 'sm:items-center')}>
       {htmlFor ? (
         <label htmlFor={htmlFor} className={labelClass}>
           {label}

@@ -56,6 +56,8 @@ function AvatarMenu() {
   )
 }
 
+const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)
+
 export function Navbar() {
   const location = useLocation()
   const leftCollapsed = useUIStore((s) => s.leftCollapsed)
@@ -90,9 +92,7 @@ export function Navbar() {
 
       <div className="flex items-center gap-1.5">
         <span className="h-2 w-2 rounded-full bg-accent" />
-        <span className="hidden text-sm font-semibold tracking-[0.14em] text-text sm:inline">
-          NEXTUSS
-        </span>
+        <span className="hidden text-sm font-semibold tracking-tight text-text sm:inline">Nextuss</span>
       </div>
 
       {currentLabel && (
@@ -104,11 +104,11 @@ export function Navbar() {
 
       <button
         onClick={openPalette}
-        className="ml-2 flex flex-1 max-w-sm items-center gap-2 rounded-lg border border-border bg-bg-soft px-3 py-1.5 text-left text-text-faint transition-colors hover:border-border-strong"
+        className="ml-2 flex flex-1 max-w-sm items-center gap-2 rounded-sm border border-border bg-surface px-3 py-1.5 text-left text-text-muted transition-colors hover:border-border-strong"
       >
         <Search size={14} strokeWidth={1.75} />
         <span className="flex-1 text-xs">Buscar o ejecutar un comando…</span>
-        <Kbd>⌘K</Kbd>
+        <Kbd>{IS_MAC ? '⌘K' : 'Ctrl K'}</Kbd>
       </button>
 
       <div className="ml-auto flex items-center gap-2">
@@ -123,11 +123,15 @@ export function Navbar() {
         )}
 
         <button
+          type="button"
           onClick={() => openQuickAdd()}
-          className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-on-accent transition-opacity hover:opacity-90"
+          aria-label="Captura rápida"
+          title="Captura rápida (i)"
+          className="flex h-8 items-center gap-1.5 rounded-sm border border-border bg-surface px-2.5 text-[13px] font-medium text-text transition-colors hover:bg-surface-hover"
         >
           <Plus size={14} strokeWidth={2} />
           <span className="hidden sm:inline">Nuevo</span>
+          <Kbd className="hidden sm:inline-flex">i</Kbd>
         </button>
 
         <div

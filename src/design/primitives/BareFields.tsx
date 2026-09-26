@@ -33,7 +33,7 @@ export const TitleField = forwardRef<HTMLInputElement, TitleFieldProps>(function
         placeholder={placeholder}
         aria-invalid={!!error}
         aria-describedby={error ? errorId : undefined}
-        className="field-bare w-full border-b border-transparent bg-transparent pb-1 text-xl font-semibold tracking-tight text-text placeholder:text-text-muted focus:border-border aria-invalid:border-danger"
+        className="field-bare w-full border-b border-transparent bg-transparent pb-1 text-xl font-semibold tracking-tight text-text placeholder:text-text-muted focus:border-accent aria-invalid:border-danger"
       />
       {error && (
         <p id={errorId} role="alert" className="mt-1 text-sm text-danger">
@@ -65,7 +65,7 @@ export function NotesField({ label, value, onChange, placeholder }: NotesFieldPr
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={value.split('\n').length > 2 ? 4 : 2}
-        className="field-bare mt-2 w-full resize-none border-b border-transparent bg-transparent text-sm text-text placeholder:text-text-muted focus:border-border"
+        className="field-bare mt-2 w-full resize-none border-b border-transparent bg-transparent text-sm text-text placeholder:text-text-muted focus:border-accent"
       />
     </>
   )

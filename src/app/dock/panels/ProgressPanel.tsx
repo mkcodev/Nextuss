@@ -17,7 +17,7 @@ export function ProgressPanel() {
             <span className="text-sm font-semibold tabular-nums text-text">{level}</span>
           </RingProgress>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-text-faint">
+            <p className="text-xs font-semibold text-text-muted">
               Nivel
             </p>
             <p className="text-sm font-semibold tabular-nums text-text">

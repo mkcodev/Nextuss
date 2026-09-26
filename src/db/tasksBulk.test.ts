@@ -3,6 +3,7 @@ import { db } from './schema'
 import { useUndoStore } from '../lib/undoStore'
 import {
   addTagBulk,
+  carryOverToToday,
   createTask,
   moveTasksToDateBulk,
   moveToProjectBulk,
@@ -125,6 +126,22 @@ describe('moveTasksToDateBulk', () => {
     expect(ta!.scheduledStart).toBeUndefined()
     expect(ta!.postponedCount).toBe(1)
     expect((await db.tasks.get(b))!.scheduledDate).toBe('2026-09-27')
+
+    await useUndoStore.getState().undo()
+    const back = await db.tasks.get(a)
+    expect(back!.scheduledDate).toBe('2026-09-20')
+    expect(back!.scheduledStart).toBe('09:00')
+    expect(back!.postponedCount).toBe(0)
+  })
+})
+
+describe('carryOverToToday', () => {
+  it('mueve la atrasada a hoy y se puede deshacer', async () => {
+    const a = await createTask({ title: 'a', scheduledDate: '2026-09-20', scheduledStart: '09:00', scheduledEnd: '10:00' })
+
+    await carryOverToToday(a, '2026-09-26')
+    expect((await db.tasks.get(a))!.scheduledDate).toBe('2026-09-26')
+    expect((await db.tasks.get(a))!.postponedCount).toBe(1)
 
     await useUndoStore.getState().undo()
     const back = await db.tasks.get(a)

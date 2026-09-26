@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { motion, useReducedMotion } from 'framer-motion'
 import { CalendarClock, Check, Play } from 'lucide-react'
@@ -9,10 +9,11 @@ import { getGoalForTask } from '../../db/repositories/goals'
 import { nextRelativeDate, timeToMinutes } from '../../lib/dates'
 import { PRIORITY_NAMES, PRIORITY_COLORS } from '../../lib/priority'
 import { cn } from '../../lib/cn'
+import { useSubmitGuard } from '../../lib/useSubmitGuard'
 import { startFocusOnTask } from '../focus/startFocusOnTask'
 import { toggleTaskDoneWithFeedback } from '../tasks/actions'
 import { useTaskFormStore } from '../tasks/taskFormStore'
-import type { EnergyLevel } from '../../db/types'
+import type { EnergyLevel, Task } from '../../db/types'
 import { pickNowTask } from './pickNowTask'
 
 const ENERGY_NAMES: Record<EnergyLevel, string> = { low: 'Baja', medium: 'Media', high: 'Alta' }
@@ -47,6 +48,8 @@ export function NowBlock({ date }: { date: string }) {
   const goal = useLiveQuery(() => (task?.id ? getGoalForTask(task.id) : Promise.resolve(null)), [task?.id])
   const openEdit = useTaskFormStore((s) => s.openEdit)
   const reduceMotion = useReducedMotion()
+  const titleId = useId()
+  const [movingToTomorrow, moveToTomorrow] = useSubmitGuard((t: Task) => moveTasksToDateBulk([t.id!], nextRelativeDate(t.scheduledDate, date, 1)))
 
   if (!pick || !task) return null
 
@@ -72,8 +75,8 @@ export function NowBlock({ date }: { date: string }) {
       initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: reduceMotion ? 0.12 : 0.22, ease: [0.25, 1, 0.5, 1] }}
-      aria-labelledby="now-title"
-      className="rounded-lg border border-border bg-surface p-5"
+      aria-labelledby={titleId}
+      className="rounded-md border border-border bg-surface p-5"
     >
       <div className="flex items-center gap-2 text-sm">
         <span
@@ -87,7 +90,7 @@ export function NowBlock({ date }: { date: string }) {
         <span className="ml-auto tabular-nums text-text-muted">{meta}</span>
       </div>
 
-      <h2 id="now-title" className="mt-2 text-xl font-semibold tracking-tight text-balance text-text">
+      <h2 id={titleId} className="mt-2 text-xl font-semibold tracking-tight text-balance text-text">
         <button type="button" onClick={() => openEdit(task)} className="text-left hover:underline hover:decoration-border-strong hover:underline-offset-4">
           {task.title}
         </button>
@@ -127,7 +130,9 @@ export function NowBlock({ date }: { date: string }) {
             <dt className="text-xs text-text-muted">{c.label}</dt>
             <dd className="mt-0.5 flex items-center gap-1.5 truncate text-sm font-medium text-text">
               {c.dot && <span aria-hidden="true" className="size-2 shrink-0 rounded-full" style={{ backgroundColor: c.dot }} />}
-              <span className="truncate">{c.value}</span>
+              <span className="truncate" title={c.value}>
+                {c.value}
+              </span>
             </dd>
           </div>
         ))}
@@ -140,7 +145,7 @@ export function NowBlock({ date }: { date: string }) {
         <Button variant="secondary" onClick={() => void toggleTaskDoneWithFeedback(task.id!, task.title)}>
           <Check size={14} strokeWidth={2} /> Hecha
         </Button>
-        <Button variant="ghost" onClick={() => void moveTasksToDateBulk([task.id!], nextRelativeDate(task.scheduledDate, date, 1))}>
+        <Button variant="ghost" loading={movingToTomorrow} onClick={() => void moveToTomorrow(task)}>
           <CalendarClock size={14} strokeWidth={1.75} /> Pasar a mañana
         </Button>
       </div>
