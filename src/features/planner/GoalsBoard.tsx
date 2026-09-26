@@ -8,7 +8,7 @@ import { listAttributes } from '../../db/repositories/gamification'
 import { GoalSection } from './GoalSection'
 import { NorthStarCallout } from './NorthStarCallout'
 import { AttributePortfolio } from './AttributePortfolio'
-import { parsePeriodKey, previousPeriodKey, nextPeriodKey } from '../../lib/periods'
+import { formatPeriodLabel, parsePeriodKey, previousPeriodKey, nextPeriodKey } from '../../lib/periods'
 import { useGoalFormStore } from './goalFormStore'
 import { useWeeklyReviewStore } from './weeklyReviewStore'
 
@@ -28,7 +28,7 @@ export function GoalsBoard() {
   const openCreate = useGoalFormStore((s) => s.openCreate)
   const openReview = useWeeklyReviewStore((s) => s.openReview)
 
-  const monthLabel = new Date(monthCursor + '-01').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
+  const monthLabel = formatPeriodLabel('month', monthCursor)
 
   return (
     <div className="space-y-6">
@@ -41,8 +41,8 @@ export function GoalsBoard() {
             <ChevronLeft size={15} />
           </button>
           <div className="min-w-[9rem] text-center">
-            <p className="text-sm font-semibold capitalize text-text">{monthLabel}</p>
-            <p className="text-xs text-text-faint">Semana {weekCursor}</p>
+            <p className="text-sm font-semibold text-text">{monthLabel}</p>
+            <p className="text-xs text-text-muted">{formatPeriodLabel('week', weekCursor)}</p>
           </div>
           <button
             onClick={() => setWeekCursor((k) => nextPeriodKey('week', k))}

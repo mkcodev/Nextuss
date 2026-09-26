@@ -549,7 +549,20 @@ export function TasksPage() {
               <Skeleton className="h-10 w-full" />
             </div>
           ) : rows.length === 0 ? (
-            <EmptyState icon={ListTodo} title="Nada aquí" description="Ninguna tarea cumple los filtros de esta vista." />
+            allTasks.length === 0 ? (
+              <EmptyState
+                icon={ListTodo}
+                title="Aún no tienes tareas"
+                description="Crea la primera aquí o captúrala desde cualquier pantalla con la tecla i."
+                action={
+                  <Button onClick={() => openCreateTask()}>
+                    <Plus size={14} strokeWidth={2} /> Crear tarea
+                  </Button>
+                }
+              />
+            ) : (
+              <EmptyState icon={ListTodo} title="Nada en esta vista" description="Ninguna tarea cumple sus filtros. Prueba otra vista o cambia los filtros." />
+            )
           ) : (
             <Card className="overflow-hidden p-0">
               <div className="overflow-x-auto">
