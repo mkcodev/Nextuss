@@ -34,6 +34,7 @@ import { PRIORITY_COLORS, PRIORITY_NAMES } from '../../lib/priority'
 import { formatShortDate, minutesToTime, monthKey, nextRelativeDate, timeToMinutes, todayKey, weekKey } from '../../lib/dates'
 import { ENTITY_COLORS } from '../../lib/colors'
 import { useSubmitGuard } from '../../lib/useSubmitGuard'
+import { useToastStore } from '../../lib/toastStore'
 import { useTaskFormStore } from './taskFormStore'
 import { useAiAvailable } from '../ai/useAiAvailable'
 import { useTaskBreakdownStore } from '../ai/taskBreakdownStore'
@@ -119,6 +120,7 @@ export function TaskForm() {
   // Las series se editan sobre todo desde "Más" (repetición), así que se abre de entrada.
   const [moreOpen, setMoreOpen] = useState(isSeries)
   const [createMore, setCreateMore] = useState(false)
+  const [repeatError, setRepeatError] = useState<string | undefined>(undefined)
 
   const weekGoals = useLiveQuery(() => listGoalsForPeriod('week', weekKey()), []) ?? []
   const monthGoals = useLiveQuery(() => listGoalsForPeriod('month', monthKey()), []) ?? []
@@ -131,8 +133,10 @@ export function TaskForm() {
     () => (isEdit && task?.id ? getGoalForTask(task.id) : Promise.resolve(undefined)),
     [task?.id],
   )
+  const [initialGoalId, setInitialGoalId] = useState<number | undefined>(undefined)
   if (isEdit && !goalIdInitialized && currentGoal !== undefined) {
     setGoalId(currentGoal?.id)
+    setInitialGoalId(currentGoal?.id)
     setGoalIdInitialized(true)
   }
 
@@ -160,7 +164,10 @@ export function TaskForm() {
   const snapshot = () =>
     JSON.stringify([title.trim(), notes.trim(), energy, estimateMin, priority, dueDate, color, tagIds, projectId, schedDate, schedStart, pendingSubtasks, repeatEnabled && repeat])
   const [initialSnapshot, setInitialSnapshot] = useState(snapshot)
-  const dirty = snapshot() !== initialSnapshot
+  // El objetivo se carga aparte (asíncrono), así que se compara por separado.
+  const dirty = snapshot() !== initialSnapshot || (goalIdInitialized && goalId !== initialGoalId)
+  const [seriesPrompt, setSeriesPrompt] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
 
   const reset = () => {
     setTitle('')
@@ -203,6 +210,17 @@ export function TaskForm() {
       setTitleError(true)
       titleRef.current?.focus()
       return
+    }
+
+    if (repeatEnabled && repeat.mode === 'schedule') {
+      const noDays =
+        (repeat.freq === 'weekly' && repeat.byWeekday.length === 0) || (repeat.freq === 'monthly' && repeat.byMonthDay.length === 0)
+      if (noDays) {
+        // Antes se guardaba una serie que nunca generaba ninguna tarea.
+        setRepeatError(repeat.freq === 'weekly' ? 'Marca al menos un día de la semana.' : 'Marca al menos un día del mes.')
+        setMoreOpen(true)
+        return
+      }
     }
 
     const payload = {
@@ -268,6 +286,7 @@ export function TaskForm() {
       setNotes('')
       setPendingSubtasks([])
       setInitialSnapshot(JSON.stringify(['', '', energy, estimateMin, priority, dueDate, color, tagIds, projectId, schedDate, schedStart, [], repeatEnabled && repeat]))
+      useToastStore.getState().push({ title: 'Tarea creada', description: 'Puedes escribir la siguiente.', variant: 'success' })
       titleRef.current?.focus()
       return
     }
@@ -276,9 +295,19 @@ export function TaskForm() {
 
   const [saving, guardedSave] = useSubmitGuard(save)
 
+  const submitDefault = () => {
+    if (isSeries) {
+      // "Solo esta" desvincula la tarea de su serie: no se hace con un Enter, se elige.
+      setSeriesPrompt(true)
+      formRef.current?.querySelector<HTMLButtonElement>('[data-series-choice]')?.focus()
+      return
+    }
+    void guardedSave(false)
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    void guardedSave(false)
+    submitDefault()
   }
 
   const handleStopRecurrence = async () => {
@@ -295,22 +324,28 @@ export function TaskForm() {
 
   const toggleTag = (id: number) => setTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]))
 
-  const addTag = async () => {
+  const [, addTag] = useSubmitGuard(async () => {
     const name = newTagName.trim()
     if (!name) return
     const id = await findOrCreateTag(name)
     setTagIds((prev) => (prev.includes(id) ? prev : [...prev, id]))
     setNewTagName('')
+  })
+
+  // Al cerrar el campo de "nuevo proyecto" el foco vuelve a la ficha de Proyecto (si no, caía a <body>).
+  const closeNewProject = () => {
+    setShowNewProject(false)
+    requestAnimationFrame(() => formRef.current?.querySelector<HTMLElement>('[aria-label^="Proyecto:"]')?.focus())
   }
 
-  const addProject = async () => {
+  const [, addProject] = useSubmitGuard(async () => {
     const name = newProjectName.trim()
     if (!name) return
     const id = await createProject({ name, color: ENTITY_COLORS[0] })
     setProjectId(id)
     setNewProjectName('')
-    setShowNewProject(false)
-  }
+    closeNewProject()
+  })
 
   const project = projects.find((p) => p.id === projectId)
   const goalOptions = (list: typeof weekGoals) => list.filter((g) => !g.done || g.id === goalId)
@@ -329,11 +364,12 @@ export function TaskForm() {
   return (
     <Dialog open={open} onClose={handleClose} title={isEdit ? 'Editar tarea' : 'Nueva tarea'} size="lg" dirty={dirty}>
       <form
+        ref={formRef}
         onSubmit={handleSubmit}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
             e.preventDefault()
-            void guardedSave(false)
+            submitDefault()
           }
         }}
       >
@@ -376,7 +412,7 @@ export function TaskForm() {
           <Popover
             label="Fecha"
             trigger={(t) => (
-              <Chip {...t} empty={!schedDate} aria-label={`Fecha: ${schedDate ? formatShortDate(schedDate) : 'sin fecha'}`}>
+              <Chip {...t} empty={!schedDate} aria-label={`Fecha: ${schedDate ? `${formatShortDate(schedDate)}${schedStart ? ` a las ${schedStart}` : ''}` : 'sin fecha'}`}>
                 <CalendarDays size={14} strokeWidth={1.75} aria-hidden="true" />
                 {schedDate ? `${formatShortDate(schedDate)}${schedStart ? ` · ${schedStart}` : ''}` : 'Fecha'}
               </Chip>
@@ -498,16 +534,16 @@ export function TaskForm() {
                 if (e.key === 'Escape') {
                   // Cierra solo el campo de "nuevo proyecto", no el diálogo de la tarea.
                   e.stopPropagation()
-                  setShowNewProject(false)
+                  closeNewProject()
                 }
               }}
-              placeholder="Nombre del proyecto"
+              placeholder="Nombre del proyecto…"
               className="h-7 flex-1 rounded-sm border border-border bg-surface px-2.5 text-sm text-text placeholder:text-text-muted focus:border-accent"
             />
             <Button type="button" size="sm" onClick={() => void addProject()}>
               Crear proyecto
             </Button>
-            <Button type="button" size="sm" variant="ghost" onClick={() => setShowNewProject(false)}>
+            <Button type="button" size="sm" variant="ghost" onClick={closeNewProject}>
               Cancelar
             </Button>
           </div>
@@ -630,7 +666,11 @@ export function TaskForm() {
                   <div className="mt-3">
                     <RepeatSection
                       value={repeat}
-                      onChange={(patch) => setRepeat((r) => ({ ...r, ...patch }))}
+                      onChange={(patch) => {
+                        setRepeat((r) => ({ ...r, ...patch }))
+                        setRepeatError(undefined)
+                      }}
+                      error={repeatError}
                       onStop={isSeries ? () => void handleStopRecurrence() : undefined}
                     />
                   </div>
@@ -645,6 +685,7 @@ export function TaskForm() {
                   pending={pendingSubtasks}
                   onPendingChange={setPendingSubtasks}
                   onOpen={openEdit}
+                  openBlockedReason={dirty ? 'Guarda antes los cambios de esta tarea para abrir la subtarea.' : undefined}
                 />
                 {isEdit && task?.id && aiAvailable && (
                   <button
@@ -678,7 +719,12 @@ export function TaskForm() {
             </Button>
             {isSeries ? (
               <>
-                <Button type="submit" variant="secondary" disabled={saving}>
+                {seriesPrompt && (
+                  <span role="status" className="text-sm text-text-muted">
+                    ¿Aplicar solo a esta o también a las futuras?
+                  </span>
+                )}
+                <Button type="button" variant="secondary" data-series-choice loading={saving} onClick={() => void guardedSave(false)}>
                   Solo esta
                 </Button>
                 <Button type="button" loading={saving} onClick={() => void guardedSave(true)}>
@@ -686,9 +732,11 @@ export function TaskForm() {
                 </Button>
               </>
             ) : (
-              <Button type="submit" loading={saving} title="Ctrl + Enter">
+              <Button type="submit" loading={saving} title="Ctrl + Enter" aria-keyshortcuts="Control+Enter">
                 {isEdit ? 'Guardar tarea' : 'Crear tarea'}
-                <kbd className="ml-1 rounded-xs bg-black/15 px-1 text-xs font-medium">Ctrl ↵</kbd>
+                <kbd aria-hidden="true" className="ml-1 rounded-xs bg-black/15 px-1 text-xs font-medium">
+                  Ctrl&nbsp;↵
+                </kbd>
               </Button>
             )}
           </div>

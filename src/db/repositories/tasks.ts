@@ -165,15 +165,18 @@ export async function getOverdueTasks(today: string): Promise<Task[]> {
     .sort((a, b) => (a.scheduledDate ?? '').localeCompare(b.scheduledDate ?? ''))
 }
 
-/** Moves an overdue task to today, clearing its old time slot and counting the postponement. */
+/** Moves an overdue task to today, clearing its old time slot and counting the postponement.
+ *  Con deshacer, como el resto de reprogramaciones (antes era la única que no lo tenía). */
 export async function carryOverToToday(id: number, today: string) {
   const task = await db.tasks.get(id)
   if (!task) return
-  await db.tasks.update(id, {
-    scheduledDate: today,
-    scheduledStart: undefined,
-    scheduledEnd: undefined,
-    postponedCount: task.postponedCount + 1,
+  await withUndo('Tarea movida a hoy', [{ table: 'tasks', ids: [id] }], async () => {
+    await db.tasks.update(id, {
+      scheduledDate: today,
+      scheduledStart: undefined,
+      scheduledEnd: undefined,
+      postponedCount: task.postponedCount + 1,
+    })
   })
 }
 
