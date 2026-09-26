@@ -47,7 +47,13 @@ export function ResumenTab({ range }: ResumenTabProps) {
   const { totalXp } = usePlayerProgress()
   const levelMarkers = useMemo(() => {
     const gained = xpCurve.length > 0 ? xpCurve[xpCurve.length - 1].xp : 0
-    return levelUpsInCurve(xpCurve, Math.max(0, totalXp - gained)).map((m) => ({ x: m.date, label: `Nv. ${m.level}` }))
+    const ups = levelUpsInCurve(xpCurve, Math.max(0, totalXp - gained))
+    // Con más de 5 subidas las etiquetas se pisarían: se dibujan solo las líneas y se resume en el subtítulo.
+    const crowded = ups.length > 5
+    return {
+      markers: ups.map((m) => ({ x: m.date, label: crowded ? '' : `Nv. ${m.level}` })),
+      summary: ups.length === 0 ? '' : ups.length === 1 ? ` · subiste al nivel ${ups[0].level}` : ` · subiste del nivel ${ups[0].level - 1} al ${ups[ups.length - 1].level}`,
+    }
   }, [xpCurve, totalXp])
 
   const weeklyHabits = useMemo(() => {
@@ -136,8 +142,8 @@ export function ResumenTab({ range }: ResumenTabProps) {
       </ChartCard>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ChartCard title="XP acumulado" subtitle="En el periodo seleccionado" loading={data.loading} empty={xpCurve.length === 0}>
-          <LineTrend data={xpCurve} xKey="date" series={[{ key: 'xp', label: 'XP', color: 'var(--nx-accent)' }]} markers={levelMarkers} />
+        <ChartCard title="XP acumulado" subtitle={`En el periodo seleccionado${levelMarkers.summary}`} loading={data.loading} empty={xpCurve.length === 0}>
+          <LineTrend data={xpCurve} xKey="date" series={[{ key: 'xp', label: 'XP', color: 'var(--nx-accent)' }]} markers={levelMarkers.markers} />
         </ChartCard>
 
         <ChartCard

@@ -48,8 +48,8 @@ export function TiempoTab({ range }: TiempoTabProps) {
       listAttributes(),
       ids.length ? db.goals.where('taskIds').anyOf(ids).filter((g) => g.deletedAt === 0).toArray() : Promise.resolve([]),
     ])
-    const goalByTask = new Map<number, { key: string; label: string }>()
-    for (const g of goals) for (const id of g.taskIds) if (!goalByTask.has(id)) goalByTask.set(id, { key: String(g.id), label: g.title })
+    const goalByTask = new Map<number, { key: string; label: string; attributeId?: number }>()
+    for (const g of goals) for (const id of g.taskIds) if (!goalByTask.has(id)) goalByTask.set(id, { key: String(g.id), label: g.title, attributeId: g.attributeId })
     return { projects: new Map(projects.map((p) => [p.id!, p])), attributes: new Map(attributes.map((a) => [a.id!, a])), goalByTask }
   }, [taskIdsKey])
   const byAttribute = useMemo(() => {
@@ -58,8 +58,10 @@ export function TiempoTab({ range }: TiempoTabProps) {
     return timeByGroup(
       taskMinutes,
       (taskId) => {
+        // Atributo del proyecto y, si no tiene, el del objetivo al que está vinculada la tarea.
         const project = lookups.projects.get(projectOf.get(taskId) ?? -1)
-        const attr = project?.attributeId != null ? lookups.attributes.get(project.attributeId) : undefined
+        const attrId = project?.attributeId ?? lookups.goalByTask.get(taskId)?.attributeId
+        const attr = attrId != null ? lookups.attributes.get(attrId) : undefined
         return attr ? { key: String(attr.id), label: attr.name, color: attr.color } : null
       },
       'Sin atributo',
