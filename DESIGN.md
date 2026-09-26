@@ -3,23 +3,24 @@ name: Nextuss
 description: Centro de mando personal (hábitos, tareas, objetivos y foco) con aspecto de herramienta profesional sobria.
 colors:
   indigo-accent: "#5058c8"
-  indigo-accent-night: "#5e66d6"
+  indigo-accent-night: "#7c84e8"
   on-accent: "#ffffff"
+  on-accent-night: "#0f1020"
   paper: "#ffffff"
   paper-side: "#f7f7f8"
   paper-hover: "#ededf0"
   hairline: "#e7e7eb"
   ink: "#1b1b20"
   ink-dim: "#6a6a75"
-  ink-faint: "#9a9aa4"
-  overdue-orange: "#b4540a"
+  ink-faint: "#72727c"
+  overdue-orange: "#a64d08"
   night: "#131316"
   night-side: "#0f0f11"
   night-hover: "#1f1f24"
   night-hairline: "#26262c"
   night-ink: "#e7e7eb"
   night-ink-dim: "#9d9da8"
-  night-ink-faint: "#6f6f7a"
+  night-ink-faint: "#8b8b96"
   overdue-orange-night: "#f0a25e"
   scrim: "rgba(0, 0, 0, 0.35)"
 typography:
@@ -174,6 +175,8 @@ Anti-referencia confirmada: la estética anterior de la app (tablero SaaS oscuro
 - Teclado visible: cada acción principal muestra su atajo en `kbd`.
 
 ## Colors
+
+> **Ajuste de contraste (2026-09-26, #38):** al llevar los tokens a la app se oscurecieron tinta tenue (#72727c / #8b8b96) y naranja de atraso (#a64d08) para pasar AA también sobre filas seleccionadas, y el índigo en oscuro pasó a #7c84e8 con texto oscuro encima (on-accent-night #0f1020). Fuente: `src/index.css`.
 
 Paleta neutra casi monocroma, con un índigo como única voz y un naranja que solo aparece para decir "esto va tarde".
 
