@@ -118,19 +118,37 @@ async function futurePendingOccurrences(ruleId: number, today: string): Promise<
   return occurrences.filter((t) => t.deletedAt === 0 && t.status !== 'done' && (t.occurrenceDate ?? '') >= today)
 }
 
-/** "Editar esta y futuras": actualiza la plantilla de la regla, manda a la papelera las ocurrencias
- * futuras aún no completadas (una de ellas puede ser la que se está editando ahora mismo) y vuelve a
- * generar el horizonte a partir de la plantilla ya actualizada. Las ocurrencias pasadas o ya
- * completadas no se tocan — son historial, no se reescriben con efecto retroactivo. */
+/** "Editar esta y futuras": actualiza la plantilla de la regla y la aplica *en su sitio* a las
+ * ocurrencias futuras aún no completadas (una de ellas puede ser la que se está editando). Si el
+ * calendario cambió, las que ya no tocan van a la papelera y se generan las fechas nuevas. Antes se
+ * mandaban todas a la papelera y se regeneraba, pero `occurrenceExists` cuenta también las de la
+ * papelera — a propósito, para no resucitar una ocurrencia que el usuario borró — y la serie se
+ * quedaba vacía (#63). Las pasadas o completadas no se tocan: son historial. */
 export async function updateRuleAndFutureOccurrences(
   ruleId: number,
   changes: Partial<Omit<RecurrenceRule, 'id' | 'createdAt'>>,
   today: string = todayKey(),
 ): Promise<void> {
   await db.recurrenceRules.update(ruleId, changes)
-  const future = await futurePendingOccurrences(ruleId, today)
-  if (future.length) await trashRows('tasks', future.map((t) => t.id!), 'Serie recurrente actualizada')
-  await generateOccurrencesForRule(ruleId, today, HORIZON_DAYS)
+  const rule = await db.recurrenceRules.get(ruleId)
+  if (!rule) return
+  const schedule = rule.mode === 'schedule'
+  const toDate = dateKey(addDays(parseDateKey(today), HORIZON_DAYS))
+  const validDates = new Set(schedule ? occurrencesInRange(rule, today, toDate) : [])
+
+  const stale: number[] = []
+  for (const t of await futurePendingOccurrences(ruleId, today)) {
+    const date = t.occurrenceDate!
+    if (schedule && !validDates.has(date)) {
+      stale.push(t.id!)
+      continue
+    }
+    // La fecha programada se conserva: el usuario pudo mover esa ocurrencia a mano.
+    const { scheduledDate: _date, occurrenceDate: _occurrence, ...template } = taskPayloadFromRule(rule, date)
+    await db.tasks.update(t.id!, template)
+  }
+  if (stale.length) await trashRows('tasks', stale, 'Serie recurrente actualizada')
+  if (schedule) await generateOccurrencesForRule(ruleId, today, HORIZON_DAYS)
 }
 
 /** Detiene la serie por completo: borra la regla (no lleva papelera propia, es solo metadatos de

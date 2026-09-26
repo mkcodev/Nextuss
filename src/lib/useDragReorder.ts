@@ -45,6 +45,10 @@ export function useDragReorder({ mime, orientation = 'vertical', onMove, ids, la
   const [draggingId, setDraggingId] = useState<number | null>(null)
   const [over, setOver] = useState<{ id: number; position: DropPosition } | null>(null)
   const draggingRef = useRef<number | null>(null)
+  // Orden optimista tras mover con teclado: hasta que la base de datos lo devuelva, `ids` sigue siendo
+  // el viejo y las pulsaciones seguidas se perderían (#64). Los vecinos que calcula `onMove` sobre la
+  // lista vieja siguen siendo correctos: solo el elemento movido está fuera de sitio en ella.
+  const optimistic = useRef<{ order: number[]; at: number } | null>(null)
 
   const reset = () => {
     draggingRef.current = null
@@ -60,12 +64,23 @@ export function useDragReorder({ mime, orientation = 'vertical', onMove, ids, la
     const back = orientation === 'vertical' ? 'ArrowUp' : 'ArrowLeft'
     const forward = orientation === 'vertical' ? 'ArrowDown' : 'ArrowRight'
     if (e.key !== back && e.key !== forward) return
-    const index = ids.indexOf(id)
-    const targetIndex = e.key === back ? index - 1 : index + 1
-    if (index < 0 || targetIndex < 0 || targetIndex >= ids.length) return
+    // Siempre, también en los bordes: Alt+← es "Atrás" en el navegador.
     e.preventDefault()
-    onMove(id, ids[targetIndex], e.key === back ? 'before' : 'after')
-    announce(`${labelOf?.(id) ?? 'Elemento'} movido a la posición ${targetIndex + 1} de ${ids.length}`)
+    let current = ids
+    const o = optimistic.current
+    if (o) {
+      const caughtUp = o.order.join(',') === ids.join(',')
+      if (caughtUp || o.order.length !== ids.length || Date.now() - o.at > 1500) optimistic.current = null
+      else current = o.order
+    }
+    const index = current.indexOf(id)
+    const targetIndex = e.key === back ? index - 1 : index + 1
+    if (index < 0 || targetIndex < 0 || targetIndex >= current.length) return
+    onMove(id, current[targetIndex], e.key === back ? 'before' : 'after')
+    const next = current.filter((x) => x !== id)
+    next.splice(targetIndex, 0, id)
+    optimistic.current = { order: next, at: Date.now() }
+    announce(`${labelOf?.(id) ?? 'Elemento'} movido a la posición ${targetIndex + 1} de ${current.length}`)
   }
 
   const rowProps = (id: number) => ({
