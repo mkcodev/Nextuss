@@ -22,6 +22,7 @@ import { useTaskFormStore } from './taskFormStore'
 import { useAiAvailable } from '../ai/useAiAvailable'
 import { useTaskBreakdownStore } from '../ai/taskBreakdownStore'
 import { ENTITY_COLORS } from '../../lib/colors'
+import { useSubmitGuard } from '../../lib/useSubmitGuard'
 
 const ESTIMATE_PRESETS = [15, 30, 45, 60, 90, 120]
 const ENERGY_OPTIONS: { value: EnergyLevel; label: string }[] = [
@@ -206,9 +207,11 @@ export function TaskForm() {
     handleClose()
   }
 
+  const [saving, guardedSave] = useSubmitGuard(save)
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    void save(false)
+    void guardedSave(false)
   }
 
   const handleStopRecurrence = async () => {
@@ -398,7 +401,11 @@ export function TaskForm() {
                       e.preventDefault()
                       addProject()
                     }
-                    if (e.key === 'Escape') setShowNewProject(false)
+                    if (e.key === 'Escape') {
+                      // Cierra solo el campo de "nuevo proyecto", no el diálogo de la tarea.
+                      e.stopPropagation()
+                      setShowNewProject(false)
+                    }
                   }}
                   placeholder="Nombre del proyecto"
                   className="w-full rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
@@ -775,7 +782,7 @@ export function TaskForm() {
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-2">
+        <div className="sticky bottom-0 -mx-6 -mb-6 flex items-center justify-between border-t border-border bg-surface px-6 py-3">
           {isEdit ? (
             <Button type="button" variant="danger" onClick={handleDelete} className="px-2.5 text-xs">
               <Trash2 size={13} /> Eliminar
@@ -789,15 +796,15 @@ export function TaskForm() {
             </Button>
             {isEdit && task?.recurrenceId ? (
               <>
-                <Button type="submit" variant="ghost">
+                <Button type="submit" variant="ghost" disabled={saving}>
                   Solo esta
                 </Button>
-                <Button type="button" onClick={() => void save(true)}>
+                <Button type="button" loading={saving} onClick={() => void guardedSave(true)}>
                   Esta y futuras
                 </Button>
               </>
             ) : (
-              <Button type="submit">{isEdit ? 'Guardar' : 'Crear tarea'}</Button>
+              <Button type="submit" loading={saving}>{isEdit ? 'Guardar tarea' : 'Crear tarea'}</Button>
             )}
           </div>
         </div>

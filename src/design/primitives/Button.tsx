@@ -1,28 +1,45 @@
 import type { ButtonHTMLAttributes } from 'react'
+import { Loader2 } from 'lucide-react'
 import { cn } from '../../lib/cn'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type Size = 'sm' | 'md'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
+  /** sm: 28px (barras de herramientas, fichas). md: 32px (formularios, acciones principales). */
+  size?: Size
+  /** Muestra un indicador y bloquea el botón mientras se guarda (evita dobles envíos). */
+  loading?: boolean
 }
 
 const variantClasses: Record<Variant, string> = {
   primary: 'bg-accent text-on-accent hover:bg-accent-strong',
   secondary: 'bg-surface border border-border text-text hover:bg-surface-hover',
   ghost: 'bg-transparent text-text-muted hover:text-text hover:bg-surface-hover',
-  danger: 'bg-danger/10 text-danger border border-danger/30 hover:bg-danger/20',
+  danger: 'bg-danger/10 text-danger hover:bg-danger/15',
 }
 
-export function Button({ variant = 'primary', className, ...props }: ButtonProps) {
+const sizeClasses: Record<Size, string> = {
+  sm: 'h-7 px-2.5 text-[13px] gap-1.5',
+  md: 'h-8 px-3 text-sm gap-2',
+}
+
+export function Button({ variant = 'primary', size = 'md', loading, disabled, className, children, ...props }: ButtonProps) {
   return (
     <button
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none',
+        'inline-flex items-center justify-center rounded-sm font-medium whitespace-nowrap transition-colors disabled:opacity-50 disabled:pointer-events-none',
+        sizeClasses[size],
         variantClasses[variant],
         className,
       )}
       {...props}
-    />
+    >
+      {loading && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
+      {children}
+    </button>
   )
 }

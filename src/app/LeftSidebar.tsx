@@ -9,7 +9,7 @@ export function LeftSidebar() {
   return (
     <nav
       className={cn(
-        'hidden shrink-0 flex-col gap-0.5 border-r border-border py-3 transition-[width] duration-150 md:flex',
+        'hidden shrink-0 flex-col gap-0.5 border-r border-border bg-bg-soft py-3 transition-[width] duration-150 md:flex',
         collapsed ? 'w-[60px] px-2' : 'w-56 px-3',
       )}
     >
@@ -21,23 +21,20 @@ export function LeftSidebar() {
           title={collapsed ? `${label} (g ${goKey})` : undefined}
           className={({ isActive }) =>
             cn(
-              'relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors',
+              'flex h-8 items-center gap-2.5 rounded-sm px-2.5 text-sm font-medium transition-colors',
               collapsed && 'justify-center px-0',
               isActive
-                ? 'bg-accent-soft text-accent'
-                : 'text-text-faint hover:bg-surface-hover hover:text-text',
+                ? 'bg-surface-hover text-text'
+                : 'text-text-muted hover:bg-surface-hover hover:text-text',
             )
           }
         >
           {({ isActive }) => (
             <>
-              {isActive && (
-                <span className="absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-accent" />
-              )}
-              <Icon size={18} strokeWidth={1.75} className="shrink-0" />
+              <Icon size={16} strokeWidth={1.75} className={cn('shrink-0', isActive && 'text-accent')} />
               {!collapsed && <span className="truncate">{label}</span>}
               {!collapsed && (
-                <span className="ml-auto text-xs tabular-nums text-text-faint/70">
+                <span className="ml-auto text-xs tabular-nums text-text-faint">
                   g {goKey}
                 </span>
               )}
