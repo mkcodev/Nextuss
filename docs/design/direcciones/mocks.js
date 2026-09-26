@@ -290,7 +290,7 @@ INFO.E = {
   raises: ['Ley de color (del arcade): el naranja aparece una sola vez por pantalla.','Estados por forma (de la tensegridad): tecla vacía, verde con marca, con anillo (ahora) o discontinua (aparcada).']
 };
 const FILES = { A: 'a-plano-tecnico.html', B: 'b-cabina.html', C: 'c-herramienta.html', D: 'd-tablero.html', E: 'e-aparato.html', F: 'f-herramienta-plano.html', G: 'g-aparato-plano.html' };
-const TAGS = { A: 'La que eligió el dado', B: 'Mi favorita', C: 'Lo que pediste: tipo Linear', D: 'Carta competitiva, más atrevida', E: 'Mi segunda candidata', F: 'Mezcla que pediste: C + bloque Ahora de A', G: 'Mezcla que pediste: E + bloque Ahora de A' };
+const TAGS = { A: 'La que eligió el dado', B: 'Mi favorita', C: 'Lo que pediste: tipo Linear', D: 'Carta competitiva, más atrevida', E: 'Mi segunda candidata', F: 'ELEGIDA · C + bloque Ahora de A', G: 'Mezcla que pediste: E + bloque Ahora de A' };
 
 const flaps = t => [...t].map(ch => ch === ':' ? '<span class="c">:</span>' : `<span class="flap">${ch}</span>`).join('');
 
