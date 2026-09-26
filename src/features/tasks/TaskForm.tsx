@@ -702,7 +702,7 @@ export function TaskForm() {
           </div>
         )}
 
-        <div className="sticky bottom-0 -mx-6 -mb-6 mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border bg-surface px-6 py-3">
+        <div className="sticky -bottom-6 -mx-6 -mb-6 mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border bg-surface px-6 py-3">
           {isEdit ? (
             <Button type="button" variant="ghost" size="sm" onClick={() => void handleDelete()} className="hover:text-danger">
               <Trash2 size={14} strokeWidth={1.75} /> Eliminar

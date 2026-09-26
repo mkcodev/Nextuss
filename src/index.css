@@ -202,6 +202,11 @@ body {
   outline: none;
 }
 
+/* Al tabular por un formulario largo, el campo enfocado no queda escondido bajo el pie fijo. */
+.dialog-panel :focus {
+  scroll-margin-bottom: 5rem;
+}
+
 .skip-link {
   position: fixed;
   top: -100%;
