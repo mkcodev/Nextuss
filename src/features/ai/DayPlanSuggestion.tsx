@@ -68,16 +68,16 @@ export function DayPlanSuggestion({ date }: DayPlanSuggestionProps) {
         <h3 className="flex items-center gap-1.5 text-xs font-semibold text-text-muted">
           <Sparkles size={13} strokeWidth={1.75} /> Plan del día con IA
         </h3>
-        <Button variant="ghost" onClick={run} disabled={loading} className="h-6 px-2 py-0 text-[11px]">
+        <Button variant="ghost" onClick={run} disabled={loading} className="h-6 px-2 py-0 text-xs">
           {loading ? <Loader2 size={12} className="animate-spin" /> : 'Sugerir'}
         </Button>
       </div>
 
-      {error && <p className="mt-2 text-[11px] text-text-faint">{error}</p>}
+      {error && <p className="mt-2 text-xs text-text-faint">{error}</p>}
 
       {result && (
         <div className="mt-2 space-y-2">
-          <p className="text-[11px] text-text-faint">{result.note}</p>
+          <p className="text-xs text-text-faint">{result.note}</p>
           {result.orderedTaskIds.length > 0 && (
             <ol className="space-y-1">
               {result.orderedTaskIds.map((id, i) => (
@@ -94,7 +94,7 @@ export function DayPlanSuggestion({ date }: DayPlanSuggestionProps) {
             </ol>
           )}
           {result.deferTaskIds.length > 0 && (
-            <p className="text-[11px] text-text-faint">
+            <p className="text-xs text-text-faint">
               Mejor otro día: {result.deferTaskIds.map((id) => byId[id]).filter(Boolean).join(', ')}
             </p>
           )}

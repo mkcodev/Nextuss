@@ -16,7 +16,7 @@ export function DropIndicator({
     <span
       aria-hidden
       className={cn(
-        'pointer-events-none absolute z-[2] rounded-full bg-accent shadow-glow',
+        'pointer-events-none absolute z-[2] rounded-full bg-accent',
         horizontal
           ? cn('inset-y-0 w-0.5', position === 'before' ? '-left-[4px]' : '-right-[4px]')
           : cn('inset-x-0 h-0.5', position === 'before' ? '-top-[5px]' : '-bottom-[5px]'),

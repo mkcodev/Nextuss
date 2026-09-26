@@ -6,13 +6,14 @@ import { listTags } from '../../db/repositories/tags'
 import { useTaskFormStore } from '../tasks/taskFormStore'
 import { toggleTaskDoneWithFeedback } from '../tasks/actions'
 import { cn } from '../../lib/cn'
-import { PRIORITY_COLORS } from '../../lib/priority'
+import { priorityBadgeStyle } from '../../lib/priority'
 import { TaskQuickMenu } from '../tasks/TaskQuickMenu'
 import type { Tag, Task } from '../../db/types'
 import { TASK_DRAG_MIME } from './constants'
 import { DropIndicator } from '../../design/primitives'
 import { useDragReorder } from '../../lib/useDragReorder'
 import { reorderNeighbors, type DropPosition } from '../../lib/reorder'
+import { DEFAULT_ENTITY_COLOR } from '../../lib/colors'
 
 function SubtaskRow({ subtask, onOpen }: { subtask: Task; onOpen: (t: Task) => void }) {
   const done = subtask.status === 'done'
@@ -22,7 +23,7 @@ function SubtaskRow({ subtask, onOpen }: { subtask: Task; onOpen: (t: Task) => v
         onClick={() => toggleTaskDoneWithFeedback(subtask.id!, subtask.title)}
         className={cn(
           'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border',
-          done ? 'border-accent bg-accent text-white' : 'border-text-faint',
+          done ? 'border-accent bg-accent text-on-accent' : 'border-text-faint',
         )}
       >
         {done && <Check size={9} strokeWidth={3} />}
@@ -62,12 +63,12 @@ function TaskRow({
           'relative flex cursor-grab items-center gap-2 rounded-lg border border-l-[3px] border-border bg-surface px-3 py-2 transition-all hover:border-border-strong active:cursor-grabbing',
           dnd.dragging(task.id!) && 'opacity-40',
         )}
-        style={{ borderLeftColor: task.color ?? '#5EC8FF' }}
+        style={{ borderLeftColor: task.color ?? DEFAULT_ENTITY_COLOR }}
       >
         {task.priority && (
           <span
-            className="shrink-0 rounded px-1 py-0.5 text-[10px] font-semibold text-white"
-            style={{ backgroundColor: PRIORITY_COLORS[task.priority] }}
+            className="shrink-0 rounded px-1 py-0.5 text-xs font-semibold"
+            style={priorityBadgeStyle(task.priority)}
           >
             P{task.priority}
           </span>
@@ -77,13 +78,13 @@ function TaskRow({
         {tags.map((tag) => (
           <span
             key={tag.id}
-            className="shrink-0 rounded-full border border-border px-1.5 py-0.5 text-[10px] text-text-muted"
+            className="shrink-0 rounded-full border border-border px-1.5 py-0.5 text-xs text-text-muted"
           >
             {tag.name}
           </span>
         ))}
         {subtasks.length > 0 && (
-          <span className="shrink-0 text-[10px] tabular-nums text-text-faint">
+          <span className="shrink-0 text-xs tabular-nums text-text-faint">
             {done}/{subtasks.length}
           </span>
         )}

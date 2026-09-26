@@ -11,6 +11,7 @@ import { SNAP_MIN, HOUR_HEIGHT, DRAG_THRESHOLD_PX } from './constants'
 import { clampMoveStart, clampResizeEnd } from './collision'
 import { minutesToY, snapMinutes } from './geometry'
 import type { Task } from '../../db/types'
+import { DEFAULT_ENTITY_COLOR } from '../../lib/colors'
 
 interface DragState {
   startX: number
@@ -180,8 +181,8 @@ export function TaskBlock({
         height: Math.max(20, height),
         transform: dayTranslate ? `translateX(${dayTranslate}px)` : undefined,
         touchAction: 'none',
-        backgroundColor: `${task.color ?? '#5EC8FF'}1f`,
-        borderColor: `${task.color ?? '#5EC8FF'}55`,
+        backgroundColor: `${task.color ?? DEFAULT_ENTITY_COLOR}1f`,
+        borderColor: `${task.color ?? DEFAULT_ENTITY_COLOR}55`,
       }}
     >
       <div className="flex min-w-0 items-center gap-1.5">
@@ -193,7 +194,7 @@ export function TaskBlock({
           }}
           className={cn(
             'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border',
-            done ? 'border-accent bg-accent text-white' : 'border-text-faint',
+            done ? 'border-accent bg-accent text-on-accent' : 'border-text-faint',
           )}
         >
           {done && <Check size={9} strokeWidth={3} />}
@@ -212,7 +213,7 @@ export function TaskBlock({
         )}
       </div>
       {height > 34 && (
-        <p className="text-[10px] text-text-faint">
+        <p className="text-xs text-text-faint">
           {minutesToTime(effectiveStart)}–{minutesToTime(effectiveStart + effectiveDuration)}
         </p>
       )}

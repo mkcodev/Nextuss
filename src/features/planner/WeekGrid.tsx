@@ -107,7 +107,7 @@ export function WeekGrid({ days }: { days: Date[] }) {
           {hours.map((h, i) => (
             <span
               key={h}
-              className="absolute right-2 -top-2 text-[10px] tabular-nums text-text-faint"
+              className="absolute right-2 -top-2 text-xs tabular-nums text-text-faint"
               style={{ top: i * HOUR_HEIGHT }}
             >
               {String(h).padStart(2, '0')}:00

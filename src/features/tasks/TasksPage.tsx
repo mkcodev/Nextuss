@@ -20,7 +20,7 @@ import { cn } from '../../lib/cn'
 import { useDragReorder } from '../../lib/useDragReorder'
 import { reorderNeighbors, type DropPosition } from '../../lib/reorder'
 import { todayKey } from '../../lib/dates'
-import { PRIORITY_COLORS, PRIORITY_LABELS } from '../../lib/priority'
+import { PRIORITY_COLORS, PRIORITY_LABELS, priorityBadgeStyle } from '../../lib/priority'
 import {
   addTagBulk,
   listAllTasks,
@@ -397,14 +397,14 @@ export function TasksPage() {
             {showFilters && (
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-text-muted">Estado</label>
+                  <label className="mb-1 block text-xs font-medium text-text-muted">Estado</label>
                   <div className="flex flex-wrap gap-1">
                     {(Object.keys(STATUS_LABELS) as TaskStatus[]).map((s) => (
                       <button
                         key={s}
                         onClick={() => patchFilters({ status: toggleInArray(activeView.filters.status, s) })}
                         className={cn(
-                          'rounded-md border px-2 py-1 text-[11px] font-medium',
+                          'rounded-md border px-2 py-1 text-xs font-medium',
                           activeView.filters.status?.includes(s)
                             ? 'border-accent bg-accent-soft text-accent'
                             : 'border-border text-text-faint',
@@ -417,19 +417,19 @@ export function TasksPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-text-muted">Prioridad</label>
+                  <label className="mb-1 block text-xs font-medium text-text-muted">Prioridad</label>
                   <div className="flex flex-wrap gap-1">
                     {[1, 2, 3, 4].map((p) => (
                       <button
                         key={p}
                         onClick={() => patchFilters({ priority: toggleInArray(activeView.filters.priority, p) })}
                         className={cn(
-                          'rounded-md border px-2 py-1 text-[11px] font-semibold',
+                          'rounded-md border px-2 py-1 text-xs font-semibold',
                           activeView.filters.priority?.includes(p)
-                            ? 'text-white'
+                            ? ''
                             : 'border-border text-text-faint',
                         )}
-                        style={activeView.filters.priority?.includes(p) ? { backgroundColor: PRIORITY_COLORS[p], borderColor: PRIORITY_COLORS[p] } : undefined}
+                        style={activeView.filters.priority?.includes(p) ? priorityBadgeStyle(p) : undefined}
                       >
                         {PRIORITY_LABELS[p]}
                       </button>
@@ -438,7 +438,7 @@ export function TasksPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-text-muted">Proyecto</label>
+                  <label className="mb-1 block text-xs font-medium text-text-muted">Proyecto</label>
                   <Select
                     value={activeView.filters.projectId === null ? '__none__' : (activeView.filters.projectId ?? '')}
                     onChange={(e) => {
@@ -457,15 +457,15 @@ export function TasksPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-text-muted">Etiquetas</label>
+                  <label className="mb-1 block text-xs font-medium text-text-muted">Etiquetas</label>
                   <div className="flex flex-wrap gap-1">
-                    {tags.length === 0 && <span className="text-[11px] text-text-faint">Sin etiquetas todavía.</span>}
+                    {tags.length === 0 && <span className="text-xs text-text-faint">Sin etiquetas todavía.</span>}
                     {tags.map((t) => (
                       <button
                         key={t.id}
                         onClick={() => patchFilters({ tagIds: toggleInArray(activeView.filters.tagIds, t.id!) })}
                         className={cn(
-                          'rounded-full border px-2 py-0.5 text-[11px]',
+                          'rounded-full border px-2 py-0.5 text-xs',
                           activeView.filters.tagIds?.includes(t.id!)
                             ? 'border-accent bg-accent-soft text-accent'
                             : 'border-border text-text-faint',
@@ -478,7 +478,7 @@ export function TasksPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-text-muted">Rango de fechas</label>
+                  <label className="mb-1 block text-xs font-medium text-text-muted">Rango de fechas</label>
                   <div className="flex items-center gap-1">
                     <Select
                       value={activeView.filters.dateField ?? 'scheduledDate'}
@@ -504,7 +504,7 @@ export function TasksPage() {
                       className="w-full rounded-lg border border-border bg-bg-soft px-2 py-1.5 text-xs text-text outline-none focus:border-accent"
                     />
                   </div>
-                  <label className="mt-1.5 flex items-center gap-1.5 text-[11px] text-text-muted">
+                  <label className="mt-1.5 flex items-center gap-1.5 text-xs text-text-muted">
                     <Checkbox
                       checked={!!activeView.filters.overdueOnly}
                       onChange={(e) => patchFilters({ overdueOnly: e.target.checked })}
@@ -514,14 +514,14 @@ export function TasksPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium text-text-muted">Columnas visibles</label>
+                  <label className="mb-1 block text-xs font-medium text-text-muted">Columnas visibles</label>
                   <div className="flex flex-wrap gap-1">
                     {(Object.keys(COLUMN_LABELS) as TaskColumnKey[]).map((c) => (
                       <button
                         key={c}
                         onClick={() => toggleColumn(c)}
                         className={cn(
-                          'rounded-md border px-2 py-1 text-[11px] font-medium',
+                          'rounded-md border px-2 py-1 text-xs font-medium',
                           activeView.columns.includes(c)
                             ? 'border-accent bg-accent-soft text-accent'
                             : 'border-border text-text-faint',
@@ -657,8 +657,8 @@ function TaskViewRow({
         <td key={col} className="px-3 py-2 text-xs text-text-muted">
           {col === 'priority' && task.priority && (
             <span
-              className="rounded px-1.5 py-0.5 text-[10px] font-semibold text-white"
-              style={{ backgroundColor: PRIORITY_COLORS[task.priority] }}
+              className="rounded px-1.5 py-0.5 text-xs font-semibold"
+              style={priorityBadgeStyle(task.priority)}
             >
               {PRIORITY_LABELS[task.priority]}
             </span>
@@ -672,7 +672,7 @@ function TaskViewRow({
           {col === 'tags' && taskTags.length > 0 && (
             <span className="flex flex-wrap gap-1">
               {taskTags.map((t) => (
-                <span key={t.id} className="rounded-full border border-border px-1.5 py-0.5 text-[10px]">
+                <span key={t.id} className="rounded-full border border-border px-1.5 py-0.5 text-xs">
                   {t.name}
                 </span>
               ))}

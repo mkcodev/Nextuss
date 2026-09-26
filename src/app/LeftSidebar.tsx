@@ -37,7 +37,7 @@ export function LeftSidebar() {
               <Icon size={18} strokeWidth={1.75} className="shrink-0" />
               {!collapsed && <span className="truncate">{label}</span>}
               {!collapsed && (
-                <span className="ml-auto text-[10px] tabular-nums text-text-faint/70">
+                <span className="ml-auto text-xs tabular-nums text-text-faint/70">
                   g {goKey}
                 </span>
               )}

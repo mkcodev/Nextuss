@@ -18,7 +18,7 @@ export function MobileNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-mobile-nav flex justify-around border-t border-border bg-bg-soft/90 backdrop-blur-xl md:hidden"
+      className="fixed inset-x-0 bottom-0 z-mobile-nav flex justify-around border-t border-border bg-bg-soft md:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {MOBILE_NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (

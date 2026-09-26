@@ -75,7 +75,7 @@ export function CheckInFields({ date }: { date: string }) {
 
   return (
     <div className="space-y-3">
-      <p className={cn('text-[11px]', answered ? 'text-accent' : 'text-text-faint')}>
+      <p className={cn('text-xs', answered ? 'text-accent' : 'text-text-faint')}>
         {answered ? 'Check-in guardado.' : 'Todavía no has hecho el check-in.'}
       </p>
       <RatingRow label="Energía" value={checkin?.energy ?? null} onChange={(v) => setRating('energy', v)} />

@@ -94,7 +94,7 @@ export function CapturePanel() {
           className="resize-none"
         />
         <div className="mt-1.5 flex items-center justify-between">
-          <span className="text-[10px] text-text-faint">Enter para guardar</span>
+          <span className="text-xs text-text-faint">Enter para guardar</span>
           <IconButton label="Guardar" onClick={submit} className="h-6 w-6">
             <Send size={12} strokeWidth={2} />
           </IconButton>

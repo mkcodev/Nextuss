@@ -70,7 +70,7 @@ function PanelTabs({
         return (
           <div key={key} className="relative">
             {dropTarget?.key === key && dropTarget.side === 'before' && (
-              <span className="absolute -left-[3px] top-0.5 bottom-0.5 w-0.5 rounded-full bg-accent shadow-glow" />
+              <span className="absolute -left-[3px] top-0.5 bottom-0.5 w-0.5 rounded-full bg-accent" />
             )}
             <button
               role="tab"
@@ -94,7 +94,7 @@ function PanelTabs({
               <p.icon size={13} strokeWidth={1.75} />
             </button>
             {dropTarget?.key === key && dropTarget.side === 'after' && (
-              <span className="absolute -right-[3px] top-0.5 bottom-0.5 w-0.5 rounded-full bg-accent shadow-glow" />
+              <span className="absolute -right-[3px] top-0.5 bottom-0.5 w-0.5 rounded-full bg-accent" />
             )}
           </div>
         )
@@ -219,7 +219,7 @@ function MobileDockSheet() {
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-dialog flex items-end bg-black/40 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-dialog flex items-end bg-black/35 md:hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

@@ -103,7 +103,7 @@ export function CommandPalette() {
         if (!next) closePalette()
       }}
       label="Paleta de comandos"
-      overlayClassName="fixed inset-0 z-palette bg-black/40 backdrop-blur-sm"
+      overlayClassName="fixed inset-0 z-palette bg-black/35"
       contentClassName="fixed left-1/2 top-[18%] z-palette-content w-full max-w-lg -translate-x-1/2 px-4"
       className="overflow-hidden rounded-2xl border border-border bg-bg-soft shadow-card"
     >
@@ -118,7 +118,7 @@ export function CommandPalette() {
         />
       </div>
 
-      <Command.List className="max-h-80 overflow-y-auto p-2 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-text-faint">
+      <Command.List className="max-h-80 overflow-y-auto p-2 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-text-faint">
         <Command.Empty className="px-3 py-6 text-center text-sm text-text-faint">
           Sin resultados.
         </Command.Empty>

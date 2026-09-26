@@ -26,7 +26,7 @@ export function Checkbox({ label, className, checked, indeterminate, ...props }:
           aria-hidden="true"
           className={cn(
             'pointer-events-none flex h-4 w-4 items-center justify-center rounded border transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent',
-            checked || indeterminate ? 'border-accent bg-accent text-white' : 'border-border-strong bg-bg-soft',
+            checked || indeterminate ? 'border-accent bg-accent text-on-accent' : 'border-border-strong bg-bg-soft',
           )}
         >
           {indeterminate ? <Minus size={11} strokeWidth={3} /> : checked && <Check size={11} strokeWidth={3} />}

@@ -1,8 +1,8 @@
 @import 'tailwindcss';
 
 /* ---------------------------------------------------------------------- */
-/* Nextuss — Design tokens ("cuarzo")                                      */
-/* Light = cuarzo blanco/cristal. Dark = cuarzo ahumado/obsidiana.        */
+/* Nextuss — Design tokens ("Herramienta precisa", fuente: DESIGN.md)     */
+/* Claro = papel blanco, bordes finos. Oscuro = casi negro. Un acento.    */
 /* Tailwind v4 reads these via @theme and emits var()-based utilities,    */
 /* so overriding the custom properties below is enough to re-theme them.  */
 /* ---------------------------------------------------------------------- */
@@ -28,13 +28,19 @@
   --color-warning: var(--nx-warning);
   --color-danger: var(--nx-danger);
 
-  --shadow-glow: var(--nx-shadow-glow);
-  --shadow-card: var(--nx-shadow-card);
+  --color-on-accent: var(--nx-on-accent);
 
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.875rem;
-  --radius-xl: 1.25rem;
+  --shadow-card: var(--nx-shadow-card);
+  --shadow-dialog: var(--nx-shadow-dialog);
+
+  /* Radios de DESIGN.md: 4 / 6 / 8 / 12. xl y 2xl se quedan en 12px para que ningún
+     `rounded-xl`/`rounded-2xl` heredado vuelva a las esquinas blandas del tema anterior. */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 12px;
+  --radius-2xl: 12px;
 
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --dur-fast: 120ms;
@@ -77,33 +83,37 @@
   z-index: var(--z-tooltip);
 }
 
-/* Light theme (default) */
+/* Light theme (default) — "Herramienta precisa" (ver DESIGN.md) */
 :root {
   color-scheme: light;
 
-  --nx-bg: #eef1f6;
-  --nx-bg-soft: #f6f8fb;
-  --nx-surface: rgba(255, 255, 255, 0.72);
-  --nx-surface-hover: rgba(255, 255, 255, 0.9);
-  --nx-border: rgba(15, 23, 42, 0.08);
-  --nx-border-strong: rgba(15, 23, 42, 0.14);
-  --nx-text: #10131b;
-  --nx-text-muted: #565f70;
-  --nx-text-faint: #656e80;
+  --nx-bg: #ffffff;
+  --nx-bg-soft: #f7f7f8;
+  --nx-surface: #ffffff;
+  --nx-surface-hover: #ededf0;
+  --nx-border: #e7e7eb;
+  --nx-border-strong: #d4d4db;
+  --nx-text: #1b1b20;
+  --nx-text-muted: #6a6a75;
+  --nx-text-faint: #72727c;
 
-  --nx-accent: #0ea5e9;
-  --nx-accent-soft: rgba(14, 165, 233, 0.12);
-  --nx-accent-strong: #0284c7;
+  --nx-accent: #5058c8;
+  --nx-accent-soft: rgba(80, 88, 200, 0.1);
+  --nx-accent-strong: #4249b3;
+  --nx-on-accent: #ffffff;
 
-  --nx-success: #10b981;
-  --nx-warning: #f59e0b;
-  --nx-danger: #f43f5e;
+  --nx-success: #1b7f53;
+  --nx-warning: #a64d08;
+  --nx-danger: #c8322e;
 
-  --nx-shadow-glow: 0 0 32px rgba(14, 165, 233, 0.18);
-  --nx-shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 24px -12px rgba(15, 23, 42, 0.12);
+  /* Prioridad: P1 rojo, P2 naranja, P3 índigo, P4 gris (texto y puntos). */
+  --nx-prio-1: #c8322e;
+  --nx-prio-2: #a64d08;
+  --nx-prio-3: #5058c8;
+  --nx-prio-4: #8a8a94;
 
-  --nx-quartz-a: rgba(14, 165, 233, 0.10);
-  --nx-quartz-b: rgba(148, 163, 184, 0.12);
+  --nx-shadow-card: 0 1px 2px rgba(20, 20, 30, 0.04);
+  --nx-shadow-dialog: 0 24px 60px -12px rgba(20, 20, 30, 0.28);
 }
 
 /* Dark theme. `useTheme.ts` always resolves 'system' to an explicit data-theme attribute
@@ -112,29 +122,32 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --nx-bg: #0a0d14;
-  --nx-bg-soft: #10131c;
-  --nx-surface: rgba(255, 255, 255, 0.035);
-  --nx-surface-hover: rgba(255, 255, 255, 0.06);
-  --nx-border: rgba(255, 255, 255, 0.08);
-  --nx-border-strong: rgba(255, 255, 255, 0.14);
-  --nx-text: #e9edf5;
-  --nx-text-muted: #9aa3b5;
-  --nx-text-faint: #8891a3;
+  --nx-bg: #131316;
+  --nx-bg-soft: #0f0f11;
+  --nx-surface: #131316;
+  --nx-surface-hover: #1f1f24;
+  --nx-border: #26262c;
+  --nx-border-strong: #34343c;
+  --nx-text: #e7e7eb;
+  --nx-text-muted: #9d9da8;
+  --nx-text-faint: #8b8b96;
 
-  --nx-accent: #5ec8ff;
-  --nx-accent-soft: rgba(94, 200, 255, 0.14);
-  --nx-accent-strong: #7dd3fc;
+  --nx-accent: #7c84e8;
+  --nx-accent-soft: rgba(124, 132, 232, 0.16);
+  --nx-accent-strong: #9097ee;
+  --nx-on-accent: #0f1020;
 
-  --nx-success: #34d399;
-  --nx-warning: #fbbf24;
-  --nx-danger: #fb7185;
+  --nx-success: #4cc38a;
+  --nx-warning: #f0a25e;
+  --nx-danger: #f07470;
 
-  --nx-shadow-glow: 0 0 40px rgba(94, 200, 255, 0.25);
-  --nx-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 32px -16px rgba(0, 0, 0, 0.5);
+  --nx-prio-1: #f07470;
+  --nx-prio-2: #f0a25e;
+  --nx-prio-3: #7c84e8;
+  --nx-prio-4: #8b8b96;
 
-  --nx-quartz-a: rgba(94, 200, 255, 0.08);
-  --nx-quartz-b: rgba(255, 255, 255, 0.03);
+  --nx-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --nx-shadow-dialog: 0 24px 60px -12px rgba(0, 0, 0, 0.6);
 }
 
 :root[data-theme='light'] {
@@ -154,11 +167,7 @@ body,
 body {
   margin: 0;
   color: var(--color-text);
-  background:
-    radial-gradient(1200px 600px at 85% -10%, var(--nx-quartz-a), transparent),
-    radial-gradient(900px 500px at -10% 110%, var(--nx-quartz-b), transparent),
-    var(--color-bg);
-  background-attachment: fixed;
+  background: var(--color-bg);
   font-family: var(--font-sans);
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
@@ -192,7 +201,7 @@ body {
   left: 1rem;
   z-index: var(--z-tooltip);
   background: var(--color-accent);
-  color: white;
+  color: var(--color-on-accent);
   padding: 0.5rem 1rem;
   border-radius: var(--radius-md);
   font-size: 0.875rem;

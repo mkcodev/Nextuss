@@ -124,7 +124,7 @@ function DayColumnImpl({
 
       {dragOverMin != null && (
         <div
-          className="pointer-events-none absolute inset-x-1 z-[2] h-0.5 rounded-full bg-accent shadow-glow"
+          className="pointer-events-none absolute inset-x-1 z-[2] h-0.5 rounded-full bg-accent"
           style={{ top: minutesToY(dragOverMin, dayStartMin) }}
         />
       )}

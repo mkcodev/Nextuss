@@ -43,7 +43,7 @@ export function NorthStarCallout({ period, periodKey }: { period: GoalPeriod; pe
   }))
 
   return (
-    <Card glow className="flex items-center gap-4 border-accent/40 p-5">
+    <Card className="flex items-center gap-4 border-accent/40 p-5">
       <RingProgress
         value={goal.done ? 1 : progress.ratio}
         segments={goal.done ? undefined : ringSegments}
@@ -54,7 +54,7 @@ export function NorthStarCallout({ period, periodKey }: { period: GoalPeriod; pe
         <Compass size={22} className="text-accent" />
       </RingProgress>
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-accent">Objetivo principal · {label}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-accent">Objetivo principal · {label}</p>
         <button onClick={() => openEdit(goal)} className="mt-0.5 truncate text-left text-lg font-semibold text-text hover:underline">
           {goal.title}
         </button>

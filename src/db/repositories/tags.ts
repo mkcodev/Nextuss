@@ -1,13 +1,14 @@
 import { db } from '../schema'
 import type { Tag } from '../types'
 import { foldText } from '../../lib/text'
+import { DEFAULT_ENTITY_COLOR } from '../../lib/colors'
 
 export function listTags(): Promise<Tag[]> {
   return db.tags.toArray()
 }
 
 /** Busca una etiqueta existente por nombre (sin distinguir mayúsculas/acentos) o crea una nueva. */
-export async function findOrCreateTag(name: string, color = '#5EC8FF'): Promise<number> {
+export async function findOrCreateTag(name: string, color = DEFAULT_ENTITY_COLOR): Promise<number> {
   const clean = name.trim()
   const existing = await db.tags.filter((t) => foldText(t.name) === foldText(clean)).first()
   if (existing?.id) return existing.id

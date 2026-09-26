@@ -1,9 +1,10 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { createAttribute, listAttributes } from '../../db/repositories/gamification'
 import { DEFAULT_ICON_KEY } from '../../design/icons'
+import { DEFAULT_ENTITY_COLOR } from '../../lib/colors'
 
 const DEFAULT_ICON = DEFAULT_ICON_KEY
-const DEFAULT_COLOR = '#5EC8FF'
+const DEFAULT_COLOR = DEFAULT_ENTITY_COLOR
 
 /** Attribute list plus a quick-create used from the habit form ("crear atributo nuevo"). */
 export function useAttributesWithCreate() {

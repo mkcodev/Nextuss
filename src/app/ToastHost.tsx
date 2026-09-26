@@ -40,9 +40,8 @@ export function ToastHost() {
             className="pointer-events-auto"
           >
             <Card
-              glow
               className={cn(
-                'flex cursor-pointer items-start gap-3 p-4',
+                'flex cursor-pointer items-start gap-3 p-4 shadow-dialog',
                 toast.variant && VARIANT_CARD_CLASSES[toast.variant],
               )}
               role={toast.variant === 'error' || toast.variant === 'warning' ? 'alert' : 'status'}

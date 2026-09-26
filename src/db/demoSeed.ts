@@ -46,7 +46,7 @@ function sample<T>(pool: T[], n: number, rand: () => number): T[] {
 const DEMO_ATTRIBUTES = [
   { key: 'salud', name: 'Salud', icon: 'heart', color: '#FB5A5A' },
   { key: 'mente', name: 'Mente', icon: 'brain', color: '#8B7CF6' },
-  { key: 'trabajo', name: 'Trabajo', icon: 'briefcase', color: '#5EC8FF' },
+  { key: 'trabajo', name: 'Trabajo', icon: 'briefcase', color: '#5058C8' },
   { key: 'relaciones', name: 'Relaciones', icon: 'sparkles', color: '#F5A524' },
 ] as const
 type AttrKey = (typeof DEMO_ATTRIBUTES)[number]['key']
@@ -65,7 +65,7 @@ const DEMO_HABITS: Array<{
   {
     name: 'Beber agua',
     icon: 'droplet',
-    color: '#5EC8FF',
+    color: '#5058C8',
     type: 'quantity',
     targetValue: 8,
     unit: 'vasos',
