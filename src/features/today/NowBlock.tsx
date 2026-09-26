@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { motion, useReducedMotion } from 'framer-motion'
 import { CalendarClock, Check, Play } from 'lucide-react'
 import { Button } from '../../design/primitives'
 import { getTasksForDate, moveTasksToDateBulk } from '../../db/repositories/tasks'
@@ -45,6 +46,7 @@ export function NowBlock({ date }: { date: string }) {
   )
   const goal = useLiveQuery(() => (task?.id ? getGoalForTask(task.id) : Promise.resolve(null)), [task?.id])
   const openEdit = useTaskFormStore((s) => s.openEdit)
+  const reduceMotion = useReducedMotion()
 
   if (!pick || !task) return null
 
@@ -65,7 +67,14 @@ export function NowBlock({ date }: { date: string }) {
   ]
 
   return (
-    <section aria-labelledby="now-title" className="rounded-lg border border-border bg-surface p-5">
+    <motion.section
+      key={task.id}
+      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: reduceMotion ? 0.12 : 0.22, ease: [0.25, 1, 0.5, 1] }}
+      aria-labelledby="now-title"
+      className="rounded-lg border border-border bg-surface p-5"
+    >
       <div className="flex items-center gap-2 text-sm">
         <span
           aria-hidden="true"
@@ -135,6 +144,6 @@ export function NowBlock({ date }: { date: string }) {
           <CalendarClock size={14} strokeWidth={1.75} /> Pasar a mañana
         </Button>
       </div>
-    </section>
+    </motion.section>
   )
 }

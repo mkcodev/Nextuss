@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { listItemMotion } from '../../design/primitives'
 import { differenceInCalendarDays } from 'date-fns'
 import { ArrowRight, Target } from 'lucide-react'
 import { carryOverToToday, getOverdueTasks, moveTasksToDateBulk, parkTasksBulk, ZOMBIE_THRESHOLD } from '../../db/repositories/tasks'
@@ -31,6 +33,7 @@ export function OverdueTasks({ date }: { date: string }) {
   const tasks = useLiveQuery(() => getOverdueTasks(date), [date])
   const openEdit = useTaskFormStore((s) => s.openEdit)
   const [expanded, setExpanded] = useState(false)
+  const reduceMotion = useReducedMotion()
   const zombieTaskIds = (tasks ?? [])
     .filter((t) => t.postponedCount >= ZOMBIE_THRESHOLD)
     .map((t) => t.id!)
@@ -69,10 +72,11 @@ export function OverdueTasks({ date }: { date: string }) {
       </div>
 
       <ul className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface">
+        <AnimatePresence initial={false}>
         {visible.map((t) => {
           const isZombie = t.postponedCount >= ZOMBIE_THRESHOLD
           return (
-            <li key={t.id} className="flex h-10 items-center gap-2 px-3">
+            <motion.li key={t.id} {...listItemMotion(reduceMotion)} className="flex h-10 items-center gap-2 px-3">
               <button
                 type="button"
                 onClick={() => openEdit(t)}
@@ -104,9 +108,10 @@ export function OverdueTasks({ date }: { date: string }) {
                 A hoy <ArrowRight size={12} strokeWidth={2} />
               </button>
               <TaskQuickMenu task={t} />
-            </li>
+            </motion.li>
           )
         })}
+        </AnimatePresence>
       </ul>
 
       {tasks.length > VISIBLE && (
