@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { levelForXp, progressForXp, xpForLevel } from './xp'
+import { levelForXp, progressForXp, xpForLevel, levelUpsInCurve } from './xp'
 
 describe('xpForLevel', () => {
   it('requires 0 xp for level 1', () => {
@@ -52,5 +52,24 @@ describe('progressForXp', () => {
     expect(p.level).toBe(1)
     expect(p.xpIntoLevel).toBe(0)
     expect(p.xpForNextLevel).toBe(50)
+  })
+})
+
+describe('levelUpsInCurve', () => {
+  it('marca el día en que se cruza cada umbral de nivel', () => {
+    // nivel 2 empieza en 50 XP y nivel 3 en 150 (xpForLevel)
+    const curve = [
+      { date: '09-01', xp: 20 },
+      { date: '09-02', xp: 40 },
+      { date: '09-03', xp: 120 },
+    ]
+    // 30 + 20 = 50 → nivel 2 el 09-01; 30 + 120 = 150 → nivel 3 el 09-03
+    expect(levelUpsInCurve(curve, 30)).toEqual([
+      { date: '09-01', level: 2 },
+      { date: '09-03', level: 3 },
+    ])
+  })
+  it('sin subida no hay marcas', () => {
+    expect(levelUpsInCurve([{ date: '09-01', xp: 5 }], 0)).toEqual([])
   })
 })

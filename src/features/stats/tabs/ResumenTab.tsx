@@ -9,6 +9,8 @@ import { getNorthStarStreak, listGoalsForPeriod } from '../../../db/repositories
 import { weekKey, monthKey } from '../../../lib/dates'
 import { formatMinutes } from '../format'
 import type { KpiDelta } from '../aggregate'
+import { levelUpsInCurve } from '../../../lib/xp'
+import { usePlayerProgress } from '../../gamification/usePlayerProgress'
 
 interface ResumenTabProps {
   range: StatsRange
@@ -40,6 +42,13 @@ export function ResumenTab({ range }: ResumenTabProps) {
       }, []),
     [data.points],
   )
+
+  // Subidas de nivel dentro del periodo: el XP de partida es el total de hoy menos lo ganado en el periodo.
+  const { totalXp } = usePlayerProgress()
+  const levelMarkers = useMemo(() => {
+    const gained = xpCurve.length > 0 ? xpCurve[xpCurve.length - 1].xp : 0
+    return levelUpsInCurve(xpCurve, Math.max(0, totalXp - gained)).map((m) => ({ x: m.date, label: `Nv. ${m.level}` }))
+  }, [xpCurve, totalXp])
 
   const weeklyHabits = useMemo(() => {
     const buckets = new Map<string, { week: string; done: number; scheduled: number }>()
@@ -128,7 +137,7 @@ export function ResumenTab({ range }: ResumenTabProps) {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ChartCard title="XP acumulado" subtitle="En el periodo seleccionado" loading={data.loading} empty={xpCurve.length === 0}>
-          <LineTrend data={xpCurve} xKey="date" series={[{ key: 'xp', label: 'XP', color: 'var(--nx-accent)' }]} />
+          <LineTrend data={xpCurve} xKey="date" series={[{ key: 'xp', label: 'XP', color: 'var(--nx-accent)' }]} markers={levelMarkers} />
         </ChartCard>
 
         <ChartCard
