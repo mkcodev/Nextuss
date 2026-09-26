@@ -89,7 +89,7 @@ export function Navbar() {
       </button>
 
       <div className="flex items-center gap-1.5">
-        <span className="h-2 w-2 rounded-full bg-accent shadow-glow" />
+        <span className="h-2 w-2 rounded-full bg-accent" />
         <span className="hidden text-sm font-semibold tracking-[0.14em] text-text sm:inline">
           NEXTUSS
         </span>
@@ -124,7 +124,7 @@ export function Navbar() {
 
         <button
           onClick={() => openQuickAdd()}
-          className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white shadow-glow transition-opacity hover:opacity-90"
+          className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-on-accent transition-opacity hover:opacity-90"
         >
           <Plus size={14} strokeWidth={2} />
           <span className="hidden sm:inline">Nuevo</span>

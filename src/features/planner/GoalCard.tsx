@@ -78,7 +78,7 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
   }
 
   return (
-    <Card className={cn('p-4', goal.isPriority && 'border-accent/40 shadow-glow', nested && 'p-3')}>
+    <Card className={cn('p-4', goal.isPriority && 'border-accent/40', nested && 'p-3')}>
       <div className="flex items-start gap-3">
         <button
           onClick={() => toggleGoalDoneWithFeedback(goal.id!, goal.title)}

@@ -90,7 +90,7 @@ export function OnboardingFlow() {
   }
 
   return (
-    <div className="fixed inset-0 z-dialog flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-dialog flex items-center justify-center bg-black/35 p-4">
       <motion.div
         role="dialog"
         aria-modal="true"
@@ -145,7 +145,7 @@ export function OnboardingFlow() {
               >
                 <Compass size={22} strokeWidth={1.75} className="text-accent" />
                 <span className="text-sm font-medium text-text">Empezar de cero</span>
-                <span className="text-[11px] text-text-faint">Creas tu primer hábito ahora mismo</span>
+                <span className="text-xs text-text-faint">Creas tu primer hábito ahora mismo</span>
               </button>
               <button
                 onClick={chooseDemo}
@@ -154,7 +154,7 @@ export function OnboardingFlow() {
               >
                 <Sparkles size={22} strokeWidth={1.75} className="text-accent" />
                 <span className="text-sm font-medium text-text">Ver con datos de ejemplo</span>
-                <span className="text-[11px] text-text-faint">~6 meses generados, se borran cuando quieras</span>
+                <span className="text-xs text-text-faint">~6 meses generados, se borran cuando quieras</span>
               </button>
             </div>
             {loadingDemo && <p className="text-center text-xs text-text-faint">Generando datos de ejemplo…</p>}

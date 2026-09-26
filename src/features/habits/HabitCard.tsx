@@ -87,7 +87,7 @@ export function HabitCard({ entry, date, onEdit, selected }: HabitCardProps) {
           className={cn(
             'h-9 w-9 rounded-full border-2 transition-colors',
             completed
-              ? 'border-accent bg-accent text-white'
+              ? 'border-accent bg-accent text-on-accent'
               : 'border-border-strong text-transparent hover:border-accent',
           )}
         >
