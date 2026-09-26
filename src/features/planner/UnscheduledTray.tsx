@@ -60,11 +60,11 @@ function TaskRow({
         onClick={() => onOpen(task)}
         title="Arrastra al timeline para programarla, o sobre otra tarea para reordenar"
         className={cn(
-          'relative flex cursor-grab items-center gap-2 rounded-lg border border-l-[3px] border-border bg-surface px-3 py-2 transition-all hover:border-border-strong active:cursor-grabbing',
+          'relative flex cursor-grab items-center gap-2 rounded-md border border-border bg-surface px-3 py-2 transition-colors hover:border-border-strong active:cursor-grabbing',
           dnd.dragging(task.id!) && 'opacity-40',
         )}
-        style={{ borderLeftColor: task.color ?? DEFAULT_ENTITY_COLOR }}
       >
+        <span aria-hidden="true" className="size-2 shrink-0 rounded-full" style={{ backgroundColor: task.color ?? DEFAULT_ENTITY_COLOR }} />
         {task.priority && (
           <span
             className="shrink-0 rounded px-1 py-0.5 text-xs font-semibold"

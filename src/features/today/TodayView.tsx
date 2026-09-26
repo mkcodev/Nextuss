@@ -27,6 +27,7 @@ import { previousPeriodKey } from '../../lib/periods'
 import { useWeeklyReviewStore } from '../planner/weeklyReviewStore'
 import { DayPlanSuggestion } from '../ai/DayPlanSuggestion'
 import { CheckInCard } from './CheckInCard'
+import { NowBlock } from './NowBlock'
 import { db } from '../../db/schema'
 import { shouldShowDayClose, shouldShowDayStart } from '../rituals/gates'
 import type { Task } from '../../db/types'
@@ -48,7 +49,10 @@ export function TodayView() {
     () => entries?.filter((e) => isHabitScheduledOn(e.habit, parseDateKey(date))),
     [entries, date],
   )
-  const label = format(parseDateKey(date), "EEEE d 'de' MMMM", { locale: es })
+  // "sábado, 26 de septiembre" → "Sábado, 26 de septiembre": solo la primera letra en mayúscula
+  // (el `capitalize` de CSS ponía también "De" y "Septiembre").
+  const rawLabel = format(parseDateKey(date), "EEEE, d 'de' MMMM", { locale: es })
+  const label = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1)
   const doneCount = todaysEntries?.filter((e) => e.log?.completed).length ?? 0
   const totalCount = todaysEntries?.length ?? 0
   const pending = todaysEntries?.filter((e) => !e.log?.completed) ?? []
@@ -165,59 +169,59 @@ export function TodayView() {
             const entry = todaysEntries[selectedIndex]
             if (entry) activateHabitEntry(entry, date)
           },
-          onCreate: openCreate,
         }
       : null,
   )
 
   return (
     <div className="mx-auto max-w-6xl p-6 lg:p-8">
-      <header className="mb-6 flex items-end justify-between">
-        <div className="flex items-center gap-2">
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-1">
           <button
+            type="button"
             onClick={() => goToDate(dateKey(subDays(parseDateKey(date), 1)))}
-            className="rounded-md p-1.5 text-text-faint hover:bg-surface-hover hover:text-text"
+            aria-label="Día anterior"
+            title="Día anterior ( [ )"
+            className="rounded-sm p-1.5 text-text-muted hover:bg-surface-hover hover:text-text"
           >
-            <ChevronLeft size={17} strokeWidth={2} />
+            <ChevronLeft size={16} strokeWidth={2} />
           </button>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-text-faint">
-              {isToday ? 'Hoy' : 'Día'}
-            </p>
-            <h1 className="mt-1 text-2xl font-semibold capitalize text-text">{label}</h1>
-          </div>
+          <h1 className="text-xl font-semibold tracking-tight text-text">{label}</h1>
           <button
+            type="button"
             onClick={() => goToDate(dateKey(addDays(parseDateKey(date), 1)))}
-            className="rounded-md p-1.5 text-text-faint hover:bg-surface-hover hover:text-text"
+            aria-label="Día siguiente"
+            title="Día siguiente ( ] )"
+            className="rounded-sm p-1.5 text-text-muted hover:bg-surface-hover hover:text-text"
           >
-            <ChevronRight size={17} strokeWidth={2} />
+            <ChevronRight size={16} strokeWidth={2} />
           </button>
           {!isToday && (
-            <Button variant="ghost" onClick={() => goToDate(today)} className="px-2 py-1 text-xs">
-              Hoy
+            <Button variant="secondary" size="sm" onClick={() => goToDate(today)} className="ml-2">
+              Volver a hoy
             </Button>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {totalCount > 0 && (
-            <div className="flex items-center gap-1.5 text-sm text-text-muted">
+            <span className="flex items-center gap-1.5 text-sm text-text-muted">
               <CheckCheck size={15} strokeWidth={2} className="text-accent" />
               <span className="tabular-nums">
-                {doneCount}/{totalCount} completados
+                {doneCount} de {totalCount} hábitos
               </span>
-            </div>
+            </span>
           )}
           {isToday && (
-            <Button variant="ghost" onClick={() => openDayClose(date)} className="px-2 py-1 text-xs">
-              <Moon size={13} strokeWidth={2} /> Cerrar el día
+            <Button variant="ghost" size="sm" onClick={() => openDayClose(date)}>
+              <Moon size={14} strokeWidth={1.75} /> Cerrar el día
             </Button>
           )}
         </div>
       </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
-        <div className="space-y-3 lg:order-1">
-          <NorthStarCallout period="week" periodKey={currentWeekKey} />
+        <div className="space-y-6 lg:order-1">
+          {isToday && <NowBlock date={date} />}
           {needsReview && (
             <Alert tone="info">
               <button onClick={() => openWeeklyReview(currentWeekKey)} className="hover:underline">
@@ -231,13 +235,14 @@ export function TodayView() {
         </div>
 
         <div className="space-y-6 lg:order-2">
+          <NorthStarCallout period="week" periodKey={currentWeekKey} />
           <CheckInCard date={date} />
 
           <div>
             <div className="mb-1 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-text-muted">{isToday ? 'Hábitos de hoy' : 'Hábitos ese día'}</h2>
-              <Button variant="ghost" onClick={() => openCreate()} className="px-2 py-1 text-xs">
-                <Plus size={14} strokeWidth={2} /> Nuevo
+              <h2 className="text-sm font-semibold text-text">{isToday ? 'Hábitos de hoy' : 'Hábitos ese día'}</h2>
+              <Button variant="ghost" size="sm" onClick={() => openCreate()}>
+                <Plus size={14} strokeWidth={2} /> Nuevo hábito
               </Button>
             </div>
 
@@ -275,7 +280,7 @@ export function TodayView() {
           </div>
 
           <div>
-            <h2 className="mb-1 text-sm font-semibold text-text-muted">Sin planificar</h2>
+            <h2 className="mb-1.5 text-sm font-semibold text-text">Sin planificar</h2>
             <UnscheduledTray date={date} />
           </div>
 
