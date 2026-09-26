@@ -231,6 +231,16 @@ export const parkTasksBulk = (ids: number[]) =>
     t.postponedCount = 0
   })
 
+/** Reprograma varias tareas a `date` de una vez (Hoy → "Mover todas a mañana"): quita la franja
+ * horaria y cuenta el aplazamiento, igual que `carryOverToToday` pero para un lote y con deshacer. */
+export const moveTasksToDateBulk = (ids: number[], date: string) =>
+  bulkModify(ids, `${ids.length} tarea${ids.length === 1 ? '' : 's'} movida${ids.length === 1 ? '' : 's'}`, (t) => {
+    t.scheduledDate = date
+    t.scheduledStart = undefined
+    t.scheduledEnd = undefined
+    t.postponedCount = t.postponedCount + 1
+  })
+
 /** Papelera en lote: une el subárbol de subtareas de cada tarea seleccionada (mismo
  * `collectTaskSubtreeIds` que ya usa `trashTask`) en un solo lote/un solo deshacer, en vez de N
  * lotes separados. */
