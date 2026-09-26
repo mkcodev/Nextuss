@@ -8,30 +8,12 @@ export const PRIORITY_COLORS: Record<number, string> = {
   4: 'var(--nx-prio-4)',
 }
 
-/** Distintivo de prioridad: texto del color de la prioridad sobre un fondo suave del mismo tono.
- *  Nunca texto blanco sobre el color: en tema oscuro los colores son claros y no se leería. */
-export function priorityBadgeStyle(p: number): { color: string; backgroundColor: string; borderColor: string } {
-  const c = PRIORITY_COLORS[p]
-  return {
-    color: c,
-    backgroundColor: `color-mix(in srgb, ${c} 14%, transparent)`,
-    borderColor: `color-mix(in srgb, ${c} 40%, transparent)`,
-  }
-}
-
 /** Nombre en palabras, para donde "P1" sería jerga (bloque Ahora, lectores de pantalla). */
 export const PRIORITY_NAMES: Record<number, string> = {
   1: 'Urgente',
   2: 'Alta',
   3: 'Media',
   4: 'Baja',
-}
-
-export const PRIORITY_LABELS: Record<number, string> = {
-  1: 'P1',
-  2: 'P2',
-  3: 'P3',
-  4: 'P4',
 }
 
 /** Orden por defecto: prioridad ascendente (1 primero), sin prioridad al final, luego `sortKey`. */

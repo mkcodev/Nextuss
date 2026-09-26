@@ -5,12 +5,7 @@ import { shiftPeriodKey } from '../../lib/periods'
 import { NORTH_STAR_STREAK_ACHIEVEMENT_THRESHOLD } from '../../lib/achievementThresholds'
 import { applyAttributeXpDelta, applyXpDelta, unlockAchievement } from './gamification'
 import { trashRows } from '../trash'
-import {
-  computeGoalProgress,
-  computeGoalSegments,
-  computeNorthStarStreak,
-  type GoalProgressResult,
-} from '../../features/planner/goalProgress'
+import { computeNorthStarStreak } from '../../features/planner/goalProgress'
 
 export async function listGoalsForPeriod(period: GoalPeriod, periodKey: string): Promise<Goal[]> {
   const goals = await db.goals.where('[period+periodKey]').equals([period, periodKey]).toArray()
@@ -154,14 +149,6 @@ export async function getChildGoals(parentGoalId: number): Promise<Goal[]> {
 }
 
 /** Rolls up from child goals (one level — week goals under a month goal) when present, else from linked tasks. */
-export async function getGoalProgress(goalId: number): Promise<GoalProgressResult> {
-  const goal = await db.goals.get(goalId)
-  if (!goal) return { done: 0, total: 0, ratio: 0, source: 'self' }
-
-  const children = await getChildGoals(goalId)
-  const tasks = goal.taskIds.length ? await db.tasks.bulkGet(goal.taskIds) : []
-  return computeGoalProgress(goal, computeGoalSegments(tasks, children))
-}
 
 const NORTH_STAR_STREAK_LOOKBACK = 104
 
@@ -242,11 +229,6 @@ export async function setGoalForTask(taskId: number, goalId: number | undefined)
   if (goalId != null) {
     await linkTaskToGoal(goalId, taskId)
   }
-}
-
-export async function unlinkTaskFromAllGoals(taskId: number): Promise<void> {
-  const goals = await db.goals.where('taskIds').equals(taskId).toArray()
-  await Promise.all(goals.map((g) => unlinkTaskFromGoal(g.id!, taskId)))
 }
 
 export async function linkTaskToGoal(goalId: number, taskId: number) {

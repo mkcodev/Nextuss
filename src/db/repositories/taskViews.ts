@@ -6,10 +6,6 @@ export async function listTaskViews(): Promise<TaskView[]> {
   return all.sort((a, b) => a.sortKey - b.sortKey)
 }
 
-export function getTaskView(id: number) {
-  return db.taskViews.get(id)
-}
-
 export async function createTaskView(input: Omit<TaskView, 'id' | 'createdAt' | 'sortKey'>): Promise<number> {
   return (await db.taskViews.add({
     ...input,

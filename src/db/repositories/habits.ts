@@ -32,25 +32,6 @@ export function moveHabitBetween(habitId: number, beforeSortKey: number | null, 
 }
 
 /** Vacaciones: rango inclusive durante el cual el hábito no cuenta como programado (ni rompe racha). */
-export function pauseHabit(id: number, pausedFrom: string, pausedUntil: string) {
-  return db.habits.update(id, { pausedFrom, pausedUntil })
-}
-
-export function resumeHabit(id: number) {
-  return db.habits.update(id, { pausedFrom: undefined, pausedUntil: undefined })
-}
-
-export async function addSkipDate(id: number, date: string) {
-  const habit = await db.habits.get(id)
-  if (!habit || habit.skipDates?.includes(date)) return
-  await db.habits.update(id, { skipDates: [...(habit.skipDates ?? []), date].sort() })
-}
-
-export async function removeSkipDate(id: number, date: string) {
-  const habit = await db.habits.get(id)
-  if (!habit) return
-  await db.habits.update(id, { skipDates: (habit.skipDates ?? []).filter((d) => d !== date) })
-}
 
 export function getHabit(id: number) {
   return db.habits.get(id)
@@ -103,13 +84,6 @@ export function getLogsForDate(date: string) {
 
 export function getLog(habitId: number, date: string) {
   return db.habitLogs.where('[habitId+date]').equals([habitId, date]).first()
-}
-
-export async function getStreakForHabit(habitId: number, referenceDate: Date = new Date()) {
-  const habit = await db.habits.get(habitId)
-  if (!habit) return { current: 0, longest: 0 }
-  const logs = await getHabitLogs(habitId)
-  return calculateStreak(habit, logs, referenceDate)
 }
 
 export interface LogHabitResult {

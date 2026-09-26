@@ -72,10 +72,6 @@ export async function createAttribute(input: { name: string; icon: string; color
   return db.attributes.add({ ...input, xp: 0, order: count })
 }
 
-export function updateAttribute(id: number, changes: Partial<{ name: string; icon: string; color: string }>) {
-  return db.attributes.update(id, changes)
-}
-
 /** Clears `attributeId` on any habit/goal that pointed at it before deleting for real — an attribute
  * has no trash/undo of its own, so this is the one place that must not leave a dangling reference. */
 export function deleteAttribute(id: number) {
