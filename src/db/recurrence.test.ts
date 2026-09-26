@@ -103,22 +103,43 @@ describe('detachOccurrence / updateRuleAndFutureOccurrences / stopRecurrence', (
     expect(stillLinked.find((t) => t.id === task.id)).toBeUndefined()
   })
 
-  it('updateRuleAndFutureOccurrences regenera las ocurrencias futuras no completadas con la plantilla nueva', async () => {
+  it('updateRuleAndFutureOccurrences aplica la plantilla nueva a todas las ocurrencias futuras (#63)', async () => {
     const ruleId = await createRecurrenceRule(
       baseRule({ freq: 'daily', interval: 1, startDate: '2026-01-01' }),
       '2026-01-01',
     )
-    await generateUpcomingOccurrences('2026-01-01')
-    const before = await db.tasks.where('recurrenceId').equals(ruleId).toArray()
-    expect(before.every((t) => t.title === 'Regar plantas')).toBe(true)
+    const live = async () => (await db.tasks.where('recurrenceId').equals(ruleId).toArray()).filter((t) => t.deletedAt === 0)
+    const before = await live()
+    expect(before.length).toBeGreaterThan(20)
 
     await updateRuleAndFutureOccurrences(ruleId, { title: 'Regar plantas (nuevo horario)' }, '2026-01-01')
 
-    const after = (await db.tasks.where('recurrenceId').equals(ruleId).toArray()).filter((t) => t.deletedAt === 0)
+    const after = await live()
+    expect(after.length).toBe(before.length)
     expect(after.every((t) => t.title === 'Regar plantas (nuevo horario)')).toBe(true)
-    // Las filas viejas quedaron en papelera, no borradas de verdad.
+    expect(after.map((t) => t.id).sort()).toEqual(before.map((t) => t.id).sort())
+  })
+
+  it('updateRuleAndFutureOccurrences con otro calendario: quita las fechas que ya no tocan y genera las nuevas', async () => {
+    const ruleId = await createRecurrenceRule(
+      baseRule({ freq: 'daily', interval: 1, startDate: '2026-01-01' }),
+      '2026-01-01',
+    )
+    await updateRuleAndFutureOccurrences(ruleId, { interval: 2 }, '2026-01-01')
+    const live = (await db.tasks.where('recurrenceId').equals(ruleId).toArray()).filter((t) => t.deletedAt === 0)
+    const dates = live.map((t) => t.occurrenceDate!).sort()
+    expect(dates.slice(0, 3)).toEqual(['2026-01-01', '2026-01-03', '2026-01-05'])
     const trashed = await db.tasks.where('recurrenceId').equals(ruleId).and((t) => t.deletedAt !== 0).toArray()
-    expect(trashed.length).toBe(before.length)
+    expect(trashed.every((t) => Number(t.occurrenceDate!.slice(-2)) % 2 === 0)).toBe(true)
+  })
+
+  it('updateRuleAndFutureOccurrences no resucita una ocurrencia que el usuario mandó a la papelera', async () => {
+    const ruleId = await createRecurrenceRule(baseRule({ startDate: '2026-01-01' }), '2026-01-01')
+    const jan3 = (await db.tasks.toArray()).find((t) => t.occurrenceDate === '2026-01-03')!
+    await db.tasks.update(jan3.id!, { deletedAt: Date.now() })
+    await updateRuleAndFutureOccurrences(ruleId, { title: 'Otro' }, '2026-01-01')
+    const live = (await db.tasks.toArray()).filter((t) => t.deletedAt === 0 && t.occurrenceDate === '2026-01-03')
+    expect(live).toEqual([])
   })
 
   it('updateRuleAndFutureOccurrences no toca una ocurrencia ya completada', async () => {
