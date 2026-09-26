@@ -66,6 +66,12 @@ export function Menu({ trigger, children, align = 'right', className }: MenuProp
     if (e.key === 'Escape') {
       e.stopPropagation()
       setOpen(false)
+    } else if (e.key === 'Tab') {
+      // Salir con Tab cierra el menú (antes el foco se iba y el menú quedaba abierto).
+      setOpen(false)
+    } else if (e.key === 'Home' || e.key === 'End') {
+      e.preventDefault()
+      items[e.key === 'Home' ? 0 : items.length - 1]?.focus()
     } else if (e.key === 'ArrowDown') {
       e.preventDefault()
       items[(currentIndex + 1) % items.length]?.focus()
@@ -92,7 +98,7 @@ export function Menu({ trigger, children, align = 'right', className }: MenuProp
           role="menu"
           aria-labelledby={triggerId}
           className={cn(
-            'absolute top-[calc(100%+0.375rem)] z-dialog w-52 overflow-hidden rounded-md border border-border bg-surface py-1 shadow-dialog',
+            'absolute top-[calc(100%+0.375rem)] z-dialog max-h-72 w-52 overflow-y-auto overscroll-contain rounded-md border border-border bg-surface py-1 shadow-dialog',
             align === 'right' ? 'right-0' : 'left-0',
           )}
         >

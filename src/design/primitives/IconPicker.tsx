@@ -1,6 +1,7 @@
 import { cn } from '../../lib/cn'
 import { ICON_LABELS, type IconKey } from '../icons'
 import { Icon } from './Icon'
+import { useRovingRadio } from './useRovingRadio'
 
 interface IconPickerProps {
   options: IconKey[]
@@ -12,13 +13,15 @@ interface IconPickerProps {
 
 /** Selector de icono: `radiogroup` con el nombre de cada icono (antes eran botones sin nombre). */
 export function IconPicker({ options, value, onChange, label = 'Icono', className }: IconPickerProps) {
+  const itemProps = useRovingRadio(options.length, options.indexOf(value as IconKey), (i) => onChange(options[i]))
   return (
     <div role="radiogroup" aria-label={label} className={cn('flex flex-wrap gap-1', className)}>
-      {options.map((key) => {
+      {options.map((key, i) => {
         const on = value === key
         return (
           <button
             key={key}
+            {...itemProps(i)}
             type="button"
             role="radio"
             aria-checked={on}
