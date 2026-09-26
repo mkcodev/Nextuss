@@ -22,6 +22,7 @@ import { OverdueTasks } from '../planner/OverdueTasks'
 import { NorthStarCallout } from '../planner/NorthStarCallout'
 import { getTasksForDate, getOverdueTasks } from '../../db/repositories/tasks'
 import { getReview } from '../../db/repositories/reviews'
+import { listGoalsForPeriod } from '../../db/repositories/goals'
 import { getCheckInForDate } from '../../db/repositories/checkins'
 import { previousPeriodKey } from '../../lib/periods'
 import { useWeeklyReviewStore } from '../planner/weeklyReviewStore'
@@ -64,7 +65,9 @@ export function TodayView() {
   // semana hasta que exista una revisión para la semana pasada.
   const lastWeekKey = previousPeriodKey('week', currentWeekKey)
   const lastWeekReview = useLiveQuery(() => getReview(lastWeekKey), [lastWeekKey])
-  const needsReview = isToday && lastWeekReview === null
+  // Solo hay algo que revisar si la semana pasada tuvo objetivos (el primer día de uso, no).
+  const lastWeekGoalCount = useLiveQuery(async () => (await listGoalsForPeriod('week', lastWeekKey)).length, [lastWeekKey])
+  const needsReview = isToday && lastWeekReview === null && (lastWeekGoalCount ?? 0) > 0
   const openWeeklyReview = useWeeklyReviewStore((s) => s.openReview)
   const navigate = useNavigate()
   const { insights } = useInsights('30d')
@@ -105,16 +108,20 @@ export function TodayView() {
   // puertas esperan a todas sus entradas, `checkin` incluido — un día sin check-in resuelve a `null`.
   useEffect(() => {
     if (!isToday || dayStartOpen || dayCloseOpen || overdueForGate === undefined || checkin === undefined) return
+    // En el primer uso manda la bienvenida: el ritual no se abre encima de ella.
+    if (!settings?.onboardingCompleted) return
+    // Sin hábitos ni tareas todavía no hay día que preparar: el ritual solo sería ruido.
+    if (entries !== undefined && entries.length === 0 && tasksToday !== undefined && tasksToday.length === 0 && overdueForGate.length === 0) return
     if (promptedDayStartRef.current === date) return
     if (shouldShowDayStart(checkin, overdueForGate.length)) {
       promptedDayStartRef.current = date
       openDayStart(date)
     }
-  }, [isToday, dayStartOpen, dayCloseOpen, checkin, overdueForGate, date, openDayStart])
+  }, [isToday, dayStartOpen, dayCloseOpen, checkin, overdueForGate, date, openDayStart, settings, entries, tasksToday])
 
   useEffect(() => {
     if (!isToday || dayStartOpen || dayCloseOpen || checkin === undefined || tasksToday === undefined) return
-    if (todaysEntries === undefined || !settings) return
+    if (todaysEntries === undefined || !settings?.onboardingCompleted) return
     if (promptedDayCloseRef.current === date) return
     const pendingCount =
       tasksToday.filter((t) => t.status !== 'done').length + todaysEntries.filter((e) => !e.log?.completed).length

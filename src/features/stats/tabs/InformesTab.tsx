@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronLeft, ChevronRight, Compass, Download, FileJson, Printer, Sparkles, Trophy } from 'lucide-react'
 import { useStatsData } from '../useStatsData'
 import { useInsights } from '../insights/useInsights'
-import { nextPeriodKey, periodDateRange, previousPeriodKey } from '../../../lib/periods'
+import { nextPeriodKey, periodDateRange, previousPeriodKey, formatPeriodLabel } from '../../../lib/periods'
 import { monthKey, parseDateKey, weekKey } from '../../../lib/dates'
 import { formatMinutes } from '../format'
 import { downloadCsv, downloadJson } from '../export'
@@ -65,10 +65,7 @@ export function InformesTab() {
   const periodGoals = useLiveQuery(() => listGoalsForPeriod(period, periodKey), [period, periodKey]) ?? []
 
   const isCurrent = periodKey === currentKeyFor(period)
-  const periodLabel =
-    period === 'week'
-      ? `Semana ${periodKey}`
-      : parseDateKey(`${periodKey}-01`).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
+  const periodLabel = formatPeriodLabel(period, periodKey)
 
   const doneGoals = periodGoals.filter((g) => g.done)
   const achievementRows = data.achievements
@@ -117,7 +114,7 @@ export function InformesTab() {
             <ChevronLeft size={15} strokeWidth={1.75} />
           </button>
           <div className="min-w-[10rem] text-center">
-            <p className="text-sm font-semibold capitalize text-text">{periodLabel}</p>
+            <p className="text-sm font-semibold text-text">{periodLabel}</p>
           </div>
           <button
             onClick={() => setPeriodKey((k) => nextPeriodKey(period, k))}
@@ -141,7 +138,7 @@ export function InformesTab() {
           <p className="text-xs font-medium uppercase tracking-wide text-text-faint">
             Informe de {period === 'week' ? 'la semana' : 'el mes'}
           </p>
-          <h2 className="mt-1 text-xl font-semibold capitalize text-text">{periodLabel}</h2>
+          <h2 className="mt-1 text-xl font-semibold text-text">{periodLabel}</h2>
 
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <MiniStat label="Cumplimiento hábitos" value={`${Math.round(complianceCurrent * 100)}%`} />

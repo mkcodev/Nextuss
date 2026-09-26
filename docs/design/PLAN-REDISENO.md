@@ -54,8 +54,10 @@ Comandos de Impeccable más útiles: `critique` (jerarquía/claridad), `audit` (
 - [x] ProjectForm (#48)  - [x] HabitForm (#49)  - [x] GoalForm (#47)
 
 ### 8. Páginas y estados
-- [ ] TasksPage, HabitsPage, SettingsPage con el nuevo sistema.
-- [ ] EmptyState/Skeleton donde falten; listas con animación de entrada/salida.
+- [x] Estados vacíos y de carga con el estilo de DESIGN.md (Skeleton visible, EmptyState legible); Tareas distingue "sin tareas" de "nada en esta vista".
+- [x] Primer uso: la bienvenida ya no se abre junto a "Empezar el día"; sin revisión semanal ni ritual cuando no hay nada.
+- [x] Fechas legibles en Objetivos e Informes ("Semana del 21 al 27 sept", "Septiembre de 2026").
+- [x] Listas con animación de entrada/salida (atrasadas, subtareas, bloque Ahora), respetando reduced-motion.
 
 ### 9. Pulido final
 - [ ] `/impeccable polish` → `/web-design-guidelines` → `/impeccable animate` → `/impeccable harden`.

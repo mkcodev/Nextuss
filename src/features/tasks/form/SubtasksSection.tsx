@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { listItemMotion } from '../../../design/primitives'
 import { Check, Plus, X } from 'lucide-react'
 import { cn } from '../../../lib/cn'
 import { createTask, getSubtasks, trashTask } from '../../../db/repositories/tasks'
@@ -17,6 +19,7 @@ interface SubtasksSectionProps {
 
 export function SubtasksSection({ taskId, pending, onPendingChange, onOpen }: SubtasksSectionProps) {
   const [draft, setDraft] = useState('')
+  const reduceMotion = useReducedMotion()
   const stored = useLiveQuery(() => (taskId ? getSubtasks(taskId) : Promise.resolve([] as Task[])), [taskId]) ?? []
 
   const add = async () => {
@@ -36,10 +39,11 @@ export function SubtasksSection({ taskId, pending, onPendingChange, onOpen }: Su
   return (
     <div>
       <ul className="space-y-0.5">
+        <AnimatePresence initial={false}>
         {stored.map((s) => {
           const done = s.status === 'done'
           return (
-            <li key={s.id} className="group flex h-8 items-center gap-2.5">
+            <motion.li key={s.id} {...listItemMotion(reduceMotion)} className="group flex h-8 items-center gap-2.5">
               <button
                 type="button"
                 role="checkbox"
@@ -65,11 +69,11 @@ export function SubtasksSection({ taskId, pending, onPendingChange, onOpen }: Su
               >
                 <X size={14} />
               </button>
-            </li>
+            </motion.li>
           )
         })}
         {pending.map((title, i) => (
-          <li key={`${title}-${i}`} className="group flex h-8 items-center gap-2.5">
+          <motion.li key={`${title}-${i}`} {...listItemMotion(reduceMotion)} className="group flex h-8 items-center gap-2.5">
             <span aria-hidden="true" className={circle(false)} />
             <span className="min-w-0 flex-1 truncate text-sm text-text">{title}</span>
             <button
@@ -80,8 +84,9 @@ export function SubtasksSection({ taskId, pending, onPendingChange, onOpen }: Su
             >
               <X size={14} />
             </button>
-          </li>
+          </motion.li>
         ))}
+        </AnimatePresence>
       </ul>
       <div className="flex h-8 items-center gap-2.5">
         <Plus size={16} strokeWidth={1.75} className="shrink-0 text-text-muted" aria-hidden="true" />

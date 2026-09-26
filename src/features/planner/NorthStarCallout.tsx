@@ -1,4 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
+import { Link } from 'react-router-dom'
 import { Compass, Flame } from 'lucide-react'
 import { db } from '../../db/schema'
 import { Card, RingProgress } from '../../design/primitives'
@@ -27,10 +28,16 @@ export function NorthStarCallout({ period, periodKey }: { period: GoalPeriod; pe
 
   if (goal === null) {
     return (
-      <Card className="flex items-center gap-3 border-dashed p-4 text-sm text-text-muted">
-        <Compass size={18} className="shrink-0 text-text-faint" />
-        <p>Aún no tienes objetivo principal {label}. Márcalo con la estrella en la lista de abajo.</p>
-      </Card>
+      <section aria-label={`Objetivo principal ${label}`}>
+        <h2 className="mb-1.5 text-sm font-semibold text-text">Objetivo principal {label}</h2>
+        <Card className="flex items-center gap-3 border-dashed p-3.5 text-sm text-text-muted">
+          <Compass size={18} strokeWidth={1.75} className="shrink-0" aria-hidden="true" />
+          <p className="min-w-0 flex-1">Aún no has elegido ninguno.</p>
+          <Link to="/planificacion?tab=objetivos" className="shrink-0 font-medium text-accent hover:underline hover:underline-offset-4">
+            Elegir
+          </Link>
+        </Card>
+      </section>
     )
   }
 
