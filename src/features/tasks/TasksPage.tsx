@@ -15,12 +15,12 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
-import { Button, Card, Checkbox, DropIndicator, EmptyState, Menu, MenuItem, MenuSeparator, Select, Skeleton } from '../../design/primitives'
+import { Button, Card, Checkbox, DropIndicator, EmptyState, Kbd, Menu, MenuItem, MenuSeparator, Select, Skeleton } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { useDragReorder } from '../../lib/useDragReorder'
 import { reorderNeighbors, type DropPosition } from '../../lib/reorder'
 import { todayKey, formatShortDate } from '../../lib/dates'
-import { PRIORITY_COLORS, PRIORITY_LABELS, priorityBadgeStyle } from '../../lib/priority'
+import { PRIORITY_LABELS, PRIORITY_NAMES, priorityBadgeStyle } from '../../lib/priority'
 import {
   addTagBulk,
   listAllTasks,
@@ -42,6 +42,9 @@ import {
 import { applyTaskView, mergeViewDraft, type TaskViewDraft } from './taskViewFilter'
 import { useTaskFormStore } from './taskFormStore'
 import { TaskQuickMenu } from './TaskQuickMenu'
+import { PriorityBars } from './PriorityBars'
+import { toggleTaskDoneWithFeedback } from './actions'
+import { useListNav } from '../../app/shortcuts/listNavStore'
 import type { Task, TaskColumnKey, TaskSortField, TaskStatus, TaskView } from '../../db/types'
 
 const VIEW_DRAG_MIME = 'application/x-nextuss-taskview'
@@ -91,6 +94,7 @@ export function TasksPage() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
   const [lastCheckedIndex, setLastCheckedIndex] = useState<number | null>(null)
   const [visibleRows, setVisibleRows] = useState(ROWS_PAGE_SIZE)
+  const [cursor, setCursor] = useState(0)
   const [draft, setDraft] = useState<{ viewId: number; changes: TaskViewDraft } | null>(null)
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<number | null>(null)
 
@@ -217,6 +221,18 @@ export function TasksPage() {
     if (draft?.viewId === view.id) setDraft(null)
   }
 
+  const shownCount = Math.min(rows.length, visibleRows)
+  const listNav = {
+    onNext: () => setCursor((i) => Math.min(i + 1, Math.max(shownCount - 1, 0))),
+    onPrev: () => setCursor((i) => Math.max(i - 1, 0)),
+    onActivate: () => {
+      const t = rows[Math.min(cursor, shownCount - 1)]
+      if (t) openEditTask(t)
+    },
+    onCreate: () => openCreateTask(),
+  }
+  useListNav(listNav)
+
   return (
     <div className="mx-auto max-w-5xl space-y-4 p-6 lg:p-8">
       <header className="flex items-center justify-between">
@@ -239,10 +255,10 @@ export function TasksPage() {
             key={view.id}
             {...dnd.rowProps(view.id!)}
             className={cn(
-              'relative flex cursor-grab items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity active:cursor-grabbing',
+              'relative flex cursor-grab items-center gap-1.5 rounded-sm border px-2.5 py-1 text-[13px] font-medium transition-opacity active:cursor-grabbing',
               dnd.dragging(view.id!) && 'opacity-40',
               effectiveViewId === view.id
-                ? 'border-accent bg-accent-soft text-accent'
+                ? 'border-border-strong bg-surface-hover text-text'
                 : 'border-border text-text-muted hover:text-text',
             )}
           >
@@ -285,14 +301,14 @@ export function TasksPage() {
                   aria-label={`Renombrar la vista ${view.name}`}
                   className="text-text-faint hover:text-text"
                 >
-                  <Pencil size={10} strokeWidth={2} />
+                  <Pencil size={12} strokeWidth={2} />
                 </button>
                 <button
                   onClick={() => setConfirmingDeleteId(view.id!)}
                   aria-label={`Eliminar la vista ${view.name}`}
                   className="text-text-faint hover:text-danger"
                 >
-                  <Trash2 size={10} strokeWidth={2} />
+                  <Trash2 size={12} strokeWidth={2} />
                 </button>
               </>
             )}
@@ -304,8 +320,8 @@ export function TasksPage() {
       {activeView && (
         <>
           {activeDraft && (
-            <Card className="flex flex-wrap items-center gap-2 border-warning/40 bg-warning/10 p-3" role="status">
-              <span className="text-xs font-semibold text-warning">Vista modificada sin guardar</span>
+            <Card className="flex flex-wrap items-center gap-2 bg-bg-soft p-3" role="status">
+              <span className="text-xs font-semibold text-text">Vista modificada sin guardar</span>
               <span className="text-xs text-text-muted">Los cambios solo se ven aquí hasta que los guardes.</span>
               <div className="ml-auto flex gap-1.5">
                 <Button variant="ghost" onClick={handleResetDraft} className="px-2.5 py-1 text-xs">
@@ -322,27 +338,27 @@ export function TasksPage() {
           )}
 
           {selectedIds.size > 0 && (
-            <Card className="flex flex-wrap items-center gap-2 border-accent bg-accent-soft p-3">
-              <span className="text-xs font-semibold text-accent">{selectedIds.size} seleccionada{selectedIds.size === 1 ? '' : 's'}</span>
-              <div className="h-4 w-px bg-accent/30" />
+            <Card className="flex flex-wrap items-center gap-2 bg-bg-soft p-3" role="region" aria-label="Acciones en bloque">
+              <span className="text-sm font-semibold text-text">{selectedIds.size} seleccionada{selectedIds.size === 1 ? '' : 's'}</span>
+              <div className="h-4 w-px bg-border-strong" />
 
               <Menu
                 trigger={(props) => (
-                  <button {...props} className="rounded-md border border-accent/40 px-2.5 py-1 text-xs font-medium text-accent hover:bg-accent-soft">
+                  <button {...props} className="rounded-sm border border-border bg-surface px-2.5 py-1 text-[13px] font-medium text-text hover:bg-surface-hover">
                     Prioridad
                   </button>
                 )}
               >
                 {[1, 2, 3, 4].map((p) => (
                   <MenuItem key={p} onSelect={() => runBulk(() => setPriorityBulk([...selectedIds], p))}>
-                    <span style={{ color: PRIORITY_COLORS[p] }}>{PRIORITY_LABELS[p]}</span>
+                    <span className="flex items-center gap-2"><PriorityBars p={p} />{PRIORITY_NAMES[p]}</span>
                   </MenuItem>
                 ))}
               </Menu>
 
               <Menu
                 trigger={(props) => (
-                  <button {...props} className="flex items-center gap-1 rounded-md border border-accent/40 px-2.5 py-1 text-xs font-medium text-accent hover:bg-accent-soft">
+                  <button {...props} className="flex items-center gap-1 rounded-sm border border-border bg-surface px-2.5 py-1 text-[13px] font-medium text-text hover:bg-surface-hover">
                     <FolderKanban size={12} strokeWidth={2} /> Proyecto
                   </button>
                 )}
@@ -358,7 +374,7 @@ export function TasksPage() {
 
               <Menu
                 trigger={(props) => (
-                  <button {...props} className="flex items-center gap-1 rounded-md border border-accent/40 px-2.5 py-1 text-xs font-medium text-accent hover:bg-accent-soft">
+                  <button {...props} className="flex items-center gap-1 rounded-sm border border-border bg-surface px-2.5 py-1 text-[13px] font-medium text-text hover:bg-surface-hover">
                     <TagIcon size={12} strokeWidth={2} /> Etiqueta
                   </button>
                 )}
@@ -373,19 +389,19 @@ export function TasksPage() {
 
               <button
                 onClick={() => runBulk(() => parkTasksBulk([...selectedIds]))}
-                className="flex items-center gap-1 rounded-md border border-accent/40 px-2.5 py-1 text-xs font-medium text-accent hover:bg-accent-soft"
+                className="flex items-center gap-1 rounded-sm border border-border bg-surface px-2.5 py-1 text-[13px] font-medium text-text hover:bg-surface-hover"
               >
                 <Archive size={12} strokeWidth={2} /> Aparcar
               </button>
 
               <button
                 onClick={() => runBulk(() => trashTasksBulk([...selectedIds]))}
-                className="flex items-center gap-1 rounded-md border border-danger/40 px-2.5 py-1 text-xs font-medium text-danger hover:bg-danger/10"
+                className="flex items-center gap-1 rounded-sm border border-border bg-surface px-2.5 py-1 text-[13px] font-medium text-danger hover:bg-danger/10"
               >
                 <Trash2 size={12} strokeWidth={2} /> Eliminar
               </button>
 
-              <button onClick={clearSelection} className="ml-auto flex items-center gap-1 text-xs text-accent hover:underline">
+              <button type="button" onClick={clearSelection} className="ml-auto flex items-center gap-1 text-[13px] text-text-muted hover:text-text">
                 <X size={12} strokeWidth={2} /> Cancelar
               </button>
             </Card>
@@ -564,12 +580,12 @@ export function TasksPage() {
               <EmptyState icon={ListTodo} title="Nada en esta vista" description="Ninguna tarea cumple sus filtros. Prueba otra vista o cambia los filtros." />
             )
           ) : (
-            <Card className="overflow-hidden p-0">
+            <div className="overflow-hidden rounded-md border border-border bg-surface">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-border text-left text-xs text-text-faint">
-                      <th className="w-8 px-4 py-2.5">
+                    <tr className="h-9 border-b border-border bg-bg-soft text-left text-[13px] text-text-muted">
+                      <th className="w-8 px-4 py-2">
                         <Checkbox
                           checked={rowsAllSelected}
                           indeterminate={rowsSomeSelected && !rowsAllSelected}
@@ -577,7 +593,7 @@ export function TasksPage() {
                           aria-label="Seleccionar todas"
                         />
                       </th>
-                      <th className="px-3 py-2.5 font-medium">
+                      <th className="px-3 py-2 font-medium">
                         <button onClick={() => toggleSort('title')} className="flex items-center gap-1">
                           Título {activeView.sortField === 'title' && <SortIcon dir={activeView.sortDir} />}
                         </button>
@@ -585,7 +601,7 @@ export function TasksPage() {
                       {activeView.columns.map((col) => {
                         const sortable = col === 'priority' || col === 'scheduledDate' || col === 'dueDate' || col === 'estimateMin'
                         return (
-                          <th key={col} className="px-3 py-2.5 font-medium">
+                          <th key={col} className="px-3 py-2 font-medium">
                             {sortable ? (
                               <button
                                 onClick={() => toggleSort(col as TaskSortField)}
@@ -600,13 +616,15 @@ export function TasksPage() {
                           </th>
                         )
                       })}
-                      <th className="px-3 py-2.5" />
+                      <th className="px-3 py-2"><span className="sr-only">Acciones</span></th>
                     </tr>
                   </thead>
                   <tbody>
                     {shownRows.map((task, index) => (
                       <TaskViewRow
                         key={task.id}
+                        active={index === cursor}
+                        today={today}
                         task={task}
                         columns={activeView.columns}
                         project={task.projectId ? projectsById.get(task.projectId) : undefined}
@@ -620,7 +638,7 @@ export function TasksPage() {
                 </table>
               </div>
               {rows.length > shownRows.length && (
-                <div className="flex items-center justify-between border-t border-border px-4 py-2.5 text-xs text-text-faint">
+                <div className="flex items-center justify-between border-t border-border px-4 py-2.5 text-xs text-text-muted">
                   <span>
                     Mostrando {shownRows.length} de {rows.length}
                   </span>
@@ -629,13 +647,21 @@ export function TasksPage() {
                   </Button>
                 </div>
               )}
-            </Card>
+              <div aria-hidden="true" className="flex flex-wrap gap-x-4 gap-y-1 border-t border-border bg-bg-soft px-4 py-2 text-xs text-text-muted">
+                <span><Kbd>j</Kbd> <Kbd>k</Kbd> moverse</span>
+                <span><Kbd>Enter</Kbd> abrir</span>
+                <span><Kbd>c</Kbd> nueva tarea</span>
+                <span><Kbd>Mayús</Kbd> + clic: seleccionar varias</span>
+              </div>
+            </div>
           )}
         </>
       )}
     </div>
   )
 }
+
+const HOURS = new Intl.NumberFormat('es', { maximumFractionDigits: 1 })
 
 function TaskViewRow({
   task,
@@ -645,7 +671,11 @@ function TaskViewRow({
   onOpen,
   selected,
   onToggleChecked,
+  active,
+  today,
 }: {
+  active: boolean
+  today: string
   task: Task
   columns: TaskColumnKey[]
   project?: { name: string; color: string }
@@ -654,9 +684,20 @@ function TaskViewRow({
   selected: boolean
   onToggleChecked: (shiftKey: boolean) => void
 }) {
+  const done = task.status === 'done'
   return (
-    <tr className={cn('border-b border-border last:border-0 hover:bg-surface-hover', selected && 'bg-accent-soft/40')}>
-      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+    <tr
+      ref={(el) => {
+        if (active && el && el.getBoundingClientRect().top > 0) el.scrollIntoView({ block: 'nearest' })
+      }}
+      data-active={active || undefined}
+      className={cn(
+        'group h-10 border-b border-border last:border-0 hover:bg-surface-hover',
+        (selected || active) && 'bg-surface-hover',
+        active && 'shadow-[inset_2px_0_0_var(--color-accent)]',
+      )}
+    >
+      <td className="px-4 py-1.5" onClick={(e) => e.stopPropagation()}>
         <Checkbox
           checked={selected}
           onChange={() => {}}
@@ -664,22 +705,36 @@ function TaskViewRow({
           aria-label={`Seleccionar "${task.title}"`}
         />
       </td>
-      <td className="px-3 py-2">
-        <button
-          onClick={onOpen}
-          className={cn('truncate text-left hover:underline', task.status === 'done' && 'text-text-faint line-through')}
-        >
-          {task.title}
-        </button>
+      <td className="px-3 py-1.5">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={done}
+            aria-label={`Completar "${task.title}"`}
+            onClick={() => void toggleTaskDoneWithFeedback(task.id!, task.title)}
+            className={cn(
+              'grid size-4 shrink-0 place-items-center rounded-full border-[1.5px]',
+              done ? 'border-accent bg-accent text-on-accent' : 'border-text-muted hover:border-text',
+            )}
+          >
+            {done && <Check size={10} strokeWidth={3} />}
+          </button>
+          <button
+            type="button"
+            onClick={onOpen}
+            className={cn('truncate text-left text-text hover:underline hover:underline-offset-4', done && 'text-text-muted line-through')}
+          >
+            {task.title}
+          </button>
+        </div>
       </td>
       {columns.map((col) => (
-        <td key={col} className="px-3 py-2 text-xs text-text-muted">
+        <td key={col} className="px-3 py-1.5 text-[13px] whitespace-nowrap text-text-muted">
           {col === 'priority' && task.priority && (
-            <span
-              className="rounded px-1.5 py-0.5 text-xs font-semibold"
-              style={priorityBadgeStyle(task.priority)}
-            >
-              {PRIORITY_LABELS[task.priority]}
+            <span className="flex items-center gap-1.5" title={PRIORITY_NAMES[task.priority]}>
+              <PriorityBars p={task.priority} />
+              <span className="sr-only">{PRIORITY_NAMES[task.priority]}</span>
             </span>
           )}
           {col === 'project' && project && (
@@ -697,12 +752,15 @@ function TaskViewRow({
               ))}
             </span>
           )}
-          {col === 'scheduledDate' && task.scheduledDate && formatShortDate(task.scheduledDate)}
+          {col === 'scheduledDate' && task.scheduledDate && (
+            // Atrasada: la fecha en naranja (solo el texto, sin fondo de alarma).
+            <span className={cn('tabular-nums', !done && task.scheduledDate < today && 'text-warning')}>{formatShortDate(task.scheduledDate)}</span>
+          )}
           {col === 'dueDate' && task.dueDate && formatShortDate(task.dueDate)}
-          {col === 'estimateMin' && task.estimateMin != null && `${task.estimateMin} min`}
+          {col === 'estimateMin' && task.estimateMin != null && <span className="tabular-nums">{task.estimateMin < 60 ? `${task.estimateMin} min` : `${HOURS.format(task.estimateMin / 60)} h`}</span>}
         </td>
       ))}
-      <td className="px-3 py-2 text-right">
+      <td className="px-3 py-1.5 text-right">
         <TaskQuickMenu task={task} />
       </td>
     </tr>

@@ -4,7 +4,8 @@ import { Archive, ChevronDown, ChevronUp, Plus } from 'lucide-react'
 import { Button, DropIndicator } from '../../design/primitives'
 import { CalendarHeatmap } from '../stats/charts/CalendarHeatmap'
 import { describeHabitSchedule, subDaysKey, todayKey } from '../../lib/dates'
-import { archiveHabit, getHabitLogs, moveHabitBetween } from '../../db/repositories/habits'
+import { archiveHabit, getHabitLogs, getHabitLogsForHabits, moveHabitBetween } from '../../db/repositories/habits'
+import { WeekStrip } from './WeekStrip'
 import { useHabitsWithStats, type HabitWithStats } from './useHabitsWithStats'
 import { HabitCard } from './HabitCard'
 import { activateHabitEntry } from './activateHabit'
@@ -51,6 +52,20 @@ export function HabitsPage() {
   const [showArchived, setShowArchived] = useState(false)
   const allEntries = useHabitsWithStats(date, showArchived)
   const activeEntries = useMemo(() => allEntries?.filter((e) => !e.habit.archived), [allEntries])
+  // Días hechos de esta semana por hábito, para la tira L–D de cada fila.
+  const weekFrom = subDaysKey(date, 6)
+  const activeIds = (activeEntries ?? []).map((e) => e.habit.id!).join(',')
+  const weekDone = useLiveQuery(async () => {
+    const ids = activeIds ? activeIds.split(',').map(Number) : []
+    const logs = await getHabitLogsForHabits(ids)
+    const map = new Map<number, Set<string>>()
+    for (const l of logs) {
+      if (!l.completed || l.date < weekFrom) continue
+      if (!map.has(l.habitId)) map.set(l.habitId, new Set())
+      map.get(l.habitId)!.add(l.date)
+    }
+    return map
+  }, [activeIds, weekFrom])
   const archivedEntries = useMemo(() => allEntries?.filter((e) => e.habit.archived), [allEntries])
   const openCreate = useHabitFormStore((s) => s.openCreate)
   const openEdit = useHabitFormStore((s) => s.openEdit)
@@ -153,21 +168,24 @@ export function HabitsPage() {
               />
               <DropIndicator position={dnd.dropPosition(entry.habit.id!)} />
             </div>
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 pl-[68px]">
+            <WeekStrip habit={entry.habit} completedDates={weekDone?.get(entry.habit.id!) ?? new Set()} today={date} />
             <button
               type="button"
               onClick={() => setExpandedId((id) => (id === entry.habit.id ? null : entry.habit.id!))}
               aria-expanded={expandedId === entry.habit.id}
-              className="mt-1 flex items-center gap-1 pl-[68px] text-xs text-text-muted hover:text-text"
+              className="flex items-center gap-1 text-xs text-text-muted hover:text-text"
             >
               {describeHabitSchedule(entry.habit)}
-              {' · racha más larga: '}
-              {entry.streak.longest}
+              {' · mejor racha: '}
+              {entry.streak.longest} {entry.streak.longest === 1 ? 'día' : 'días'}
               {expandedId === entry.habit.id ? (
-                <ChevronUp size={11} strokeWidth={2} />
+                <ChevronUp size={12} strokeWidth={2} />
               ) : (
-                <ChevronDown size={11} strokeWidth={2} />
+                <ChevronDown size={12} strokeWidth={2} />
               )}
             </button>
+            </div>
             {expandedId === entry.habit.id && (
               <div className="mt-1.5">
                 <HabitDetailPanel entry={entry} />
