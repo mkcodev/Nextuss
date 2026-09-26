@@ -1,4 +1,5 @@
-import { useRef, useState, type DragEvent } from 'react'
+import { useRef, useState, type DragEvent, type KeyboardEvent } from 'react'
+import { announce } from './announce'
 import { dropPositionFromPointer, type DropPosition } from './reorder'
 
 interface Options {
@@ -7,6 +8,10 @@ interface Options {
   orientation?: 'vertical' | 'horizontal'
   /** Ya sin no-ops: `targetId` distinto de `draggedId` y `position` respecto a él. */
   onMove: (draggedId: number, targetId: number, position: DropPosition) => void
+  /** Orden actual de los ids: habilita reordenar sin arrastrar con Alt+flechas (teclado; Fase 19). */
+  ids?: number[]
+  /** Nombre de un elemento para anunciar el movimiento ("Meditar movido a la posición 2 de 5"). */
+  labelOf?: (id: number) => string
 }
 
 /** Preview propio del arrastre: clon del elemento, ligeramente inclinado y con sombra, en lugar de la
@@ -36,7 +41,7 @@ function applyDragGhost(e: DragEvent<HTMLElement>) {
  * línea de inserción (`<DropIndicator>`) y `dragging(id)` atenúa la fila que se lleva. Lo usan las
  * listas de tareas, proyectos, hábitos y vistas para no repetir cuatro veces la misma maquinaria.
  */
-export function useDragReorder({ mime, orientation = 'vertical', onMove }: Options) {
+export function useDragReorder({ mime, orientation = 'vertical', onMove, ids, labelOf }: Options) {
   const [draggingId, setDraggingId] = useState<number | null>(null)
   const [over, setOver] = useState<{ id: number; position: DropPosition } | null>(null)
   const draggingRef = useRef<number | null>(null)
@@ -47,8 +52,25 @@ export function useDragReorder({ mime, orientation = 'vertical', onMove }: Optio
     setOver(null)
   }
 
+  // Reordenar sin arrastrar: con el foco dentro del elemento, Alt+↑/↓ (o Alt+←/→ en horizontal).
+  const onKeyDown = (e: KeyboardEvent<HTMLElement>, id: number) => {
+    if (!ids || !e.altKey) return
+    const t = e.target as HTMLElement
+    if (t.closest('input, textarea, [contenteditable="true"]')) return
+    const back = orientation === 'vertical' ? 'ArrowUp' : 'ArrowLeft'
+    const forward = orientation === 'vertical' ? 'ArrowDown' : 'ArrowRight'
+    if (e.key !== back && e.key !== forward) return
+    const index = ids.indexOf(id)
+    const targetIndex = e.key === back ? index - 1 : index + 1
+    if (index < 0 || targetIndex < 0 || targetIndex >= ids.length) return
+    e.preventDefault()
+    onMove(id, ids[targetIndex], e.key === back ? 'before' : 'after')
+    announce(`${labelOf?.(id) ?? 'Elemento'} movido a la posición ${targetIndex + 1} de ${ids.length}`)
+  }
+
   const rowProps = (id: number) => ({
     draggable: true,
+    ...(ids ? { onKeyDown: (e: KeyboardEvent<HTMLElement>) => onKeyDown(e, id), 'aria-keyshortcuts': orientation === 'vertical' ? 'Alt+ArrowUp Alt+ArrowDown' : 'Alt+ArrowLeft Alt+ArrowRight' } : {}),
     onDragStart: (e: DragEvent<HTMLElement>) => {
       e.dataTransfer.setData(mime, String(id))
       e.dataTransfer.effectAllowed = 'move'

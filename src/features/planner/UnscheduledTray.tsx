@@ -117,7 +117,12 @@ export function UnscheduledTray({ date }: { date: string }) {
     const n = reorderNeighbors(tasks, (t) => t.id, draggedId, targetId, position)
     if (n) void moveTaskBetween(draggedId, n.before, n.after)
   }
-  const dnd = useDragReorder({ mime: TASK_DRAG_MIME, onMove: handleMove })
+  const dnd = useDragReorder({
+    mime: TASK_DRAG_MIME,
+    onMove: handleMove,
+    ids: tasks?.map((t) => t.id!),
+    labelOf: (id) => tasks?.find((t) => t.id === id)?.title ?? 'Tarea',
+  })
 
   return (
     <div className="space-y-2">

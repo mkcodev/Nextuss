@@ -124,7 +124,12 @@ export function HabitsPage() {
     const n = reorderNeighbors(activeEntries.map((e) => e.habit), (h) => h.id, draggedId, targetId, position)
     if (n) void moveHabitBetween(draggedId, n.before, n.after)
   }
-  const dnd = useDragReorder({ mime: HABIT_DRAG_MIME, onMove: handleMove })
+  const dnd = useDragReorder({
+    mime: HABIT_DRAG_MIME,
+    onMove: handleMove,
+    ids: activeEntries?.map((e) => e.habit.id!),
+    labelOf: (id) => activeEntries?.find((e) => e.habit.id === id)?.habit.name ?? 'Hábito',
+  })
 
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-6 lg:p-8">

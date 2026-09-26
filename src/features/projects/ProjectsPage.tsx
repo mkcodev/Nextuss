@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Archive, FolderKanban, LayoutTemplate, Plus } from 'lucide-react'
 import { Button, DropIndicator, EmptyState } from '../../design/primitives'
@@ -10,6 +11,7 @@ import { ProjectCard } from './ProjectCard'
 import { useDragReorder } from '../../lib/useDragReorder'
 import { reorderNeighbors, type DropPosition } from '../../lib/reorder'
 import { cn } from '../../lib/cn'
+import { useListNav } from '../../app/shortcuts/listNavStore'
 
 const PROJECT_DRAG_MIME = 'application/x-nextuss-project'
 
@@ -27,7 +29,26 @@ export function ProjectsPage() {
     const n = reorderNeighbors(activeProjects, (p) => p.id, draggedId, targetId, position)
     if (n) void moveProjectBetween(draggedId, n.before, n.after)
   }
-  const dnd = useDragReorder({ mime: PROJECT_DRAG_MIME, onMove: handleMove })
+  const dnd = useDragReorder({
+    mime: PROJECT_DRAG_MIME,
+    onMove: handleMove,
+    ids: activeProjects.map((p) => p.id!),
+    labelOf: (id) => activeProjects.find((p) => p.id === id)?.name ?? 'Proyecto',
+  })
+
+  // j/k/Enter/c como en Tareas y Hábitos (Fase 19): el cursor marca la tarjeta y Enter abre el proyecto.
+  const navigate = useNavigate()
+  const [cursor, setCursor] = useState(0)
+  const cursorIndex = Math.min(cursor, Math.max(activeProjects.length - 1, 0))
+  useListNav({
+    onNext: () => setCursor(Math.min(cursorIndex + 1, Math.max(activeProjects.length - 1, 0))),
+    onPrev: () => setCursor(Math.max(cursorIndex - 1, 0)),
+    onActivate: () => {
+      const p = activeProjects[cursorIndex]
+      if (p) navigate(`/proyectos/${p.id}`)
+    },
+    onCreate: () => openCreate(),
+  })
 
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-6 lg:p-8">
@@ -64,11 +85,15 @@ export function ProjectsPage() {
       )}
 
       <div className="space-y-2">
-        {activeProjects.map((project) => (
+        {activeProjects.map((project, i) => (
           <div
             key={project.id}
             {...dnd.rowProps(project.id!)}
-            className={cn('relative cursor-grab transition-opacity active:cursor-grabbing', dnd.dragging(project.id!) && 'opacity-40')}
+            className={cn(
+              'relative cursor-grab rounded-md transition-opacity active:cursor-grabbing',
+              dnd.dragging(project.id!) && 'opacity-40',
+              i === cursorIndex && activeProjects.length > 1 && 'ring-1 ring-border-strong',
+            )}
           >
             <ProjectCard
               project={project}
