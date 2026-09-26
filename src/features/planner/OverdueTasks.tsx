@@ -1,11 +1,15 @@
+import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { AlertTriangle, ArrowRight, Target } from 'lucide-react'
-import { Card } from '../../design/primitives'
-import { cn } from '../../lib/cn'
-import { carryOverToToday, getOverdueTasks, ZOMBIE_THRESHOLD } from '../../db/repositories/tasks'
+import { differenceInCalendarDays } from 'date-fns'
+import { ArrowRight, Target } from 'lucide-react'
+import { carryOverToToday, getOverdueTasks, moveTasksToDateBulk, parkTasksBulk, ZOMBIE_THRESHOLD } from '../../db/repositories/tasks'
 import { getGoalForTask } from '../../db/repositories/goals'
+import { nextRelativeDate, parseDateKey } from '../../lib/dates'
 import { useTaskFormStore } from '../tasks/taskFormStore'
 import { TaskQuickMenu } from '../tasks/TaskQuickMenu'
+
+/** Cuántas atrasadas se ven sin desplegar: suficiente para decidir, no tanto como para agobiar. */
+const VISIBLE = 3
 
 /** Tracks which zombie tasks already have a linked goal, so the "link it?" nudge only shows where it's useful. */
 function useZombieGoalLinks(taskIds: number[]) {
@@ -15,9 +19,18 @@ function useZombieGoalLinks(taskIds: number[]) {
   }, [taskIds.join(',')])
 }
 
+function daysLate(scheduledDate: string | undefined, today: string): string {
+  if (!scheduledDate) return ''
+  const days = differenceInCalendarDays(parseDateKey(today), parseDateKey(scheduledDate))
+  return days === 1 ? 'ayer' : `hace ${days} días`
+}
+
+/** Atrasadas de Hoy: informan, no castigan (PRODUCT.md, "progreso honesto y tranquilo"). Tono neutro,
+ *  solo unas pocas a la vista y acciones en bloque para resolverlas de una vez. */
 export function OverdueTasks({ date }: { date: string }) {
   const tasks = useLiveQuery(() => getOverdueTasks(date), [date])
   const openEdit = useTaskFormStore((s) => s.openEdit)
+  const [expanded, setExpanded] = useState(false)
   const zombieTaskIds = (tasks ?? [])
     .filter((t) => t.postponedCount >= ZOMBIE_THRESHOLD)
     .map((t) => t.id!)
@@ -25,58 +38,87 @@ export function OverdueTasks({ date }: { date: string }) {
 
   if (!tasks || tasks.length === 0) return null
 
+  // Las más recientes primero: son las que aún tienen sentido rescatar hoy.
+  const ordered = [...tasks].reverse()
+  const visible = expanded ? ordered : ordered.slice(0, VISIBLE)
+  const ids = tasks.map((t) => t.id!)
+  const tomorrow = nextRelativeDate(date, date, 1)
+
   return (
-    <Card className="border-warning/30 bg-warning/5 p-3.5">
-      <div className="mb-2 flex items-center gap-1.5">
-        <AlertTriangle size={14} strokeWidth={2} className="text-warning" />
-        <p className="text-xs font-semibold text-text">
-          {tasks.length} tarea{tasks.length > 1 ? 's' : ''} atrasada{tasks.length > 1 ? 's' : ''}
-        </p>
+    <section aria-labelledby="overdue-title">
+      <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+        <h2 id="overdue-title" className="text-sm font-semibold text-text">
+          Atrasadas <span className="font-normal tabular-nums text-text-muted">{tasks.length}</span>
+        </h2>
+        <div className="ml-auto flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => void moveTasksToDateBulk(ids, tomorrow)}
+            className="rounded-sm px-2 py-1 text-[13px] font-medium text-text-muted hover:bg-surface-hover hover:text-text"
+          >
+            Mover todas a mañana
+          </button>
+          <button
+            type="button"
+            onClick={() => void parkTasksBulk(ids)}
+            className="rounded-sm px-2 py-1 text-[13px] font-medium text-text-muted hover:bg-surface-hover hover:text-text"
+          >
+            Aparcar todas
+          </button>
+        </div>
       </div>
-      <div className="space-y-1.5">
-        {tasks.map((t) => {
+
+      <ul className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface">
+        {visible.map((t) => {
           const isZombie = t.postponedCount >= ZOMBIE_THRESHOLD
           return (
-            <div
-              key={t.id}
-              className="flex items-center gap-2 rounded-lg border border-border bg-surface px-2.5 py-1.5"
-            >
+            <li key={t.id} className="flex h-10 items-center gap-2 px-3">
               <button
+                type="button"
                 onClick={() => openEdit(t)}
-                className="min-w-0 flex-1 truncate text-left text-xs text-text hover:underline"
+                className="min-w-0 flex-1 truncate text-left text-sm text-text hover:underline hover:decoration-border-strong hover:underline-offset-4"
               >
                 {t.title}
               </button>
-              <span className="shrink-0 text-xs text-text-faint">{t.scheduledDate}</span>
               {isZombie && (
-                <span
-                  title={`Pospuesta ${t.postponedCount} veces — usa el menú "···" para desglosarla, reducirla, aparcarla o eliminarla`}
-                  className={cn('shrink-0 text-danger')}
-                >
-                  <AlertTriangle size={12} strokeWidth={2} />
+                <span className="shrink-0 text-xs text-text-muted" title="Usa el menú ··· para desglosarla, reducirla o aparcarla">
+                  aplazada {t.postponedCount} veces
                 </span>
               )}
               {isZombie && goalLinks?.get(t.id!) === false && (
                 <button
+                  type="button"
                   onClick={() => openEdit(t)}
-                  title="¿La vinculamos a un objetivo?"
-                  className="flex shrink-0 items-center gap-0.5 rounded-md px-1.5 py-0.5 text-xs font-medium text-text-faint hover:bg-accent-soft hover:text-accent"
+                  className="flex shrink-0 items-center gap-1 rounded-sm px-1.5 py-0.5 text-xs font-medium text-text-muted hover:bg-surface-hover hover:text-text"
                 >
-                  <Target size={10} strokeWidth={2.5} /> Vincular
+                  <Target size={12} strokeWidth={2} /> Vincular a un objetivo
                 </button>
               )}
+              <span className="shrink-0 text-xs tabular-nums text-warning">{daysLate(t.scheduledDate, date)}</span>
               <button
-                onClick={() => carryOverToToday(t.id!, date)}
-                title="Mover a hoy"
-                className="flex shrink-0 items-center gap-0.5 rounded-md px-1.5 py-0.5 text-xs font-medium text-accent hover:bg-accent-soft"
+                type="button"
+                onClick={() => void carryOverToToday(t.id!, date)}
+                aria-label={`Mover "${t.title}" a hoy`}
+                className="flex shrink-0 items-center gap-1 rounded-sm px-1.5 py-0.5 text-xs font-medium text-accent hover:bg-accent-soft"
               >
-                Hoy <ArrowRight size={10} strokeWidth={2.5} />
+                A hoy <ArrowRight size={12} strokeWidth={2} />
               </button>
               <TaskQuickMenu task={t} />
-            </div>
+            </li>
           )
         })}
-      </div>
-    </Card>
+      </ul>
+
+      {tasks.length > VISIBLE && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          className="mt-1.5 rounded-sm px-1 text-[13px] font-medium text-text-muted hover:text-text"
+        >
+          {expanded ? 'Ver menos' : `Ver las ${tasks.length - VISIBLE} restantes`}
+        </button>
+      )}
+    </section>
   )
 }
