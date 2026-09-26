@@ -81,7 +81,7 @@ export function ProjectDetailPage() {
       <header className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4">
           <div
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border"
             style={{ backgroundColor: `${project.color}14`, borderColor: `${project.color}33`, color: project.color }}
           >
             <Icon name={project.icon ?? 'folder'} size={26} strokeWidth={1.75} />
@@ -119,7 +119,7 @@ export function ProjectDetailPage() {
           <Target size={22} className="text-accent" />
         </RingProgress>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-accent">Progreso</p>
+          <h2 className="text-sm font-semibold text-text">Progreso</h2>
           <p className="mt-0.5 text-lg font-semibold text-text">
             {progress?.done ?? 0} / {progress?.total ?? 0} tareas
           </p>

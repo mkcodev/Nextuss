@@ -79,7 +79,7 @@ export function TaskForm() {
   const { available: aiAvailable } = useAiAvailable()
   const openBreakdown = useTaskBreakdownStore((s) => s.openFor)
   const titleRef = useRef<HTMLInputElement>(null)
-  const ids = { goal: useId(), due: useId(), more: useId() }
+  const ids = { goal: useId(), due: useId(), more: useId(), actual: useId() }
 
   const [title, setTitle] = useState(task?.title ?? prefill?.title ?? '')
   const [notes, setNotes] = useState(task?.notes ?? '')
@@ -87,6 +87,8 @@ export function TaskForm() {
   const [estimateMin, setEstimateMin] = useState(task?.estimateMin ?? prefill?.estimateMin ?? 30)
   const [priority, setPriority] = useState<number | undefined>(task?.priority ?? prefill?.priority)
   const [dueDate, setDueDate] = useState(task?.dueDate ?? '')
+  // Tiempo real invertido (min), solo al editar. Texto para poder dejarlo vacío (= sin registrar).
+  const [actualMin, setActualMin] = useState(task?.actualMin != null ? String(task.actualMin) : '')
   const [color, setColor] = useState(task?.color ?? ENTITY_COLORS[0])
   const [goalId, setGoalId] = useState<number | undefined>(undefined)
   const [goalIdInitialized, setGoalIdInitialized] = useState(!isEdit)
@@ -147,7 +149,7 @@ export function TaskForm() {
   // "Cambios sin guardar" explícito: compara con cómo se abrió el formulario, así "Crear otra" (que
   // vacía el título) no deja el aviso de descartar colgado.
   const snapshot = () =>
-    JSON.stringify([title.trim(), notes.trim(), energy, estimateMin, priority, dueDate, color, tagIds, projectId, schedDate, schedStart, pendingSubtasks, repeatEnabled && repeat])
+    JSON.stringify([title.trim(), notes.trim(), energy, estimateMin, priority, dueDate, color, tagIds, projectId, schedDate, schedStart, pendingSubtasks, repeatEnabled && repeat, actualMin])
   const [initialSnapshot, setInitialSnapshot] = useState(snapshot)
   // El objetivo se carga aparte (asíncrono), así que se compara por separado.
   const dirty = snapshot() !== initialSnapshot || (goalIdInitialized && goalId !== initialGoalId)
@@ -236,6 +238,7 @@ export function TaskForm() {
         if (task.recurrenceId) await detachOccurrence(task.id)
         await updateTask(task.id, {
           ...payload,
+          actualMin: actualMin === '' ? undefined : Math.max(0, Math.round(Number(actualMin)) || 0),
           scheduledDate: schedDate || undefined,
           scheduledStart: schedStart || undefined,
           scheduledEnd,
@@ -270,7 +273,7 @@ export function TaskForm() {
       setTitle('')
       setNotes('')
       setPendingSubtasks([])
-      setInitialSnapshot(JSON.stringify(['', '', energy, estimateMin, priority, dueDate, color, tagIds, projectId, schedDate, schedStart, [], repeatEnabled && repeat]))
+      setInitialSnapshot(JSON.stringify(['', '', energy, estimateMin, priority, dueDate, color, tagIds, projectId, schedDate, schedStart, [], repeatEnabled && repeat, actualMin]))
       useToastStore.getState().push({ title: 'Tarea creada', description: 'Puedes escribir la siguiente.', variant: 'success' })
       titleRef.current?.focus()
       return
@@ -628,6 +631,24 @@ export function TaskForm() {
                 className="h-7 rounded-sm border border-border bg-surface px-2 text-sm text-text focus:border-accent"
               />
             </FormRow>
+
+            {isEdit && (
+              <FormRow label="Tiempo real" htmlFor={ids.actual} hint="Lo que te llevó de verdad. Se compara con la estimación en Estadísticas.">
+                <div className="flex items-center gap-2">
+                  <input
+                    id={ids.actual}
+                    type="number"
+                    min={0}
+                    inputMode="numeric"
+                    value={actualMin}
+                    onChange={(e) => setActualMin(e.target.value)}
+                    placeholder="—"
+                    className="h-8 w-20 rounded-sm border border-border bg-surface px-2 text-sm tabular-nums text-text placeholder:text-text-muted focus:border-accent"
+                  />
+                  <span className="text-sm text-text-muted">min</span>
+                </div>
+              </FormRow>
+            )}
 
             <FormRow label="Color">
               <ColorPicker value={color} onChange={setColor} label="Color de la tarea" />
