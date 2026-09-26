@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { nextCompletionOccurrence, occurrencesInRange, type RecurrenceRuleLike } from './recurrence'
+import { describeRecurrence, nextCompletionOccurrence, occurrencesInRange, type RecurrenceRuleLike } from './recurrence'
 
 function rule(overrides: Partial<RecurrenceRuleLike> = {}): RecurrenceRuleLike {
   return {
@@ -107,4 +107,13 @@ describe('nextCompletionOccurrence', () => {
     const r = rule({ freq: 'daily', interval: 3, startDate: '2026-01-01', until: '2026-01-12' })
     expect(nextCompletionOccurrence(r, '2026-01-10')).toBeNull()
   })
+})
+
+describe('describeRecurrence', () => {
+  const base = { interval: 1, mode: 'schedule', startDate: '2026-09-01' } as const
+  it('diaria', () => expect(describeRecurrence({ ...base, freq: 'daily' })).toBe('Cada día'))
+  it('semanal con días, lunes primero', () =>
+    expect(describeRecurrence({ ...base, freq: 'weekly', interval: 2, byWeekday: [4, 1] })).toBe('Cada 2 semanas: lunes y jueves'))
+  it('mensual con días', () => expect(describeRecurrence({ ...base, freq: 'monthly', byMonthDay: [15, 1] })).toBe('Cada mes: días 1 y 15'))
+  it('tras completar', () => expect(describeRecurrence({ ...base, freq: 'daily', interval: 3, mode: 'completion' })).toBe('Cada 3 días, tras completarla'))
 })

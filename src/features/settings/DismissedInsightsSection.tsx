@@ -12,7 +12,7 @@ const INSIGHT_LABELS: Record<string, string> = {
   bestFocusHour: 'Mejor hora de foco',
   estimateBias: 'Sesgo de estimación',
   habitAtRisk: 'Hábito en riesgo',
-  zombieAccumulation: 'Tareas zombie acumuladas',
+  zombieAccumulation: 'Tareas que se aplazan mucho',
   goalCompletionRate: 'Ritmo de cumplimiento de objetivos',
   interruptionTrend: 'Tendencia de interrupciones',
   overcommitment: 'Sobrecarga de plan',
@@ -36,17 +36,17 @@ export function DismissedInsightsSection() {
       <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-text">
         <Lightbulb size={15} strokeWidth={1.75} /> Insights descartados
       </h2>
-      <p className="mb-3 text-xs text-text-faint">Restaura uno para que vuelva a aparecer cuando se cumpla.</p>
+      <p className="mb-3 text-sm text-text-muted">Restaura uno para que vuelva a aparecer cuando se cumpla.</p>
       {dismissed != null && dismissed.length === 0 && <EmptyState icon={Lightbulb} title="No has descartado ningún insight" />}
       {dismissed != null && dismissed.length > 0 && (
         <ul className="space-y-1.5">
           {dismissed.map((d) => (
             <li
               key={d.id}
-              className="flex items-center gap-2 rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm"
+              className="flex items-center gap-2 rounded-md border border-border bg-bg-soft px-3 py-2 text-sm"
             >
               <span className="min-w-0 flex-1 truncate text-text">{INSIGHT_LABELS[d.key] ?? d.key}</span>
-              <span className="shrink-0 text-xs text-text-faint">
+              <span className="shrink-0 text-xs text-text-muted">
                 {new Date(d.dismissedAt).toLocaleDateString('es')}
               </span>
               <button
