@@ -15,8 +15,8 @@ por fase, una versión Dexie por porción entregable (ninguna fase de este plan 
 | 15 | Interacción: issues #4 (arrastre), #5 (Mañana/Próxima semana incremental), #8 (`[`/`]`/`t`) | Hecha |
 | 16 | Rendimiento: code-splitting de Recharts (~370 KB) y SDK de Anthropic (~190 KB), `/tareas` con render progresivo | Hecha |
 | 17 | Convención de carga/error para `useLiveQuery` (101 usos, 3 patrones) | Hecha |
-| 18 | Huecos funcionales (detalle de proyecto, marcadores de XP, tiempo por atributo, `actualMin`, plantillas editables) | Pendiente |
-| 19 | Accesibilidad y teclado (`useListNav` en `/tareas`, reordenar sin arrastrar, `tablist` real) | Pendiente |
+| 18 | Huecos funcionales (detalle de proyecto, marcadores de XP, tiempo por atributo, `actualMin`, plantillas editables) | Hecha |
+| 19 | Accesibilidad y teclado (Alt+flechas para reordenar en todas las listas, Esc/Ctrl+A y `aria-sort` en `/tareas`, j/k en `/proyectos`, separador del panel con teclado) | Hecha |
 | 20 | Cobertura de tests (8 de 15 repositorios sin test) | Pendiente |
 | 21 | Verificación manual: issues #7, #9, #10, #11, #12, #13, #14 | Pendiente |
 
