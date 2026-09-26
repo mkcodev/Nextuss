@@ -149,24 +149,24 @@ export function QuickAddDialog() {
         {hasPreview && (
           <div className="flex flex-wrap gap-1.5">
             {finalScheduledDate && (
-              <span className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-[11px] text-text-muted">
+              <span className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-text-muted">
                 <Calendar size={11} strokeWidth={1.75} /> {formatDateChip(finalScheduledDate)}
               </span>
             )}
             {parsed.scheduledStart && (
-              <span className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-[11px] text-text-muted">
+              <span className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-text-muted">
                 <Clock size={11} strokeWidth={1.75} /> {parsed.scheduledStart}
               </span>
             )}
             {parsed.priority && (
               <span
-                className={`flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-[11px] font-medium ${PRIORITY_COLORS[parsed.priority]}`}
+                className={`flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs font-medium ${PRIORITY_COLORS[parsed.priority]}`}
               >
                 <Flag size={11} strokeWidth={1.75} /> P{parsed.priority}
               </span>
             )}
             {finalEstimateMin != null && (
-              <span className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-[11px] text-text-muted">
+              <span className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-text-muted">
                 <Hourglass size={11} strokeWidth={1.75} />
                 {finalEstimateMin < 60 ? `${finalEstimateMin} min` : `${finalEstimateMin / 60} h`}
               </span>
@@ -174,14 +174,14 @@ export function QuickAddDialog() {
             {parsed.tagNames.map((tag) => (
               <span
                 key={tag}
-                className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-[11px] text-text-muted"
+                className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-text-muted"
               >
                 <Tag size={11} strokeWidth={1.75} /> {tag}
               </span>
             ))}
             {parsed.goalQuery && (
               <span
-                className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] ${
+                className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${
                   matchedGoal ? 'border-accent bg-accent-soft text-accent' : 'border-border bg-surface text-text-faint'
                 }`}
               >
@@ -204,7 +204,7 @@ export function QuickAddDialog() {
         )}
 
         <div className="flex items-center justify-between pt-1">
-          <span className="flex items-center gap-1 text-[11px] text-text-faint">
+          <span className="flex items-center gap-1 text-xs text-text-faint">
             <Kbd>Tab</Kbd> formulario completo
           </span>
           <div className="flex gap-2">

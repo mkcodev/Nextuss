@@ -138,7 +138,7 @@ export function TodayView() {
       </p>
       {pending.length > 0 ? (
         <div>
-          <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wide text-text-faint">
+          <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-text-faint">
             Pendientes
           </p>
           <ul className="space-y-1">

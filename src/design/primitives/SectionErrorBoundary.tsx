@@ -41,7 +41,7 @@ export class SectionErrorBoundary extends Component<SectionErrorBoundaryProps, S
         <p className="text-xs font-medium text-text">
           No se pudo cargar {this.props.label ?? 'esta sección'}
         </p>
-        <p className="max-w-full truncate text-[11px] text-text-faint">{this.state.error.message}</p>
+        <p className="max-w-full truncate text-xs text-text-faint">{this.state.error.message}</p>
         <Button variant="secondary" onClick={this.reset} className="h-7 px-2 py-0 text-xs">
           <RefreshCw size={12} strokeWidth={1.75} /> Reintentar
         </Button>

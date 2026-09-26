@@ -47,7 +47,7 @@ export function OverdueTasks({ date }: { date: string }) {
               >
                 {t.title}
               </button>
-              <span className="shrink-0 text-[10px] text-text-faint">{t.scheduledDate}</span>
+              <span className="shrink-0 text-xs text-text-faint">{t.scheduledDate}</span>
               {isZombie && (
                 <span
                   title={`Pospuesta ${t.postponedCount} veces — usa el menú "···" para desglosarla, reducirla, aparcarla o eliminarla`}
@@ -60,7 +60,7 @@ export function OverdueTasks({ date }: { date: string }) {
                 <button
                   onClick={() => openEdit(t)}
                   title="¿La vinculamos a un objetivo?"
-                  className="flex shrink-0 items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-text-faint hover:bg-accent-soft hover:text-accent"
+                  className="flex shrink-0 items-center gap-0.5 rounded-md px-1.5 py-0.5 text-xs font-medium text-text-faint hover:bg-accent-soft hover:text-accent"
                 >
                   <Target size={10} strokeWidth={2.5} /> Vincular
                 </button>
@@ -68,7 +68,7 @@ export function OverdueTasks({ date }: { date: string }) {
               <button
                 onClick={() => carryOverToToday(t.id!, date)}
                 title="Mover a hoy"
-                className="flex shrink-0 items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-accent hover:bg-accent-soft"
+                className="flex shrink-0 items-center gap-0.5 rounded-md px-1.5 py-0.5 text-xs font-medium text-accent hover:bg-accent-soft"
               >
                 Hoy <ArrowRight size={10} strokeWidth={2.5} />
               </button>

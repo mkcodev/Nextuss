@@ -113,12 +113,12 @@ export function FocusPanel() {
             className={cn(interruptions > 0 && 'text-warning')}
           >
             <TriangleAlert size={15} strokeWidth={1.75} />
-            {interruptions > 0 && <span className="ml-0.5 text-[10px] font-semibold">{interruptions}</span>}
+            {interruptions > 0 && <span className="ml-0.5 text-xs font-semibold">{interruptions}</span>}
           </IconButton>
         )}
       </div>
 
-      <p className="text-center text-[11px] text-text-faint">
+      <p className="text-center text-xs text-text-faint">
         {mode !== 'work'
           ? 'El tiempo sigue corriendo aunque cambies de pestaña o recargues.'
           : taskId

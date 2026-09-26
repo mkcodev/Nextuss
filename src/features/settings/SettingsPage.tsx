@@ -249,7 +249,7 @@ function NotificationsSection() {
               <div key={key} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
                 <div>
                   <p className="text-xs font-medium text-text">{label}</p>
-                  <p className="text-[11px] text-text-faint">{description}</p>
+                  <p className="text-xs text-text-faint">{description}</p>
                 </div>
                 <Switch
                   checked={settings?.[key] !== false}
@@ -353,7 +353,7 @@ function PomodoroSection() {
       <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
         <div>
           <p className="text-xs font-medium text-text">Sonido al terminar</p>
-          <p className="text-[11px] text-text-faint">Además de la notificación, un tono corto</p>
+          <p className="text-xs text-text-faint">Además de la notificación, un tono corto</p>
         </div>
         <Switch
           checked={settings?.pomodoroSoundEnabled === true}
@@ -432,12 +432,12 @@ function AiSection() {
         </p>
       )}
 
-      <p className="mt-3 flex items-start gap-1.5 text-[11px] text-warning">
+      <p className="mt-3 flex items-start gap-1.5 text-xs text-warning">
         <TriangleAlert size={13} strokeWidth={1.75} className="mt-0.5 shrink-0" />
         La clave se guarda en texto plano en este navegador (IndexedDB), sin cifrar. No la compartas si usas un equipo compartido.
       </p>
 
-      <p className="mt-2 text-[11px] text-text-faint">Peticiones hechas desde esta app: {settings?.aiUsageCount ?? 0}</p>
+      <p className="mt-2 text-xs text-text-faint">Peticiones hechas desde esta app: {settings?.aiUsageCount ?? 0}</p>
     </Card>
   )
 }
@@ -532,7 +532,7 @@ function TelegramSection() {
           <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
             <div>
               <p className="text-xs font-medium text-text">Reenviar avisos por Telegram</p>
-              <p className="text-[11px] text-text-faint">Además de (o en vez de) la notificación nativa</p>
+              <p className="text-xs text-text-faint">Además de (o en vez de) la notificación nativa</p>
             </div>
             <Switch
               checked={settings?.telegramForwardNotifications === true}
@@ -553,7 +553,7 @@ function TelegramSection() {
         </>
       )}
 
-      <p className="mt-3 flex items-start gap-1.5 text-[11px] text-warning">
+      <p className="mt-3 flex items-start gap-1.5 text-xs text-warning">
         <TriangleAlert size={13} strokeWidth={1.75} className="mt-0.5 shrink-0" />
         La recepción de mensajes solo funciona con esta app abierta en una pestaña visible. Para 24/7
         hace falta desplegar el worker opcional (ver <code>worker/README.md</code>) — el token deja de

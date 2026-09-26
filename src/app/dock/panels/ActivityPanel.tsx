@@ -43,7 +43,7 @@ export function ActivityPanel() {
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-medium text-text">{item.title}</p>
-            <p className="text-[11px] text-text-faint">
+            <p className="text-xs text-text-faint">
               {item.subtitle} · {formatDistanceToNowStrict(item.time, { addSuffix: true, locale: es })}
             </p>
           </div>

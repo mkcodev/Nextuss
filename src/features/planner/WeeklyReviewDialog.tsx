@@ -177,7 +177,7 @@ export function WeeklyReviewDialog() {
                     type="button"
                     onClick={generateSummary}
                     disabled={summarizing}
-                    className="flex items-center gap-1 text-[11px] font-medium text-accent hover:underline disabled:opacity-50"
+                    className="flex items-center gap-1 text-xs font-medium text-accent hover:underline disabled:opacity-50"
                   >
                     {summarizing ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} strokeWidth={1.75} />}
                     Generar con IA

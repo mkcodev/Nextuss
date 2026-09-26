@@ -109,7 +109,7 @@ export function TaskBreakdownDialog() {
                     onChange={(e) => updateSubtask(i, { estimateMin: Number(e.target.value) || 5 })}
                     className="w-16 shrink-0 rounded-md border border-border bg-bg-soft px-1.5 py-1 text-right text-xs text-text outline-none focus:border-accent"
                   />
-                  <span className="shrink-0 text-[10px] text-text-faint">min</span>
+                  <span className="shrink-0 text-xs text-text-faint">min</span>
                   <button type="button" onClick={() => removeSubtask(i)} className="shrink-0 text-text-faint hover:text-danger">
                     <Trash2 size={13} />
                   </button>

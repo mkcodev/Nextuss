@@ -36,7 +36,7 @@ export function InsightsPanel() {
             className="min-w-0 flex-1 text-left"
           >
             <p className="truncate text-xs font-medium text-text">{insight.title}</p>
-            <p className="line-clamp-2 text-[11px] text-text-faint">{insight.body}</p>
+            <p className="line-clamp-2 text-xs text-text-faint">{insight.body}</p>
           </button>
           <button
             onClick={() => dismiss(insight.key)}

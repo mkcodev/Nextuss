@@ -24,12 +24,12 @@ export function Field({ label, hint, error, children, className }: FieldProps) {
       </label>
       {children({ id, 'aria-describedby': describedBy })}
       {hint && !error && (
-        <p id={hintId} className="text-[11px] text-text-faint">
+        <p id={hintId} className="text-xs text-text-faint">
           {hint}
         </p>
       )}
       {error && (
-        <p id={errorId} className="text-[11px] text-danger">
+        <p id={errorId} className="text-xs text-danger">
           {error}
         </p>
       )}
