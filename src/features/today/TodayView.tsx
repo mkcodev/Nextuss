@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { addDays, format, subDays } from 'date-fns'
@@ -6,6 +6,7 @@ import { es } from 'date-fns/locale'
 import { CheckCheck, ChevronLeft, ChevronRight, Moon, Plus, Sparkles, Target } from 'lucide-react'
 import { Alert, Button, EmptyState, Skeleton } from '../../design/primitives'
 import { useInsights } from '../stats/insights/useInsights'
+import { cn } from '../../lib/cn'
 import { todayKey, isHabitScheduledOn, dateKey, parseDateKey, weekKey } from '../../lib/dates'
 import { useHabitsWithStats } from '../habits/useHabitsWithStats'
 import { HabitCard } from '../habits/HabitCard'
@@ -20,7 +21,7 @@ import { UnscheduledTray } from '../planner/UnscheduledTray'
 import { CapacityBanner } from '../planner/CapacityBanner'
 import { OverdueTasks } from '../planner/OverdueTasks'
 import { NorthStarCallout } from '../planner/NorthStarCallout'
-import { getTasksForDate, getOverdueTasks } from '../../db/repositories/tasks'
+import { getTasksForDate, getOverdueTasks, getUnscheduledTasks } from '../../db/repositories/tasks'
 import { getReview } from '../../db/repositories/reviews'
 import { listGoalsForPeriod } from '../../db/repositories/goals'
 import { getCheckInForDate } from '../../db/repositories/checkins'
@@ -300,14 +301,38 @@ export function TodayView() {
             </div>
           </div>
 
-          <div>
-            <h2 className="mb-1.5 text-sm font-semibold text-text">Sin planificar</h2>
-            <UnscheduledTray date={date} />
-          </div>
-
-          <DayPlanSuggestion date={date} />
+          <UnscheduledSection date={date} />
         </div>
       </div>
     </div>
+  )
+}
+
+/** "Sin planificar" plegado con su recuento: se abre cuando toca repartir tareas en el día (arrastrarlas
+ *  a la línea de tiempo o pedir la sugerencia de IA), sin ocupar la columna el resto del tiempo. */
+function UnscheduledSection({ date }: { date: string }) {
+  const [open, setOpen] = useState(false)
+  const panelId = useId()
+  const count = useLiveQuery(async () => (await getUnscheduledTasks(date)).length, [date])
+  return (
+    <section>
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center gap-1.5 text-left text-sm font-semibold text-text"
+      >
+        <ChevronRight size={15} strokeWidth={2} className={cn('shrink-0 text-text-muted transition-transform', open && 'rotate-90')} aria-hidden="true" />
+        Sin planificar
+        {count != null && <span className="font-normal tabular-nums text-text-muted">{count}</span>}
+      </button>
+      {open && (
+        <div id={panelId} className="mt-2 space-y-4">
+          <UnscheduledTray date={date} />
+          <DayPlanSuggestion date={date} />
+        </div>
+      )}
+    </section>
   )
 }
