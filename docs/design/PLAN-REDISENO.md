@@ -60,8 +60,10 @@ Comandos de Impeccable más útiles: `critique` (jerarquía/claridad), `audit` (
 - [x] Listas con animación de entrada/salida (atrasadas, subtareas, bloque Ahora), respetando reduced-motion.
 
 ### 9. Pulido final
-- [ ] `/impeccable polish` → `/web-design-guidelines` → `/impeccable animate` → `/impeccable harden`.
-- [ ] Verificación completa: 360px, escritorio, claro/oscuro, teclado, `prefers-reduced-motion`.
+- [x] Re-crítica con el mismo método que AUDITORIA.md: **25/40 → 27/40**, detector de código a 0 (#55).
+- [x] Lote de arreglos: pérdida de datos, errores visibles, teclado (radiogroup con flechas, foco dentro del diálogo), NumberInput, semana en lunes, sin culpa, contraste, móvil (#55).
+- [x] Tareas como lista del sistema con j/k, semana L–D en Hábitos, Hoy más ligero (#56).
+- [x] DESIGN.md regenerado desde el código real (#57).
 
 ## Reglas que no cambian
 - Nada de emoji: solo iconos Lucide lineales.
