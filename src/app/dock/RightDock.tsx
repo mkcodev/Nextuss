@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
-import type { DragEvent as ReactDragEvent, PointerEvent as ReactPointerEvent } from 'react'
+import type { DragEvent as ReactDragEvent, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 import { ChevronsDown, ChevronsUp, X } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useUIStore, type DockZone } from '../uiStore'
@@ -162,6 +162,19 @@ function DockZones() {
     [setSplitPct],
   )
 
+  // Teclado (Fase 19): flechas ±5 %, Inicio/Fin a los topes — el mismo rango que el arrastre.
+  const onSeparatorKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget) return
+    const step = { ArrowUp: -5, ArrowDown: 5 }[e.key]
+    let next: number | null = null
+    if (step != null) next = Math.min(85, Math.max(15, dock.splitPct + step))
+    else if (e.key === 'Home') next = 15
+    else if (e.key === 'End') next = 85
+    if (next == null) return
+    e.preventDefault()
+    setSplitPct(next)
+  }
+
   return (
     <div ref={bodyRef} className="flex min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-col" style={{ height: `${livePct ?? dock.splitPct}%` }}>
@@ -173,14 +186,21 @@ function DockZones() {
         role="separator"
         aria-orientation="horizontal"
         aria-label="Redimensionar paneles"
+        aria-valuenow={Math.round(livePct ?? dock.splitPct)}
+        aria-valuemin={8}
+        aria-valuemax={92}
+        aria-valuetext={`Zona superior al ${Math.round(livePct ?? dock.splitPct)} %`}
+        tabIndex={0}
+        onKeyDown={onSeparatorKeyDown}
         className="group relative flex h-2.5 shrink-0 cursor-row-resize touch-none items-center justify-center"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
       >
-        <div className="h-px w-full bg-border transition-colors group-hover:bg-accent/50" />
-        <div className="absolute flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="h-px w-full bg-border transition-colors group-hover:bg-accent/50 group-focus-visible:bg-accent" />
+        <div className="absolute flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
           <button
+            type="button"
             onClick={() => setSplitPct(92)}
             title="Maximizar zona superior"
             aria-label="Maximizar zona superior"
@@ -189,6 +209,7 @@ function DockZones() {
             <ChevronsUp size={11} strokeWidth={2} />
           </button>
           <button
+            type="button"
             onClick={() => setSplitPct(8)}
             title="Maximizar zona inferior"
             aria-label="Maximizar zona inferior"
