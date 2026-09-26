@@ -33,8 +33,7 @@ export function ProjectsPage() {
     <div className="mx-auto max-w-3xl space-y-4 p-6 lg:p-8">
       <header className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-text-faint">Gestión</p>
-          <h1 className="mt-1 text-2xl font-semibold text-text">Proyectos</h1>
+          <h1 className="text-xl font-semibold tracking-tight text-text">Proyectos</h1>
         </div>
         <div className="flex gap-2">
           <Button variant="ghost" onClick={() => setShowArchived((v) => !v)}>
@@ -84,7 +83,7 @@ export function ProjectsPage() {
 
       {showArchived && (
         <div className="space-y-2 border-t border-border pt-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-text-faint">Archivados</p>
+          <h2 className="text-sm font-semibold text-text-muted">Archivados</h2>
           {archivedProjects.length === 0 && <p className="text-sm text-text-faint">No hay proyectos archivados.</p>}
           {archivedProjects.map((project) => (
             <div

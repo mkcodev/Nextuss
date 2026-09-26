@@ -586,8 +586,7 @@ export function SettingsPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6 lg:p-8">
       <header>
-        <p className="text-xs font-medium uppercase tracking-wide text-text-faint">Ajustes</p>
-        <h1 className="mt-1 text-2xl font-semibold text-text">Preferencias</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-text">Preferencias</h1>
       </header>
 
       <Card className="p-4">
