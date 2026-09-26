@@ -41,15 +41,14 @@ Comandos de Impeccable más útiles: `critique` (jerarquía/claridad), `audit` (
 - [x] CLAUDE: escribirla en `DESIGN.md` (raíz del repo, lo leen las skills) + contrato en `.impeccable/surfaces/src-app.md`.
 
 ### 5. Sistema de diseño base (#22, rama propia)
-- [ ] Tokens: escala tipográfica (quitar `text-[10px]`/`[11px]`), elevación, usar `--dur-*`/`--ease-*`, radios en Card/Button.
-- [ ] Primitivos: `Button` con `size`, `Card` con padding, fusionar Tabs+SegmentedControl, nuevos `FormSection`/`FieldGroup`/`Collapsible`.
-- [ ] Color: `PRIORITY_COLORS` por tema, `COLOR_PRESETS` único (hoy duplicado en 3 formularios), sin `#5EC8FF` repetido.
+- [x] Tokens y color (#38, PR #39): paleta de DESIGN.md, radios, sin cian/brillos/cuarzo, texto mínimo 12px, prioridades por tema, paleta única.
+- [x] Primitivos (#40, PR #41): Dialog (aviso de cambios, Esc, clic fuera, foco), Button tamaños + guardando, Tabs = SegmentedControl, ToggleGroup, campos, nav.
+- [x] Páginas (#42, PR #43): Hoy con bloque Ahora y atrasadas resumidas, Tareas, Hábitos, cabeceras sin etiquetas en mayúsculas.
 
 ### 6. TaskForm (#6/#21, rama propia) — el modelo para el resto
-- [ ] CLAUDE: usar `PROMPT-OPUS.md` con objetivo TaskForm → auditoría → **3 variantes** en mockup ASCII.
-- [ ] TÚ: elegir variante. Ser concreto: "el título pesa poco", "la sección Repetir sobra abierta".
-- [ ] CLAUDE: implementar, verificar en navegador (móvil+escritorio, claro+oscuro, solo teclado).
-- [ ] TÚ: probarlo tú mismo creando y editando 3 tareas reales.
+- [x] Diseño: vista "Tarea completa" de la dirección F (ya elegida en el paso 4, sin nueva ronda de variantes).
+- [x] Implementado: título grande + notas, fichas (prioridad, fecha, proyecto, estimación), "Más" plegado con resumen, subtareas también al crear, "Crear otra", Ctrl+Enter.
+- [ ] TÚ: probarlo creando y editando 3 tareas reales.
 
 ### 7. Resto de formularios (misma receta, 1 rama/PR cada uno)
 - [ ] ProjectForm  - [ ] HabitForm  - [ ] GoalForm
