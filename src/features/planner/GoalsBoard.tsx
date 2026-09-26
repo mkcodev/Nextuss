@@ -35,8 +35,10 @@ export function GoalsBoard() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1.5">
           <button
+            type="button"
             onClick={() => setWeekCursor((k) => previousPeriodKey('week', k))}
-            className="rounded-lg border border-border p-1.5 text-text-muted hover:bg-surface-hover hover:text-text"
+            aria-label="Semana anterior"
+            className="rounded-sm border border-border p-1.5 text-text-muted hover:bg-surface-hover hover:text-text"
           >
             <ChevronLeft size={15} />
           </button>
@@ -45,8 +47,10 @@ export function GoalsBoard() {
             <p className="text-xs text-text-muted">{formatPeriodLabel('week', weekCursor)}</p>
           </div>
           <button
+            type="button"
             onClick={() => setWeekCursor((k) => nextPeriodKey('week', k))}
-            className="rounded-lg border border-border p-1.5 text-text-muted hover:bg-surface-hover hover:text-text"
+            aria-label="Semana siguiente"
+            className="rounded-sm border border-border p-1.5 text-text-muted hover:bg-surface-hover hover:text-text"
           >
             <ChevronRight size={15} />
           </button>
@@ -55,14 +59,14 @@ export function GoalsBoard() {
               onClick={() => setWeekCursor(weekKey())}
               className="ml-1 text-xs font-medium text-accent hover:underline"
             >
-              Hoy
+              Semana actual
             </button>
           )}
         </div>
 
         <div className="flex items-center gap-2">
           <label className="flex items-center gap-1.5 text-xs text-text-muted">
-            <input type="checkbox" checked={showCompleted} onChange={(e) => setShowCompleted(e.target.checked)} />
+            <input type="checkbox" checked={showCompleted} onChange={(e) => setShowCompleted(e.target.checked)} className="size-4 accent-[var(--color-accent)]" />
             Mostrar completados
           </label>
           <Button variant="secondary" onClick={() => openReview(weekKey())} className="text-xs">

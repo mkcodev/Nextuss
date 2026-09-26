@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { AlertTriangle, ChevronDown, ChevronRight, History, Pencil, Plus, Star, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, History, Pencil, Plus, Star, Trash2, Unlink } from 'lucide-react'
 import { db } from '../../db/schema'
 import { cn } from '../../lib/cn'
-import { Badge, Card, Icon, RingProgress } from '../../design/primitives'
+import { Card, Icon, RingProgress } from '../../design/primitives'
 import type { RingSegment } from '../../design/primitives/RingProgress'
 import type { Attribute, Goal, Task } from '../../db/types'
 import { createTask } from '../../db/repositories/tasks'
@@ -112,21 +112,24 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
               </span>
             )}
             {atRisk && (
-              <Badge tone="warning">
-                <AlertTriangle size={11} /> En riesgo
-              </Badge>
+              <span className="text-xs text-text-muted" title="Va más lento que el tiempo que ha pasado del periodo">
+                · va con retraso
+              </span>
             )}
           </div>
 
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-text-faint">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-text-muted">
             {progress.source === 'segments' && (
               <span className="tabular-nums">
                 {progress.done}/{progress.total} completado{progress.total === 1 ? '' : 's'}
               </span>
             )}
             {attribute && (
-              <span className="inline-flex items-center gap-1" style={{ color: attribute.color }}>
-                <Icon name={attribute.icon} size={11} /> {attribute.name}
+              <span className="inline-flex items-center gap-1 text-text-muted">
+                <span style={{ color: attribute.color }} aria-hidden="true">
+                  <Icon name={attribute.icon} size={12} />
+                </span>
+                {attribute.name}
               </span>
             )}
           </div>
@@ -134,15 +137,21 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
 
         <div className="flex shrink-0 items-center gap-1">
           <button
+            type="button"
             onClick={() => setPriorityGoal(goal.id!)}
+            aria-pressed={!!goal.isPriority}
+            aria-label={goal.isPriority ? 'Quitar como objetivo principal' : 'Marcar como objetivo principal'}
             title={goal.isPriority ? 'Quitar como objetivo principal' : 'Marcar como objetivo principal'}
-            className={cn('rounded-md p-1.5', goal.isPriority ? 'text-warning' : 'text-text-faint hover:text-warning')}
+            className={cn('rounded-sm p-1.5', goal.isPriority ? 'text-accent' : 'text-text-muted hover:text-text')}
           >
             <Star size={15} fill={goal.isPriority ? 'currentColor' : 'none'} />
           </button>
           <button
+            type="button"
             onClick={() => setExpanded((e) => !e)}
-            className="rounded-md p-1.5 text-text-faint hover:text-text"
+            aria-expanded={expanded}
+            aria-label={expanded ? `Plegar "${goal.title}"` : `Desplegar "${goal.title}"`}
+            className="rounded-sm p-1.5 text-text-muted hover:text-text"
           >
             {expanded ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
           </button>
@@ -151,7 +160,7 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
 
       {expanded && (
         <div className="mt-3 space-y-3 border-t border-border pt-3">
-          {goal.notes && <p className="text-xs italic text-text-muted">"{goal.notes}"</p>}
+          {goal.notes && <p className="text-sm text-text-muted">{goal.notes}</p>}
 
           {!nested && children.length > 0 && (
             <div className="space-y-2">
@@ -168,6 +177,10 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
                   t && (
                     <li key={t.id} className="flex items-center gap-2 text-sm">
                       <button
+                        type="button"
+                        role="checkbox"
+                        aria-checked={t.status === 'done'}
+                        aria-label={t.title}
                         onClick={() => toggleTaskDoneWithFeedback(t.id!, t.title)}
                         className={cn(
                           'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border',
@@ -178,11 +191,13 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
                         {t.title}
                       </span>
                       <button
+                        type="button"
                         onClick={() => unlinkTaskFromGoal(goal.id!, t.id!)}
-                        className="shrink-0 text-text-faint hover:text-danger"
-                        title="Desvincular"
+                        aria-label={`Desvincular "${t.title}" del objetivo`}
+                        title="Desvincular (la tarea no se borra)"
+                        className="shrink-0 rounded-sm p-1 text-text-muted hover:text-text"
                       >
-                        <Trash2 size={12} />
+                        <Unlink size={13} />
                       </button>
                     </li>
                   ),
@@ -195,12 +210,16 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
+              aria-label={`Añadir tarea vinculada a "${goal.title}"`}
               placeholder="Añadir tarea vinculada…"
-              className="flex-1 rounded-lg border border-border bg-bg-soft px-2.5 py-1 text-xs text-text outline-none focus:border-accent"
+              autoComplete="off"
+              className="h-7 flex-1 rounded-sm border border-border bg-surface px-2.5 text-sm text-text placeholder:text-text-muted focus:border-accent"
             />
             <button
+              type="button"
               onClick={handleAddTask}
-              className="flex items-center justify-center rounded-lg border border-border px-2 text-text-muted hover:bg-surface-hover hover:text-text"
+              aria-label="Añadir tarea"
+              className="grid size-7 place-items-center rounded-sm border border-border text-text-muted hover:bg-surface-hover hover:text-text"
             >
               <Plus size={13} />
             </button>
