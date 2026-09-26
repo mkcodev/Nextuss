@@ -77,7 +77,8 @@ export async function createAttribute(input: { name: string; icon: string; color
 export function deleteAttribute(id: number) {
   return db.transaction('rw', db.attributes, db.habits, db.goals, async () => {
     await db.habits.where('attributeId').equals(id).modify({ attributeId: undefined })
-    await db.goals.where('attributeId').equals(id).modify({ attributeId: undefined })
+    // `goals` no indexa `attributeId` (tabla pequeña): filtro en memoria, no `where`.
+    await db.goals.filter((g) => g.attributeId === id).modify({ attributeId: undefined })
     await db.attributes.delete(id)
   })
 }
