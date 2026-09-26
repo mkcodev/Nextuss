@@ -17,7 +17,7 @@ por fase, una versión Dexie por porción entregable (ninguna fase de este plan 
 | 17 | Convención de carga/error para `useLiveQuery` (101 usos, 3 patrones) | Hecha |
 | 18 | Huecos funcionales (detalle de proyecto, marcadores de XP, tiempo por atributo, `actualMin`, plantillas editables) | Hecha |
 | 19 | Accesibilidad y teclado (Alt+flechas para reordenar en todas las listas, Esc/Ctrl+A y `aria-sort` en `/tareas`, j/k en `/proyectos`, separador del panel con teclado) | Hecha |
-| 20 | Cobertura de tests (8 de 15 repositorios sin test) | Pendiente |
+| 20 | Cobertura de tests: los 15 repositorios y los validadores de IA (382 tests; arreglado `deleteAttribute`) | Hecha |
 | 21 | Verificación manual: issues #7, #9, #10, #11, #12, #13, #14 | Pendiente |
 
 ## Bloque B — Diseño (después del A)
