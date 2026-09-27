@@ -151,7 +151,13 @@ export function HabitsPage() {
         </div>
       </header>
 
-      {activeEntries === undefined && <p className="text-sm text-text-faint">Cargando…</p>}
+      {activeEntries === undefined && (
+        <div className="space-y-2" aria-hidden="true">
+          <Skeleton className="h-[100px] w-full" />
+          <Skeleton className="h-[100px] w-full" />
+          <Skeleton className="h-[100px] w-full" />
+        </div>
+      )}
 
       {activeEntries?.length === 0 && (
         <div className="rounded-2xl border border-dashed border-border p-8 text-center">

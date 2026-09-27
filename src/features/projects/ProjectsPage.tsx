@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Archive, FolderKanban, LayoutTemplate, Plus } from 'lucide-react'
-import { Button, DropIndicator, EmptyState } from '../../design/primitives'
+import { Button, DropIndicator, EmptyState, Skeleton } from '../../design/primitives'
 import { listAttributes } from '../../db/repositories/gamification'
 import { archiveProject, listProjects, moveProjectBetween } from '../../db/repositories/projects'
 import { useProjectFormStore } from './projectFormStore'
@@ -69,7 +69,13 @@ export function ProjectsPage() {
         </div>
       </header>
 
-      {allProjects === undefined && <p className="text-sm text-text-faint">Cargando…</p>}
+      {allProjects === undefined && (
+        <div className="space-y-2" aria-hidden="true">
+          <Skeleton className="h-[78px] w-full" />
+          <Skeleton className="h-[78px] w-full" />
+          <Skeleton className="h-[78px] w-full" />
+        </div>
+      )}
 
       {allProjects !== undefined && activeProjects.length === 0 && (
         <EmptyState
