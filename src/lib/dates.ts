@@ -69,8 +69,11 @@ export function isHabitScheduledOn(habit: Habit, date: Date): boolean {
 
   switch (schedule.type) {
     case 'everyNDays': {
+      // El ciclo se extiende también hacia atrás desde el ancla (como los demás horarios): si no,
+      // al cambiar a «cada N días» (ancla = hoy) ningún día pasado cuenta y la racha cae a 0.
+      const interval = Math.max(1, schedule.interval)
       const diff = differenceInCalendarDays(date, parseDateKey(schedule.anchorDate))
-      return diff >= 0 && diff % Math.max(1, schedule.interval) === 0
+      return ((diff % interval) + interval) % interval === 0
     }
     case 'monthDays':
       return schedule.days.includes(date.getDate())
