@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IA opcional · 3 variantes</title>
+<style>
+  /* Tokens reales de la app (src/index.css, tema oscuro). */
+  :root {
+    --bg: #131316; --bg-soft: #0f0f11; --hover: #1f1f24; --border: #26262c; --border-strong: #34343c;
+    --text: #e7e7eb; --muted: #9d9da8; --faint: #8b8b96;
+    --accent: #7c84e8; --accent-soft: rgba(124,132,232,.16); --on-accent: #0f1020;
+    --success: #4cc38a; --warning: #f0a25e; --danger: #f07470;
+    --shadow: 0 24px 60px -12px rgba(0,0,0,.6);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg-soft); color: var(--text); font: 14px/1.5 InterVariable, ui-sans-serif, system-ui, -apple-system, sans-serif; }
+  .lucide { width: 15px; height: 15px; stroke-width: 1.75; flex: none; }
+  .page { max-width: 1180px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -.01em; margin: 0 0 6px; }
+  .lead { color: var(--muted); max-width: 72ch; margin: 0 0 24px; }
+  .tabs { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); margin-bottom: 24px; flex-wrap: wrap; }
+  .tabs button { font: inherit; color: var(--muted); background: none; border: 0; padding: 6px 14px; border-radius: 6px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--hover); color: var(--text); font-weight: 500; }
+  .variant { display: none; }
+  .variant.on { display: block; }
+  .vhead { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 4px; }
+  .vhead h2 { font-size: 17px; font-weight: 600; margin: 0; }
+  .tag { font-size: 12px; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0 8px; }
+  .idea { color: var(--muted); margin: 0 0 20px; max-width: 80ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
+  .scene { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .scene > .cap { font-size: 12px; color: var(--faint); padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+  .scene > .cap b { color: var(--muted); font-weight: 500; }
+  .stage { padding: 16px; position: relative; }
+  .pc { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+  .pc > div { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: var(--bg); }
+  .pc h3 { font-size: 13px; margin: 0 0 6px; font-weight: 600; }
+  .pc ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .pc li { margin: 3px 0; }
+  .pro h3 { color: var(--success); } .con h3 { color: var(--warning); }
+  @media (max-width: 700px) { .pc { grid-template-columns: 1fr; } }
+
+  /* Piezas de la app */
+  .hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .hdr .t { font-size: 16px; font-weight: 600; margin-right: auto; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 6px; font: inherit; font-size: 13px; border: 1px solid var(--border-strong); background: transparent; color: var(--text); cursor: default; white-space: nowrap; }
+  .btn.p { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 500; }
+  .btn.g { border-color: transparent; color: var(--muted); }
+  .btn.sm { height: 26px; font-size: 12px; padding: 0 8px; }
+  .btn .lucide { width: 14px; height: 14px; }
+  .ai { color: var(--accent); }
+  .row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; background: var(--bg); }
+  .row .n { flex: 1; min-width: 0; }
+  .row .n small { display: block; color: var(--faint); font-size: 12px; }
+  .ico { width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; background: var(--hover); color: var(--muted); flex: none; }
+  .chk { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border-strong); flex: none; display: grid; place-items: center; }
+  .chk.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .chk.on::after { content: ""; width: 8px; height: 4px; border: 2px solid currentColor; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px,-1px); }
+  .muted { color: var(--muted); } .faint { color: var(--faint); font-size: 12px; }
+  .dialog { border: 1px solid var(--border-strong); border-radius: 12px; background: var(--bg); box-shadow: var(--shadow); padding: 16px; }
+  .dialog .dt { font-size: 15px; font-weight: 600; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+  .field { border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 10px; color: var(--text); background: var(--bg-soft); margin-bottom: 10px; }
+  .field.ph { color: var(--faint); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .chip { font-size: 12px; border: 1px solid var(--border-strong); border-radius: 999px; padding: 2px 9px; color: var(--muted); }
+  .chip.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); align-items: center; }
+  .foot .faint { margin-right: auto; }
+  .ghost { border-style: dashed; background: transparent; }
+  .ghost .n { color: var(--muted); }
+  .iconbtn { width: 26px; height: 26px; border-radius: 6px; display: grid; place-items: center; color: var(--faint); border: 1px solid transparent; }
+  .iconbtn.ok { color: var(--success); border-color: var(--border); }
+  .iconbtn.no { border-color: var(--border); }
+  .goal { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .goal .gt { font-weight: 600; display: flex; gap: 8px; align-items: center; }
+  .bar { height: 4px; border-radius: 2px; background: var(--hover); margin: 8px 0 12px; }
+  .inline { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px dashed var(--border-strong); border-radius: 8px; color: var(--muted); font-size: 13px; }
+  .inline .n { flex: 1; }
+  .tree { margin: 0 0 0 14px; padding-left: 12px; border-left: 1px solid var(--border); }
+  .kbd { font-size: 11px; color: var(--faint); border: 1px solid var(--border-strong); border-radius: 4px; padding: 0 5px; }
+  .palette { border: 1px solid var(--border-strong); border-radius: 12px; background: var(--bg); box-shadow: var(--shadow); overflow: hidden; }
+  .palette .q { display: flex; gap: 8px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 15px; }
+  .palette .sec { padding: 8px 14px 4px; font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
+  .palette .it { display: flex; gap: 10px; align-items: center; padding: 7px 14px; font-size: 13px; }
+  .palette .it.sel { background: var(--hover); }
+  .palette .it .n { flex: 1; }
+  .kind { font-size: 11px; color: var(--faint); border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; }
+  .rec { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 16px 18px; margin: 28px 0 0; }
+  .rec h2 { font-size: 15px; margin: 0 0 6px; }
+  .rec p { margin: 4px 0; color: var(--text); }
+  .common { border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; margin-top: 16px; background: var(--bg); }
+  .common h2 { font-size: 14px; margin: 0 0 6px; }
+  .common ul { margin: 0; padding-left: 18px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main class="page">
+  <h1>IA opcional: 3 variantes</h1>
+  <p class="lead">Issue #60: sugerir hábitos, generar plantillas de proyecto y proponer tareas para un objetivo. Las tres variantes hacen lo mismo por dentro; cambia <strong>dónde aparece la IA y cómo aceptas lo que propone</strong>. Todo es opcional: sin clave de API en Ajustes, nada de esto se ve.</p>
+
+  <div class="tabs" role="tablist" aria-label="Variantes">
+    <button role="tab" aria-selected="true" data-v="a">A · Botón + revisión</button>
+    <button role="tab" aria-selected="false" data-v="b">B · En línea, donde hay hueco</button>
+    <button role="tab" aria-selected="false" data-v="c">C · Pedir a la IA (Ctrl K)</button>
+  </div>
+
+  <!-- ============ A ============ -->
+  <section class="variant on" id="v-a">
+    <div class="vhead"><h2>A · Botón + revisión</h2><span class="tag">mismo patrón que «Desglosar con IA»</span></div>
+    <p class="idea">Un botón discreto con el destello en cada sitio. Abre un diálogo: das un poco de contexto, la IA propone, revisas con casillas y editas. Nada se guarda hasta «Crear».</p>
+    <div class="grid">
+      <div class="scene"><div class="cap"><b>Hábitos</b> · cabecera + diálogo</div><div class="stage">
+        <div class="hdr"><span class="t">Hábitos</span><span class="btn g"><i data-lucide="sparkles" class="ai"></i>Sugerir</span><span class="btn p"><i data-lucide="plus"></i>Nuevo hábito</span></div>
+        <div class="dialog">
+          <div class="dt"><i data-lucide="sparkles" class="ai"></i>Sugerir hábitos</div>
+          <div class="field">Dormir mejor y tener más energía por la mañana</div>
+          <div class="chips"><span class="chip on">Salud</span><span class="chip">Mente</span><span class="chip">Trabajo</span></div>
+          <div class="row"><span class="chk on"></span><span class="ico"><i data-lucide="moon"></i></span><span class="n">Pantallas fuera a las 23:00<small>Sí / No · todos los días</small></span></div>
+          <div class="row"><span class="chk on"></span><span class="ico"><i data-lucide="sun"></i></span><span class="n">Luz natural al levantarte<small>Duración · 10 min · todos los días</small></span></div>
+          <div class="row"><span class="chk"></span><span class="ico"><i data-lucide="coffee"></i></span><span class="n">Nada de café después de las 15:00<small>A evitar · todos los días</small></span></div>
+          <div class="foot"><span class="faint">Ya tienes «Beber agua»: no se repite</span><span class="btn g">Cancelar</span><span class="btn p">Crear 2 hábitos</span></div>
+        </div>
+      </div></div>
+
+      <div class="scene"><div class="cap"><b>Plantillas</b> · Ajustes › Plantillas de proyecto</div><div class="stage">
+        <div class="hdr"><span class="t">Plantillas de proyecto</span><span class="btn g"><i data-lucide="sparkles" class="ai"></i>Generar</span><span class="btn">Nueva</span></div>
+        <div class="dialog">
+          <div class="dt"><i data-lucide="sparkles" class="ai"></i>Generar plantilla</div>
+          <div class="field">Lanzar un podcast de 10 episodios</div>
+          <div class="row"><span class="ico"><i data-lucide="music"></i></span><span class="n">Lanzar podcast<small>8 tareas · 3 fases</small></span><span class="btn sm g">Editar</span></div>
+          <div class="tree">
+            <div class="row"><span class="chk on"></span><span class="n">Definir formato y duración<small>45 min</small></span></div>
+            <div class="row"><span class="chk on"></span><span class="n">Grabar episodio piloto<small>2 h</small></span></div>
+            <div class="row"><span class="chk on"></span><span class="n">Elegir hosting y publicar tráiler<small>1 h</small></span></div>
+          </div>
+          <div class="foot"><span class="faint">+5 tareas más</span><span class="btn g">Cancelar</span><span class="btn p">Guardar plantilla</span></div>
+        </div>
+      </div></div>
+
+      <div class="scene"><div class="cap"><b>Objetivo</b> · menú de la tarjeta</div><div class="stage">
+        <div class="goal"><div class="gt"><i data-lucide="target"></i>Publicar la web del estudio<span class="faint" style="margin-left:auto">Mes</span></div><div class="bar"></div>
+          <div class="hdr" style="margin:0"><span class="faint" style="margin-right:auto">0 tareas</span><span class="btn sm g"><i data-lucide="sparkles" class="ai"></i>Proponer tareas</span></div></div>
+        <div class="dialog" style="margin-top:12px">
+          <div class="dt"><i data-lucide="sparkles" class="ai"></i>Tareas para «Publicar la web del estudio»</div>
+          <div class="row"><span class="chk on"></span><span class="n">Escribir textos de portada y servicios<small>1 h 30 · sin fecha</small></span></div>
+          <div class="row"><span class="chk on"></span><span class="n">Elegir 6 fotos de proyectos<small>45 min</small></span></div>
+          <div class="row"><span class="chk on"></span><span class="n">Configurar dominio y SSL<small>30 min</small></span></div>
+          <div class="foot"><span class="faint">Se vinculan al objetivo</span><span class="btn g">Cancelar</span><span class="btn p">Crear 3 tareas</span></div>
+        </div>
+      </div></div>
+    </div>
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>Coherente: ya existe «Desglosar con IA» y funciona así.</li><li>Nunca aparece sin que la pidas: cero ruido para TDAH.</li><li>Revisión clara antes de guardar; fácil de validar y testear.</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>Hay que saber que el botón existe (menos descubrible).</li><li>Un paso más (diálogo) incluso para 1 tarea.</li></ul></div>
+    </div>
+  </section>
+
+  <!-- ============ B ============ -->
+  <section class="variant" id="v-b">
+    <div class="vhead"><h2>B · En línea, donde hay hueco</h2><span class="tag">mismo patrón que la sugerencia de plan del día</span></div>
+    <p class="idea">La IA solo se ofrece donde falta algo: un objetivo sin tareas, un proyecto recién nombrado, un atributo sin hábitos. Las propuestas aparecen como filas fantasma en el sitio y se aceptan una a una.</p>
+    <div class="grid">
+      <div class="scene"><div class="cap"><b>Objetivo</b> · tarjeta sin tareas</div><div class="stage">
+        <div class="goal"><div class="gt"><i data-lucide="target"></i>Publicar la web del estudio<span class="faint" style="margin-left:auto">Mes</span></div><div class="bar"></div>
+          <div class="row ghost"><span class="n">Escribir textos de portada y servicios<small>1 h 30</small></span><span class="iconbtn ok"><i data-lucide="check"></i></span><span class="iconbtn no"><i data-lucide="x"></i></span></div>
+          <div class="row ghost"><span class="n">Elegir 6 fotos de proyectos<small>45 min</small></span><span class="iconbtn ok"><i data-lucide="check"></i></span><span class="iconbtn no"><i data-lucide="x"></i></span></div>
+          <div class="row ghost"><span class="n">Configurar dominio y SSL<small>30 min</small></span><span class="iconbtn ok"><i data-lucide="check"></i></span><span class="iconbtn no"><i data-lucide="x"></i></span></div>
+          <div class="hdr" style="margin:8px 0 0"><span class="faint" style="margin-right:auto"><i data-lucide="sparkles" class="ai" style="width:12px;height:12px;vertical-align:-2px"></i> Propuestas de IA</span><span class="btn sm g">Descartar todas</span><span class="btn sm">Aceptar todas</span></div>
+        </div>
+      </div></div>
+
+      <div class="scene"><div class="cap"><b>Proyecto</b> · formulario nuevo</div><div class="stage">
+        <div class="dialog">
+          <div class="dt">Nuevo proyecto</div>
+          <div class="field">Mudanza a Valencia</div>
+          <div class="inline"><i data-lucide="sparkles" class="ai"></i><span class="n">¿Empezar con tareas sugeridas para una mudanza?</span><span class="btn sm">Sugerir</span></div>
+          <div class="faint" style="margin:10px 0 6px">Tras «Sugerir»:</div>
+          <div class="row ghost"><span class="n">Pedir 3 presupuestos de mudanza</span><span class="iconbtn ok"><i data-lucide="check"></i></span><span class="iconbtn no"><i data-lucide="x"></i></span></div>
+          <div class="row ghost"><span class="n">Dar de baja luz, agua e internet</span><span class="iconbtn ok"><i data-lucide="check"></i></span><span class="iconbtn no"><i data-lucide="x"></i></span></div>
+          <div class="foot"><span class="btn g">Cancelar</span><span class="btn p">Crear proyecto</span></div>
+        </div>
+      </div></div>
+
+      <div class="scene"><div class="cap"><b>Hábitos</b> · panel lateral</div><div class="stage">
+        <div class="dialog" style="box-shadow:none">
+          <div class="dt" style="font-size:13px">Resumen de hábitos</div>
+          <div class="faint">Mente · sin hábitos todavía</div>
+          <div class="chips" style="margin-top:8px"><span class="chip"><i data-lucide="plus" style="width:11px;height:11px;vertical-align:-1px"></i> Leer 10 páginas</span><span class="chip"><i data-lucide="plus" style="width:11px;height:11px;vertical-align:-1px"></i> Meditar 5 min</span><span class="chip"><i data-lucide="plus" style="width:11px;height:11px;vertical-align:-1px"></i> Diario de 3 líneas</span></div>
+          <div class="faint"><i data-lucide="sparkles" class="ai" style="width:12px;height:12px;vertical-align:-2px"></i> Un clic lo crea con horario diario; luego se edita</div>
+        </div>
+      </div></div>
+    </div>
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>Muy descubrible: aparece justo cuando hace falta.</li><li>Aceptar una a una sin diálogo: rápido.</li><li>Las filas fantasma dejan claro qué es propuesta y qué es real.</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>Añade elementos que se ven sin pedirlos (más ruido visual).</li><li>Menos control previo: no das contexto antes de que proponga.</li><li>Tres sitios con UI distinta: más código y más que mantener.</li></ul></div>
+    </div>
+  </section>
+
+  <!-- ============ C ============ -->
+  <section class="variant" id="v-c">
+    <div class="vhead"><h2>C · Pedir a la IA (Ctrl K)</h2><span class="tag">un único punto de entrada</span></div>
+    <p class="idea">En la paleta de comandos escribes lo que quieres conseguir en lenguaje natural. La IA devuelve un paquete mixto (hábitos, un objetivo, tareas o una plantilla) y lo revisas todo junto en un panel.</p>
+    <div class="grid">
+      <div class="scene"><div class="cap"><b>Paleta</b> · Ctrl K</div><div class="stage">
+        <div class="palette">
+          <div class="q"><i data-lucide="sparkles" class="ai"></i><span>quiero dormir mejor este mes</span></div>
+          <div class="sec">Pedir a la IA</div>
+          <div class="it sel"><i data-lucide="sparkles" class="ai"></i><span class="n">Pedir a la IA: «quiero dormir mejor este mes»</span><span class="kbd">Enter</span></div>
+          <div class="sec">Comandos</div>
+          <div class="it"><i data-lucide="plus"></i><span class="n">Nuevo hábito</span></div>
+          <div class="it"><i data-lucide="target"></i><span class="n">Nuevo objetivo</span></div>
+        </div>
+      </div></div>
+      <div class="scene" style="grid-column: span 2"><div class="cap"><b>Resultado</b> · un panel para todo</div><div class="stage">
+        <div class="dialog">
+          <div class="dt"><i data-lucide="sparkles" class="ai"></i>Plan para «dormir mejor este mes»</div>
+          <div class="row"><span class="chk on"></span><span class="kind">Objetivo</span><span class="n">Dormir 7 h al menos 5 noches por semana<small>Mes · Salud</small></span></div>
+          <div class="row"><span class="chk on"></span><span class="kind">Hábito</span><span class="n">Pantallas fuera a las 23:00<small>Sí / No · diario</small></span></div>
+          <div class="row"><span class="chk on"></span><span class="kind">Hábito</span><span class="n">Nada de café después de las 15:00<small>A evitar · diario</small></span></div>
+          <div class="row"><span class="chk"></span><span class="kind">Tarea</span><span class="n">Comprar cortinas opacas<small>30 min · vinculada al objetivo</small></span></div>
+          <div class="foot"><span class="faint">4 elementos de 3 tipos</span><span class="btn g">Cancelar</span><span class="btn p">Crear 3</span></div>
+        </div>
+      </div></div>
+    </div>
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>Lo más potente: una frase, un plan completo.</li><li>Encaja con «teclado primero» (PRODUCT.md).</li><li>Cero ruido visual en el resto de la app.</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>Lo menos predecible: la salida mezcla tipos y es más difícil de validar.</li><li>Escondido: solo lo encuentra quien usa Ctrl K.</li><li>Más trabajo: un prompt y un validador para paquetes mixtos.</li></ul></div>
+    </div>
+  </section>
+
+  <div class="common">
+    <h2>Igual en las tres</h2>
+    <ul>
+      <li>Sin clave de API → no se muestra nada (como hoy con «Desglosar»).</li>
+      <li>La IA recibe contexto real (hábitos y atributos que ya tienes, tus estimaciones) para no repetir ni inventar.</li>
+      <li>Todo pasa por un validador antes de tocar la base de datos, con tests.</li>
+      <li>Iconos del registro de la app, nunca emoji.</li>
+    </ul>
+  </div>
+
+  <div class="rec">
+    <h2>Recomendación: A, con una entrada de B para objetivos vacíos</h2>
+    <p>A es coherente con lo que ya existe y no mete ruido. Añadiría solo un detalle de B: en una tarjeta de objetivo sin tareas, el enlace «Proponer tareas» aparece en línea (y abre el mismo diálogo de A). Es el hueco más claro de la app.</p>
+    <p class="muted">C podría llegar después reutilizando las piezas de A.</p>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script>
+  lucide.createIcons();
+  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    document.querySelectorAll('.variant').forEach((v) => v.classList.toggle('on', v.id === 'v-' + b.dataset.v));
+  }));
+</script>
+</body>
+</html>
