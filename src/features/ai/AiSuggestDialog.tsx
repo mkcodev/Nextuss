@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { subDays } from 'date-fns'
 import { Loader2, RefreshCw, Sparkles } from 'lucide-react'
 import { Button, Checkbox, Dialog, Icon, Textarea } from '../../design/primitives'
@@ -42,7 +42,9 @@ const HABIT_TYPE_LABEL: Record<HabitType, string> = { binary: 'Sí / No', quanti
 
 function habitMeta(h: HabitSuggestion): string {
   const measure = h.targetValue != null ? ` · ${h.targetValue} ${h.unit ?? ''}`.trimEnd() : ''
-  return `${HABIT_TYPE_LABEL[h.type]}${measure} · ${describeHabitSchedule({ weekdays: h.weekdays }).toLowerCase()}`
+  const days = describeHabitSchedule({ weekdays: h.weekdays })
+  // «Todos los días» va en minúscula a media frase; las iniciales de los días («L X V»), no.
+  return `${HABIT_TYPE_LABEL[h.type]}${measure} · ${h.weekdays.length === 0 ? days.toLowerCase() : days}`
 }
 
 /** Últimos 6 meses de tareas cerradas: la misma señal de sesgo de estimación que usa «Desglosar». */
@@ -93,10 +95,16 @@ export function AiSuggestDialog() {
   const [result, setResult] = useState<Result | null>(null)
   const [goalTitle, setGoalTitle] = useState('')
   const push = useToastStore((s) => s.push)
+  // Cada llamada cuesta dinero: `seq` descarta respuestas de una petición ya sustituida (cerrar y
+  // abrir otro objetivo, «Otras ideas»), y `startedFor` evita repetir la automática del mismo
+  // `request` (StrictMode ejecuta los efectos dos veces en desarrollo).
+  const seq = useRef(0)
+  const startedFor = useRef<AiSuggestRequest | null>(null)
 
   const needsPrompt = request?.kind === 'habits' || request?.kind === 'template'
 
   const generate = async (req: AiSuggestRequest, input: string, attrId: number | null) => {
+    const id = ++seq.current
     setError(null)
     setResult(null)
     setLoading(true)
@@ -105,18 +113,26 @@ export function AiSuggestDialog() {
       const apiKey = settings.claudeApiKey?.trim()
       if (!apiKey) throw new AiError('no-key', 'No hay clave de API configurada en Ajustes.')
       const attribute = attributes.find((a) => a.id === attrId) ?? null
-      setResult(await runRequest(req, apiKey, input, attribute))
+      const next = await runRequest(req, apiKey, input, attribute)
       void recordAiUsage(settings)
+      if (id === seq.current) setResult(next)
     } catch (err) {
-      setError(err instanceof AiError ? err.message : 'Error inesperado al pedir la sugerencia.')
+      if (id === seq.current) setError(err instanceof AiError ? err.message : 'Error inesperado al pedir la sugerencia.')
     } finally {
-      setLoading(false)
+      if (id === seq.current) setLoading(false)
     }
   }
 
   // Al abrir: estado limpio; «Proponer tareas» no necesita pregunta (el objetivo ya es el contexto).
   useEffect(() => {
-    if (!open || !request) return
+    if (!open || !request) {
+      seq.current++ // cerrar invalida lo que esté en vuelo
+      startedFor.current = null
+      return
+    }
+    if (startedFor.current === request) return
+    startedFor.current = request
+    setLoading(false)
     setText('')
     setAttributeId(null)
     setError(null)
