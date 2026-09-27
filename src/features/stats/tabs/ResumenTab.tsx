@@ -9,6 +9,7 @@ import { getNorthStarStreak, listGoalsForPeriod } from '../../../db/repositories
 import { weekKey, monthKey } from '../../../lib/dates'
 import { formatMinutes } from '../format'
 import type { KpiDelta } from '../aggregate'
+import type { Goal } from '../../../db/types'
 import { levelUpsInCurve } from '../../../lib/xp'
 import { usePlayerProgress } from '../../gamification/usePlayerProgress'
 
@@ -22,14 +23,19 @@ function deltaLabel(delta: KpiDelta | undefined, formatter: (v: number) => strin
   return `${sign}${formatter(delta.delta)} vs. periodo anterior`
 }
 
+/** «hechos/total», o «—» mientras la consulta carga (no un 0/0 momentáneo). */
+function formatGoalCount(goals: Goal[] | undefined): string {
+  return goals === undefined ? '—' : `${goals.filter((g) => g.done).length}/${goals.length}`
+}
+
 export function ResumenTab({ range }: ResumenTabProps) {
   const navigate = useNavigate()
   const data = useStatsData(range)
   // El heatmap solo lee `points` del año: no necesita el año anterior (mitad de las consultas).
   const yearData = useStatsData('year', false, false)
-  const northStarStreak = useLiveQuery(() => getNorthStarStreak('week', weekKey()), []) ?? 0
-  const thisWeekGoals = useLiveQuery(() => listGoalsForPeriod('week', weekKey()), []) ?? []
-  const thisMonthGoals = useLiveQuery(() => listGoalsForPeriod('month', monthKey()), []) ?? []
+  const northStarStreak = useLiveQuery(() => getNorthStarStreak('week', weekKey()), [])
+  const thisWeekGoals = useLiveQuery(() => listGoalsForPeriod('week', weekKey()), [])
+  const thisMonthGoals = useLiveQuery(() => listGoalsForPeriod('month', monthKey()), [])
 
   const kpi = (key: KpiDelta['key']) => data.kpiDeltas.find((d) => d.key === key)
 
@@ -169,7 +175,7 @@ export function ResumenTab({ range }: ResumenTabProps) {
             <Compass size={18} strokeWidth={1.75} className="shrink-0 text-accent" />
             <div>
               <p className="text-xs text-text-faint">Racha North Star</p>
-              <p className="text-lg font-semibold text-text">{northStarStreak} periodos</p>
+              <p className="text-lg font-semibold text-text">{northStarStreak === undefined ? '—' : `${northStarStreak} periodos`}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 rounded-xl border border-border p-3">
@@ -177,7 +183,7 @@ export function ResumenTab({ range }: ResumenTabProps) {
             <div>
               <p className="text-xs text-text-faint">Objetivos de la semana</p>
               <p className="text-lg font-semibold text-text">
-                {thisWeekGoals.filter((g) => g.done).length}/{thisWeekGoals.length}
+                {formatGoalCount(thisWeekGoals)}
               </p>
             </div>
           </div>
@@ -186,7 +192,7 @@ export function ResumenTab({ range }: ResumenTabProps) {
             <div>
               <p className="text-xs text-text-faint">Objetivos del mes</p>
               <p className="text-lg font-semibold text-text">
-                {thisMonthGoals.filter((g) => g.done).length}/{thisMonthGoals.length}
+                {formatGoalCount(thisMonthGoals)}
               </p>
             </div>
           </div>
