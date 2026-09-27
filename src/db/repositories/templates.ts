@@ -37,6 +37,14 @@ export async function saveTaskAsTemplate(taskId: number): Promise<number> {
 
 /** Captura un proyecto y sus tareas raíz vivas — solo raíz, mismo criterio que `getProjectProgress`
  * (una subtarea no es una unidad de arranque independiente). */
+/** Plantilla de proyecto creada desde cero (p. ej. la que genera la IA, issue #60). */
+export async function createProjectTemplate(
+  input: Pick<ProjectTemplate, 'name' | 'color' | 'icon' | 'description' | 'attributeId' | 'tasks'>,
+): Promise<number> {
+  const now = Date.now()
+  return (await db.projectTemplates.add({ ...input, createdAt: now, sortKey: now })) as number
+}
+
 export async function saveProjectAsTemplate(projectId: number): Promise<number> {
   const project = await db.projects.get(projectId)
   if (!project) throw new Error(`Project ${projectId} not found`)

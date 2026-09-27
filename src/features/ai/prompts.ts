@@ -2,13 +2,30 @@
 // resultado antes de devolverlo — nunca se escribe en la base de datos lo que el modelo devuelve sin
 // pasar por el `validate` de `callTool`.
 import { AiError, callTool, type Anthropic } from './client'
-import { validateCapture, validateDayPlan, validateSubtasks, validateSummary } from './validators'
-import type { EnergyLevel } from '../../db/types'
+import {
+  validateCapture,
+  validateDayPlan,
+  validateGoalTasks,
+  validateHabitSuggestions,
+  validateProjectTemplate,
+  validateSubtasks,
+  validateSummary,
+  type HabitSuggestion,
+  type ProjectTemplateDraft,
+} from './validators'
+import { ICON_LABELS, ICON_REGISTRY, type IconKey } from '../../design/icons'
+import type { EnergyLevel, GoalPeriod } from '../../db/types'
 import type { EstimateAccuracyResult, PeriodSummary } from '../stats/aggregate'
 
 export interface Subtask {
   title: string
   estimateMin: number
+}
+
+function biasNote(bias: EstimateAccuracyResult): string {
+  return bias.sampleSize >= 5 && bias.medianRatio
+    ? `El usuario suele tardar x${bias.medianRatio.toFixed(2)} de lo que estima en sus tareas — ajusta las estimaciones a esa realidad, no a un ideal.`
+    : 'Todavía no hay datos suficientes del sesgo de estimación del usuario — estima de forma realista.'
 }
 
 export async function breakdownTask(
@@ -43,10 +60,6 @@ export async function breakdownTask(
     strict: true,
   }
 
-  const biasNote =
-    bias.sampleSize >= 5 && bias.medianRatio
-      ? `El usuario suele tardar x${bias.medianRatio.toFixed(2)} de lo que estima en sus tareas — ajusta las estimaciones a esa realidad, no a un ideal.`
-      : 'Todavía no hay datos suficientes del sesgo de estimación del usuario — estima de forma realista.'
 
   const subtasks = await callTool({
     apiKey,
@@ -55,7 +68,7 @@ export async function breakdownTask(
       'Eres un asistente de productividad para una persona con TDAH. Desglosas tareas en subtareas pequeñas, ' +
       'concretas y accionables — nunca vagas ("investigar", "pensar en"), siempre con un verbo de acción claro ' +
       'y un resultado verificable.',
-    user: `Tarea: "${task.title}"${task.notes ? `\nNotas: ${task.notes}` : ''}\n\n${biasNote}\n\nDesglósala en entre 2 y 8 subtareas.`,
+    user: `Tarea: "${task.title}"${task.notes ? `\nNotas: ${task.notes}` : ''}\n\n${biasNote(bias)}\n\nDesglósala en entre 2 y 8 subtareas.`,
     tool,
     validate: validateSubtasks,
   })
@@ -192,5 +205,153 @@ export async function suggestDayPlan(
     user: `Capacidad disponible hoy: ${input.capacityMin} min.\n${checkInNote}\n\nTareas candidatas:\n${taskList}\n\nOrdénalas y decide cuáles no caben hoy.`,
     tool,
     validate: (raw) => validateDayPlan(raw, validIds),
+  })
+}
+
+// --- Issue #60: sugerir hábitos, generar plantillas de proyecto y proponer tareas de un objetivo ---
+
+const ICON_KEYS = Object.keys(ICON_REGISTRY) as IconKey[]
+/** El modelo elige el icono por su clave, con el nombre en español como pista ("book: Libro"). */
+const ICON_HINT = ICON_KEYS.map((k) => `${k}: ${ICON_LABELS[k]}`).join(', ')
+
+const ADHD_SYSTEM =
+  'Ayudas a una persona con TDAH a organizarse en una app de productividad. Propones cosas pequeñas, concretas y ' +
+  'realistas — mejor poco y sostenible que mucho y ambicioso. Escribes en español, títulos cortos con un verbo claro.'
+
+const taskItemSchema = {
+  type: 'object',
+  properties: {
+    title: { type: 'string', description: 'Tarea accionable con verbo claro y resultado verificable' },
+    estimateMin: { type: 'integer', minimum: 5, maximum: 480 },
+  },
+  required: ['title', 'estimateMin'],
+  additionalProperties: false,
+}
+
+export async function suggestHabits(
+  apiKey: string,
+  input: { goal: string; attribute?: string; existingHabits: string[]; attributes: { id: number; name: string }[] },
+): Promise<HabitSuggestion[]> {
+  const tool: Anthropic.Tool = {
+    name: 'suggest_habits',
+    description: 'Propone hábitos nuevos que ayuden a lo que el usuario quiere mejorar.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        habits: {
+          type: 'array',
+          minItems: 2,
+          maxItems: 5,
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', description: 'Nombre corto del hábito, p. ej. "Leer 10 páginas"' },
+              icon: { type: 'string', enum: ICON_KEYS },
+              type: {
+                type: 'string',
+                enum: ['binary', 'quantity', 'duration', 'negative'],
+                description: 'binary = sí/no; quantity = cantidad con unidad; duration = minutos; negative = algo a evitar',
+              },
+              targetValue: { type: ['integer', 'null'], description: 'Meta diaria para quantity/duration; null en los demás' },
+              unit: { type: ['string', 'null'], description: 'Unidad para quantity (vasos, páginas…); "min" para duration; null en los demás' },
+              weekdays: {
+                type: 'array',
+                items: { type: 'integer', minimum: 0, maximum: 6 },
+                description: 'Días de la semana (0=domingo … 6=sábado); vacío = todos los días',
+              },
+              attribute: { type: ['string', 'null'], description: 'Nombre exacto de uno de los atributos del usuario, o null' },
+              reason: { type: 'string', description: 'Una frase breve: por qué ayuda' },
+            },
+            required: ['name', 'icon', 'type', 'targetValue', 'unit', 'weekdays', 'attribute', 'reason'],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ['habits'],
+      additionalProperties: false,
+    },
+    strict: true,
+  }
+
+  const user =
+    `Quiero: ${input.goal}\n` +
+    (input.attribute ? `Área de vida: ${input.attribute}\n` : '') +
+    `Hábitos que ya tengo (no los repitas): ${input.existingHabits.join(', ') || 'ninguno'}\n` +
+    `Mis atributos: ${input.attributes.map((a) => a.name).join(', ') || 'ninguno'}\n` +
+    `Iconos disponibles: ${ICON_HINT}\n\n` +
+    'Propón entre 2 y 5 hábitos nuevos, empezando por el más fácil de mantener.'
+
+  return callTool({
+    apiKey,
+    effort: 'low',
+    system: ADHD_SYSTEM,
+    user,
+    tool,
+    validate: (raw) => validateHabitSuggestions(raw, { existingNames: input.existingHabits, attributes: input.attributes }),
+  })
+}
+
+export async function generateProjectTemplate(
+  apiKey: string,
+  input: { description: string; bias: EstimateAccuracyResult },
+): Promise<ProjectTemplateDraft> {
+  const tool: Anthropic.Tool = {
+    name: 'project_template',
+    description: 'Genera una plantilla de proyecto reutilizable: nombre y lista ordenada de tareas.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', description: 'Nombre corto y genérico de la plantilla' },
+        icon: { type: 'string', enum: ICON_KEYS },
+        description: { type: 'string', description: 'Una frase: para qué sirve la plantilla' },
+        tasks: { type: 'array', minItems: 3, maxItems: 15, items: taskItemSchema },
+      },
+      required: ['name', 'icon', 'description', 'tasks'],
+      additionalProperties: false,
+    },
+    strict: true,
+  }
+
+  return callTool({
+    apiKey,
+    effort: 'medium',
+    system: ADHD_SYSTEM,
+    user:
+      `Proyecto: ${input.description}\n${biasNote(input.bias)}\nIconos disponibles: ${ICON_HINT}\n\n` +
+      'Crea una plantilla reutilizable: tareas en el orden en que se harían, cada una de menos de medio día.',
+    tool,
+    validate: validateProjectTemplate,
+  })
+}
+
+const PERIOD_LABEL: Record<GoalPeriod, string> = { week: 'esta semana', month: 'este mes' }
+
+export async function proposeGoalTasks(
+  apiKey: string,
+  input: { goal: string; notes?: string; period: GoalPeriod; existingTasks: string[]; bias: EstimateAccuracyResult },
+): Promise<Subtask[]> {
+  const tool: Anthropic.Tool = {
+    name: 'propose_goal_tasks',
+    description: 'Propone las siguientes tareas concretas para avanzar hacia un objetivo.',
+    input_schema: {
+      type: 'object',
+      properties: { tasks: { type: 'array', minItems: 2, maxItems: 8, items: taskItemSchema } },
+      required: ['tasks'],
+      additionalProperties: false,
+    },
+    strict: true,
+  }
+
+  return callTool({
+    apiKey,
+    effort: 'medium',
+    system: ADHD_SYSTEM,
+    user:
+      `Objetivo para ${PERIOD_LABEL[input.period]}: "${input.goal}"` +
+      (input.notes ? `\nNotas: ${input.notes}` : '') +
+      `\nTareas ya vinculadas (no las repitas): ${input.existingTasks.join(', ') || 'ninguna'}\n${biasNote(input.bias)}\n\n` +
+      'Propón entre 2 y 8 tareas que quepan en ese plazo, en el orden en que conviene hacerlas.',
+    tool,
+    validate: (raw) => validateGoalTasks(raw, input.existingTasks),
   })
 }
