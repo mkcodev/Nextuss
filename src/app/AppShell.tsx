@@ -33,12 +33,14 @@ import { TemplatePickerDialog } from '../features/templates/TemplatePickerDialog
 import { useTemplatePickerStore } from '../features/templates/templatePickerStore'
 import { WeeklyReviewDialog } from '../features/planner/WeeklyReviewDialog'
 import { useTaskBreakdownStore } from '../features/ai/taskBreakdownStore'
+import { useAiSuggestStore } from '../features/ai/aiSuggestStore'
 import { OnboardingFlow } from '../features/onboarding/OnboardingFlow'
 import { DayStartFlow } from '../features/rituals/DayStartFlow'
 import { DayCloseFlow } from '../features/rituals/DayCloseFlow'
 
 const CommandPalette = lazyNamed(() => import('./CommandPalette'), 'CommandPalette')
 const TaskBreakdownDialog = lazyNamed(() => import('../features/ai/TaskBreakdownDialog'), 'TaskBreakdownDialog')
+const AiSuggestDialog = lazyNamed(() => import('../features/ai/AiSuggestDialog'), 'AiSuggestDialog')
 
 function RouteFallback() {
   return (
@@ -67,6 +69,7 @@ export function AppShell() {
   const templatePickerNonce = useTemplatePickerStore((s) => s.nonce)
   const paletteOpen = useOverlayStore((s) => s.paletteOpen)
   const breakdownOpen = useTaskBreakdownStore((s) => s.open)
+  const aiSuggestOpen = useAiSuggestStore((s) => s.open)
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
@@ -107,6 +110,11 @@ export function AppShell() {
       <MountOnFirstOpen open={breakdownOpen}>
         <Suspense fallback={null}>
           <TaskBreakdownDialog />
+        </Suspense>
+      </MountOnFirstOpen>
+      <MountOnFirstOpen open={aiSuggestOpen}>
+        <Suspense fallback={null}>
+          <AiSuggestDialog />
         </Suspense>
       </MountOnFirstOpen>
       <OnboardingFlow />

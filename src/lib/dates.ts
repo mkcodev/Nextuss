@@ -90,7 +90,7 @@ export function isPeriodicHabit(habit: Habit): boolean {
 }
 
 /** Etiqueta corta en español para el resumen del calendario de un hábito (HabitForm, HabitsPage). */
-export function describeHabitSchedule(habit: Habit): string {
+export function describeHabitSchedule(habit: Pick<Habit, 'schedule' | 'weekdays'>): string {
   const schedule = habit.schedule
   if (!schedule || schedule.type === 'weekdays') {
     const weekdays = schedule?.weekdays ?? habit.weekdays
