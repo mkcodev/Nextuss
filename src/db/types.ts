@@ -286,6 +286,8 @@ export interface WeeklyReview {
 
 export type ThemePreference = 'system' | 'light' | 'dark'
 
+export type AiModel = 'claude-sonnet-5' | 'claude-opus-5' | 'claude-haiku-4-5'
+
 export interface Settings {
   id?: number // singleton, id = 1
   theme: ThemePreference
@@ -302,6 +304,8 @@ export interface Settings {
    * `https://nextuss-relay.usuario.workers.dev/nx_abc123`. Vacío = no se usa (100% opcional). */
   telegramWorkerUrl?: string
   claudeApiKey?: string
+  /** Modelo usado en las llamadas a la API de Claude. Sin definir = Sonnet 5 (ver `resolveAiModel`). */
+  aiModel?: AiModel
   /** Contador de llamadas a la API de Claude hechas desde esta app — estimación de uso, no facturación real. */
   aiUsageCount?: number
   // Notificaciones (Fase 5.2) — sin migración: Dexie guarda props no indexadas sin tocar el esquema.

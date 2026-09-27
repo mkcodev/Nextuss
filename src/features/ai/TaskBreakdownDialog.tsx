@@ -4,7 +4,7 @@ import { Button, Dialog } from '../../design/primitives'
 import { createTask, getTasksForRange } from '../../db/repositories/tasks'
 import { buildEstimateAccuracy } from '../stats/aggregate'
 import type { Subtask } from './prompts'
-import { AiError, recordAiUsage } from './errors'
+import { AiError, recordAiUsage, resolveAiModel } from './errors'
 import { getOrCreateSettings } from '../../db/repositories/settings'
 import { dateKey } from '../../lib/dates'
 import { subDays } from 'date-fns'
@@ -43,7 +43,7 @@ export function TaskBreakdownDialog() {
         const recentTasks = await getTasksForRange(from, to)
         const bias = buildEstimateAccuracy(recentTasks)
         const { breakdownTask } = await import('./prompts')
-        const result = await breakdownTask(apiKey, { title, notes }, bias)
+        const result = await breakdownTask(apiKey, resolveAiModel(settings.aiModel), { title, notes }, bias)
         if (cancelled) return
         setSubtasks(result)
         void recordAiUsage(settings)

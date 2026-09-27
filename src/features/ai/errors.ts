@@ -2,7 +2,25 @@
 // que quien solo necesita `AiError`/`recordAiUsage` no arrastre el SDK de Anthropic (~190 KB) al
 // bundle inicial — `client.ts` y `prompts.ts` se cargan con `import()` solo al usar la IA.
 import { updateSettings } from '../../db/repositories/settings'
-import type { Settings } from '../../db/types'
+import type { AiModel, Settings } from '../../db/types'
+
+export const DEFAULT_AI_MODEL: AiModel = 'claude-sonnet-5'
+
+/** Para el selector de Ajustes — precio orientativo para un solo usuario (~150-300 usos/mes). */
+export const AI_MODEL_OPTIONS: { value: AiModel; label: string; priceHint: string }[] = [
+  { value: 'claude-haiku-4-5', label: 'Haiku 4.5', priceHint: '~1-2 $/mes' },
+  { value: 'claude-sonnet-5', label: 'Sonnet 5', priceHint: '~2-5 $/mes' },
+  { value: 'claude-opus-5', label: 'Opus 5', priceHint: '~6-14 $/mes' },
+]
+
+export function resolveAiModel(model: AiModel | undefined): AiModel {
+  return model ?? DEFAULT_AI_MODEL
+}
+
+/** Haiku 4.5 responde 400 si se le manda `output_config.effort` — Sonnet 5 y Opus 5 sí lo aceptan. */
+export function modelSupportsEffort(model: AiModel): boolean {
+  return model !== 'claude-haiku-4-5'
+}
 
 export type AiErrorKind = 'no-key' | 'invalid-key' | 'rate-limited' | 'network' | 'malformed' | 'unknown'
 

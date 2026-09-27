@@ -8,7 +8,7 @@ import { getReview, saveReview } from '../../db/repositories/reviews'
 import { previousPeriodKey } from '../../lib/periods'
 import { useWeeklyReviewStore } from './weeklyReviewStore'
 import { useAiAvailable } from '../ai/useAiAvailable'
-import { AiError, recordAiUsage } from '../ai/errors'
+import { AiError, recordAiUsage, resolveAiModel } from '../ai/errors'
 import { getOrCreateSettings } from '../../db/repositories/settings'
 import { useStatsData } from '../stats/useStatsData'
 import { summarizePeriod } from '../stats/aggregate'
@@ -59,7 +59,7 @@ export function WeeklyReviewDialog() {
       if (!apiKey) return
       const summary = summarizePeriod(weekStats.points)
       const { summarizeWeeklyReview } = await import('../ai/prompts')
-      const text = await summarizeWeeklyReview(apiKey, summary, previousWeekKey)
+      const text = await summarizeWeeklyReview(apiKey, resolveAiModel(settings.aiModel), summary, previousWeekKey)
       void recordAiUsage(settings)
       setReflection(text)
     } catch (err) {

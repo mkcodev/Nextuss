@@ -2,9 +2,8 @@
 // del usuario (`Settings.claudeApiKey`, guardada en texto plano — ver el aviso en Ajustes). Sin
 // backend propio, así que `dangerouslyAllowBrowser` es intencional, no un descuido.
 import Anthropic from '@anthropic-ai/sdk'
-import { AiError } from './errors'
-
-const MODEL = 'claude-opus-5'
+import { AiError, modelSupportsEffort } from './errors'
+import type { AiModel } from '../../db/types'
 
 function toAiError(err: unknown): AiError {
   if (err instanceof Anthropic.AuthenticationError) return new AiError('invalid-key', 'Clave de API inválida o revocada.')
@@ -16,6 +15,7 @@ function toAiError(err: unknown): AiError {
 
 interface CallToolInput<T> {
   apiKey: string
+  model: AiModel
   system: string
   user: string
   tool: Anthropic.Tool
@@ -26,16 +26,16 @@ interface CallToolInput<T> {
   validate: (raw: unknown) => T
 }
 
-async function callTool<T>({ apiKey, system, user, tool, effort = 'medium', maxTokens = 2048, validate }: CallToolInput<T>): Promise<T> {
+async function callTool<T>({ apiKey, model, system, user, tool, effort = 'medium', maxTokens = 2048, validate }: CallToolInput<T>): Promise<T> {
   if (!apiKey) throw new AiError('no-key', 'No hay clave de API configurada.')
 
   const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true })
   let response: Anthropic.Message
   try {
     response = await client.messages.create({
-      model: MODEL,
+      model,
       max_tokens: maxTokens,
-      output_config: { effort },
+      ...(modelSupportsEffort(model) ? { output_config: { effort } } : {}),
       system,
       tools: [tool],
       tool_choice: { type: 'tool', name: tool.name },
@@ -56,14 +56,14 @@ async function callTool<T>({ apiKey, system, user, tool, effort = 'medium', maxT
 }
 
 /** Prueba mínima de conexión: una petición barata y rápida solo para validar la clave. */
-export async function testAiConnection(apiKey: string): Promise<{ ok: true } | { ok: false; message: string }> {
+export async function testAiConnection(apiKey: string, model: AiModel): Promise<{ ok: true } | { ok: false; message: string }> {
   if (!apiKey) return { ok: false, message: 'No hay clave configurada.' }
   try {
     const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true })
     await client.messages.create({
-      model: MODEL,
+      model,
       max_tokens: 8,
-      output_config: { effort: 'low' },
+      ...(modelSupportsEffort(model) ? { output_config: { effort: 'low' as const } } : {}),
       messages: [{ role: 'user', content: 'di "ok"' }],
     })
     return { ok: true }

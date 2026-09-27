@@ -14,7 +14,7 @@ import {
   type ProjectTemplateDraft,
 } from './validators'
 import { ICON_LABELS, ICON_REGISTRY, type IconKey } from '../../design/icons'
-import type { EnergyLevel, GoalPeriod } from '../../db/types'
+import type { AiModel, EnergyLevel, GoalPeriod } from '../../db/types'
 import type { EstimateAccuracyResult, PeriodSummary } from '../stats/aggregate'
 
 export interface Subtask {
@@ -30,6 +30,7 @@ function biasNote(bias: EstimateAccuracyResult): string {
 
 export async function breakdownTask(
   apiKey: string,
+  model: AiModel,
   task: { title: string; notes?: string },
   bias: EstimateAccuracyResult,
 ): Promise<Subtask[]> {
@@ -63,6 +64,7 @@ export async function breakdownTask(
 
   const subtasks = await callTool({
     apiKey,
+    model,
     effort: 'medium',
     system:
       'Eres un asistente de productividad para una persona con TDAH. Desglosas tareas en subtareas pequeñas, ' +
@@ -83,7 +85,7 @@ export interface ParsedCapture {
   estimateMin?: number
 }
 
-export async function parseQuickCapture(apiKey: string, text: string, today: string): Promise<ParsedCapture> {
+export async function parseQuickCapture(apiKey: string, model: AiModel, text: string, today: string): Promise<ParsedCapture> {
   const tool: Anthropic.Tool = {
     name: 'parse_task',
     description: 'Extrae una tarea estructurada a partir de una nota en lenguaje natural.',
@@ -106,6 +108,7 @@ export async function parseQuickCapture(apiKey: string, text: string, today: str
 
   return callTool({
     apiKey,
+    model,
     effort: 'low',
     system:
       'Extraes tareas estructuradas de notas rápidas en español, escritas al vuelo por una persona con TDAH. ' +
@@ -116,7 +119,7 @@ export async function parseQuickCapture(apiKey: string, text: string, today: str
   })
 }
 
-export async function summarizeWeeklyReview(apiKey: string, summary: PeriodSummary, weekKey: string): Promise<string> {
+export async function summarizeWeeklyReview(apiKey: string, model: AiModel, summary: PeriodSummary, weekKey: string): Promise<string> {
   const tool: Anthropic.Tool = {
     name: 'weekly_summary',
     description: 'Genera un resumen breve y honesto de cómo fue la semana, a partir de métricas reales.',
@@ -140,6 +143,7 @@ export async function summarizeWeeklyReview(apiKey: string, summary: PeriodSumma
 
   return callTool({
     apiKey,
+    model,
     effort: 'low',
     system:
       'Resumes semanas reales de un usuario con TDAH a partir de sus métricas, con tono cercano y honesto — ' +
@@ -165,6 +169,7 @@ export interface DayPlanSuggestion {
 
 export async function suggestDayPlan(
   apiKey: string,
+  model: AiModel,
   input: {
     capacityMin: number
     checkIn?: { energy: number | null; mood: number | null; focus: number | null }
@@ -198,6 +203,7 @@ export async function suggestDayPlan(
 
   return callTool({
     apiKey,
+    model,
     effort: 'low',
     system:
       'Planificas el día de una persona con TDAH. Eres realista con la capacidad y la energía disponibles, no ' +
@@ -230,6 +236,7 @@ const taskItemSchema = {
 
 export async function suggestHabits(
   apiKey: string,
+  model: AiModel,
   input: { goal: string; attribute?: string; existingHabits: string[]; attributes: { id: number; name: string }[] },
 ): Promise<HabitSuggestion[]> {
   const tool: Anthropic.Tool = {
@@ -283,6 +290,7 @@ export async function suggestHabits(
 
   return callTool({
     apiKey,
+    model,
     effort: 'low',
     system: ADHD_SYSTEM,
     user,
@@ -293,6 +301,7 @@ export async function suggestHabits(
 
 export async function generateProjectTemplate(
   apiKey: string,
+  model: AiModel,
   input: { description: string; bias: EstimateAccuracyResult },
 ): Promise<ProjectTemplateDraft> {
   const tool: Anthropic.Tool = {
@@ -314,6 +323,7 @@ export async function generateProjectTemplate(
 
   return callTool({
     apiKey,
+    model,
     effort: 'medium',
     system: ADHD_SYSTEM,
     user:
@@ -328,6 +338,7 @@ const PERIOD_LABEL: Record<GoalPeriod, string> = { week: 'esta semana', month: '
 
 export async function proposeGoalTasks(
   apiKey: string,
+  model: AiModel,
   input: { goal: string; notes?: string; period: GoalPeriod; existingTasks: string[]; bias: EstimateAccuracyResult },
 ): Promise<Subtask[]> {
   const tool: Anthropic.Tool = {
@@ -344,6 +355,7 @@ export async function proposeGoalTasks(
 
   return callTool({
     apiKey,
+    model,
     effort: 'medium',
     system: ADHD_SYSTEM,
     user:
