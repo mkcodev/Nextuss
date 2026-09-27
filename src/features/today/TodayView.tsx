@@ -31,7 +31,7 @@ import { DayPlanSuggestion } from '../ai/DayPlanSuggestion'
 import { CheckInCard } from './CheckInCard'
 import { NowBlock } from './NowBlock'
 import { db } from '../../db/schema'
-import { shouldShowDayClose, shouldShowDayStart } from '../rituals/gates'
+import { shouldOpenDayStart, shouldShowDayClose } from '../rituals/gates'
 import type { Task } from '../../db/types'
 import { useDayStartStore } from '../rituals/dayStartStore'
 import { useDayCloseStore } from '../rituals/dayCloseStore'
@@ -107,13 +107,15 @@ export function TodayView() {
   // Convención de carga (docs/CONVENCIONES.md): `undefined` = cargando, `null` = sin fila. Las
   // puertas esperan a todas sus entradas, `checkin` incluido — un día sin check-in resuelve a `null`.
   useEffect(() => {
-    if (!isToday || dayStartOpen || dayCloseOpen || overdueForGate === undefined || checkin === undefined) return
-    // En el primer uso manda la bienvenida: el ritual no se abre encima de ella.
-    if (!settings?.onboardingCompleted) return
-    // Sin hábitos ni tareas todavía no hay día que preparar: el ritual solo sería ruido.
-    if (entries !== undefined && entries.length === 0 && tasksToday !== undefined && tasksToday.length === 0 && overdueForGate.length === 0) return
-    if (promptedDayStartRef.current === date) return
-    if (shouldShowDayStart(checkin, overdueForGate.length)) {
+    if (!isToday || dayStartOpen || dayCloseOpen || promptedDayStartRef.current === date) return
+    const open = shouldOpenDayStart({
+      checkin,
+      overdueCount: overdueForGate?.length,
+      habitCount: entries?.length,
+      taskCount: tasksToday?.length,
+      onboardingCompleted: settings?.onboardingCompleted,
+    })
+    if (open) {
       promptedDayStartRef.current = date
       openDayStart(date)
     }
