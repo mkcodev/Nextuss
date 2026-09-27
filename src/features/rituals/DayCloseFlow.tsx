@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { addDays } from 'date-fns'
 import { ArrowRight, Check } from 'lucide-react'
-import { Button, Dialog, Textarea } from '../../design/primitives'
+import { Button, Dialog, Skeleton, Textarea } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { dateKey, isHabitScheduledOn, parseDateKey } from '../../lib/dates'
 import { getTasksForDate, parkTask, trashTask, updateTask } from '../../db/repositories/tasks'
@@ -18,7 +18,8 @@ export function DayCloseFlow() {
   const [step, setStep] = useState<Step>(1)
   const [reflection, setReflection] = useState('')
 
-  const tasks = useLiveQuery(() => (date ? getTasksForDate(date) : Promise.resolve([] as Task[])), [date]) ?? []
+  const tasksQuery = useLiveQuery(() => (date ? getTasksForDate(date) : Promise.resolve([] as Task[])), [date])
+  const tasks = tasksQuery ?? []
   const doneTasks = tasks.filter((t) => t.status === 'done')
   const pendingTasks = tasks.filter((t) => t.status !== 'done')
 
@@ -63,13 +64,17 @@ export function DayCloseFlow() {
         {step === 1 && (
           <div className="space-y-3">
             <p className="text-xs text-text-faint">Lo conseguido hoy</p>
-            <div className="flex items-center gap-2 text-sm text-text">
-              <Check size={15} className="text-accent" />
-              <span>
-                <span className="font-semibold text-accent">{doneTasks.length}</span> de {tasks.length} tareas
-                completadas
-              </span>
-            </div>
+            {tasksQuery === undefined ? (
+              <Skeleton className="h-5 w-48" />
+            ) : (
+              <div className="flex items-center gap-2 text-sm text-text">
+                <Check size={15} className="text-accent" />
+                <span>
+                  <span className="font-semibold text-accent">{doneTasks.length}</span> de {tasks.length} tareas
+                  completadas
+                </span>
+              </div>
+            )}
             {scheduledHabits && scheduledHabits.length > 0 && (
               <div className="flex items-center gap-2 text-sm text-text">
                 <Check size={15} className="text-accent" />
@@ -85,7 +90,9 @@ export function DayCloseFlow() {
         {step === 2 && (
           <div className="space-y-3">
             <p className="text-xs text-text-faint">¿Qué quedó sin hacer y a dónde va?</p>
-            {pendingTasks.length === 0 ? (
+            {tasksQuery === undefined ? (
+              <Skeleton className="h-10 w-full" />
+            ) : pendingTasks.length === 0 ? (
               <p className="text-sm text-text-muted">Nada pendiente.</p>
             ) : (
               <div className="space-y-1.5">

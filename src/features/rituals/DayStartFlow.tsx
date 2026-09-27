@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ArrowRight } from 'lucide-react'
-import { Button, Dialog } from '../../design/primitives'
+import { Button, Dialog, Skeleton } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { getOverdueTasks, getUnscheduledTasks } from '../../db/repositories/tasks'
 import { markRitualStart } from '../../db/repositories/checkins'
@@ -23,14 +23,16 @@ export function DayStartFlow() {
   const { open, date, close } = useDayStartStore()
   const [step, setStep] = useState<Step>(1)
 
-  const overdueTasks = useLiveQuery(() => (date ? getOverdueTasks(date) : Promise.resolve([] as Task[])), [date]) ?? []
-  const unscheduledTasks =
-    useLiveQuery(() => (date ? getUnscheduledTasks(date) : Promise.resolve([] as Task[])), [date]) ?? []
+  const overdueTasks = useLiveQuery(() => (date ? getOverdueTasks(date) : Promise.resolve([] as Task[])), [date])
+  const unscheduledTasks = useLiveQuery(
+    () => (date ? getUnscheduledTasks(date) : Promise.resolve([] as Task[])),
+    [date],
+  )
   const { availableMin, scheduledMin } = useDailyCapacity(date ?? '')
 
   // El paso 2 no aporta nada sin atrasadas — se salta al calcular el siguiente/anterior paso, en
   // vez de con un efecto que corrija `step` después de renderizar con un valor que no tocaba.
-  const hasOverdueStep = overdueTasks.length > 0
+  const hasOverdueStep = (overdueTasks?.length ?? 0) > 0
   const nextStep = (s: Step): Step => (s === 1 ? (hasOverdueStep ? 2 : 3) : 3)
   const prevStep = (s: Step): Step => (s === 3 ? (hasOverdueStep ? 2 : 1) : 1)
 
@@ -68,18 +70,22 @@ export function DayStartFlow() {
         {step === 3 && (
           <div className="space-y-3">
             <p className="text-xs text-text-faint">Planificación</p>
-            <p className="text-sm text-text">
-              {unscheduledTasks.length > 0 ? (
-                <>
-                  Tienes <span className="font-semibold text-accent">{unscheduledTasks.length}</span> tarea
-                  {unscheduledTasks.length === 1 ? '' : 's'} sin programar, y{' '}
-                  <span className="font-medium text-text">{formatHours(Math.max(0, availableMin - scheduledMin))}</span>{' '}
-                  libres hoy.
-                </>
-              ) : (
-                'No tienes tareas sin programar. Buen punto de partida.'
-              )}
-            </p>
+            {unscheduledTasks === undefined ? (
+              <Skeleton className="h-5 w-full" />
+            ) : (
+              <p className="text-sm text-text">
+                {unscheduledTasks.length > 0 ? (
+                  <>
+                    Tienes <span className="font-semibold text-accent">{unscheduledTasks.length}</span> tarea
+                    {unscheduledTasks.length === 1 ? '' : 's'} sin programar, y{' '}
+                    <span className="font-medium text-text">{formatHours(Math.max(0, availableMin - scheduledMin))}</span>{' '}
+                    libres hoy.
+                  </>
+                ) : (
+                  'No tienes tareas sin programar. Buen punto de partida.'
+                )}
+              </p>
+            )}
           </div>
         )}
 
@@ -94,7 +100,7 @@ export function DayStartFlow() {
               </Button>
             )}
             {step < 3 ? (
-              <Button type="button" onClick={() => setStep(nextStep(step))}>
+              <Button type="button" disabled={overdueTasks === undefined} onClick={() => setStep(nextStep(step))}>
                 Siguiente <ArrowRight size={14} strokeWidth={2} />
               </Button>
             ) : (
