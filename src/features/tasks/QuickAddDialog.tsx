@@ -12,7 +12,7 @@ import { useQuickAddStore } from './quickAddStore'
 import { useTaskFormStore } from './taskFormStore'
 import { useAiAvailable } from '../ai/useAiAvailable'
 import type { ParsedCapture } from '../ai/prompts'
-import { AiError, recordAiUsage } from '../ai/errors'
+import { AiError, recordAiUsage, resolveAiModel } from '../ai/errors'
 import { getOrCreateSettings } from '../../db/repositories/settings'
 import { useToastStore } from '../../lib/toastStore'
 import { PriorityBars } from './PriorityBars'
@@ -102,7 +102,7 @@ export function QuickAddDialog() {
       const apiKey = settings.claudeApiKey?.trim()
       if (!apiKey) return
       const { parseQuickCapture } = await import('../ai/prompts')
-      const result = await parseQuickCapture(apiKey, text, todayKey())
+      const result = await parseQuickCapture(apiKey, resolveAiModel(settings.aiModel), text, todayKey())
       void recordAiUsage(settings)
       setAiResult(result)
     } catch (err) {

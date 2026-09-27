@@ -7,7 +7,7 @@ import { getOrCreateSettings } from '../../db/repositories/settings'
 import { useDailyCapacity } from '../planner/useDailyCapacity'
 import { useAiAvailable } from './useAiAvailable'
 import type { DayPlanSuggestion as DayPlanResult } from './prompts'
-import { AiError, recordAiUsage } from './errors'
+import { AiError, recordAiUsage, resolveAiModel } from './errors'
 import { useTaskFormStore } from '../tasks/taskFormStore'
 
 interface DayPlanSuggestionProps {
@@ -39,7 +39,7 @@ export function DayPlanSuggestion({ date }: DayPlanSuggestionProps) {
         return
       }
       const { suggestDayPlan } = await import('./prompts')
-      const plan = await suggestDayPlan(apiKey, {
+      const plan = await suggestDayPlan(apiKey, resolveAiModel(settings.aiModel), {
         capacityMin: Math.max(0, availableMin - scheduledMin),
         checkIn:
           checkIn && (checkIn.energy != null || checkIn.mood != null || checkIn.focus != null)

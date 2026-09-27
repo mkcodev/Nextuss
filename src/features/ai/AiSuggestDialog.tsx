@@ -9,14 +9,14 @@ import { createTask, getTasksForRange } from '../../db/repositories/tasks'
 import { linkTaskToGoal } from '../../db/repositories/goals'
 import { createProjectTemplate } from '../../db/repositories/templates'
 import { getOrCreateSettings } from '../../db/repositories/settings'
-import type { Attribute, HabitType } from '../../db/types'
+import type { AiModel, Attribute, HabitType } from '../../db/types'
 import { buildEstimateAccuracy } from '../stats/aggregate'
 import { DEFAULT_ENTITY_COLOR, ENTITY_COLORS } from '../../lib/colors'
 import { dateKey, describeHabitSchedule } from '../../lib/dates'
 import { cn } from '../../lib/cn'
 import { useSubmitGuard } from '../../lib/useSubmitGuard'
 import { useToastStore } from '../../lib/toastStore'
-import { AiError, recordAiUsage } from './errors'
+import { AiError, recordAiUsage, resolveAiModel } from './errors'
 import type { Subtask } from './prompts'
 import type { HabitSuggestion, ProjectTemplateDraft } from './validators'
 import { useAiSuggestStore, type AiSuggestRequest } from './aiSuggestStore'
@@ -52,11 +52,11 @@ async function estimateBias() {
   return buildEstimateAccuracy(await getTasksForRange(dateKey(subDays(new Date(), 180)), dateKey()))
 }
 
-async function runRequest(request: AiSuggestRequest, apiKey: string, text: string, attribute: Attribute | null): Promise<Result> {
+async function runRequest(request: AiSuggestRequest, apiKey: string, model: AiModel, text: string, attribute: Attribute | null): Promise<Result> {
   const prompts = await import('./prompts')
   if (request.kind === 'habits') {
     const [habits, attributes] = await Promise.all([listHabits(), listAttributes()])
-    const items = await prompts.suggestHabits(apiKey, {
+    const items = await prompts.suggestHabits(apiKey, model, {
       goal: text,
       attribute: attribute?.name,
       existingHabits: habits.map((h) => h.name),
@@ -66,13 +66,13 @@ async function runRequest(request: AiSuggestRequest, apiKey: string, text: strin
     return { kind: 'habits', items: items.map((h) => ({ ...h, attributeId: attribute?.id ?? h.attributeId, picked: true })) }
   }
   if (request.kind === 'template') {
-    const draft = await prompts.generateProjectTemplate(apiKey, { description: text, bias: await estimateBias() })
+    const draft = await prompts.generateProjectTemplate(apiKey, model, { description: text, bias: await estimateBias() })
     return { kind: 'template', draft, tasks: draft.tasks.map((t) => ({ ...t, picked: true })) }
   }
   const goal = await db.goals.get(request.goalId)
   if (!goal) throw new AiError('unknown', 'El objetivo ya no existe.')
   const linked = (await db.tasks.bulkGet(goal.taskIds)).filter((t) => t && t.deletedAt === 0)
-  const items = await prompts.proposeGoalTasks(apiKey, {
+  const items = await prompts.proposeGoalTasks(apiKey, model, {
     goal: goal.title,
     notes: goal.notes,
     period: goal.period,
@@ -113,7 +113,7 @@ export function AiSuggestDialog() {
       const apiKey = settings.claudeApiKey?.trim()
       if (!apiKey) throw new AiError('no-key', 'No hay clave de API configurada en Ajustes.')
       const attribute = attributes.find((a) => a.id === attrId) ?? null
-      const next = await runRequest(req, apiKey, input, attribute)
+      const next = await runRequest(req, apiKey, resolveAiModel(settings.aiModel), input, attribute)
       void recordAiUsage(settings)
       if (id === seq.current) setResult(next)
     } catch (err) {

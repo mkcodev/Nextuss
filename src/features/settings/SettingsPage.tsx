@@ -27,7 +27,8 @@ import {
 } from '../notifications/permission'
 import { DEFAULT_DURATIONS_MIN } from '../focus/durations'
 import { getMe, resolveChatId } from '../telegram/client'
-import type { Settings, ThemePreference } from '../../db/types'
+import { AI_MODEL_OPTIONS, resolveAiModel } from '../ai/errors'
+import type { AiModel, Settings, ThemePreference } from '../../db/types'
 
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, h) => h)
 
@@ -376,6 +377,7 @@ function AiSection() {
   const [testing, setTesting] = useState(false)
   const [testResult, setTestResult] = useState<{ ok: boolean; message?: string } | null>(null)
   const key = keyDraft ?? settings?.claudeApiKey ?? ''
+  const model = resolveAiModel(settings?.aiModel)
 
   const commitKey = () => {
     if (keyDraft === null) return
@@ -388,7 +390,7 @@ function AiSection() {
     setTestResult(null)
     try {
       const { testAiConnection } = await import('../ai/client')
-      const result = await testAiConnection(key.trim())
+      const result = await testAiConnection(key.trim(), model)
       setTestResult(result.ok ? { ok: true } : { ok: false, message: result.message })
     } catch {
       setTestResult({ ok: false, message: 'No se pudo cargar el módulo de IA. Comprueba tu conexión.' })
@@ -435,6 +437,15 @@ function AiSection() {
           {testResult.ok ? 'Conexión correcta.' : testResult.message}
         </p>
       )}
+
+      <label className="mb-1 mt-3 block text-xs font-medium text-text-muted">Modelo</label>
+      <Select value={model} onChange={(e) => updateSettings({ aiModel: e.target.value as AiModel })}>
+        {AI_MODEL_OPTIONS.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label} · {opt.priceHint}
+          </option>
+        ))}
+      </Select>
 
       <p className="mt-3 flex items-start gap-1.5 text-xs text-warning">
         <TriangleAlert size={13} strokeWidth={1.75} className="mt-0.5 shrink-0" />
