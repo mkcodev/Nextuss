@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { LayoutTemplate, Plus, X } from 'lucide-react'
+import { LayoutTemplate, Plus, Sparkles, X } from 'lucide-react'
 import { Button, Card, EmptyState } from '../../design/primitives'
 import {
   deleteProjectTemplate,
@@ -12,6 +12,8 @@ import {
 } from '../../db/repositories/templates'
 import { useSubmitGuard } from '../../lib/useSubmitGuard'
 import type { TemplateChild } from '../../db/types'
+import { useAiAvailable } from '../ai/useAiAvailable'
+import { useAiSuggestStore } from '../ai/aiSuggestStore'
 
 /** Plantillas de tarea y de proyecto (Fase 18): antes solo se podían crear y borrar; aquí se renombran
  *  y se edita su lista de subtareas / tareas. */
@@ -19,12 +21,21 @@ export function TemplatesSection() {
   const taskTemplates = useLiveQuery(() => listTaskTemplates(), [])
   const projectTemplates = useLiveQuery(() => listProjectTemplates(), [])
   const empty = taskTemplates?.length === 0 && projectTemplates?.length === 0
+  const { available: aiAvailable } = useAiAvailable()
+  const openAiSuggest = useAiSuggestStore((s) => s.openFor)
 
   return (
     <Card className="p-4">
-      <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-text">
-        <LayoutTemplate size={15} strokeWidth={1.75} aria-hidden="true" /> Plantillas
-      </h2>
+      <div className="mb-1 flex items-center gap-2">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-text">
+          <LayoutTemplate size={15} strokeWidth={1.75} aria-hidden="true" /> Plantillas
+        </h2>
+        {aiAvailable && (
+          <Button size="sm" variant="ghost" className="ml-auto" onClick={() => openAiSuggest({ kind: 'template' })}>
+            <Sparkles size={14} strokeWidth={1.75} className="text-accent" /> Generar plantilla de proyecto
+          </Button>
+        )}
+      </div>
       <p className="mb-3 text-sm text-text-muted">
         Se crean desde el menú ··· de una tarea o de un proyecto. Aquí puedes renombrarlas y cambiar lo que contienen.
       </p>

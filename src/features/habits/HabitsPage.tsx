@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Archive, ChevronDown, ChevronUp, Plus } from 'lucide-react'
+import { Archive, ChevronDown, ChevronUp, Plus, Sparkles } from 'lucide-react'
 import { Button, DropIndicator, Skeleton } from '../../design/primitives'
 import { CalendarHeatmap } from '../stats/charts/CalendarHeatmap'
 import { describeHabitSchedule, subDaysKey, todayKey } from '../../lib/dates'
@@ -15,6 +15,8 @@ import { useListNav } from '../../app/shortcuts/listNavStore'
 import { useDragReorder } from '../../lib/useDragReorder'
 import { reorderNeighbors, type DropPosition } from '../../lib/reorder'
 import { cn } from '../../lib/cn'
+import { useAiAvailable } from '../ai/useAiAvailable'
+import { useAiSuggestStore } from '../ai/aiSuggestStore'
 
 const HABIT_DRAG_MIME = 'application/x-nextuss-habit'
 const HISTORY_DAYS = 90
@@ -68,6 +70,8 @@ export function HabitsPage() {
   }, [activeIds, weekFrom])
   const archivedEntries = useMemo(() => allEntries?.filter((e) => e.habit.archived), [allEntries])
   const openCreate = useHabitFormStore((s) => s.openCreate)
+  const { available: aiAvailable } = useAiAvailable()
+  const openAiSuggest = useAiSuggestStore((s) => s.openFor)
   const openEdit = useHabitFormStore((s) => s.openEdit)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [expandedId, setExpandedId] = useState<number | null>(null)
@@ -145,6 +149,11 @@ export function HabitsPage() {
           <Button variant="ghost" onClick={() => setShowArchived((v) => !v)}>
             <Archive size={14} strokeWidth={2} /> {showArchived ? 'Ocultar archivados' : 'Ver archivados'}
           </Button>
+          {aiAvailable && (
+            <Button variant="ghost" onClick={() => openAiSuggest({ kind: 'habits' })}>
+              <Sparkles size={14} strokeWidth={1.75} className="text-accent" /> Sugerir
+            </Button>
+          )}
           <Button onClick={() => openCreate()}>
             <Plus size={14} strokeWidth={2} /> Nuevo hábito
           </Button>
