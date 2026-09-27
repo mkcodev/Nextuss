@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { CheckIn } from '../../db/types'
-import { shouldShowDayClose, shouldShowDayStart } from './gates'
+import { shouldOpenDayStart, shouldShowDayClose, shouldShowDayStart, type DayStartInputs } from './gates'
 
 function checkin(overrides: Partial<CheckIn> = {}): CheckIn {
   return { date: '2026-09-23', energy: null, mood: null, focus: null, ...overrides }
@@ -25,6 +25,30 @@ describe('shouldShowDayStart', () => {
 
   it('never shows again once dismissed today, regardless of the rest', () => {
     expect(shouldShowDayStart(checkin({ ritualStartDismissedAt: Date.now() }), 3)).toBe(false)
+  })
+})
+
+describe('shouldOpenDayStart', () => {
+  const ready: DayStartInputs = { checkin: null, overdueCount: 0, habitCount: 2, taskCount: 1, onboardingCompleted: true }
+
+  it('opens once every input has loaded and the day needs preparing', () => {
+    expect(shouldOpenDayStart(ready)).toBe(true)
+  })
+
+  it('waits while any input is still loading', () => {
+    for (const key of ['checkin', 'overdueCount', 'habitCount', 'taskCount'] as const) {
+      expect(shouldOpenDayStart({ ...ready, [key]: undefined })).toBe(false)
+    }
+  })
+
+  it('does not open before onboarding is completed', () => {
+    expect(shouldOpenDayStart({ ...ready, onboardingCompleted: false })).toBe(false)
+    expect(shouldOpenDayStart({ ...ready, onboardingCompleted: undefined })).toBe(false)
+  })
+
+  it('does not open on a day with no habits, tasks or overdue work', () => {
+    expect(shouldOpenDayStart({ ...ready, habitCount: 0, taskCount: 0 })).toBe(false)
+    expect(shouldOpenDayStart({ ...ready, habitCount: 0, taskCount: 0, overdueCount: 1 })).toBe(true)
   })
 })
 
