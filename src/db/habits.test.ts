@@ -85,8 +85,10 @@ describe('setHabitLog', () => {
 
   it('unlocks the 7-day streak achievement on the seventh consecutive day', async () => {
     const id = await createHabit(habit())
-    await db.habits.update(id, { createdAt: 0 })
     const start = new Date(2026, 8, 1)
+    // Creado justo antes del primer registro: calculateStreak recorre día a día hasta createdAt, y
+    // con createdAt = 0 (1970) eran ~20.600 días por llamada (timeout con la suite en paralelo).
+    await db.habits.update(id, { createdAt: addDays(start, -1).getTime() })
     let last
     for (let i = 0; i < 7; i++) last = await setHabitLog(id, dateKey(addDays(start, i)), 1)
     expect(last!.streak).toBe(7)
