@@ -26,3 +26,11 @@ const goals = useLiveQuery(() => listGoalsForPeriod('week', key), [key]) // Goal
 const review = useLiveQuery(() => getReview(key), [key]) // WeeklyReview | null | undefined
 const needsReview = review === null // no mientras carga
 ```
+
+## Tests
+
+- Lógica (repositorios, utilidades, funciones puras): `*.test.ts` en entorno Node; `fake-indexeddb`
+  ya está cargado en `src/test/setup.ts`.
+- Componentes: `*.test.tsx` con `@testing-library/react`. El DOM se activa solo en ese archivo con
+  `// @vitest-environment happy-dom` en la primera línea, y se limpia con `cleanup()` en `afterEach`.
+  Ejemplo: `src/design/primitives/SectionErrorBoundary.test.tsx`.
