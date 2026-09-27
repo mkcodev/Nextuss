@@ -37,6 +37,15 @@ describe('calculateStreak', () => {
     expect(result).toEqual({ current: 0, longest: 0 })
   })
 
+  it('keeps the history after switching a daily habit to every N days (anchor = today)', () => {
+    const today = new Date(2026, 1, 10)
+    const habit = makeHabit({ schedule: { type: 'everyNDays', interval: 2, anchorDate: dateKey(today) } })
+    // 10 días seguidos completados como hábito diario, hasta ayer.
+    const logs = Array.from({ length: 10 }, (_, i) => log(1, new Date(2026, 1, 9 - i), true))
+    // Días alineados con el ciclo hacia atrás: 8, 6, 4, 2 feb y 31 ene → 5; hoy aún sin registrar.
+    expect(calculateStreak(habit, logs, today)).toEqual({ current: 5, longest: 5 })
+  })
+
   it('counts consecutive completed days including today', () => {
     const habit = makeHabit()
     const today = new Date(2026, 1, 10)

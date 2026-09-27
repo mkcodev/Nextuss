@@ -51,6 +51,13 @@ describe('isHabitScheduledOn', () => {
     expect(isHabitScheduledOn(habit, new Date(2026, 1, 4))).toBe(true) // day 3
   })
 
+  it('everyNDays extends the cycle backwards from the anchor', () => {
+    const habit = makeHabit({ schedule: { type: 'everyNDays', interval: 3, anchorDate: '2026-02-01' } })
+    expect(isHabitScheduledOn(habit, new Date(2026, 0, 29))).toBe(true) // day -3
+    expect(isHabitScheduledOn(habit, new Date(2026, 0, 30))).toBe(false) // day -2
+    expect(isHabitScheduledOn(habit, new Date(2026, 0, 31))).toBe(false) // day -1
+  })
+
   it('monthDays matches only the given days of the month', () => {
     const habit = makeHabit({ schedule: { type: 'monthDays', days: [1, 15] } })
     expect(isHabitScheduledOn(habit, new Date(2026, 1, 1))).toBe(true)
