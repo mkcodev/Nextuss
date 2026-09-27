@@ -19,6 +19,7 @@ por fase, una versión Dexie por porción entregable (ninguna fase de este plan 
 | 19 | Accesibilidad y teclado (Alt+flechas para reordenar en todas las listas, Esc/Ctrl+A y `aria-sort` en `/tareas`, j/k en `/proyectos`, separador del panel con teclado) | Hecha |
 | 20 | Cobertura de tests: los 15 repositorios y los validadores de IA (382 tests; arreglado `deleteAttribute`) | Hecha |
 | 21 | Verificación manual de #7 y #9–#14 con clics reales; arreglados #63 («Esta y futuras» vaciaba la serie) y #64 (reordenar con teclado) | Hecha |
+| 24 | IA opcional (#60): sugerir hábitos, generar plantillas de proyecto y proponer tareas de un objetivo. Variante A (botón + revisión) con entrada en línea en objetivos vacíos; mockups en `docs/design/ia/` | Hecha |
 
 ## Bloque B — Diseño (después del A)
 
