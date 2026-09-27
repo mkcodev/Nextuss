@@ -4,6 +4,7 @@ import { createTask, getSubtasks } from './repositories/tasks'
 import { createProject, getTasksForProject } from './repositories/projects'
 import {
   createProjectFromTemplate,
+  createProjectTemplate,
   createTaskFromTemplate,
   deleteProjectTemplate,
   deleteTaskTemplate,
@@ -84,6 +85,15 @@ describe('saveProjectAsTemplate', () => {
     expect(template.id).toBe(templateId)
     expect(template.name).toBe('Web nueva')
     expect(template.tasks.map((t) => t.title)).toEqual(['Diseño', 'Desarrollo'])
+  })
+})
+
+describe('createProjectTemplate', () => {
+  it('stores a template built from scratch, usable to create a project', async () => {
+    const id = await createProjectTemplate({ name: 'Podcast', color: '#5058C8', icon: 'music', tasks: [{ title: 'Grabar', estimateMin: 60 }] })
+    expect((await listProjectTemplates()).map((t) => t.name)).toEqual(['Podcast'])
+    const projectId = await createProjectFromTemplate(id)
+    expect((await getTasksForProject(projectId)).map((t) => [t.title, t.estimateMin])).toEqual([['Grabar', 60]])
   })
 })
 
