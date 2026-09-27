@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ChevronDown, ChevronRight, History, Pencil, Plus, Star, Trash2, Unlink } from 'lucide-react'
+import { ChevronDown, ChevronRight, History, Pencil, Plus, Sparkles, Star, Trash2, Unlink } from 'lucide-react'
 import { db } from '../../db/schema'
 import { cn } from '../../lib/cn'
 import { Card, Icon, RingProgress } from '../../design/primitives'
@@ -19,6 +19,8 @@ import { toggleGoalDoneWithFeedback } from './goalActions'
 import { computeGoalProgress, computeGoalSegments, isGoalAtRisk } from './goalProgress'
 import { goalElapsedRatio } from '../../lib/periods'
 import { useGoalFormStore } from './goalFormStore'
+import { useAiAvailable } from '../ai/useAiAvailable'
+import { useAiSuggestStore } from '../ai/aiSuggestStore'
 
 /** Solo tareas vivas: `goal.taskIds` sigue apuntando a las que están en la papelera (para poder
  * restaurarlas con su vínculo intacto), pero no deben listarse — `computeGoalSegments` ya las omite
@@ -64,6 +66,12 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
 
   const openEdit = useGoalFormStore((s) => s.openEdit)
   const openCreate = useGoalFormStore((s) => s.openCreate)
+  const { available: aiAvailable } = useAiAvailable()
+  const openAiSuggest = useAiSuggestStore((s) => s.openFor)
+  // Entrada en línea (variante B del issue #60): solo en el hueco más claro, un objetivo abierto vacío.
+  const liveTaskCount = (tasks ?? []).filter(Boolean).length
+  const suggestInline = aiAvailable && loaded && !goal.done && liveTaskCount === 0 && children.length === 0
+  const proposeTasks = () => goal.id != null && openAiSuggest({ kind: 'goalTasks', goalId: goal.id })
 
   const handleAddTask = async () => {
     const trimmed = newTaskTitle.trim()
@@ -128,6 +136,11 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
               <span className="tabular-nums">
                 {progress.done}/{progress.total} completado{progress.total === 1 ? '' : 's'}
               </span>
+            )}
+            {suggestInline && (
+              <button type="button" onClick={proposeTasks} className="inline-flex items-center gap-1 font-medium text-accent hover:underline">
+                <Sparkles size={12} strokeWidth={1.75} aria-hidden="true" /> Sin tareas · Proponer tareas
+              </button>
             )}
             {attribute && (
               <span className="inline-flex items-center gap-1 text-text-muted">
@@ -237,6 +250,11 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
             >
               <Pencil size={12} /> Editar
             </button>
+            {aiAvailable && !goal.done && (
+              <button onClick={proposeTasks} className="flex items-center gap-1 font-medium text-accent hover:underline">
+                <Sparkles size={12} strokeWidth={1.75} /> Proponer tareas
+              </button>
+            )}
             {!nested && goal.period === 'month' && (
               <button
                 onClick={handleAddSubGoal}
