@@ -11,6 +11,8 @@
 2. **`?? []` / `?? 0` solo para datos auxiliares** (pickers, lookups, contadores en los que un vacío
    momentáneo no se ve). Una lista que decide un estado vacío ("Nada aquí", "Sin objetivos…") se lee
    sin `?? []` y pinta `Skeleton` mientras es `undefined`.
+   Un contador visible («3/5», «Tareas zombie») muestra `—` mientras carga, no un `0` momentáneo; y un
+   aviso derivado («en riesgo») espera a que carguen sus datos.
 3. **Las puertas esperan a todas sus entradas.** Un efecto que abre un ritual o un aviso comprueba
    `!== undefined` en cada consulta de la que depende (incluida la que puede resolver a `null`).
 4. **Los errores suben a un límite.** `RouteErrorBoundary` cubre la página; las regiones
