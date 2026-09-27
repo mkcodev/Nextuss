@@ -148,10 +148,14 @@ export function TodayView() {
           <span className="truncate text-xs text-text-muted">{topInsight.title}</span>
         </button>
       )}
-      <p className="text-2xl font-semibold tabular-nums text-text">
-        {doneCount}
-        <span className="text-sm font-normal text-text-faint"> / {totalCount} completados</span>
-      </p>
+      {todaysEntries === undefined ? (
+        <Skeleton className="h-8 w-32" />
+      ) : (
+        <p className="text-2xl font-semibold tabular-nums text-text">
+          {doneCount}
+          <span className="text-sm font-normal text-text-faint"> / {totalCount} completados</span>
+        </p>
+      )}
       {pending.length > 0 ? (
         <div>
           <p className="mb-1.5 text-xs font-semibold text-text-muted">Pendientes</p>
@@ -167,7 +171,7 @@ export function TodayView() {
         totalCount > 0 && <p className="text-xs text-accent">Todo completado por hoy.</p>
       )}
     </div>,
-    [doneCount, totalCount, pending.map((e) => e.habit.id).join(','), topInsight?.key],
+    [todaysEntries === undefined, doneCount, totalCount, pending.map((e) => e.habit.id).join(','), topInsight?.key],
   )
 
   useListNav(

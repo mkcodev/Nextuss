@@ -11,7 +11,7 @@ import { downloadCsv, downloadJson } from '../export'
 import { getReview } from '../../../db/repositories/reviews'
 import { getNorthStarStreak, listGoalsForPeriod } from '../../../db/repositories/goals'
 import { ACHIEVEMENTS_BY_KEY } from '../../../lib/achievements'
-import { Badge, Button, Card, Icon, Tabs } from '../../../design/primitives'
+import { Badge, Button, Card, Icon, Skeleton, Tabs } from '../../../design/primitives'
 import { useToastStore } from '../../../lib/toastStore'
 import type { GoalPeriod, WeeklyReview } from '../../../db/types'
 
@@ -62,7 +62,8 @@ export function InformesTab() {
   // Los objetivos del informe son los que PERTENECEN a este periodo (period+periodKey), no los
   // creados/completados dentro de sus fechas naturales — `data.goals` (de useStatsData) usa ese
   // segundo criterio y no encaja aquí (mismo error que ya se evitó en ResumenTab).
-  const periodGoals = useLiveQuery(() => listGoalsForPeriod(period, periodKey), [period, periodKey]) ?? []
+  const periodGoalsQuery = useLiveQuery(() => listGoalsForPeriod(period, periodKey), [period, periodKey])
+  const periodGoals = periodGoalsQuery ?? []
 
   const isCurrent = periodKey === currentKeyFor(period)
   const periodLabel = formatPeriodLabel(period, periodKey)
@@ -150,9 +151,11 @@ export function InformesTab() {
 
         <Card className="p-5">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-text">
-            <Compass size={15} strokeWidth={1.75} /> Objetivos cumplidos ({doneGoals.length}/{periodGoals.length})
+            <Compass size={15} strokeWidth={1.75} /> Objetivos cumplidos{periodGoalsQuery && ` (${doneGoals.length}/${periodGoals.length})`}
           </h3>
-          {doneGoals.length === 0 ? (
+          {periodGoalsQuery === undefined ? (
+            <Skeleton className="h-5 w-2/3" />
+          ) : doneGoals.length === 0 ? (
             <p className="text-sm text-text-faint">Ninguno completado en este periodo.</p>
           ) : (
             <ul className="space-y-1.5">

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Archive, ChevronDown, ChevronUp, Plus } from 'lucide-react'
-import { Button, DropIndicator } from '../../design/primitives'
+import { Button, DropIndicator, Skeleton } from '../../design/primitives'
 import { CalendarHeatmap } from '../stats/charts/CalendarHeatmap'
 import { describeHabitSchedule, subDaysKey, todayKey } from '../../lib/dates'
 import { archiveHabit, getHabitLogs, getHabitLogsForHabits, moveHabitBetween } from '../../db/repositories/habits'
@@ -80,28 +80,32 @@ export function HabitsPage() {
 
   useContextPanel(
     'Resumen de hábitos',
-    <div className="space-y-2 text-xs text-text-muted">
-      <p className="text-2xl font-semibold tabular-nums text-text">{activeEntries?.length ?? 0}</p>
-      <p className="text-text-faint">hábitos activos</p>
-      <div className="mt-3 space-y-1 border-t border-border pt-3">
-        <div className="flex justify-between">
-          <span>Sí / No</span>
-          <span className="tabular-nums text-text">{byType.binary}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Cantidad</span>
-          <span className="tabular-nums text-text">{byType.quantity}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Duración</span>
-          <span className="tabular-nums text-text">{byType.duration}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>A evitar</span>
-          <span className="tabular-nums text-text">{byType.negative}</span>
+    activeEntries === undefined ? (
+      <Skeleton className="h-36 w-full" />
+    ) : (
+      <div className="space-y-2 text-xs text-text-muted">
+        <p className="text-2xl font-semibold tabular-nums text-text">{activeEntries.length}</p>
+        <p className="text-text-faint">hábitos activos</p>
+        <div className="mt-3 space-y-1 border-t border-border pt-3">
+          <div className="flex justify-between">
+            <span>Sí / No</span>
+            <span className="tabular-nums text-text">{byType.binary}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Cantidad</span>
+            <span className="tabular-nums text-text">{byType.quantity}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Duración</span>
+            <span className="tabular-nums text-text">{byType.duration}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>A evitar</span>
+            <span className="tabular-nums text-text">{byType.negative}</span>
+          </div>
         </div>
       </div>
-    </div>,
+    ),
     [activeEntries?.length, byType.binary, byType.quantity, byType.duration, byType.negative],
   )
 

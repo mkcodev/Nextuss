@@ -31,10 +31,8 @@ function useGoalTasks(goal: Goal) {
   )
 }
 
-function useChildGoals(goal: Goal): Goal[] {
-  return (
-    useLiveQuery((): Promise<Goal[]> => (goal.id != null ? getChildGoals(goal.id) : Promise.resolve([])), [goal.id]) ?? []
-  )
+function useChildGoals(goal: Goal): Goal[] | undefined {
+  return useLiveQuery((): Promise<Goal[]> => (goal.id != null ? getChildGoals(goal.id) : Promise.resolve([])), [goal.id])
 }
 
 interface GoalCardProps {
@@ -49,7 +47,10 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
   const [newTaskTitle, setNewTaskTitle] = useState('')
 
   const tasks = useGoalTasks(goal)
-  const children = useChildGoals(goal)
+  const childrenQuery = useChildGoals(goal)
+  const children = childrenQuery ?? []
+  // Mientras cargan tareas o sub-objetivos el progreso sería 0: no se marca «en riesgo» ni se cuenta.
+  const loaded = tasks !== undefined && childrenQuery !== undefined
   const segments = computeGoalSegments(tasks ?? [], children)
   const progress = computeGoalProgress(goal, segments)
   const ringSegments: RingSegment[] = segments.map((s) => ({
@@ -58,7 +59,7 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
     variant: s.kind === 'week-goal' ? 'week' : 'task',
   }))
   const elapsed = goalElapsedRatio(goal.period, goal.periodKey, goal.createdAt)
-  const atRisk = !goal.done && isGoalAtRisk(progress.ratio, elapsed)
+  const atRisk = loaded && !goal.done && isGoalAtRisk(progress.ratio, elapsed)
   const attribute = attributes.find((a) => a.id === goal.attributeId)
 
   const openEdit = useGoalFormStore((s) => s.openEdit)
@@ -123,7 +124,7 @@ export function GoalCard({ goal, attributes, nested = false }: GoalCardProps) {
           </div>
 
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-text-muted">
-            {progress.source === 'segments' && (
+            {loaded && progress.source === 'segments' && (
               <span className="tabular-nums">
                 {progress.done}/{progress.total} completado{progress.total === 1 ? '' : 's'}
               </span>

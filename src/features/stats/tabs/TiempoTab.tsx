@@ -27,8 +27,8 @@ const RATIO_BUCKETS: { label: string; test: (r: number) => boolean }[] = [
 
 export function TiempoTab({ range }: TiempoTabProps) {
   const data = useStatsData(range)
-  const overdueTasks = useLiveQuery(() => getOverdueTasks(todayKey()), []) ?? []
-  const zombieCount = overdueTasks.filter((t) => t.postponedCount >= ZOMBIE_THRESHOLD).length
+  const overdueTasks = useLiveQuery(() => getOverdueTasks(todayKey()), [])
+  const zombieCount = overdueTasks?.filter((t) => t.postponedCount >= ZOMBIE_THRESHOLD).length
 
   // Tiempo por tarea completada: el real registrado o, si no, el de sus sesiones de foco.
   const taskMinutes = useMemo(() => {
@@ -151,7 +151,7 @@ export function TiempoTab({ range }: TiempoTabProps) {
         />
         <StatTile
           label="Tareas zombie"
-          value={String(zombieCount)}
+          value={zombieCount === undefined ? '—' : String(zombieCount)}
           icon={<GitCommitHorizontal size={13} strokeWidth={1.75} />}
         />
       </div>
