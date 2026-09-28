@@ -28,6 +28,20 @@ por fase, una versión Dexie por porción entregable (ninguna fase de este plan 
 | 22 | Rediseño de `TaskForm` (issue #6) | Hecha (#44) |
 | 23 | Sistema de diseño: tokens, primitivos, páginas, estados vacío/carga, motion, colores | Hecha (#39, #41, #43, #52, #55, #56) |
 
+## Bloque C — «App perfecta» (2026-09-28)
+
+| Fase | Contenido | Estado |
+|---|---|---|
+| 25 | Arreglos y fricciones TDAH | Hecha (#81) |
+| 26 | Accesibilidad, móvil mínimo y consistencia visual | Hecha (#84, #85) |
+| 27 | Técnica y seguridad de datos (índices, copia automática) | Hecha (#87) |
+| 28a | Rutinas: pasos temporizados, reproductor con vistas Paso/Línea, tarjeta en Hoy (#88) | Hecha |
+| 28b | Conciencia del tiempo: barra «tiempo que queda hoy», cuenta atrás al siguiente bloque, avisos de transición (#89) | Pendiente |
+| 29 | Diario y notas enlazables | Pendiente |
+| 30 | Recompensas y gamificación | Pendiente |
+| 31 | Calendario ICS | Pendiente |
+| 32 | Sync con backend (decidir proveedor antes) | Pendiente |
+
 Guía paso a paso, herramientas y prompt: [`docs/design/PLAN-REDISENO.md`](design/PLAN-REDISENO.md).
 Orden recomendado dentro del bloque: dirección visual (`DESIGN.md`) → base del sistema (23) → TaskForm (22) → resto.
 
