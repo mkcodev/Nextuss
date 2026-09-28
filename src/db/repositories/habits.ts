@@ -88,6 +88,11 @@ export function getLog(habitId: number, date: string) {
 
 export interface LogHabitResult {
   completed: boolean
+  /** Pasó de no cumplido a cumplido con este registro. */
+  newlyCompleted: boolean
+  /** Valor anterior del día (0 si no había registro), para poder deshacer. */
+  previousValue: number
+  habitName: string
   leveledUp: boolean
   newLevel: number
   streak: number
@@ -155,7 +160,16 @@ export async function setHabitLog(
         }
       }
 
-      return { completed, leveledUp, newLevel, streak: current, unlockedAchievements }
+      return {
+        completed,
+        newlyCompleted: completed && !wasCompleted,
+        previousValue: existing?.value ?? 0,
+        habitName: habit.name,
+        leveledUp,
+        newLevel,
+        streak: current,
+        unlockedAchievements,
+      }
     },
   )
 }
