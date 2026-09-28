@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { LayoutPanelTop, Plus } from 'lucide-react'
 import { cn } from '../lib/cn'
-import { NAV_ITEMS } from './navItems'
+import { useNavItems } from './navItems'
 import { useUIStore } from './uiStore'
 import { useQuickAddStore } from '../features/tasks/quickAddStore'
 
@@ -9,18 +9,18 @@ import { useQuickAddStore } from '../features/tasks/quickAddStore'
 // Proyectos y Ajustes quedan en la paleta y el menú del avatar — una barra de 8 en un teléfono es
 // "técnicamente alcanzable", no usable.
 const MOBILE_EXCLUDED = new Set(['/ajustes', '/proyectos', '/estadisticas', '/rutinas'])
-const MOBILE_NAV_ITEMS = NAV_ITEMS.filter((item) => !MOBILE_EXCLUDED.has(item.to))
 
 export function MobileNav() {
   const openMobileDock = useUIStore((s) => s.openMobileDock)
   const openQuickAdd = useQuickAddStore((s) => s.openQuickAdd)
+  const navItems = useNavItems().filter((item) => !MOBILE_EXCLUDED.has(item.to))
 
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-mobile-nav flex justify-around border-t border-border bg-bg-soft md:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      {MOBILE_NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+      {navItems.map(({ to, label, icon: Icon, end }) => (
         <NavLink
           key={to}
           to={to}

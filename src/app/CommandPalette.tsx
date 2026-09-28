@@ -42,7 +42,9 @@ import { startRoutine } from '../features/routines/actions'
 import { listRoutines } from '../db/repositories/routines'
 import { useTemplatePickerStore } from '../features/templates/templatePickerStore'
 import { searchIndex, type SearchDoc } from '../features/search/searchIndex'
-import { NAV_ITEMS } from './navItems'
+import { selectNav, useNavItems } from './navItems'
+import { useEnabledPlugins } from '../features/plugins/pluginsStore'
+import type { PluginId } from '../features/plugins/types'
 
 const SEARCH_ICON: Record<SearchDoc['type'], typeof ListTodo> = {
   task: ListTodo,
@@ -52,7 +54,12 @@ const SEARCH_ICON: Record<SearchDoc['type'], typeof ListTodo> = {
 }
 
 // Entradas del grupo "Navegación" que no son una ruta de NAV_ITEMS (sub-tabs, anclas, etc).
-const EXTRA_NAV_ITEMS = [{ to: '/planificacion?tab=objetivos', label: 'Ir a Objetivos', icon: Compass }]
+const EXTRA_NAV_ITEMS: { to: string; label: string; icon: typeof Compass; pluginId: PluginId }[] = [
+  { to: '/planificacion?tab=objetivos', label: 'Ir a Objetivos', icon: Compass, pluginId: 'planning' },
+]
+
+// Resultados de búsqueda de un plugin activable (tareas, objetivos y proyectos son núcleo).
+const SEARCH_PLUGIN: Partial<Record<SearchDoc['type'], PluginId>> = { habit: 'habits' }
 
 const ITEM_CLASS =
   'flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent'
@@ -62,6 +69,9 @@ export function CommandPalette() {
   const closePalette = useOverlayStore((s) => s.closePalette)
   const openHelp = useOverlayStore((s) => s.openHelp)
   const navigate = useNavigate()
+  const navItems = useNavItems()
+  const enabled = useEnabledPlugins()
+  const on = (id: PluginId) => enabled.has(id)
   const toggleLeft = useUIStore((s) => s.toggleLeft)
   const toggleRight = useUIStore((s) => s.toggleRight)
   const openCreate = useHabitFormStore((s) => s.openCreate)
@@ -77,7 +87,14 @@ export function CommandPalette() {
   const openTemplatePicker = useTemplatePickerStore((s) => s.openFor)
 
   const [query, setQuery] = useState('')
-  const results = useMemo(() => (query.trim() ? searchIndex.search(query) : []), [query])
+  const results = useMemo(
+    () =>
+      (query.trim() ? searchIndex.search(query) : []).filter((doc) => {
+        const pluginId = SEARCH_PLUGIN[doc.type]
+        return !pluginId || enabled.has(pluginId)
+      }),
+    [query, enabled],
+  )
 
   useEffect(() => {
     if (paletteOpen) void searchIndex.ensureBuilt()
@@ -151,7 +168,7 @@ export function CommandPalette() {
         )}
 
         <Command.Group heading="Navegación">
-          {NAV_ITEMS.map(({ to, label, icon: Icon, paletteLabel }) => (
+          {navItems.map(({ to, label, icon: Icon, paletteLabel }) => (
             <Command.Item
               key={to}
               onSelect={() => run(() => navigate(to))}
@@ -160,7 +177,7 @@ export function CommandPalette() {
               <Icon size={15} strokeWidth={1.75} /> {paletteLabel ?? `Ir a ${label}`}
             </Command.Item>
           ))}
-          {EXTRA_NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+          {selectNav(EXTRA_NAV_ITEMS, enabled).map(({ to, label, icon: Icon }) => (
             <Command.Item
               key={to}
               onSelect={() => run(() => navigate(to))}
@@ -175,12 +192,11 @@ export function CommandPalette() {
           <Command.Item onSelect={() => run(openQuickAdd)} className={ITEM_CLASS}>
             <Plus size={15} strokeWidth={1.75} /> Crear tarea
           </Command.Item>
-          <Command.Item
-            onSelect={() => run(openCreate)}
-            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
-          >
-            <Plus size={15} strokeWidth={1.75} /> Crear hábito
-          </Command.Item>
+          {on('habits') && (
+            <Command.Item onSelect={() => run(openCreate)} className={ITEM_CLASS}>
+              <Plus size={15} strokeWidth={1.75} /> Crear hábito
+            </Command.Item>
+          )}
           <Command.Item
             onSelect={() => run(() => openGoalCreate({ period: 'week', periodKey: weekKey() }))}
             className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
@@ -193,10 +209,12 @@ export function CommandPalette() {
           >
             <FolderKanban size={15} strokeWidth={1.75} /> Crear proyecto
           </Command.Item>
-          <Command.Item onSelect={() => run(openRoutineCreate)} className={ITEM_CLASS}>
-            <Repeat size={15} strokeWidth={1.75} /> Crear rutina
-          </Command.Item>
-          {routines.map((r) => (
+          {on('routines') && (
+            <Command.Item onSelect={() => run(openRoutineCreate)} className={ITEM_CLASS}>
+              <Repeat size={15} strokeWidth={1.75} /> Crear rutina
+            </Command.Item>
+          )}
+          {on('routines') && routines.map((r) => (
             <Command.Item
               key={`routine-${r.id}`}
               value={`Empezar rutina ${r.name}`}
@@ -212,27 +230,24 @@ export function CommandPalette() {
           <Command.Item onSelect={() => run(() => openTemplatePicker('project'))} className={ITEM_CLASS}>
             <LayoutTemplate size={15} strokeWidth={1.75} /> Proyecto desde plantilla
           </Command.Item>
-          <Command.Item
-            onSelect={() => run(() => openWeeklyReview(weekKey()))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
-          >
-            <ClipboardCheck size={15} strokeWidth={1.75} /> Revisión semanal
-          </Command.Item>
+          {on('weeklyReview') && (
+            <Command.Item onSelect={() => run(() => openWeeklyReview(weekKey()))} className={ITEM_CLASS}>
+              <ClipboardCheck size={15} strokeWidth={1.75} /> Revisión semanal
+            </Command.Item>
+          )}
         </Command.Group>
 
         <Command.Group heading="Informes">
-          <Command.Item
-            onSelect={() => run(() => navigate('/estadisticas?tab=informes'))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
-          >
-            <FileText size={15} strokeWidth={1.75} /> Informe semanal
-          </Command.Item>
-          <Command.Item
-            onSelect={() => run(() => navigate('/estadisticas?tab=informes'))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
-          >
-            <Download size={15} strokeWidth={1.75} /> Exportar datos
-          </Command.Item>
+          {on('stats') && (
+            <>
+              <Command.Item onSelect={() => run(() => navigate('/estadisticas?tab=informes'))} className={ITEM_CLASS}>
+                <FileText size={15} strokeWidth={1.75} /> Informe semanal
+              </Command.Item>
+              <Command.Item onSelect={() => run(() => navigate('/estadisticas?tab=informes'))} className={ITEM_CLASS}>
+                <Download size={15} strokeWidth={1.75} /> Exportar datos
+              </Command.Item>
+            </>
+          )}
           <Command.Item
             onSelect={() => run(() => navigate('/ajustes#backup'))}
             className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"

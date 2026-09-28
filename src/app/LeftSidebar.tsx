@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom'
 import { cn } from '../lib/cn'
 import { useUIStore } from './uiStore'
-import { NAV_ITEMS } from './navItems'
+import { useNavItems } from './navItems'
 
 export function LeftSidebar() {
   const collapsed = useUIStore((s) => s.leftCollapsed)
+  const navItems = useNavItems()
 
   return (
     <nav
@@ -13,7 +14,7 @@ export function LeftSidebar() {
         collapsed ? 'w-[60px] px-2' : 'w-56 px-3',
       )}
     >
-      {NAV_ITEMS.map(({ to, label, icon: Icon, end, goKey }) => (
+      {navItems.map(({ to, label, icon: Icon, end, goKey }) => (
         <NavLink
           key={to}
           to={to}

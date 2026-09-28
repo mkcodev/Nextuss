@@ -7,20 +7,19 @@ import { useDayNavStore } from './dayNavStore'
 import { useCaptureRequestStore } from './captureRequestStore'
 import { useQuickAddStore } from '../../features/tasks/quickAddStore'
 import { useUndoStore } from '../../lib/undoStore'
-import { NAV_ITEMS } from '../navItems'
+import { EXTRA_GO_ITEMS, NAV_ITEMS, selectNav } from '../navItems'
+import { usePluginsStore } from '../../features/plugins/pluginsStore'
 import { ensurePanelVisible } from '../dock/ensurePanelVisible'
 import { useRoutinePlayerStore } from '../../features/routines/routinePlayerStore'
 
 const GO_SEQUENCE_WINDOW_MS = 700
 
-// Entradas del acorde "g <letra>" que no son una ruta de NAV_ITEMS (sub-tabs, anclas, etc).
-const EXTRA_GO_TARGETS: Record<string, string> = {
-  o: '/planificacion?tab=objetivos',
-}
-
-const GO_TARGETS: Record<string, string> = {
-  ...Object.fromEntries(NAV_ITEMS.map((n) => [n.goKey, n.to])),
-  ...EXTRA_GO_TARGETS,
+/** Destinos del acorde "g <letra>", solo de plugins activos: se calcula en cada pulsación. */
+function goTargets(): Record<string, string> {
+  const enabled = usePluginsStore.getState().enabled
+  return Object.fromEntries(
+    [...selectNav(NAV_ITEMS, enabled), ...selectNav(EXTRA_GO_ITEMS, enabled)].map((n) => [n.goKey, n.to]),
+  )
 }
 
 function isTypingTarget(el: EventTarget | null): boolean {
@@ -112,7 +111,7 @@ export function useGlobalShortcuts() {
       }
 
       if (pendingGo.current) {
-        const target = GO_TARGETS[e.key]
+        const target = goTargets()[e.key]
         pendingGo.current = false
         if (goTimeout.current) clearTimeout(goTimeout.current)
         if (target) {

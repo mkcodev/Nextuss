@@ -3,7 +3,8 @@ import type { DragEvent as ReactDragEvent, KeyboardEvent as ReactKeyboardEvent, 
 import { ChevronsDown, ChevronsUp, X } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useUIStore, type DockZone } from '../uiStore'
-import { PANEL_REGISTRY, type PanelKey } from './panels'
+import { PANEL_REGISTRY, isPanelVisible, type PanelKey } from './panels'
+import { useEnabledPlugins } from '../../features/plugins/pluginsStore'
 import { SectionErrorBoundary } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 
@@ -28,7 +29,9 @@ function PanelTabs({
   onSelect: (key: PanelKey) => void
   idBase: string
 }) {
-  const order = useUIStore((s) => s.panelOrder[zone])
+  const savedOrder = useUIStore((s) => s.panelOrder[zone])
+  const enabled = useEnabledPlugins()
+  const order = savedOrder.filter((key) => isPanelVisible(key, enabled))
   const movePanel = useUIStore((s) => s.movePanel)
   const [draggedKey, setDraggedKey] = useState<PanelKey | null>(null)
   const [dropTarget, setDropTarget] = useState<DropTarget | null>(null)
@@ -175,6 +178,9 @@ function DockZones() {
   const frame = useRef(0)
   const topId = useId()
   const bottomId = useId()
+  const enabled = useEnabledPlugins()
+  // Un panel de un plugin desactivado no se pinta: la zona queda en «Elige un panel arriba».
+  const visible = (key: PanelKey | null) => (key && isPanelVisible(key, enabled) ? key : null)
 
   const onPointerDown = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
     dragging.current = true
@@ -221,8 +227,8 @@ function DockZones() {
   return (
     <div ref={bodyRef} className="flex min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-col" style={{ height: `${livePct ?? dock.splitPct}%` }}>
-        <PanelTabs zone="top" idBase={topId} activeKey={dock.top} onSelect={(k) => assignPanel('top', k)} />
-        <DockZoneBody idBase={topId} panelKey={dock.top} />
+        <PanelTabs zone="top" idBase={topId} activeKey={visible(dock.top)} onSelect={(k) => assignPanel('top', k)} />
+        <DockZoneBody idBase={topId} panelKey={visible(dock.top)} />
       </div>
 
       <div
@@ -264,8 +270,8 @@ function DockZones() {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
-        <PanelTabs zone="bottom" idBase={bottomId} activeKey={dock.bottom} onSelect={(k) => assignPanel('bottom', k)} />
-        <DockZoneBody idBase={bottomId} panelKey={dock.bottom} />
+        <PanelTabs zone="bottom" idBase={bottomId} activeKey={visible(dock.bottom)} onSelect={(k) => assignPanel('bottom', k)} />
+        <DockZoneBody idBase={bottomId} panelKey={visible(dock.bottom)} />
       </div>
     </div>
   )
