@@ -11,7 +11,7 @@ import { Flame, Trophy, Gem, Star, Clock3, ListTodo, HeartPulse, type LucideIcon
 import { getOrCreateSettings } from '../../db/repositories/settings'
 import { getOverdueTasks, getTasksForDate } from '../../db/repositories/tasks'
 import { getCheckInForDate } from '../../db/repositories/checkins'
-import { getVirtualizationDays } from '../../db/repositories/virtualization'
+import { getVirtualizationDays, upsertVirtualizationDay } from '../../db/repositories/virtualization'
 import type { Settings } from '../../db/types'
 import { todayKey, formatShortDate, subDaysKey } from '../../lib/dates'
 import { Button } from '../../design/primitives'
@@ -19,15 +19,16 @@ import { useStage } from '../../app/stage/stageStore'
 import { usePlayerProgress } from '../gamification/usePlayerProgress'
 import { useHabitsWithStats } from '../habits/useHabitsWithStats'
 import { dayBlocks } from '../today/dayTime'
-import { BREATH_PATTERNS, getBreathState } from './engine/breathCycle'
+import { BREATH_PATTERNS, breathPatternDuration, getBreathState } from './engine/breathCycle'
 import { PHASE_LABELS, type PhaseId } from './engine/phases'
+import { getSyncPercent } from './engine/syncMeter'
 import { useVirtualizationStore } from './engine/useVirtualizationStore'
 import { calculateVirtualizationStreak } from './streak'
 import { THEMES } from './themes'
 import { VirtualizationThemeSwitch } from './VirtualizationThemeSwitch'
 import { virtualizationTone } from './audio/virtualizationTone'
 
-const SYNC_DURATION_SEC = 32
+const DEFAULT_MEDITATION_DURATION_SEC = 120
 
 function useReducedMotion(): boolean {
   return useMemo(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false, [])
@@ -117,11 +118,19 @@ export function Virtualization() {
     return () => clearTimeout(t)
   }, [phase, terminalLines.length, setPhase])
 
-  // Presencia: la Sincronización sube con el tiempo en la fase (PR3 la hará depender de ciclos reales).
+  // Presencia: la Sincronización sube en escalones, uno por cada ciclo de respiración completo (no
+  // de forma continua). Solo se escribe en `virtualizationDays` cuando el escalón realmente cambia,
+  // así queda registrado el progreso de la sesión (para reanudar y para estadísticas futuras) sin
+  // machacar Dexie varias veces por segundo.
+  const meditationDurationSec = settings?.meditationDurationSec ?? DEFAULT_MEDITATION_DURATION_SEC
   useEffect(() => {
     if (phase !== 'presencia') return
-    setSyncPercent(Math.min(100, Math.round((phaseElapsedSec / SYNC_DURATION_SEC) * 100)))
-  }, [phase, phaseElapsedSec, setSyncPercent])
+    const cycleDurationSec = breathPatternDuration(breathPattern)
+    const pct = getSyncPercent(phaseElapsedSec, cycleDurationSec, meditationDurationSec)
+    if (pct === syncPercent) return
+    setSyncPercent(pct)
+    void upsertVirtualizationDay(todayKey(), { meditationSec: Math.round(phaseElapsedSec), syncPercent: pct, phaseReached: 'presencia' })
+  }, [phase, phaseElapsedSec, breathPattern, meditationDurationSec, syncPercent, setSyncPercent])
 
   useEffect(() => {
     if (!visible) return
@@ -165,7 +174,13 @@ export function Virtualization() {
         {phase === 'transmision' && <TerminalOverlay lines={terminalLines} accent={palette.accent} />}
         {phase === 'escaneo' && <EscaneoOverlay onContinue={() => setPhase('presencia')} accent={palette.accent} />}
         {phase === 'presencia' && (
-          <PresenciaOverlay breathLabel={getBreathState(breathPattern, phaseElapsedSec).label} syncPercent={syncPercent} accent={palette.accent} onEnter={() => setPhase('virtualizacion')} />
+          <PresenciaOverlay
+            breathLabel={getBreathState(breathPattern, phaseElapsedSec).label}
+            syncPercent={syncPercent}
+            targetMinutes={meditationDurationSec / 60}
+            accent={palette.accent}
+            onEnter={() => setPhase('virtualizacion')}
+          />
         )}
         {phase === 'virtualizacion' && <VirtualizacionOverlay accent={palette.accent} onContinue={() => close()} />}
       </div>
@@ -280,11 +295,13 @@ function EscaneoOverlay({ onContinue, accent }: { onContinue: () => void; accent
 function PresenciaOverlay({
   breathLabel,
   syncPercent,
+  targetMinutes,
   accent,
   onEnter,
 }: {
   breathLabel: string
   syncPercent: number
+  targetMinutes: number
   accent: string
   onEnter: () => void
 }) {
@@ -294,7 +311,9 @@ function PresenciaOverlay({
       <div className="h-1 w-56 overflow-hidden rounded-full bg-white/10">
         <div className="h-full transition-[width] duration-200" style={{ width: `${syncPercent}%`, background: accent }} />
       </div>
-      <p className="text-xs opacity-60">Sincronización {syncPercent}%</p>
+      <p className="text-xs opacity-60">
+        Sincronización {syncPercent}% · meta {targetMinutes % 1 === 0 ? targetMinutes : targetMinutes.toFixed(1)} min
+      </p>
       {syncPercent >= 100 && (
         <Button size="md" onClick={onEnter} style={{ background: accent, color: '#04121a' }}>
           Pulsa Enter
