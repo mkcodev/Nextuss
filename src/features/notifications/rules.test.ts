@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import type { Habit, HabitLog, Settings, Task } from '../../db/types'
+import type { Habit, HabitLog, Routine, Settings, Task } from '../../db/types'
 import {
   eveningSummaryNotifications,
   habitReminderNotifications,
   isWithinQuietHours,
   morningSummaryNotifications,
   pomodoroEndNotification,
+  routineStartNotifications,
+  routineStepNotification,
   taskStartNotifications,
   weeklyReviewNudgeNotifications,
   zombieTaskNotifications,
@@ -216,5 +218,44 @@ describe('pomodoroEndNotification', () => {
     expect(work?.title).toBe('Sesión de foco terminada')
     expect(brk?.title).toBe('Descanso terminado')
     expect(pomodoroEndNotification({ now: MONDAY_8AM, settings: settings({ notifyPomodoroEnd: false }), mode: 'work' })).toBeNull()
+  })
+})
+
+describe('routineStartNotifications', () => {
+  const routine: Routine = {
+    id: 3,
+    name: 'Mañana',
+    icon: 'sunrise',
+    color: '#fff',
+    steps: [{ id: 'a', title: 'Vestirse', durationMin: 5 }],
+    startTime: '07:30',
+    weekdays: [],
+    createdAt: 0,
+    deletedAt: 0,
+    sortKey: 0,
+  }
+  const at730 = new Date(2026, 8, 28, 7, 30)
+
+  it('avisa a su hora, una vez al día', () => {
+    const [n] = routineStartNotifications({ now: at730, settings: settings(), routines: [routine], runsToday: [] })
+    expect(n.key).toBe('routine:3:2026-09-28')
+    expect(n.body).toBe('1 paso · 5 min')
+  })
+
+  it('no avisa si ya está hecha, fuera de hora o con el aviso apagado', () => {
+    const done = { routineId: 3, date: '2026-09-28', startedAt: 0, finishedAt: 0, completedSteps: 1, totalSteps: 1, finished: true }
+    expect(routineStartNotifications({ now: at730, settings: settings(), routines: [routine], runsToday: [done] })).toEqual([])
+    expect(routineStartNotifications({ now: new Date(2026, 8, 28, 7, 31), settings: settings(), routines: [routine], runsToday: [] })).toEqual([])
+    expect(routineStartNotifications({ now: at730, settings: settings({ notifyRoutines: false }), routines: [routine], runsToday: [] })).toEqual([])
+  })
+})
+
+describe('routineStepNotification', () => {
+  it('anuncia el siguiente paso o el final, con clave única por pasada', () => {
+    const next = routineStepNotification({ settings: settings(), runKey: 99, stepIndex: 1, routineName: 'Mañana', nextStep: { title: 'Desayunar', durationMin: 15 } })
+    expect(next).toMatchObject({ key: 'routine-step:99:1', title: 'Siguiente: Desayunar', body: 'Mañana · 15 min' })
+    const end = routineStepNotification({ settings: settings(), runKey: 99, stepIndex: 2, routineName: 'Mañana', nextStep: null })
+    expect(end?.key).toBe('routine-step:99:end')
+    expect(routineStepNotification({ settings: settings({ notifyRoutines: false }), runKey: 1, stepIndex: 0, routineName: 'x', nextStep: null })).toBeNull()
   })
 })

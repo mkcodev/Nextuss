@@ -3,6 +3,7 @@ import { listHabits, getLogsForDate } from '../../db/repositories/habits'
 import { getTasksForDate, getOverdueTasks } from '../../db/repositories/tasks'
 import { getReview } from '../../db/repositories/reviews'
 import { getPriorityGoal } from '../../db/repositories/goals'
+import { getRoutineRunsForDate, listRoutines } from '../../db/repositories/routines'
 import { dateKey, weekKey } from '../../lib/dates'
 import { previousPeriodKey } from '../../lib/periods'
 import { sendNotification } from './notify'
@@ -10,6 +11,7 @@ import {
   eveningSummaryNotifications,
   habitReminderNotifications,
   morningSummaryNotifications,
+  routineStartNotifications,
   taskStartNotifications,
   weeklyReviewNudgeNotifications,
   zombieTaskNotifications,
@@ -22,13 +24,15 @@ async function evaluate(now: Date): Promise<void> {
   if (!settings.notificationsEnabled) return
 
   const today = dateKey(now)
-  const [habits, todayLogs, tasksToday, overdue, review, northStar] = await Promise.all([
+  const [habits, todayLogs, tasksToday, overdue, review, northStar, routines, routineRunsToday] = await Promise.all([
     listHabits(),
     getLogsForDate(today),
     getTasksForDate(today),
     getOverdueTasks(today),
     getReview(previousPeriodKey('week', weekKey(now))),
     getPriorityGoal('week', weekKey(now)),
+    listRoutines(),
+    getRoutineRunsForDate(today),
   ])
   const todayLogsByHabit = new Map(todayLogs.map((l) => [l.habitId, l]))
   const doneTaskCount = tasksToday.filter((t) => t.status === 'done').length
@@ -36,6 +40,7 @@ async function evaluate(now: Date): Promise<void> {
   const pending = [
     ...habitReminderNotifications({ now, settings, habits, todayLogs: todayLogsByHabit }),
     ...taskStartNotifications({ now, settings, tasksToday }),
+    ...routineStartNotifications({ now, settings, routines, runsToday: routineRunsToday }),
     ...morningSummaryNotifications({
       now,
       settings,

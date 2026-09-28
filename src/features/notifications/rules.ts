@@ -3,9 +3,10 @@
 // duplicados — eso es cosa de `notify.ts` (vía `notificationLog`), para que esta capa sea trivial
 // de testear con datos fijos.
 import { format } from 'date-fns'
-import type { Habit, HabitLog, Settings, Task } from '../../db/types'
+import type { Habit, HabitLog, Routine, RoutineRun, Settings, Task } from '../../db/types'
 import { dateKey, isHabitScheduledOn, timeToMinutes, weekKey } from '../../lib/dates'
 import { ZOMBIE_THRESHOLD } from '../../db/repositories/tasks'
+import { formatMinutes, isRoutineDone, isRoutineScheduledOn, routineTotalMin } from '../routines/schedule'
 
 export interface PendingNotification {
   key: string
@@ -169,4 +170,48 @@ export function pomodoroEndNotification(input: {
         title: 'Descanso terminado',
         body: '¿Listo para otra sesión de foco?',
       }
+}
+
+/** Rutina con hora (Fase 28): aviso al llegar su hora si toca hoy y no se ha hecho ya. */
+export function routineStartNotifications(input: {
+  now: Date
+  settings: Settings
+  routines: Routine[]
+  runsToday: RoutineRun[]
+}): PendingNotification[] {
+  const { now, settings, routines, runsToday } = input
+  if (settings.notificationsEnabled === false || settings.notifyRoutines === false) return []
+  const time = hhmm(now)
+  const today = dateKey(now)
+  return routines
+    .filter(
+      (r) =>
+        r.startTime === time && r.steps.length > 0 && isRoutineScheduledOn(r, now) && !isRoutineDone(r.id!, runsToday),
+    )
+    .map((r) => ({
+      key: `routine:${r.id}:${today}`,
+      title: `Rutina: ${r.name}`,
+      body: `${r.steps.length} ${r.steps.length === 1 ? 'paso' : 'pasos'} · ${formatMinutes(routineTotalMin(r))}`,
+      url: '/rutinas',
+    }))
+}
+
+/** Cambio de paso en el reproductor. `runKey` identifica la pasada (su hora de inicio), así que cada
+ * cambio de paso es un evento único. `nextStep` null = la rutina ha terminado. */
+export function routineStepNotification(input: {
+  settings: Settings
+  runKey: number
+  stepIndex: number
+  routineName: string
+  nextStep: { title: string; durationMin: number } | null
+}): PendingNotification | null {
+  const { settings, runKey, stepIndex, routineName, nextStep } = input
+  if (settings.notificationsEnabled === false || settings.notifyRoutines === false) return null
+  return nextStep
+    ? {
+        key: `routine-step:${runKey}:${stepIndex}`,
+        title: `Siguiente: ${nextStep.title}`,
+        body: `${routineName} · ${formatMinutes(nextStep.durationMin)}`,
+      }
+    : { key: `routine-step:${runKey}:end`, title: `${routineName} terminada`, body: 'Buen trabajo.' }
 }

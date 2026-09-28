@@ -9,6 +9,7 @@ import { elapsedSeconds, useFocusTimerStore } from './focusTimerStore'
 import { formatTime } from './format'
 import { playChime } from './chime'
 import { logWorkSegmentIfSignificant } from './logSegment'
+import { isRoutineRunning } from '../routines/useRoutinePlayerEngine'
 
 const MODE_LABEL: Record<FocusMode, string> = { work: 'Foco', break: 'Descanso', longBreak: 'Descanso largo' }
 const DEFAULT_TITLE = document.title
@@ -39,9 +40,12 @@ export function useFocusTimerEngine(): void {
     const id = setInterval(() => {
       const s = useFocusTimerStore.getState()
       if (s.running) {
-        document.title = `${formatTime(Math.max(0, s.plannedSec - elapsedSeconds(s)))} · ${MODE_LABEL[s.mode]} — Nextuss`
+        // Con una rutina en marcha, el título es suyo (lo que se hace ahora mismo es el paso).
+        if (!isRoutineRunning()) {
+          document.title = `${formatTime(Math.max(0, s.plannedSec - elapsedSeconds(s)))} · ${MODE_LABEL[s.mode]} — Nextuss`
+        }
         if (elapsedSeconds(s) >= s.plannedSec) void finishSegment(durations)
-      } else if (document.title !== DEFAULT_TITLE) {
+      } else if (document.title !== DEFAULT_TITLE && !isRoutineRunning()) {
         document.title = DEFAULT_TITLE
       }
     }, 1000)
