@@ -155,3 +155,19 @@ export async function shouldRemindBackup(hasData: boolean, now = Date.now()): Pr
   await setKv(K_LAST_REMINDER, now)
   return days ?? -1
 }
+
+/** Texto y acción del recordatorio. Si el navegador admite la copia automática y aún no hay carpeta,
+ * se ofrece elegirla: resuelve el problema para siempre, una descarga suelta solo hasta la próxima vez. */
+export function backupReminderContent(
+  days: number,
+  canPickFolder: boolean,
+): { title: string; description: string; action: 'choose-folder' | 'download' } {
+  const title = days < 0 ? 'Aún no tienes copia de seguridad' : `${days} días sin copia de seguridad`
+  return canPickFolder
+    ? {
+        title,
+        description: 'Elige una carpeta y Nextuss guardará allí una copia cada día, sin que hagas nada.',
+        action: 'choose-folder',
+      }
+    : { title, description: 'Tus datos solo viven en este navegador. Una copia tarda un segundo.', action: 'download' }
+}
