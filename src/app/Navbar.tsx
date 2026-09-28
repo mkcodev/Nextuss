@@ -20,6 +20,7 @@ import { usePlayerProgress } from '../features/gamification/usePlayerProgress'
 import { useOnlineStatus } from '../features/pwa/useOnlineStatus'
 import { FocusIndicator } from '../features/focus/FocusIndicator'
 import { RoutineIndicator } from '../features/routines/RoutineIndicator'
+import { DayTimeIndicator } from '../features/today/DayTimeIndicator'
 import { initials } from '../lib/text'
 import { NAV_ITEMS } from './navItems'
 import { Avatar, Kbd, Menu, MenuItem, MenuLabel } from '../design/primitives'
@@ -132,6 +133,7 @@ export function Navbar() {
           </div>
         )}
 
+        <DayTimeIndicator />
         <RoutineIndicator />
         <FocusIndicator />
 
