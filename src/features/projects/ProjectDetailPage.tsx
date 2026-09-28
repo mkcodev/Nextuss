@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ArrowLeft, Archive, Check, CheckCheck, Clock, FolderKanban, ListTodo, Pencil, Target } from 'lucide-react'
-import { Card, EmptyState, Icon, RingProgress, SegmentedControl, Skeleton } from '../../design/primitives'
+import { Card, EmptyState, Icon, RingProgress, SegmentedControl, Skeleton, Input } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { StatTile } from '../stats/charts/StatTile'
 import { usePageTitle } from '../../app/pageTitleStore'
@@ -159,7 +159,11 @@ export function ProjectDetailPage() {
         {tasksQuery === undefined ? (
           <Skeleton className="h-16 w-full" />
         ) : visibleTasks.length === 0 ? (
-          <p className="text-sm text-text-faint">Nada aquí.</p>
+          <EmptyState
+            icon={ListTodo}
+            title={filter === 'completadas' ? 'Nada completado todavía' : filter === 'pendientes' ? 'Sin tareas pendientes' : 'Este proyecto no tiene tareas'}
+            className="py-6"
+          />
         ) : (
           <div className="space-y-1.5">
             {visibleTasks.map((t) => (
@@ -198,7 +202,7 @@ export function ProjectDetailPage() {
           </div>
         )}
 
-        <input
+        <Input
           value={newTaskTitle}
           onChange={(e) => setNewTaskTitle(e.target.value)}
           onKeyDown={(e) => {
@@ -209,7 +213,7 @@ export function ProjectDetailPage() {
           }}
           placeholder="Añadir tarea al proyecto…"
           aria-label="Añadir tarea al proyecto"
-          className="mt-2 w-full rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
+          className="mt-2 !px-3 !py-2"
         />
       </div>
     </div>

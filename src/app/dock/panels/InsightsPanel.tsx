@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { Sparkles, X } from 'lucide-react'
 import { useInsights } from '../../../features/stats/insights/useInsights'
 import { cn } from '../../../lib/cn'
+import { Skeleton } from '../../../design/primitives'
 
 const MAX_SHOWN = 3
 
@@ -16,7 +17,13 @@ export function InsightsPanel() {
   const navigate = useNavigate()
 
   if (loading) {
-    return <p className="text-xs text-text-faint">Cargando…</p>
+    return (
+      <div className="space-y-2.5" aria-busy="true">
+        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-9 w-full" />
+      </div>
+    )
   }
 
   if (insights.length === 0) {

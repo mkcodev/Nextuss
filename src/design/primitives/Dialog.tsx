@@ -3,6 +3,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
+import { Button } from './Button'
 
 type DialogSize = 'sm' | 'md' | 'lg'
 
@@ -123,7 +124,7 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty, hideTitle }
 
   return (
     <motion.div
-      className="fixed inset-0 z-dialog flex items-center justify-center bg-black/35 p-4"
+      className="fixed inset-0 z-dialog flex items-center justify-center bg-scrim p-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -166,24 +167,19 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty, hideTitle }
             className="sticky -bottom-6 z-10 -mx-6 -mb-6 mt-4 flex flex-wrap items-center gap-3 border-t border-border bg-surface px-6 py-3"
           >
             <p className="flex-1 text-sm text-text">Tienes cambios sin guardar. ¿Descartarlos?</p>
-            <button
-              type="button"
-              autoFocus
-              onClick={() => setConfirming(false)}
-              className="h-8 rounded-sm border border-border bg-surface px-3 text-sm font-medium text-text hover:bg-surface-hover"
-            >
+            <Button type="button" variant="secondary" autoFocus onClick={() => setConfirming(false)}>
               Seguir editando
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="danger"
               onClick={() => {
                 setConfirming(false)
                 onClose()
               }}
-              className="h-8 rounded-sm bg-danger/10 px-3 text-sm font-medium text-danger hover:bg-danger/15"
             >
               Descartar
-            </button>
+            </Button>
           </div>
         )}
         {/* Último en el DOM: el foco inicial sigue yendo al primer campo, no a la X. */}
