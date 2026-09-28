@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virtualización · Variante C</title>
+<link rel="stylesheet" href="./shared.css" />
+<style>
+  #label { position: fixed; bottom: 14px; left: 14px; z-index: 20; font-size: 12px; color: var(--dim); }
+  #label b { color: var(--fg); }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div id="flash"></div>
+<div id="assembly"><div class="navbar"></div><div class="sidebar"></div><div class="today"><h4>Hoy</h4><p>Estás en tu día.</p></div></div>
+
+<div id="overlay">
+  <div id="devbar">
+    <button data-phase="cabina">1 Cabina</button>
+    <button data-phase="transmision">2 Transmisión</button>
+    <button data-phase="escaneo">3 Escaneo</button>
+    <button data-phase="presencia">4 Presencia</button>
+    <button data-phase="virtualizacion">5 Virtualización</button>
+  </div>
+  <div id="mute"><button data-muted="false">Sonido: on</button></div>
+  <div id="label">Variante C — <b>Terminal / glitch fuerte</b></div>
+
+  <section class="phase" data-phase="cabina">
+    <h1 class="title">Cabina</h1>
+    <p class="sub">Iniciar virtualización o saltar sin culpa. Solo la primera apertura del día.</p>
+    <div class="row">
+      <button class="btn solid" data-start>Iniciar virtualización</button>
+      <button class="btn ghost" data-skip>Hoy no</button>
+    </div>
+  </section>
+
+  <section class="phase" data-phase="transmision">
+    <div id="terminal"></div>
+  </section>
+
+  <section class="phase" data-phase="escaneo">
+    <h1 class="title">Escaneo</h1>
+    <div id="scanData">racha 12 · nivel 4 · 3 bloques hoy · 1 pendiente de ayer</div>
+  </section>
+
+  <section class="phase" data-phase="presencia">
+    <div id="breathWord">Inspira</div>
+    <div class="meter"><i id="syncBar"></i></div>
+    <div id="syncLabel">Sincronización 0%</div>
+    <button class="btn solid" id="enterHint" style="display:none" data-enter>Pulsa Enter</button>
+  </section>
+
+  <section class="phase" data-phase="virtualizacion">
+    <h1 class="title">Virtualización</h1>
+    <p class="sub">La interfaz se ensambla por capas.</p>
+  </section>
+</div>
+
+<script type="module">
+  import { createPrototype } from './shared.js'
+  import { variantC } from './variant-c.js'
+  createPrototype(variantC)
+</script>
+</body>
+</html>

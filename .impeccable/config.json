@@ -74,6 +74,12 @@
         ],
         "createdAt": "2026-09-26T07:45:39.479Z",
         "reason": "Claude: página de comparación de direcciones; carga a propósito las fuentes de las direcciones no elegidas (A, B, D, E)"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "cascadia code",
+        "createdAt": "2026-09-28T18:24:20.480Z",
+        "reason": "prototipo desechable docs/design/virtualizacion (issue #97), fuera de src/ y del sistema de diseño real; terminal monoespaciado solo para decidir estilo"
       }
     ]
   }
