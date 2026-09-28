@@ -7,6 +7,7 @@ import { xpForTaskCompletion } from '../../lib/xp'
 import { LEVEL_ACHIEVEMENT_THRESHOLDS, TASK_COUNT_ACHIEVEMENT_THRESHOLDS } from '../../lib/achievementThresholds'
 import { applyAttributeXpDelta, applyXpDelta, unlockAchievement } from './gamification'
 import { handleRecurringCompletion } from './recurrence'
+import { emit, type AppEvents } from '../../lib/events/bus'
 
 export async function getTasksForDate(date: string): Promise<Task[]> {
   const tasks = await db.tasks.where('scheduledDate').equals(date).toArray()
@@ -306,7 +307,8 @@ export interface ToggleTaskResult {
  * XP que la tarea concedió (`xpAwarded`, persistido en la propia fila), no lo que las constantes
  * actuales dirían hoy. Solo puntúan las tareas raíz — una subtarea cambia de estado sin XP propio. */
 export async function toggleTaskDone(id: number): Promise<ToggleTaskResult> {
-  return db.transaction(
+  let completed: AppEvents['task.completed'] | null = null
+  const result = await db.transaction(
     'rw',
     [db.tasks, db.projects, db.progress, db.attributes, db.achievements, db.recurrenceRules],
     async () => {
@@ -315,6 +317,7 @@ export async function toggleTaskDone(id: number): Promise<ToggleTaskResult> {
 
       const done = task.status !== 'done'
       const isRoot = task.parentId == null
+      if (done) completed = { taskId: id, projectId: task.projectId, tagIds: task.tagIds ?? [] }
       let xpDelta = 0
       let xpAwarded = task.xpAwarded
 
@@ -372,4 +375,7 @@ export async function toggleTaskDone(id: number): Promise<ToggleTaskResult> {
       return { done, xpDelta, leveledUp, newLevel, unlockedAchievements }
     },
   )
+  // Tras confirmar la transacción: un oyente nunca ve una tarea «completada» que luego se deshizo.
+  if (completed) emit('task.completed', completed)
+  return result
 }

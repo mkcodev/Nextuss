@@ -2,10 +2,10 @@
 // El permiso de la carpeta y las marcas de tiempo viven en una base de datos aparte, propia de este
 // dispositivo: no deben viajar dentro de las copias (un handle de carpeta no se puede serializar y la
 // fecha de la última copia es de este navegador, no de los datos).
-import Dexie, { type Table } from 'dexie'
 import { exportDatabase } from '../../db/backup'
 import { downloadJson } from '../stats/export'
 import { dateKey } from '../../lib/dates'
+import { deviceDb, getDeviceValue as getKv, setDeviceValue as setKv } from '../../db/device'
 
 interface DirHandle {
   name: string
@@ -18,21 +18,6 @@ interface DirHandle {
   keys(): AsyncIterableIterator<string>
 }
 
-interface DeviceKv {
-  key: string
-  value: unknown
-}
-
-class DeviceDB extends Dexie {
-  kv!: Table<DeviceKv, string>
-  constructor() {
-    super('nextuss-device')
-    this.version(1).stores({ kv: 'key' })
-  }
-}
-
-const deviceDb = new DeviceDB()
-
 const K_HANDLE = 'backupDir'
 const K_LAST_BACKUP = 'lastBackupAt'
 const K_LAST_REMINDER = 'lastBackupReminderAt'
@@ -41,14 +26,6 @@ const KEEP_FILES = 7
 const AUTO_INTERVAL_MS = 20 * 60 * 60 * 1000
 export const REMIND_AFTER_DAYS = 7
 const DAY_MS = 24 * 60 * 60 * 1000
-
-async function getKv<T>(key: string): Promise<T | undefined> {
-  return (await deviceDb.kv.get(key))?.value as T | undefined
-}
-
-async function setKv(key: string, value: unknown): Promise<void> {
-  await deviceDb.kv.put({ key, value })
-}
 
 export function isAutoBackupSupported(): boolean {
   return typeof window !== 'undefined' && 'showDirectoryPicker' in window

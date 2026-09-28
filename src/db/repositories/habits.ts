@@ -6,6 +6,7 @@ import { XP_PER_COMPLETION } from '../../lib/xp'
 import { isPeriodicHabit, parseDateKey } from '../../lib/dates'
 import { STREAK_ACHIEVEMENT_THRESHOLDS, LEVEL_ACHIEVEMENT_THRESHOLDS } from '../../lib/achievementThresholds'
 import { trashRows } from '../trash'
+import { emit } from '../../lib/events/bus'
 import {
   applyAttributeXpDelta,
   applyXpDelta,
@@ -106,7 +107,8 @@ export async function setHabitLog(
   value: number,
   note?: string,
 ): Promise<LogHabitResult> {
-  return db.transaction(
+  let justCompleted = false
+  const result = await db.transaction(
     'rw',
     db.habits,
     db.habitLogs,
@@ -120,6 +122,7 @@ export async function setHabitLog(
       const completed = isLogCompleted(habit, value)
       const existing = await getLog(habitId, date)
       const wasCompleted = existing?.completed ?? false
+      justCompleted = completed && !wasCompleted
 
       const loggedAt = Date.now()
       if (existing) {
@@ -172,6 +175,8 @@ export async function setHabitLog(
       }
     },
   )
+  if (justCompleted) emit('habit.logged', { habitId, date })
+  return result
 }
 
 /**
