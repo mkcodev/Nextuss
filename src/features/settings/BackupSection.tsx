@@ -78,6 +78,8 @@ export function BackupSection() {
             <label className="flex items-center gap-2 text-sm text-text">
               <input
                 type="radio"
+                name="restore-mode"
+                className="size-4 shrink-0 accent-[var(--color-accent)]"
                 checked={restoreState?.mode === 'merge'}
                 onChange={() => setRestoreState((s) => (s ? { ...s, mode: 'merge' } : s))}
               />
@@ -86,6 +88,8 @@ export function BackupSection() {
             <label className="flex items-center gap-2 text-sm text-text">
               <input
                 type="radio"
+                name="restore-mode"
+                className="size-4 shrink-0 accent-[var(--color-accent)]"
                 checked={restoreState?.mode === 'replace'}
                 onChange={() => setRestoreState((s) => (s ? { ...s, mode: 'replace' } : s))}
               />

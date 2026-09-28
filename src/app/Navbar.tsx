@@ -138,7 +138,7 @@ export function Navbar() {
           onClick={() => openQuickAdd()}
           aria-label="Nueva tarea"
           title="Nueva tarea (n)"
-          className="flex h-8 items-center gap-1.5 rounded-sm border border-border bg-surface px-2.5 text-[13px] font-medium text-text transition-colors hover:bg-surface-hover"
+          className="flex h-8 items-center gap-1.5 rounded-sm border border-border bg-surface px-2.5 text-ui font-medium text-text transition-colors hover:bg-surface-hover"
         >
           <Plus size={14} strokeWidth={2} />
           <span className="hidden sm:inline">Nuevo</span>

@@ -26,7 +26,7 @@ function currentKeyFor(period: GoalPeriod): string {
 
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border p-3">
+    <div className="rounded-lg border border-border p-3">
       <p className="text-xs text-text-faint">{label}</p>
       <p className="mt-1 text-lg font-semibold tabular-nums text-text">{value}</p>
     </div>

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Archive, ChevronDown, ChevronUp, Plus, Sparkles } from 'lucide-react'
-import { Button, DropIndicator, Skeleton } from '../../design/primitives'
+import { Archive, ChevronDown, ChevronUp, Plus, Repeat, Sparkles } from 'lucide-react'
+import { Button, DropIndicator, EmptyState, Skeleton } from '../../design/primitives'
 import { CalendarHeatmap } from '../stats/charts/CalendarHeatmap'
 import { describeHabitSchedule, subDaysKey, todayKey } from '../../lib/dates'
 import { archiveHabit, getHabitLogs, getHabitLogsForHabits, moveHabitBetween } from '../../db/repositories/habits'
@@ -33,7 +33,7 @@ function HabitDetailPanel({ entry }: { entry: HabitWithStats }) {
   }
 
   return (
-    <div className="ml-2 space-y-2 rounded-xl border border-border bg-bg-soft p-3">
+    <div className="ml-2 space-y-2 rounded-lg border border-border bg-bg-soft p-3">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
         <span>{describeHabitSchedule(habit)}</span>
         <span>Racha actual: {entry.streak.current}</span>
@@ -169,12 +169,16 @@ export function HabitsPage() {
       )}
 
       {activeEntries?.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-border p-8 text-center">
-          <p className="text-sm text-text-muted">Todavía no has creado ningún hábito.</p>
-          <Button onClick={() => openCreate()} className="mt-3">
-            <Plus size={14} strokeWidth={2} /> Crear tu primer hábito
-          </Button>
-        </div>
+        <EmptyState
+          icon={Repeat}
+          title="Todavía no tienes hábitos"
+          description="Empieza por uno pequeño que puedas cumplir incluso en un mal día."
+          action={
+            <Button onClick={() => openCreate()}>
+              <Plus size={14} strokeWidth={2} /> Crear tu primer hábito
+            </Button>
+          }
+        />
       )}
 
       <div className="space-y-2">
@@ -228,7 +232,7 @@ export function HabitsPage() {
           {archivedEntries?.map((entry) => (
             <div
               key={entry.habit.id}
-              className="flex items-center justify-between rounded-xl border border-border bg-bg-soft px-3.5 py-2.5"
+              className="flex items-center justify-between rounded-lg border border-border bg-bg-soft px-3.5 py-2.5"
             >
               <span className="text-sm text-text-muted">{entry.habit.name}</span>
               <Button variant="secondary" onClick={() => archiveHabit(entry.habit.id!, false)} className="px-2.5 py-1 text-xs">

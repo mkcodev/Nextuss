@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ArrowRight, Check, Loader2, Plus, Sparkles, X } from 'lucide-react'
-import { Button, Dialog, Skeleton } from '../../design/primitives'
+import { Button, Dialog, Skeleton, Input, Textarea } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { listGoalsForPeriod, carryOverGoal, createGoal } from '../../db/repositories/goals'
 import { getReview, saveReview } from '../../db/repositories/reviews'
@@ -184,12 +184,12 @@ export function WeeklyReviewDialog() {
                   </button>
                 )}
               </div>
-              <textarea
+              <Textarea
                 value={reflection}
                 onChange={(e) => setReflection(e.target.value)}
                 rows={3}
                 placeholder="Una reflexión rápida…"
-                className="w-full resize-none rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
+                className="resize-none !px-3 !py-2"
               />
             </div>
           </div>
@@ -237,13 +237,13 @@ export function WeeklyReviewDialog() {
             <p className="text-xs text-text-faint">Objetivos para la nueva semana (1-3)</p>
             <div className="space-y-1.5">
               {newGoalTitles.map((t, i) => (
-                <input
+                <Input
                   key={i}
                   autoFocus={i === 0}
                   value={t}
                   onChange={(e) => setNewGoalTitle(i, e.target.value)}
                   placeholder="Objetivo de la semana…"
-                  className="w-full rounded-lg border border-border bg-bg-soft px-3 py-1.5 text-sm text-text outline-none focus:border-accent"
+                  className="!px-3"
                 />
               ))}
             </div>

@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { subDays } from 'date-fns'
 import { Loader2, RefreshCw, Sparkles } from 'lucide-react'
-import { Button, Checkbox, Dialog, Icon, Textarea } from '../../design/primitives'
+import { Button, Checkbox, Dialog, Icon, Textarea, Input } from '../../design/primitives'
 import { db } from '../../db/schema'
 import { listAttributes } from '../../db/repositories/gamification'
 import { createHabit, listHabits } from '../../db/repositories/habits'
@@ -379,14 +379,14 @@ function TaskChecklist({ items, onChange }: { items: Picked<Subtask>[]; onChange
             onChange={(e) => update(i, { title: e.target.value })}
             className={cn('field-bare min-w-0 flex-1 bg-transparent text-sm text-text', !t.picked && 'text-text-faint')}
           />
-          <input
+          <Input
             type="number"
             min={5}
             max={480}
             value={t.estimateMin}
             aria-label={`Minutos estimados de la tarea ${i + 1}`}
             onChange={(e) => update(i, { estimateMin: Math.min(480, Math.max(5, Number(e.target.value) || 5)) })}
-            className="w-16 shrink-0 rounded-sm border border-border bg-bg-soft px-1.5 py-1 text-right text-xs text-text focus:border-accent"
+            className="w-16 shrink-0 !px-1.5 !py-1 text-right !text-xs"
           />
           <span className="shrink-0 text-xs text-text-faint">min</span>
         </li>

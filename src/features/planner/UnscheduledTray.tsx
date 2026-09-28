@@ -11,7 +11,7 @@ import { PriorityBars } from '../tasks/PriorityBars'
 import { TaskQuickMenu } from '../tasks/TaskQuickMenu'
 import type { Tag, Task } from '../../db/types'
 import { TASK_DRAG_MIME } from './constants'
-import { DropIndicator } from '../../design/primitives'
+import { DropIndicator, Input } from '../../design/primitives'
 import { useDragReorder } from '../../lib/useDragReorder'
 import { reorderNeighbors, type DropPosition } from '../../lib/reorder'
 import { DEFAULT_ENTITY_COLOR } from '../../lib/colors'
@@ -127,12 +127,12 @@ export function UnscheduledTray({ date }: { date: string }) {
   return (
     <div className="space-y-2">
       <div className="flex gap-1.5">
-        <input
+        <Input
           value={quickTitle}
           onChange={(e) => setQuickTitle(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleQuickAdd()}
           placeholder="Añadir tarea…"
-          className="flex-1 rounded-lg border border-border bg-bg-soft px-3 py-1.5 text-sm text-text outline-none focus:border-accent"
+          className="flex-1 !px-3"
         />
         <button
           onClick={handleQuickAdd}

@@ -15,7 +15,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
-import { Button, Card, Checkbox, DropIndicator, EmptyState, Kbd, Menu, MenuItem, MenuSeparator, Select, Skeleton } from '../../design/primitives'
+import { Button, Card, Checkbox, DropIndicator, EmptyState, Kbd, Menu, MenuItem, MenuSeparator, Select, Skeleton, Input } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { useDragReorder } from '../../lib/useDragReorder'
 import { reorderNeighbors, type DropPosition } from '../../lib/reorder'
@@ -287,7 +287,7 @@ export function TasksPage() {
             key={view.id}
             {...dnd.rowProps(view.id!)}
             className={cn(
-              'relative flex cursor-grab items-center gap-1.5 rounded-sm border px-2.5 py-1 text-[13px] font-medium transition-opacity active:cursor-grabbing',
+              'relative flex cursor-grab items-center gap-1.5 rounded-sm border px-2.5 py-1 text-ui font-medium transition-opacity active:cursor-grabbing',
               dnd.dragging(view.id!) && 'opacity-40',
               effectiveViewId === view.id
                 ? 'border-border-strong bg-surface-hover text-text'
@@ -381,9 +381,9 @@ export function TasksPage() {
 
               <Menu
                 trigger={(props) => (
-                  <button {...props} className="rounded-sm border border-border bg-surface px-2.5 py-1 text-[13px] font-medium text-text hover:bg-surface-hover">
+                  <Button {...props} variant="secondary" size="sm">
                     Prioridad
-                  </button>
+                  </Button>
                 )}
               >
                 {[1, 2, 3, 4].map((p) => (
@@ -395,9 +395,9 @@ export function TasksPage() {
 
               <Menu
                 trigger={(props) => (
-                  <button {...props} className="flex items-center gap-1 rounded-sm border border-border bg-surface px-2.5 py-1 text-[13px] font-medium text-text hover:bg-surface-hover">
+                  <Button {...props} variant="secondary" size="sm">
                     <FolderKanban size={12} strokeWidth={2} /> Proyecto
-                  </button>
+                  </Button>
                 )}
               >
                 <MenuItem onSelect={() => runBulk(() => moveToProjectBulk([...selectedIds], undefined))}>Sin proyecto</MenuItem>
@@ -411,9 +411,9 @@ export function TasksPage() {
 
               <Menu
                 trigger={(props) => (
-                  <button {...props} className="flex items-center gap-1 rounded-sm border border-border bg-surface px-2.5 py-1 text-[13px] font-medium text-text hover:bg-surface-hover">
+                  <Button {...props} variant="secondary" size="sm">
                     <TagIcon size={12} strokeWidth={2} /> Etiqueta
-                  </button>
+                  </Button>
                 )}
               >
                 {tags.length === 0 && <p className="px-3 py-2 text-xs text-text-faint">Sin etiquetas todavía.</p>}
@@ -424,23 +424,17 @@ export function TasksPage() {
                 ))}
               </Menu>
 
-              <button
-                onClick={() => runBulk(() => parkTasksBulk([...selectedIds]))}
-                className="flex items-center gap-1 rounded-sm border border-border bg-surface px-2.5 py-1 text-[13px] font-medium text-text hover:bg-surface-hover"
-              >
+              <Button variant="secondary" size="sm" onClick={() => runBulk(() => parkTasksBulk([...selectedIds]))}>
                 <Archive size={12} strokeWidth={2} /> Aparcar
-              </button>
+              </Button>
 
-              <button
-                onClick={() => runBulk(() => trashTasksBulk([...selectedIds]))}
-                className="flex items-center gap-1 rounded-sm border border-border bg-surface px-2.5 py-1 text-[13px] font-medium text-danger hover:bg-danger/10"
-              >
+              <Button variant="danger" size="sm" onClick={() => runBulk(() => trashTasksBulk([...selectedIds]))}>
                 <Trash2 size={12} strokeWidth={2} /> Eliminar
-              </button>
+              </Button>
 
-              <button type="button" onClick={clearSelection} className="ml-auto flex items-center gap-1 text-[13px] text-text-muted hover:text-text">
+              <Button variant="ghost" size="sm" onClick={clearSelection} className="ml-auto">
                 <X size={12} strokeWidth={2} /> Cancelar
-              </button>
+              </Button>
             </Card>
           )}
 
@@ -550,18 +544,18 @@ export function TasksPage() {
                     </Select>
                   </div>
                   <div className="mt-1 flex items-center gap-1">
-                    <input
+                    <Input
                       type="date"
                       value={activeView.filters.dateFrom ?? ''}
                       onChange={(e) => patchFilters({ dateFrom: e.target.value || undefined })}
-                      className="w-full rounded-lg border border-border bg-bg-soft px-2 py-1.5 text-xs text-text outline-none focus:border-accent"
+                      className="!px-2 !text-xs"
                     />
                     <span className="text-text-faint">→</span>
-                    <input
+                    <Input
                       type="date"
                       value={activeView.filters.dateTo ?? ''}
                       onChange={(e) => patchFilters({ dateTo: e.target.value || undefined })}
-                      className="w-full rounded-lg border border-border bg-bg-soft px-2 py-1.5 text-xs text-text outline-none focus:border-accent"
+                      className="!px-2 !text-xs"
                     />
                   </div>
                   <label className="mt-1.5 flex items-center gap-1.5 text-xs text-text-muted">
@@ -615,14 +609,29 @@ export function TasksPage() {
                 }
               />
             ) : (
-              <EmptyState icon={ListTodo} title="Nada en esta vista" description="Ninguna tarea cumple sus filtros. Prueba otra vista o cambia los filtros." />
+              <EmptyState
+                icon={ListTodo}
+                title="Nada en esta vista"
+                description="Ninguna tarea cumple sus filtros. Prueba otra vista o cambia los filtros."
+                action={
+                  activeDraft ? (
+                    <Button variant="secondary" onClick={handleResetDraft}>
+                      Deshacer cambios de filtros
+                    </Button>
+                  ) : (
+                    <Button variant="secondary" onClick={() => setShowFilters(true)}>
+                      Ver filtros
+                    </Button>
+                  )
+                }
+              />
             )
           ) : (
             <div className="overflow-hidden rounded-md border border-border bg-surface">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="h-9 border-b border-border bg-bg-soft text-left text-[13px] text-text-muted">
+                    <tr className="h-9 border-b border-border bg-bg-soft text-left text-ui text-text-muted">
                       <th className="w-8 px-4 py-2">
                         <Checkbox
                           checked={rowsAllSelected}
@@ -769,7 +778,7 @@ function TaskViewRow({
         </div>
       </td>
       {columns.map((col) => (
-        <td key={col} className="px-3 py-1.5 text-[13px] whitespace-nowrap text-text-muted">
+        <td key={col} className="px-3 py-1.5 text-ui whitespace-nowrap text-text-muted">
           {col === 'priority' && task.priority && (
             <span className="flex items-center gap-1.5" title={PRIORITY_NAMES[task.priority]}>
               <PriorityBars p={task.priority} />

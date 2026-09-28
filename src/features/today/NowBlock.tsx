@@ -120,7 +120,7 @@ export function NowBlock({ date }: { date: string }) {
           <span className="absolute inset-y-0 left-0 rounded-full bg-accent" style={{ width: `${progress}%` }} />
           <span className="absolute -top-[5px] left-0 h-3 w-[1.5px] rounded-full bg-text-faint" />
           <span className="absolute -top-[5px] right-0 h-3 w-[1.5px] rounded-full bg-text-faint" />
-          <span className="absolute left-1/2 -top-2.5 -translate-x-1/2 bg-surface px-2 text-[13px] font-medium tabular-nums text-text">
+          <span className="absolute left-1/2 -top-2.5 -translate-x-1/2 bg-surface px-2 text-ui font-medium tabular-nums text-text">
             {formatDuration(total)}
           </span>
           <span className="absolute left-0 top-2.5 text-xs tabular-nums text-text-muted">{task.scheduledStart}</span>

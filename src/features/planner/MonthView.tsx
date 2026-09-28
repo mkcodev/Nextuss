@@ -89,7 +89,7 @@ export function MonthView() {
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-px overflow-hidden rounded-xl border border-border bg-border">
+      <div className="grid grid-cols-7 gap-px overflow-hidden rounded-lg border border-border bg-border">
         {WEEKDAY_LABELS_ES_FULL.slice(weekStartsOn).concat(WEEKDAY_LABELS_ES_FULL.slice(0, weekStartsOn)).map((label) => (
           <div key={label} className="bg-bg-soft px-2 py-1.5 text-center text-xs font-medium uppercase text-text-faint">
             {label.slice(0, 3)}

@@ -62,7 +62,7 @@ function Chip({ empty, children, ...props }: { empty: boolean; children: ReactNo
       type="button"
       {...props}
       className={cn(
-        'inline-flex h-7 max-w-[14rem] items-center gap-1.5 rounded-sm border border-border px-2.5 text-[13px] font-medium transition-colors hover:bg-surface-hover aria-expanded:bg-surface-hover',
+        'inline-flex h-7 max-w-[14rem] items-center gap-1.5 rounded-sm border border-border px-2.5 text-ui font-medium transition-colors hover:bg-surface-hover aria-expanded:bg-surface-hover',
         empty ? 'text-text-muted' : 'text-text',
       )}
     >

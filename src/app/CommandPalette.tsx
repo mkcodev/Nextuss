@@ -103,9 +103,9 @@ export function CommandPalette() {
         if (!next) closePalette()
       }}
       label="Paleta de comandos"
-      overlayClassName="fixed inset-0 z-palette bg-black/35"
+      overlayClassName="fixed inset-0 z-palette bg-scrim"
       contentClassName="fixed left-1/2 top-[18%] z-palette-content w-full max-w-lg -translate-x-1/2 px-4"
-      className="overflow-hidden rounded-2xl border border-border bg-bg-soft shadow-card"
+      className="overflow-hidden rounded-lg border border-border bg-bg-soft shadow-card"
     >
       <div className="flex items-center gap-2 border-b border-border px-3.5">
         <Search size={15} strokeWidth={1.75} className="shrink-0 text-text-faint" />

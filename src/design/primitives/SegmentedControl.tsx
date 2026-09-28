@@ -63,7 +63,7 @@ export function SegmentedControl<T extends string>({
             onKeyDown={(e) => onKeyDown(e, i)}
             className={cn(
               'flex items-center gap-1.5 rounded-sm font-medium whitespace-nowrap transition-colors',
-              size === 'sm' ? 'h-6 px-2.5 text-xs' : 'h-7 px-3 text-[13px]',
+              size === 'sm' ? 'h-6 px-2.5 text-xs' : 'h-7 px-3 text-ui',
               selected ? 'bg-surface-hover text-text' : 'text-text-muted hover:text-text',
             )}
           >
