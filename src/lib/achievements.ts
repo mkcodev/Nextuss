@@ -31,6 +31,13 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { key: 'first_task', title: 'Manos a la obra', description: 'Completaste tu primera tarea.', icon: 'zap' },
   { key: 'tasks_50', title: 'Productivo', description: 'Completaste 50 tareas.', icon: 'briefcase' },
   { key: 'tasks_200', title: 'Máquina de hacer', description: 'Completaste 200 tareas.', icon: 'gem' },
+  { key: 'virtualization_streak_3', title: 'Primeras sincronizaciones', description: 'Virtualización 3 días seguidos.', icon: 'zap' },
+  { key: 'virtualization_streak_7', title: 'Una semana virtualizado', description: 'Virtualización 7 días seguidos.', icon: 'flame' },
+  { key: 'virtualization_streak_14', title: 'Dos semanas', description: 'Virtualización 14 días seguidos.', icon: 'sparkles' },
+  { key: 'virtualization_streak_30', title: 'Un mes entero', description: 'Virtualización 30 días seguidos.', icon: 'shield' },
+  { key: 'virtualization_streak_60', title: 'Dos meses', description: 'Virtualización 60 días seguidos.', icon: 'star' },
+  { key: 'virtualization_streak_100', title: 'Presencia total', description: 'Virtualización 100 días seguidos.', icon: 'trophy' },
+  { key: 'virtualization_streak_365', title: 'Un año entero', description: 'Virtualización 365 días seguidos.', icon: 'gem' },
 ]
 
 export const ACHIEVEMENTS_BY_KEY = new Map(ACHIEVEMENTS.map((a) => [a.key, a]))

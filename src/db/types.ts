@@ -223,6 +223,30 @@ export type RoutineView = 'step' | 'timeline'
 
 export type DayTimeView = 'ruler' | 'ring' | 'blocks'
 
+/** Copia de `PHASES` (`features/virtualization/engine/phases.ts`) — db/types no importa de features,
+ * mismo criterio que `RoutineView`/`DayTimeView`/`VirtualizationTheme` con sus features. */
+export type VirtualizationPhaseId = 'cabina' | 'transmision' | 'escaneo' | 'presencia' | 'virtualizacion'
+
+/** Una fila por día del ritual de Virtualización (#97), usada para reanudar y para calcular la racha
+ * (`calculateVirtualizationStreak`). `completed` es lo único que cuenta para la racha; `shieldUsed`
+ * marca un día sin registro real que un escudo mensual cubrió a posteriori (mismo mecanismo que
+ * `HabitLog.shieldUsed`, ver `reconcileVirtualizationShields`). */
+export interface VirtualizationDay {
+  id?: number
+  date: string // 'YYYY-MM-DD'
+  /** Fase más lejana alcanzada ese día. */
+  phaseReached: VirtualizationPhaseId
+  meditationSec: number
+  syncPercent: number
+  completed: boolean
+  /** El usuario eligió «Hoy no» explícitamente (no cuenta para la racha, igual que un fallo registrado). */
+  skipped: boolean
+  shieldUsed?: boolean
+  startedAt: number
+  finishedAt?: number
+  xpAwarded: number
+}
+
 /** Estilo visual de la Virtualización (#97): 'a' nítido/geométrico (por defecto), 'b' orgánico de
  * partículas, 'c' terminal/glitch. Los 3 comparten el mismo motor de fase (`features/virtualization/engine`). */
 export type VirtualizationTheme = 'a' | 'b' | 'c'

@@ -7,15 +7,22 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { Flame, Trophy, Gem, Star, Clock3, ListTodo, HeartPulse, type LucideIcon } from 'lucide-react'
 import { getOrCreateSettings } from '../../db/repositories/settings'
-import { getTasksForDate } from '../../db/repositories/tasks'
+import { getOverdueTasks, getTasksForDate } from '../../db/repositories/tasks'
+import { getCheckInForDate } from '../../db/repositories/checkins'
+import { getVirtualizationDays } from '../../db/repositories/virtualization'
 import type { Settings } from '../../db/types'
-import { todayKey, formatShortDate } from '../../lib/dates'
+import { todayKey, formatShortDate, subDaysKey } from '../../lib/dates'
 import { Button } from '../../design/primitives'
 import { useStage } from '../../app/stage/stageStore'
+import { usePlayerProgress } from '../gamification/usePlayerProgress'
+import { useHabitsWithStats } from '../habits/useHabitsWithStats'
+import { dayBlocks } from '../today/dayTime'
 import { BREATH_PATTERNS, getBreathState } from './engine/breathCycle'
 import { PHASE_LABELS, type PhaseId } from './engine/phases'
 import { useVirtualizationStore } from './engine/useVirtualizationStore'
+import { calculateVirtualizationStreak } from './streak'
 import { THEMES } from './themes'
 import { VirtualizationThemeSwitch } from './VirtualizationThemeSwitch'
 import { virtualizationTone } from './audio/virtualizationTone'
@@ -207,10 +214,62 @@ function TerminalOverlay({ lines, accent }: { lines: string[]; accent: string })
   )
 }
 
-function EscaneoOverlay({ onContinue, accent }: { onContinue: () => void; accent: string }) {
+/** Icono de la racha, escalado por tramo — mismo criterio que los logros de racha (zap→flame→…→gem). */
+function streakIcon(streak: number): LucideIcon {
+  if (streak >= 100) return Gem
+  if (streak >= 30) return Trophy
+  return Flame
+}
+
+function StatRow({ icon: IconComp, label, value, accent }: { icon: LucideIcon; label: string; value: string; accent: string }) {
   return (
-    <div className="flex flex-col items-center gap-4">
-      <p className="text-sm opacity-70">Escaneando… (racha, nivel y pendientes llegan en el próximo PR)</p>
+    <div className="flex w-full items-center gap-3 border-b border-white/10 py-2 text-left last:border-0">
+      <IconComp size={16} strokeWidth={1.75} style={{ color: accent }} aria-hidden="true" />
+      <span className="flex-1 text-xs opacity-70">{label}</span>
+      <span className="text-sm font-semibold tabular-nums">{value}</span>
+    </div>
+  )
+}
+
+function EscaneoOverlay({ onContinue, accent }: { onContinue: () => void; accent: string }) {
+  const today = todayKey()
+  const yesterday = subDaysKey(today, 1)
+
+  const recentDays = useLiveQuery(() => getVirtualizationDays(400, new Date()), [today])
+  const streak = calculateVirtualizationStreak(recentDays ?? [], new Date())
+  const progress = usePlayerProgress()
+  const habitsToday = useHabitsWithStats(today)
+  const bestHabitStreak = habitsToday?.reduce((max, h) => Math.max(max, h.streak.current), 0) ?? 0
+  const tasksToday = useLiveQuery(() => getTasksForDate(today), [today])
+  const overdueTasks = useLiveQuery(() => getOverdueTasks(today), [today])
+  const yesterdayCheckIn = useLiveQuery(() => getCheckInForDate(yesterday), [yesterday])
+
+  const loading = recentDays == null || progress.loading || habitsToday == null || tasksToday == null || overdueTasks == null
+  const StreakIcon = streakIcon(streak.current)
+
+  return (
+    <div className="flex w-full max-w-sm flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-1">
+        <StreakIcon size={40} strokeWidth={1.5} style={{ color: accent }} aria-hidden="true" />
+        <p className="text-3xl font-semibold tabular-nums">{streak.current}</p>
+        <p className="text-xs opacity-60">{streak.current === 1 ? 'día seguido virtualizando' : 'días seguidos virtualizando'}</p>
+      </div>
+
+      {!loading && (
+        <div className="w-full rounded-md border border-white/10 px-4 py-1">
+          <StatRow icon={Star} label="Nivel y experiencia" value={`Nv. ${progress.level} · ${progress.xpIntoLevel}/${progress.xpForNextLevel} XP`} accent={accent} />
+          <StatRow icon={Flame} label="Mejor racha de hábito" value={bestHabitStreak > 0 ? `${bestHabitStreak} días` : 'ninguna activa'} accent={accent} />
+          <StatRow icon={Clock3} label="Bloques de hoy" value={`${dayBlocks(tasksToday!).length}`} accent={accent} />
+          <StatRow icon={ListTodo} label="Pendientes atrasadas" value={`${overdueTasks!.length}`} accent={accent} />
+          <StatRow
+            icon={HeartPulse}
+            label="Energía de ayer"
+            value={yesterdayCheckIn?.energy != null ? `${yesterdayCheckIn.energy}/5` : 'sin check-in'}
+            accent={accent}
+          />
+        </div>
+      )}
+
       <Button size="md" onClick={onContinue} style={{ background: accent, color: '#04121a' }}>
         Continuar
       </Button>
