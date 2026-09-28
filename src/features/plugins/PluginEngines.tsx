@@ -6,6 +6,7 @@ import { RoutinePlayer } from '../routines/RoutinePlayer'
 import { useTelegramPoller } from '../telegram/useTelegramPoller'
 import { useTelegramWorkerSync } from '../telegram/useTelegramWorkerSync'
 import { useLauncherEngine } from '../launchers/engine'
+import { VirtualizationEngine } from '../virtualization/VirtualizationEngine'
 import { usePluginEnabled } from './pluginsStore'
 
 function FocusEngine() {
@@ -34,12 +35,14 @@ export function PluginEngines() {
   const routines = usePluginEnabled('routines')
   const telegram = usePluginEnabled('telegram')
   const launchers = usePluginEnabled('launchers')
+  const virtualization = usePluginEnabled('virtualization')
   return (
     <>
       {focus && <FocusEngine />}
       {routines && <RoutinesEngine />}
       {telegram && <TelegramEngine />}
       {launchers && <LaunchersEngine />}
+      {virtualization && <VirtualizationEngine />}
     </>
   )
 }

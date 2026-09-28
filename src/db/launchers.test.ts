@@ -12,6 +12,7 @@ import { getOrCreateSettings, updateSettings } from './repositories/settings'
 import { exportDatabase, importDatabase } from './backup'
 import { processEvent } from '../features/launchers/engine'
 import { resetBus, type AppEvent } from '../lib/events/bus'
+import type { LauncherAction } from './types'
 
 beforeEach(async () => {
   await db.transaction('rw', db.tables, async () => {
@@ -64,9 +65,11 @@ describe('motor de lanzadores', () => {
   })
 
   it('una acción no disponible deja el error legible y no rompe nada', async () => {
-    await createLauncher({ ...base, actions: [{ type: 'virtualization.start' }] })
+    // Simula una acción de una versión futura que este build aún no conoce (dato real, tipo inventado).
+    const futureAction = { type: 'future.action' } as unknown as LauncherAction
+    await createLauncher({ ...base, actions: [futureAction] })
     await processEvent(firstOpen)
     const [run] = await listRecentLauncherRuns()
-    expect(run).toMatchObject({ status: 'error', reason: 'la acción «virtualization.start» aún no está disponible' })
+    expect(run).toMatchObject({ status: 'error', reason: 'la acción «future.action» aún no está disponible' })
   })
 })
