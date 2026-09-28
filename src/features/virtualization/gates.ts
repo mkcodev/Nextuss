@@ -1,6 +1,20 @@
-// La puerta de la Virtualización para su lanzador integrado (patrón `dayStartGate.ts`). De momento
-// siempre abre: el interruptor de activar/desactivar y la ventana horaria llegan en el PR de Ajustes
-// (#97 PR4), que añadirá los campos `virtualizationEnabled`/`virtualizationWindowEndHour` a `Settings`.
-export async function shouldOpenVirtualizationOn(_date: string): Promise<boolean> {
-  return true
+// La puerta de la Virtualización para su lanzador integrado (patrón `dayStartGate.ts`/`gates.ts` de
+// rituals: predicado puro + envoltorio async que lee `Settings`).
+import { getOrCreateSettings } from '../../db/repositories/settings'
+
+export interface VirtualizationGateInputs {
+  enabled?: boolean
+  windowEndHour?: number
+}
+
+/** Activado por defecto; solo tiene sentido antes de la hora límite configurada (por defecto, mediodía) —
+ * proponer el ritual "matutino" a media tarde no tiene sentido. */
+export function shouldOpenVirtualization({ enabled, windowEndHour }: VirtualizationGateInputs, now: Date): boolean {
+  if (enabled === false) return false
+  return now.getHours() < (windowEndHour ?? 12)
+}
+
+export async function shouldOpenVirtualizationOn(_date: string, now: Date = new Date()): Promise<boolean> {
+  const settings = await getOrCreateSettings()
+  return shouldOpenVirtualization({ enabled: settings.virtualizationEnabled, windowEndHour: settings.virtualizationWindowEndHour }, now)
 }

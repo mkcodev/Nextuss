@@ -1,5 +1,21 @@
 import { describe, expect, it } from 'vitest'
-import { levelForXp, progressForXp, xpForLevel, levelUpsInCurve } from './xp'
+import { levelForXp, progressForXp, xpForLevel, levelUpsInCurve, xpForVirtualization, VIRTUALIZATION_XP_BASE } from './xp'
+
+describe('xpForVirtualization', () => {
+  it('sin racha, da la XP base', () => {
+    expect(xpForVirtualization(0)).toBe(VIRTUALIZATION_XP_BASE)
+  })
+
+  it('crece un 2% por día de racha', () => {
+    expect(xpForVirtualization(1)).toBe(Math.round(VIRTUALIZATION_XP_BASE * 1.02))
+    expect(xpForVirtualization(10)).toBe(Math.round(VIRTUALIZATION_XP_BASE * 1.2))
+  })
+
+  it('el bonus tiene un tope del 50%, aunque la racha sea enorme', () => {
+    expect(xpForVirtualization(25)).toBe(Math.round(VIRTUALIZATION_XP_BASE * 1.5))
+    expect(xpForVirtualization(365)).toBe(Math.round(VIRTUALIZATION_XP_BASE * 1.5))
+  })
+})
 
 describe('xpForLevel', () => {
   it('requires 0 xp for level 1', () => {

@@ -2,8 +2,8 @@
 // hábitos, sin el filtro de días programados (la Virtualización aplica todos los días). Camina hacia
 // atrás desde `referenceDate` hasta la fecha más antigua presente en `days`.
 import { subDays } from 'date-fns'
-import type { VirtualizationDay } from '../../db/types'
-import { dateKey, parseDateKey } from '../../lib/dates'
+import type { VirtualizationDay } from '../db/types'
+import { dateKey, parseDateKey } from './dates'
 
 export interface StreakResult {
   current: number

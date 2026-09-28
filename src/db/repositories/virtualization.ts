@@ -4,8 +4,11 @@
 // patrón que `habits.ts#reconcileShields`.
 import { db } from '../schema'
 import type { VirtualizationDay } from '../types'
-import { dateKey, subDaysKey } from '../../lib/dates'
-import { consumeShield, refillShieldsIfNewMonth } from './gamification'
+import { dateKey, parseDateKey, subDaysKey } from '../../lib/dates'
+import { VIRTUALIZATION_STREAK_ACHIEVEMENT_THRESHOLDS } from '../../lib/achievementThresholds'
+import { xpForVirtualization } from '../../lib/xp'
+import { calculateVirtualizationStreak } from '../../lib/virtualizationStreak'
+import { applyXpDelta, consumeShield, refillShieldsIfNewMonth, unlockAchievement } from './gamification'
 
 export function getVirtualizationDay(date: string): Promise<VirtualizationDay | undefined> {
   return db.virtualizationDays.where('date').equals(date).first()
@@ -58,4 +61,49 @@ export async function reconcileVirtualizationShields(today: Date = new Date()): 
   if (await getVirtualizationDay(yesterday)) return
   const granted = await consumeShield()
   if (granted) await upsertVirtualizationDay(yesterday, { shieldUsed: true })
+}
+
+export interface CompleteVirtualizationResult {
+  streak: number
+  xpAwarded: number
+  leveledUp: boolean
+  newLevel: number
+  unlockedAchievements: string[]
+}
+
+/**
+ * Cierra el ritual del día: marca la fila (completada o saltada) y recalcula la racha ya con esa fila
+ * puesta. Saltar («Hoy no») nunca da XP ni logros — solo cuenta para la racha, igual que un hábito sin
+ * marcar. Completarla aplica XP con bonus de racha (`xpForVirtualization`) y desbloquea los logros de
+ * racha que correspondan (mismo patrón que `habits.ts#setHabitLog`).
+ */
+export async function completeVirtualization(date: string, skipped: boolean): Promise<CompleteVirtualizationResult> {
+  return db.transaction('rw', db.virtualizationDays, db.progress, db.achievements, async () => {
+    await upsertVirtualizationDay(date, {
+      completed: !skipped,
+      skipped,
+      finishedAt: Date.now(),
+      phaseReached: skipped ? 'cabina' : 'virtualizacion',
+    })
+    const recentDays = await getVirtualizationDays(400, parseDateKey(date))
+    const { current } = calculateVirtualizationStreak(recentDays, parseDateKey(date))
+
+    let xpAwarded = 0
+    let leveledUp = false
+    let newLevel = 1
+    const unlockedAchievements: string[] = []
+
+    if (!skipped) {
+      xpAwarded = xpForVirtualization(current)
+      const xpResult = await applyXpDelta(xpAwarded)
+      leveledUp = xpResult.leveledUp
+      newLevel = xpResult.level
+      await upsertVirtualizationDay(date, { xpAwarded })
+      for (const t of VIRTUALIZATION_STREAK_ACHIEVEMENT_THRESHOLDS) {
+        if (current >= t.streak && (await unlockAchievement(t.key))) unlockedAchievements.push(t.key)
+      }
+    }
+
+    return { streak: current, xpAwarded, leveledUp, newLevel, unlockedAchievements }
+  })
 }
