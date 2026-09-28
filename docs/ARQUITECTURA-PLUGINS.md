@@ -31,6 +31,7 @@ y el Test de entrada (#100). Se construye por capas (#113-#119).
 
   | evento | quién |
   |---|---|
+  | `app.opened` | `clock.ts`, una vez por arranque de la app |
   | `task.completed` | `toggleTaskDone`, al pasar a hecha |
   | `habit.logged` | `setHabitLog`, al completarse ese día |
   | `focus.finished` | `logFocusSession` |
@@ -59,3 +60,13 @@ y el Test de entrada (#100). Se construye por capas (#113-#119).
 - Límite conocido: la cadena de causas solo pasa de un lanzador al evento que emite él mismo de forma
   síncrona. Un evento que llega después por acción del usuario (terminar la rutina que abrió un
   lanzador) empieza cadena nueva, que es lo que se quiere.
+
+## Integrados y recetas
+
+- `db/builtinLaunchers.ts`: «Empezar el día» (`app.opened` → `dayStart.open`, si no está hecho hoy).
+  Se crea al arrancar si falta. Su acción aplica la puerta de siempre (`rituals/dayStartGate.ts` →
+  `shouldOpenDayStart`) y, si no hay nada que preparar, se apunta como salto. `TodayView` ya no lo abre.
+- Como es un lanzador, con el plugin Lanzadores desactivado «Empezar el día» tampoco se abre.
+- `features/launchers/recipes.ts`: «Mañana consciente» (Virtualización → rutina matutina → check-in →
+  Hoy; con «Hoy no» pregunta «¿Rutina igualmente?»). `installMorningRecipe(routineId)` la instala y
+  desactiva «Empezar el día». La Virtualización (#97) la sembrará cuando exista su acción.

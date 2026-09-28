@@ -3,6 +3,8 @@
 // la pestaña está abierta (ver `docs/ARQUITECTURA-PLUGINS.md`).
 
 export interface AppEvents {
+  /** Cada vez que arranca la app (una por sesión o recarga). */
+  'app.opened': { date: string }
   /** Primera apertura del día lógico (corte a las 04:00) en este dispositivo. */
   'day.firstOpen': { date: string }
   /** Cada 30 s mientras la app está abierta. */

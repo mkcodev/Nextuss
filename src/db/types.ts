@@ -425,8 +425,10 @@ export interface TrashEntry {
 
 // Lanzadores (#118): reglas «cuando pase X, haz Y». Los eventos vienen del bus (`lib/events/bus.ts`).
 export type LauncherTrigger =
+  | { type: 'app.opened' }
   | { type: 'day.firstOpen' }
-  | { type: 'virtualization.completed' }
+  /** `skipped`: solo cuando se saltó («Hoy no») o solo cuando se completó; sin definir, ambos. */
+  | { type: 'virtualization.completed'; skipped?: boolean }
   | { type: 'routine.finished'; routineId?: number }
   | { type: 'task.completed'; taskId?: number; projectId?: number; tagId?: number }
   | { type: 'habit.logged'; habitId?: number }

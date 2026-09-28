@@ -9,6 +9,7 @@ import { navigateTo } from '../../app/navigateBridge'
 import { ensurePanelVisible } from '../../app/dock/ensurePanelVisible'
 import { startRoutine } from '../routines/actions'
 import { useDayStartStore } from '../rituals/dayStartStore'
+import { shouldOpenDayStartOn } from '../rituals/dayStartGate'
 import { useWeeklyReviewStore } from '../planner/weeklyReviewStore'
 import { useFocusTimerStore } from '../focus/focusTimerStore'
 import { playChime } from '../focus/chime'
@@ -44,6 +45,8 @@ export function registerLauncherAction<T extends LauncherAction['type']>(
 }
 
 export class LauncherActionError extends Error {}
+/** Una acción que decide no hacer nada (su propia puerta no se cumple): se apunta como salto, no error. */
+export class LauncherSkip extends Error {}
 
 /** Ejecuta las acciones en orden. La primera que falla corta las siguientes y sube su motivo. */
 export async function runActions(actions: readonly LauncherAction[], ctx: ActionContext): Promise<void> {
@@ -68,7 +71,10 @@ registerLauncherAction(
 )
 // El check-in vive dentro de «Empezar el día» hasta que tenga pantalla propia.
 registerLauncherAction('checkin.open', (_a, ctx) => useDayStartStore.getState().openFlow(ctx.date), 'checkin')
-registerLauncherAction('dayStart.open', (_a, ctx) => useDayStartStore.getState().openFlow(ctx.date))
+registerLauncherAction('dayStart.open', async (_a, ctx) => {
+  if (!(await shouldOpenDayStartOn(ctx.date))) throw new LauncherSkip('nada que preparar hoy')
+  useDayStartStore.getState().openFlow(ctx.date)
+})
 registerLauncherAction(
   'focus.start',
   () => {
