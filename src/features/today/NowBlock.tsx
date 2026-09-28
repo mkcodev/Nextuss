@@ -1,7 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { motion, useReducedMotion } from 'framer-motion'
-import { CalendarClock, Check, Play } from 'lucide-react'
+import { CalendarClock, Check, CheckCheck, Play, Plus } from 'lucide-react'
 import { Button } from '../../design/primitives'
 import { getTasksForDate, moveTasksToDateBulk } from '../../db/repositories/tasks'
 import { getProject } from '../../db/repositories/projects'
@@ -14,6 +14,7 @@ import { useSubmitGuard } from '../../lib/useSubmitGuard'
 import { startFocusOnTask } from '../focus/startFocusOnTask'
 import { toggleTaskDoneWithFeedback } from '../tasks/actions'
 import { useTaskFormStore } from '../tasks/taskFormStore'
+import { useQuickAddStore } from '../tasks/quickAddStore'
 import type { EnergyLevel, Task } from '../../db/types'
 import { pickNowTask } from './pickNowTask'
 
@@ -52,16 +53,24 @@ export function NowBlock({ date }: { date: string }) {
   const titleId = useId()
   const [movingToTomorrow, moveToTomorrow] = useSubmitGuard((t: Task) => moveTasksToDateBulk([t.id!], nextRelativeDate(t.scheduledDate, date, 1)))
 
-  if (!pick || !task) return null
+  if (!tasks) return null
+  if (!pick || !task) return <NowEmpty allDone={tasks.some((t) => t.status === 'done' && !t.parentId)} />
 
-  const start = timeToMinutes(task.scheduledStart!)
-  const end = timeToMinutes(task.scheduledEnd!)
+  const slotted = pick.mode !== 'pick'
+  const current = pick.mode === 'current'
+  const start = slotted ? timeToMinutes(task.scheduledStart!) : 0
+  const end = slotted ? timeToMinutes(task.scheduledEnd!) : 0
   const total = Math.max(end - start, 1)
-  const elapsed = pick.current ? Math.min(Math.max(nowMin - start, 0), total) : 0
+  const elapsed = current ? Math.min(Math.max(nowMin - start, 0), total) : 0
   const progress = (elapsed / total) * 100
-  const meta = pick.current
+  const meta = current
     ? `quedan ${formatDuration(end - nowMin)}`
-    : `empieza en ${formatDuration(start - nowMin)}`
+    : slotted
+      ? `empieza en ${formatDuration(start - nowMin)}`
+      : task.estimateMin
+        ? `unos ${formatDuration(task.estimateMin)}`
+        : 'sin hora'
+  const heading = current ? 'Ahora' : slotted ? 'A continuación' : 'Lo siguiente'
 
   const cells: { label: string; value: string; dot?: string; bars?: number }[] = [
     { label: 'Proyecto', value: project?.name ?? '—', dot: project?.color },
@@ -84,10 +93,10 @@ export function NowBlock({ date }: { date: string }) {
           aria-hidden="true"
           className={cn(
             'size-3.5 shrink-0 rounded-full border-[1.5px]',
-            pick.current ? 'border-accent bg-[conic-gradient(var(--color-accent)_0_50%,transparent_0)]' : 'border-text-faint',
+            current ? 'border-accent bg-[conic-gradient(var(--color-accent)_0_50%,transparent_0)]' : 'border-text-faint',
           )}
         />
-        <span className="font-semibold text-text-muted">{pick.current ? 'Ahora' : 'A continuación'}</span>
+        <span className="font-semibold text-text-muted">{heading}</span>
         <span className="ml-auto tabular-nums text-text-muted">{meta}</span>
       </div>
 
@@ -98,24 +107,28 @@ export function NowBlock({ date }: { date: string }) {
       </h2>
 
       {/* Línea de medida: los extremos marcan inicio y fin, el tramo relleno lo que ya ha pasado. */}
-      <div
-        role="meter"
-        aria-label="Tiempo de la tarea"
-        aria-valuemin={0}
-        aria-valuemax={total}
-        aria-valuenow={elapsed}
-        aria-valuetext={`${formatDuration(elapsed)} de ${formatDuration(total)}, de ${task.scheduledStart} a ${task.scheduledEnd}`}
-        className="relative mt-5 mb-8 h-0.5 rounded-full bg-border"
-      >
-        <span className="absolute inset-y-0 left-0 rounded-full bg-accent" style={{ width: `${progress}%` }} />
-        <span className="absolute -top-[5px] left-0 h-3 w-[1.5px] rounded-full bg-text-faint" />
-        <span className="absolute -top-[5px] right-0 h-3 w-[1.5px] rounded-full bg-text-faint" />
-        <span className="absolute left-1/2 -top-2.5 -translate-x-1/2 bg-surface px-2 text-[13px] font-medium tabular-nums text-text">
-          {formatDuration(total)}
-        </span>
-        <span className="absolute left-0 top-2.5 text-xs tabular-nums text-text-muted">{task.scheduledStart}</span>
-        <span className="absolute right-0 top-2.5 text-xs tabular-nums text-text-muted">{task.scheduledEnd}</span>
-      </div>
+      {slotted ? (
+        <div
+          role="meter"
+          aria-label="Tiempo de la tarea"
+          aria-valuemin={0}
+          aria-valuemax={total}
+          aria-valuenow={elapsed}
+          aria-valuetext={`${formatDuration(elapsed)} de ${formatDuration(total)}, de ${task.scheduledStart} a ${task.scheduledEnd}`}
+          className="relative mt-5 mb-8 h-0.5 rounded-full bg-border"
+        >
+          <span className="absolute inset-y-0 left-0 rounded-full bg-accent" style={{ width: `${progress}%` }} />
+          <span className="absolute -top-[5px] left-0 h-3 w-[1.5px] rounded-full bg-text-faint" />
+          <span className="absolute -top-[5px] right-0 h-3 w-[1.5px] rounded-full bg-text-faint" />
+          <span className="absolute left-1/2 -top-2.5 -translate-x-1/2 bg-surface px-2 text-[13px] font-medium tabular-nums text-text">
+            {formatDuration(total)}
+          </span>
+          <span className="absolute left-0 top-2.5 text-xs tabular-nums text-text-muted">{task.scheduledStart}</span>
+          <span className="absolute right-0 top-2.5 text-xs tabular-nums text-text-muted">{task.scheduledEnd}</span>
+        </div>
+      ) : (
+        <p className="mt-1 mb-4 text-sm text-text-muted">La más prioritaria de hoy sin hora. Empieza por aquí.</p>
+      )}
 
       <dl className="grid grid-cols-2 overflow-hidden rounded-md border border-border sm:grid-cols-4">
         {cells.map((c, i) => (
@@ -152,5 +165,24 @@ export function NowBlock({ date }: { date: string }) {
         </Button>
       </div>
     </motion.section>
+  )
+}
+
+function NowEmpty({ allDone }: { allDone: boolean }) {
+  const openQuickAdd = useQuickAddStore((s) => s.openQuickAdd)
+  return (
+    <section className="flex flex-wrap items-center gap-3 rounded-md border border-dashed border-border-strong bg-surface p-5">
+      {allDone ? (
+        <>
+          <CheckCheck size={18} strokeWidth={1.75} className="text-success" aria-hidden="true" />
+          <p className="flex-1 text-sm text-text">Todo lo de hoy está hecho. Buen trabajo.</p>
+        </>
+      ) : (
+        <p className="flex-1 text-sm text-text">¿Qué es lo único que quieres hacer hoy?</p>
+      )}
+      <Button variant={allDone ? 'ghost' : 'primary'} onClick={() => openQuickAdd()}>
+        <Plus size={14} strokeWidth={2} /> {allDone ? 'Añadir otra' : 'Añadir tarea'}
+      </Button>
+    </section>
   )
 }
