@@ -1,5 +1,5 @@
 import { db } from '../schema'
-import type { Task } from '../types'
+import type { Task, TaskStatus } from '../types'
 import { withUndo } from '../undoable'
 import { trashRows } from '../trash'
 import { compareByPriorityThenSortKey } from '../../lib/priority'
@@ -257,10 +257,14 @@ export async function trashTasksBulk(ids: number[]): Promise<void> {
 }
 
 /** Non-done tasks, most recently scheduled/created first — used by the focus timer's task picker. */
+const OPEN_STATUSES: TaskStatus[] = ['inbox', 'backlog', 'planned']
+
 export async function listActiveTasks(): Promise<Task[]> {
-  const all = await db.tasks.where('status').notEqual('done').toArray()
+  const all = await db.tasks
+    .where('[deletedAt+status]')
+    .anyOf(OPEN_STATUSES.map((s) => [0, s]))
+    .toArray()
   return all
-    .filter((t) => t.deletedAt === 0)
     .sort((a, b) => (b.scheduledDate ?? '').localeCompare(a.scheduledDate ?? '') || b.createdAt - a.createdAt)
     .slice(0, 50)
 }
@@ -268,8 +272,7 @@ export async function listActiveTasks(): Promise<Task[]> {
 /** Todas las tareas vivas, sin tope y sin excluir `done` (Fase 13.2) — a diferencia de
  * `listActiveTasks`, pensada para la vista de tareas global, no para un selector acotado. */
 export async function listAllTasks(): Promise<Task[]> {
-  const all = await db.tasks.toArray()
-  return all.filter((t) => t.deletedAt === 0)
+  return db.tasks.where('deletedAt').equals(0).toArray()
 }
 
 export async function addActualMinutes(id: number, minutes: number) {
