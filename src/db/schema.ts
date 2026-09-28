@@ -25,6 +25,7 @@ import type {
   TaskTemplate,
   TaskView,
   TrashEntry,
+  VirtualizationDay,
   WeeklyReview,
 } from './types'
 import {
@@ -62,6 +63,7 @@ export class NextussDB extends Dexie {
   routineRuns!: EntityTable<RoutineRun, 'id'>
   launchers!: EntityTable<Launcher, 'id'>
   launcherRuns!: EntityTable<LauncherRun, 'id'>
+  virtualizationDays!: EntityTable<VirtualizationDay, 'id'>
 
   constructor() {
     // Nombre real de la base de datos IndexedDB — deliberadamente NO sigue el rebranding a
@@ -204,6 +206,12 @@ export class NextussDB extends Dexie {
     this.version(15).stores({
       launchers: '++id, deletedAt, sortKey, recipeKey, builtinKey',
       launcherRuns: '++id, launcherId, date, firedAt, [launcherId+date]',
+    })
+
+    // Virtualización (#97 PR2): tabla nueva, sin datos previos que migrar, sin `.upgrade()` — una fila
+    // por día, indexada por `date` para leer el rango reciente al calcular la racha.
+    this.version(16).stores({
+      virtualizationDays: '++id, date',
     })
   }
 }
