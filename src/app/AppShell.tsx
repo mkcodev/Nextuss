@@ -42,6 +42,7 @@ import { OnboardingFlow } from '../features/onboarding/OnboardingFlow'
 import { DayStartFlow } from '../features/rituals/DayStartFlow'
 import { DayCloseFlow } from '../features/rituals/DayCloseFlow'
 import { useBackupGuard } from '../features/backup/useBackupGuard'
+import { usePluginsSync } from '../features/plugins/pluginsStore'
 
 const CommandPalette = lazyNamed(() => import('./CommandPalette'), 'CommandPalette')
 const TaskBreakdownDialog = lazyNamed(() => import('../features/ai/TaskBreakdownDialog'), 'TaskBreakdownDialog')
@@ -58,6 +59,7 @@ function RouteFallback() {
 }
 
 export function AppShell() {
+  usePluginsSync()
   useGlobalShortcuts()
   usePwaShortcutActions()
   useServiceWorker()
