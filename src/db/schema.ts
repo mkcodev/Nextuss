@@ -15,6 +15,8 @@ import type {
   ProjectTemplate,
   QuickNote,
   RecurrenceRule,
+  Routine,
+  RoutineRun,
   Settings,
   Tag,
   Task,
@@ -54,6 +56,8 @@ export class NextussDB extends Dexie {
   taskViews!: EntityTable<TaskView, 'id'>
   taskTemplates!: EntityTable<TaskTemplate, 'id'>
   projectTemplates!: EntityTable<ProjectTemplate, 'id'>
+  routines!: EntityTable<Routine, 'id'>
+  routineRuns!: EntityTable<RoutineRun, 'id'>
 
   constructor() {
     // Nombre real de la base de datos IndexedDB — deliberadamente NO sigue el rebranding a
@@ -181,6 +185,13 @@ export class NextussDB extends Dexie {
     this.version(13).stores({
       taskTemplates: '++id, sortKey',
       projectTemplates: '++id, sortKey',
+    })
+
+    // Rutinas (Fase 28): tablas nuevas, sin datos previos que migrar, sin `.upgrade()`. `routines`
+    // nace ya con papelera + orden manual (`deletedAt`/`sortKey`), como tasks/habits tras la v6.
+    this.version(14).stores({
+      routines: '++id, deletedAt, sortKey',
+      routineRuns: '++id, routineId, date, [routineId+date]',
     })
   }
 }

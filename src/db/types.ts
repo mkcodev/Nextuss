@@ -183,6 +183,44 @@ export interface ProjectTemplate {
   sortKey: number
 }
 
+/** Paso de una rutina: vive dentro de `Routine.steps` (no en tabla propia) porque solo tiene sentido
+ * junto a su rutina y siempre se lee y se escribe con ella. `id` estable para las claves de React. */
+export interface RoutineStep {
+  id: string
+  title: string
+  durationMin: number
+}
+
+/** Rutina (Fase 28): secuencia de pasos temporizados que se sigue en el reproductor a pantalla
+ * completa. `startTime` es opcional: sin hora solo se lanza a mano. */
+export interface Routine {
+  id?: number
+  name: string
+  icon: string
+  color: string
+  steps: RoutineStep[]
+  startTime?: string // 'HH:mm'
+  weekdays: number[] // 0=domingo..6=sábado; [] = todos los días (mismo criterio que `Habit.weekdays`)
+  createdAt: number
+  deletedAt: number // 0 = viva
+  sortKey: number
+}
+
+/** Una pasada por una rutina, terminada o abandonada a medias: de aquí sale "hecha hoy". */
+export interface RoutineRun {
+  id?: number
+  routineId: number
+  date: string // 'YYYY-MM-DD'
+  startedAt: number
+  finishedAt: number
+  completedSteps: number
+  totalSteps: number
+  /** Llegó al último paso (aunque se saltara alguno); false = se salió a medias. */
+  finished: boolean
+}
+
+export type RoutineView = 'step' | 'timeline'
+
 export type RecurrenceFreq = 'daily' | 'weekly' | 'monthly'
 /** `schedule`: fechas de calendario fijas (p.ej. "cada lunes"), se generan por adelantado.
  * `completion`: la siguiente ocurrencia se genera solo al completar la anterior, desplazada
@@ -317,6 +355,12 @@ export interface Settings {
   notifyWeeklyReviewNudge?: boolean
   notifyZombieTasks?: boolean
   notifyPomodoroEnd?: boolean
+  /** Rutinas (Fase 28): aviso a su hora y al cambiar de paso en el reproductor. */
+  notifyRoutines?: boolean
+  /** Sonido al cambiar de paso en el reproductor de rutinas. Sin definir = activado. */
+  routineSoundEnabled?: boolean
+  /** Vista del reproductor: un paso cada vez o línea de tiempo con horas. Sin definir = 'step'. */
+  routineView?: RoutineView
   morningSummaryTime?: string // 'HH:mm', default '08:00'
   eveningSummaryTime?: string // 'HH:mm', default '21:00'
   quietHoursStart?: string // 'HH:mm'
@@ -356,7 +400,7 @@ export interface InsightFeedbackRecord {
   dismissedAt: number
 }
 
-export type TrashableTable = 'tasks' | 'habits' | 'goals' | 'projects'
+export type TrashableTable = 'tasks' | 'habits' | 'goals' | 'projects' | 'routines'
 
 /** Metadatos de un borrado por lote (una tarea con su subárbol, un hábito, un objetivo) — lo que
  * alimenta la página de Papelera y la purga a los 30 días en `runDailyMaintenance`. La fila borrada
