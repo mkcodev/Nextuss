@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Bell, BellOff, Bot, CalendarClock, Database, Eye, EyeOff, Monitor, Moon, Send, Sparkles, Sun, Timer, TriangleAlert, Trash2 } from 'lucide-react'
-import { Button, Card, Dialog, Icon, Select, Skeleton, Switch } from '../../design/primitives'
+import { Button, Card, Dialog, Icon, Select, Skeleton, Switch, Input } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { useTheme } from '../../design/useTheme'
 import { db } from '../../db/schema'
@@ -87,7 +87,7 @@ function PlannerSection() {
               key={value}
               onClick={() => updateSettings({ weekStartsOn: value as 0 | 1 })}
               className={cn(
-                'rounded-xl border p-2.5 text-xs font-medium transition-colors',
+                'rounded-lg border p-2.5 text-xs font-medium transition-colors',
                 (settings?.weekStartsOn ?? 1) === value
                   ? 'border-accent bg-accent-soft text-accent'
                   : 'border-border text-text-muted hover:bg-surface-hover',
@@ -268,38 +268,38 @@ function NotificationsSection() {
           <div className="mt-3 grid grid-cols-2 gap-3 border-t border-border pt-3">
             <label className="text-xs text-text-muted">
               Resumen mañana
-              <input
+              <Input
                 type="time"
                 value={settings?.morningSummaryTime ?? '08:00'}
                 onChange={(e) => updateSettings({ morningSummaryTime: e.target.value })}
-                className="mt-1 w-full rounded-lg border border-border bg-bg-soft px-2 py-1.5 text-sm text-text outline-none focus:border-accent"
+                className="mt-1 !px-2"
               />
             </label>
             <label className="text-xs text-text-muted">
               Cierre del día
-              <input
+              <Input
                 type="time"
                 value={settings?.eveningSummaryTime ?? '21:00'}
                 onChange={(e) => updateSettings({ eveningSummaryTime: e.target.value })}
-                className="mt-1 w-full rounded-lg border border-border bg-bg-soft px-2 py-1.5 text-sm text-text outline-none focus:border-accent"
+                className="mt-1 !px-2"
               />
             </label>
             <label className="text-xs text-text-muted">
               Silencio desde
-              <input
+              <Input
                 type="time"
                 value={settings?.quietHoursStart ?? ''}
                 onChange={(e) => updateSettings({ quietHoursStart: e.target.value || undefined })}
-                className="mt-1 w-full rounded-lg border border-border bg-bg-soft px-2 py-1.5 text-sm text-text outline-none focus:border-accent"
+                className="mt-1 !px-2"
               />
             </label>
             <label className="text-xs text-text-muted">
               Silencio hasta
-              <input
+              <Input
                 type="time"
                 value={settings?.quietHoursEnd ?? ''}
                 onChange={(e) => updateSettings({ quietHoursEnd: e.target.value || undefined })}
-                className="mt-1 w-full rounded-lg border border-border bg-bg-soft px-2 py-1.5 text-sm text-text outline-none focus:border-accent"
+                className="mt-1 !px-2"
               />
             </label>
           </div>
@@ -322,35 +322,35 @@ function PomodoroSection() {
       <div className="grid grid-cols-3 gap-3">
         <label className="text-xs text-text-muted">
           Foco (min)
-          <input
+          <Input
             type="number"
             min={1}
             max={180}
             value={settings?.pomodoroWorkMin ?? DEFAULT_DURATIONS_MIN.work}
             onChange={(e) => updateSettings({ pomodoroWorkMin: Number(e.target.value) || DEFAULT_DURATIONS_MIN.work })}
-            className="mt-1 w-full rounded-lg border border-border bg-bg-soft px-2 py-1.5 text-sm text-text outline-none focus:border-accent"
+            className="mt-1 !px-2"
           />
         </label>
         <label className="text-xs text-text-muted">
           Descanso (min)
-          <input
+          <Input
             type="number"
             min={1}
             max={60}
             value={settings?.pomodoroBreakMin ?? DEFAULT_DURATIONS_MIN.break}
             onChange={(e) => updateSettings({ pomodoroBreakMin: Number(e.target.value) || DEFAULT_DURATIONS_MIN.break })}
-            className="mt-1 w-full rounded-lg border border-border bg-bg-soft px-2 py-1.5 text-sm text-text outline-none focus:border-accent"
+            className="mt-1 !px-2"
           />
         </label>
         <label className="text-xs text-text-muted">
           D. largo (min)
-          <input
+          <Input
             type="number"
             min={1}
             max={90}
             value={settings?.pomodoroLongBreakMin ?? DEFAULT_DURATIONS_MIN.longBreak}
             onChange={(e) => updateSettings({ pomodoroLongBreakMin: Number(e.target.value) || DEFAULT_DURATIONS_MIN.longBreak })}
-            className="mt-1 w-full rounded-lg border border-border bg-bg-soft px-2 py-1.5 text-sm text-text outline-none focus:border-accent"
+            className="mt-1 !px-2"
           />
         </label>
       </div>
@@ -411,13 +411,13 @@ function AiSection() {
       <label className="mb-1 block text-xs font-medium text-text-muted">Clave de API</label>
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <input
+          <Input
             type={showKey ? 'text' : 'password'}
             value={key}
             onChange={(e) => setKeyDraft(e.target.value)}
             onBlur={commitKey}
             placeholder="sk-ant-…"
-            className="w-full rounded-lg border border-border bg-bg-soft px-3 py-2 pr-9 text-sm text-text outline-none focus:border-accent"
+            className="!px-3 !py-2 pr-9"
           />
           <button
             type="button"
@@ -518,13 +518,13 @@ function TelegramSection() {
           <label className="mb-1 block text-xs font-medium text-text-muted">Token del bot (de @BotFather)</label>
           <div className="flex gap-2">
             <div className="relative flex-1">
-              <input
+              <Input
                 type={showToken ? 'text' : 'password'}
                 value={token}
                 onChange={(e) => setTokenDraft(e.target.value)}
                 onBlur={commitToken}
                 placeholder="123456:ABC-…"
-                className="w-full rounded-lg border border-border bg-bg-soft px-3 py-2 pr-9 text-sm text-text outline-none focus:border-accent"
+                className="!px-3 !py-2 pr-9"
               />
               <button
                 type="button"
@@ -559,11 +559,11 @@ function TelegramSection() {
           <label className="mt-3 block border-t border-border pt-3 text-xs font-medium text-text-muted">
             URL del worker (opcional, para recepción 24/7)
           </label>
-          <input
+          <Input
             defaultValue={settings?.telegramWorkerUrl ?? ''}
             onBlur={(e) => updateSettings({ telegramWorkerUrl: e.target.value.trim() || undefined })}
             placeholder="https://nextuss-telegram-relay.tu-cuenta.workers.dev/tu-secreto"
-            className="mt-1 w-full rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
+            className="mt-1 !px-3 !py-2"
           />
         </>
       )}
@@ -610,13 +610,13 @@ export function SettingsPage() {
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-soft text-sm font-semibold text-accent">
             {displayName ? initials(displayName) : '?'}
           </div>
-          <input
+          <Input
             value={displayName}
             onChange={(e) => setName(e.target.value)}
             onBlur={commitName}
             onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
             placeholder="Tu nombre"
-            className="flex-1 rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
+            className="flex-1 !px-3 !py-2"
           />
         </div>
       </Card>
@@ -629,7 +629,7 @@ export function SettingsPage() {
               key={value}
               onClick={() => setTheme(value)}
               className={cn(
-                'flex flex-col items-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-colors',
+                'flex flex-col items-center gap-1.5 rounded-lg border p-3 text-xs font-medium transition-colors',
                 theme === value
                   ? 'border-accent bg-accent-soft text-accent'
                   : 'border-border text-text-muted hover:bg-surface-hover',
@@ -657,7 +657,7 @@ export function SettingsPage() {
                   key={a.key}
                   title={a.description}
                   className={cn(
-                    'flex flex-col items-center gap-1 rounded-xl border p-3 text-center',
+                    'flex flex-col items-center gap-1 rounded-lg border p-3 text-center',
                     isUnlocked ? 'border-accent/30 bg-accent-soft' : 'border-border opacity-40',
                   )}
                 >

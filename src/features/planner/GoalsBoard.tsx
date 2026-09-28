@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronLeft, ChevronRight, ClipboardCheck } from 'lucide-react'
-import { Button } from '../../design/primitives'
+import { Button, Checkbox } from '../../design/primitives'
 import { monthKey, weekKey } from '../../lib/dates'
 import { listGoalsForPeriod } from '../../db/repositories/goals'
 import { listAttributes } from '../../db/repositories/gamification'
@@ -65,10 +65,12 @@ export function GoalsBoard() {
         </div>
 
         <div className="flex items-center gap-2">
-          <label className="flex items-center gap-1.5 text-xs text-text-muted">
-            <input type="checkbox" checked={showCompleted} onChange={(e) => setShowCompleted(e.target.checked)} className="size-4 accent-[var(--color-accent)]" />
-            Mostrar completados
-          </label>
+          <Checkbox
+            checked={showCompleted}
+            onChange={(e) => setShowCompleted(e.target.checked)}
+            label="Mostrar completados"
+            className="text-xs text-text-muted"
+          />
           <Button variant="secondary" onClick={() => openReview(weekKey())} className="text-xs">
             <ClipboardCheck size={14} /> Revisión semanal
           </Button>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { AlertTriangle, Archive, ChevronDown, ChevronUp, Clock, Copy, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
-import { Card, Icon, Menu, MenuItem, MenuSeparator, RingProgress } from '../../design/primitives'
+import { Card, Icon, Menu, MenuItem, MenuSeparator, RingProgress, Input } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { todayKey } from '../../lib/dates'
 import { formatMinutes } from '../stats/format'
@@ -51,7 +51,7 @@ export function ProjectCard({ project, attribute, expanded, onToggleExpand }: Pr
           onClick={onToggleExpand}
           aria-hidden="true"
           tabIndex={-1}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition-colors"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border transition-colors"
           style={{ backgroundColor: `${project.color}14`, borderColor: `${project.color}33`, color: project.color }}
         >
           <Icon name={project.icon ?? 'folder'} size={19} strokeWidth={1.75} />
@@ -145,12 +145,12 @@ export function ProjectCard({ project, attribute, expanded, onToggleExpand }: Pr
           )}
 
           <div className="flex gap-1.5">
-            <input
+            <Input
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
               placeholder="+ tarea…"
-              className="flex-1 rounded-lg border border-border bg-bg-soft px-2.5 py-1.5 text-xs text-text outline-none focus:border-accent"
+              className="flex-1 !text-xs"
             />
             <button
               onClick={handleAddTask}

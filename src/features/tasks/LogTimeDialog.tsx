@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Dialog, Field } from '../../design/primitives'
+import { Button, Dialog, Field, Input } from '../../design/primitives'
 import { parseDateKey, todayKey } from '../../lib/dates'
 import { logFocusSession } from '../../db/repositories/focusSessions'
 import { useToastStore } from '../../lib/toastStore'
@@ -44,27 +44,27 @@ export function LogTimeDialog() {
 
         <Field label="Minutos">
           {(inputProps) => (
-            <input
+            <Input
               {...inputProps}
               autoFocus
               type="number"
               min={1}
               value={minutes}
               onChange={(e) => setMinutes(Math.max(1, Number(e.target.value) || 0))}
-              className="w-full rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
+              className="!px-3 !py-2"
             />
           )}
         </Field>
 
         <Field label="Fecha">
           {(inputProps) => (
-            <input
+            <Input
               {...inputProps}
               type="date"
               max={todayKey()}
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-text outline-none focus:border-accent"
+              className="!px-3 !py-2"
             />
           )}
         </Field>

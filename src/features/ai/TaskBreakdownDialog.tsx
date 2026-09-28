@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Loader2, Sparkles, Trash2 } from 'lucide-react'
-import { Button, Dialog } from '../../design/primitives'
+import { Button, Dialog, Input } from '../../design/primitives'
 import { createTask, getTasksForRange } from '../../db/repositories/tasks'
 import { buildEstimateAccuracy } from '../stats/aggregate'
 import type { Subtask } from './prompts'
@@ -101,13 +101,13 @@ export function TaskBreakdownDialog() {
                     onChange={(e) => updateSubtask(i, { title: e.target.value })}
                     className="min-w-0 flex-1 bg-transparent text-sm text-text outline-none"
                   />
-                  <input
+                  <Input
                     type="number"
                     min={5}
                     max={480}
                     value={s.estimateMin}
                     onChange={(e) => updateSubtask(i, { estimateMin: Number(e.target.value) || 5 })}
-                    className="w-16 shrink-0 rounded-md border border-border bg-bg-soft px-1.5 py-1 text-right text-xs text-text outline-none focus:border-accent"
+                    className="w-16 shrink-0 !px-1.5 !py-1 text-right !text-xs"
                   />
                   <span className="shrink-0 text-xs text-text-faint">min</span>
                   <button type="button" onClick={() => removeSubtask(i)} className="shrink-0 text-text-faint hover:text-danger">
