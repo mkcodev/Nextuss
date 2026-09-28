@@ -1,10 +1,22 @@
 import { useRef, useState } from 'react'
-import { Database, Download, Upload } from 'lucide-react'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { Database, Download, FolderOpen, Upload } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { Button, Card, Dialog } from '../../design/primitives'
 import { useToastStore } from '../../lib/toastStore'
-import { downloadJson } from '../stats/export'
-import { dateKey } from '../../lib/dates'
-import { exportDatabase, importDatabase, BackupVersionMismatchError, type ImportMode } from '../../db/backup'
+import { useSubmitGuard } from '../../lib/useSubmitGuard'
+import { importDatabase, BackupVersionMismatchError, type ImportMode } from '../../db/backup'
+import {
+  backupNowToDir,
+  chooseBackupDir,
+  downloadFullBackup,
+  forgetBackupDir,
+  getBackupDir,
+  getLastBackupAt,
+  isAutoBackupSupported,
+  REMIND_AFTER_DAYS,
+} from '../backup/autoBackup'
 
 /** Full-database backup/restore. Lives in Ajustes → Datos, where a user actually looks for it —
  * previously only reachable from Estadísticas → Informes, alongside the (still period-scoped,
@@ -16,8 +28,7 @@ export function BackupSection() {
   const push = useToastStore((s) => s.push)
 
   const downloadBackup = async () => {
-    const backup = await exportDatabase()
-    downloadJson(`nextuss-backup-${dateKey(new Date())}.json`, backup)
+    await downloadFullBackup()
     push({ title: 'Copia de seguridad descargada', variant: 'success' })
   }
 
@@ -58,6 +69,7 @@ export function BackupSection() {
         <p className="mb-3 text-xs text-text-faint">
           Copia de seguridad de toda la base de datos — la red de seguridad de una app 100% local.
         </p>
+        <AutoBackupBlock />
         <div className="flex flex-wrap gap-2">
           <Button variant="secondary" onClick={downloadBackup}>
             <Download size={13} strokeWidth={1.75} /> Descargar copia de seguridad
@@ -107,5 +119,81 @@ export function BackupSection() {
         </div>
       </Dialog>
     </>
+  )
+}
+
+function AutoBackupBlock() {
+  const push = useToastStore((s) => s.push)
+  // Clave para releer tras cada acción: la carpeta y la fecha viven fuera de la base de datos principal.
+  const [version, setVersion] = useState(0)
+  const state = useLiveQuery(async () => ({ dir: await getBackupDir(), last: await getLastBackupAt() }), [version])
+  const refresh = () => setVersion((v) => v + 1)
+
+  const [choosing, choose] = useSubmitGuard(async () => {
+    try {
+      const name = await chooseBackupDir()
+      push({ title: 'Copia automática activada', description: `Carpeta: ${name}`, variant: 'success' })
+    } catch (err) {
+      if (!(err instanceof DOMException && err.name === 'AbortError')) {
+        push({ title: 'No se pudo usar esa carpeta', variant: 'error' })
+      }
+    }
+    refresh()
+  })
+  const [copying, copyNow] = useSubmitGuard(async () => {
+    try {
+      await backupNowToDir()
+      push({ title: 'Copia guardada en la carpeta', variant: 'success' })
+    } catch {
+      push({ title: 'No se pudo escribir en la carpeta', variant: 'error' })
+    }
+    refresh()
+  })
+  const disable = async () => {
+    await forgetBackupDir()
+    refresh()
+  }
+
+  const lastText = state?.last ? formatDistanceToNow(state.last, { addSuffix: true, locale: es }) : 'nunca'
+
+  return (
+    <div className="mb-4 rounded-md border border-border bg-bg-soft p-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <FolderOpen size={14} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />
+        <span className="text-sm font-medium text-text">Copia automática</span>
+        <span className="ml-auto text-xs text-text-muted">Última copia: {lastText}</span>
+      </div>
+      {!isAutoBackupSupported() ? (
+        <p className="mt-2 text-xs text-text-muted">
+          Este navegador no permite escribir en una carpeta. Descarga la copia a mano; te lo recordaremos cada {REMIND_AFTER_DAYS} días.
+        </p>
+      ) : state?.dir ? (
+        <>
+          <p className="mt-2 text-xs text-text-muted">
+            Una copia al día en <span className="font-medium text-text">{state.dir.name}</span> al abrir la app; se guardan las 7 últimas.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Button size="sm" variant="secondary" loading={copying} onClick={() => void copyNow()}>
+              Copiar ahora
+            </Button>
+            <Button size="sm" variant="ghost" loading={choosing} onClick={() => void choose()}>
+              Cambiar carpeta
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => void disable()}>
+              Desactivar
+            </Button>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="mt-2 text-xs text-text-muted">
+            Elige una carpeta (mejor si la sincroniza Drive, Dropbox u OneDrive) y Nextuss dejará allí una copia cada día.
+          </p>
+          <Button size="sm" className="mt-2" loading={choosing} onClick={() => void choose()}>
+            <FolderOpen size={13} strokeWidth={1.75} /> Elegir carpeta
+          </Button>
+        </>
+      )}
+    </div>
   )
 }

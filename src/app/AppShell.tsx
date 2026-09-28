@@ -37,6 +37,7 @@ import { useAiSuggestStore } from '../features/ai/aiSuggestStore'
 import { OnboardingFlow } from '../features/onboarding/OnboardingFlow'
 import { DayStartFlow } from '../features/rituals/DayStartFlow'
 import { DayCloseFlow } from '../features/rituals/DayCloseFlow'
+import { useBackupGuard } from '../features/backup/useBackupGuard'
 
 const CommandPalette = lazyNamed(() => import('./CommandPalette'), 'CommandPalette')
 const TaskBreakdownDialog = lazyNamed(() => import('../features/ai/TaskBreakdownDialog'), 'TaskBreakdownDialog')
@@ -59,6 +60,7 @@ export function AppShell() {
   useNotificationScheduler()
   useFocusTimerEngine()
   useTelegramPoller()
+  useBackupGuard()
   useTelegramWorkerSync()
   useTheme()
   const formHabitNonce = useHabitFormStore((s) => s.nonce)
