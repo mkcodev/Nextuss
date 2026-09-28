@@ -5,6 +5,7 @@ import { useRoutinePlayerEngine } from '../routines/useRoutinePlayerEngine'
 import { RoutinePlayer } from '../routines/RoutinePlayer'
 import { useTelegramPoller } from '../telegram/useTelegramPoller'
 import { useTelegramWorkerSync } from '../telegram/useTelegramWorkerSync'
+import { useLauncherEngine } from '../launchers/engine'
 import { usePluginEnabled } from './pluginsStore'
 
 function FocusEngine() {
@@ -23,15 +24,22 @@ function TelegramEngine() {
   return null
 }
 
+function LaunchersEngine() {
+  useLauncherEngine()
+  return null
+}
+
 export function PluginEngines() {
   const focus = usePluginEnabled('focus')
   const routines = usePluginEnabled('routines')
   const telegram = usePluginEnabled('telegram')
+  const launchers = usePluginEnabled('launchers')
   return (
     <>
       {focus && <FocusEngine />}
       {routines && <RoutinesEngine />}
       {telegram && <TelegramEngine />}
+      {launchers && <LaunchersEngine />}
     </>
   )
 }

@@ -42,3 +42,20 @@ y el Test de entrada (#100). Se construye por capas (#113-#119).
 - **Con la app cerrada no se guarda ningún evento.** `day.firstOpen` sale al abrir. Los lanzadores
   de hora pueden recuperarse al abrir (#118). `day.closed` no se recupera. El service worker no
   ejecuta lanzadores.
+
+## Lanzadores (`src/features/launchers/`, Dexie v15)
+
+- Tablas `launchers` (regla: disparador, condiciones, acciones; borrado suave; los integrados solo se
+  desactivan) y `launcherRuns` (registro; se purga a los 30 días).
+- `runner.ts` (puro): `matchLaunchers(evento, lanzadores, contexto)` devuelve qué se dispara y el
+  motivo de cada salto: días, franja, una vez al día, «si no se ha hecho», plugin desactivado,
+  bienvenida sin terminar, bucle, cadena demasiado larga (4) y tope diario (20).
+- Los lanzadores de hora son siempre «una vez al día». Con `catchUpMin`, el primer tick tras abrir la
+  app dentro de ese margen los dispara (recuperación sin guardar eventos).
+- `actions.ts`: cada acción se registra con `registerLauncherAction(tipo, ejecutor, plugin?)`. Una sin
+  ejecutor falla con motivo legible (`virtualization.start` hasta #97).
+- `engine.ts`: escucha el bus en fila, ejecuta y apunta `ok`/`error`; los saltos se apuntan salvo los
+  de `clock.tick`. Lo monta `PluginEngines` con el plugin Lanzadores activo.
+- Límite conocido: la cadena de causas solo pasa de un lanzador al evento que emite él mismo de forma
+  síncrona. Un evento que llega después por acción del usuario (terminar la rutina que abrió un
+  lanzador) empieza cadena nueva, que es lo que se quiere.

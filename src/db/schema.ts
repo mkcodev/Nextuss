@@ -9,6 +9,8 @@ import type {
   Habit,
   HabitLog,
   InsightFeedbackRecord,
+  Launcher,
+  LauncherRun,
   NotificationLogRecord,
   Progress,
   Project,
@@ -58,6 +60,8 @@ export class NextussDB extends Dexie {
   projectTemplates!: EntityTable<ProjectTemplate, 'id'>
   routines!: EntityTable<Routine, 'id'>
   routineRuns!: EntityTable<RoutineRun, 'id'>
+  launchers!: EntityTable<Launcher, 'id'>
+  launcherRuns!: EntityTable<LauncherRun, 'id'>
 
   constructor() {
     // Nombre real de la base de datos IndexedDB — deliberadamente NO sigue el rebranding a
@@ -192,6 +196,14 @@ export class NextussDB extends Dexie {
     this.version(14).stores({
       routines: '++id, deletedAt, sortKey',
       routineRuns: '++id, routineId, date, [routineId+date]',
+    })
+
+    // Lanzadores (#118): tablas nuevas, sin datos previos que migrar, sin `.upgrade()`. `launchers`
+    // nace con borrado suave + orden manual; `launcherRuns` es el registro de ejecuciones (se purga a
+    // los 30 días en `runDailyMaintenance`).
+    this.version(15).stores({
+      launchers: '++id, deletedAt, sortKey, recipeKey, builtinKey',
+      launcherRuns: '++id, launcherId, date, firedAt, [launcherId+date]',
     })
   }
 }
