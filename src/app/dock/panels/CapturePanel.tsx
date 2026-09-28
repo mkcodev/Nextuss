@@ -43,15 +43,11 @@ export function CapturePanel() {
     }
   }
 
-  const toTask = async (note: QuickNote) => {
-    openTaskCreate({ title: note.text })
-    await markNoteTriaged(note.id!)
-  }
+  const triage = (note: QuickNote) => () => void markNoteTriaged(note.id!)
 
-  const toHabit = async (note: QuickNote) => {
-    openHabitCreate(note.text)
-    await markNoteTriaged(note.id!)
-  }
+  const toTask = (note: QuickNote) => openTaskCreate({ title: note.text }, triage(note))
+
+  const toHabit = (note: QuickNote) => openHabitCreate(note.text, triage(note))
 
   const toTaskWithAi = async (note: QuickNote) => {
     setParsingId(note.id!)
@@ -67,8 +63,7 @@ export function CapturePanel() {
         scheduledDate: parsed.scheduledDate,
         energy: parsed.energy,
         estimateMin: parsed.estimateMin,
-      })
-      await markNoteTriaged(note.id!)
+      }, triage(note))
     } catch (err) {
       push({ title: 'No se pudo interpretar la nota', description: err instanceof AiError ? err.message : undefined })
     } finally {
