@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { calculateVirtualizationStreak } from './streak'
-import type { VirtualizationDay } from '../../db/types'
+import { calculateVirtualizationStreak } from './virtualizationStreak'
+import type { VirtualizationDay } from '../db/types'
 
 const day = (date: string, over: Partial<VirtualizationDay> = {}): VirtualizationDay => ({
   date,

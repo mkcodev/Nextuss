@@ -91,6 +91,35 @@ class ToneAudio {
     osc.stop(now + 1.4)
   }
 
+  /** Barrido descendente para el destello de materialización de la Virtualización. */
+  whoosh(): void {
+    const ctx = this.ensure()
+    if (!ctx || !this.master) return
+    const now = ctx.currentTime
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = 'sawtooth'
+    osc.frequency.setValueAtTime(900, now)
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.9)
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.linearRampToValueAtTime(0.16, now + 0.05)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.9)
+    osc.connect(gain)
+    gain.connect(this.master)
+    osc.start(now)
+    osc.stop(now + 0.9)
+  }
+
+  /** Acorde corto (tónica + quinta + octava) al completar el ritual. */
+  chord(): void {
+    const ctx = this.ensure()
+    if (!ctx) return
+    const now = ctx.currentTime
+    this.tone(220, now, 1.1, 'sine', 0.3)
+    this.tone(330, now, 1.1, 'sine', 0.22)
+    this.tone(440, now, 1.1, 'sine', 0.18)
+  }
+
   close(): void {
     this.hum(false)
     void this.ctx?.close()

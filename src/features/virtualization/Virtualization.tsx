@@ -11,8 +11,9 @@ import { Flame, Trophy, Gem, Star, Clock3, ListTodo, HeartPulse, type LucideIcon
 import { getOrCreateSettings } from '../../db/repositories/settings'
 import { getOverdueTasks, getTasksForDate } from '../../db/repositories/tasks'
 import { getCheckInForDate } from '../../db/repositories/checkins'
-import { getVirtualizationDays, upsertVirtualizationDay } from '../../db/repositories/virtualization'
+import { completeVirtualization, getVirtualizationDays, upsertVirtualizationDay, type CompleteVirtualizationResult } from '../../db/repositories/virtualization'
 import type { Settings } from '../../db/types'
+import { emit } from '../../lib/events/bus'
 import { todayKey, formatShortDate, subDaysKey } from '../../lib/dates'
 import { Button } from '../../design/primitives'
 import { useStage } from '../../app/stage/stageStore'
@@ -23,7 +24,7 @@ import { BREATH_PATTERNS, breathPatternDuration, getBreathState } from './engine
 import { PHASE_LABELS, type PhaseId } from './engine/phases'
 import { getSyncPercent } from './engine/syncMeter'
 import { useVirtualizationStore } from './engine/useVirtualizationStore'
-import { calculateVirtualizationStreak } from './streak'
+import { calculateVirtualizationStreak } from '../../lib/virtualizationStreak'
 import { THEMES } from './themes'
 import { VirtualizationThemeSwitch } from './VirtualizationThemeSwitch'
 import { virtualizationTone } from './audio/virtualizationTone'
@@ -100,10 +101,19 @@ export function Virtualization() {
   }, [active])
 
   useEffect(() => {
+    virtualizationTone.setMuted(settings?.virtualizationSoundEnabled === false)
+  }, [settings?.virtualizationSoundEnabled])
+
+  useEffect(() => {
     if (!visible) return
     virtualizationTone.hum(phase === 'cabina')
     if (phase === 'transmision') virtualizationTone.sweep()
     if (phase === 'escaneo') virtualizationTone.beep(660)
+    if (phase === 'virtualizacion') {
+      virtualizationTone.whoosh()
+      const t = setTimeout(() => virtualizationTone.chord(), 300)
+      return () => clearTimeout(t)
+    }
   }, [visible, phase])
 
   // Transmisión: al terminar de "escribirse" el terminal, pasa sola a Escaneo tras una pausa breve.
@@ -132,6 +142,40 @@ export function Virtualization() {
     void upsertVirtualizationDay(todayKey(), { meditationSec: Math.round(phaseElapsedSec), syncPercent: pct, phaseReached: 'presencia' })
   }, [phase, phaseElapsedSec, breathPattern, meditationDurationSec, syncPercent, setSyncPercent])
 
+  // Virtualización: cierra el día del ritual (XP con bonus de racha, logros) en cuanto se entra en la
+  // fase final, mientras corre la animación de ensamblado — el evento se emite ya para que la receta
+  // «Mañana consciente» pueda arrancar la rutina sin esperar a que el usuario pulse "Continuar".
+  const [completion, setCompletion] = useState<CompleteVirtualizationResult | null>(null)
+  const completionStartedRef = useRef(false)
+  useEffect(() => {
+    if (phase !== 'virtualizacion') {
+      completionStartedRef.current = false
+      setCompletion(null)
+      return
+    }
+    if (completionStartedRef.current) return
+    completionStartedRef.current = true
+    void (async () => {
+      const result = await completeVirtualization(todayKey(), false)
+      setCompletion(result)
+      emit('virtualization.completed', { date: todayKey(), skipped: false })
+    })()
+  }, [phase])
+
+  async function skipToday(): Promise<void> {
+    await completeVirtualization(todayKey(), true)
+    emit('virtualization.completed', { date: todayKey(), skipped: true })
+    close()
+  }
+
+  // Al terminar de verdad (no al saltar), la interfaz real se "ensambla" con un fundido en vez de
+  // desaparecer de golpe — el equivalente simplificado a las capas del prototipo (`assemblyEl`).
+  const [closing, setClosing] = useState(false)
+  function finishAndClose(): void {
+    setClosing(true)
+    setTimeout(() => close(), 650)
+  }
+
   useEffect(() => {
     if (!visible) return
     function onKey(e: KeyboardEvent) {
@@ -151,7 +195,10 @@ export function Virtualization() {
   const { Scene, palette, bloom } = THEMES[theme]
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: palette.bg }}>
+    <div
+      className="fixed inset-0 z-50 flex flex-col transition-opacity duration-[650ms] ease-in"
+      style={{ background: palette.bg, opacity: closing ? 0 : 1 }}
+    >
       <div className="absolute inset-0">
         <Canvas camera={{ position: [0, 0, 6], fov: 50 }} dpr={[1, 1.5]}>
           <color attach="background" args={[palette.bg]} />
@@ -170,7 +217,7 @@ export function Virtualization() {
           {PHASE_LABELS[phase]}
         </p>
 
-        {phase === 'cabina' && <CabinaOverlay settings={settings} onStart={() => setPhase('transmision')} onSkip={() => close()} accent={palette.accent} />}
+        {phase === 'cabina' && <CabinaOverlay settings={settings} onStart={() => setPhase('transmision')} onSkip={() => void skipToday()} accent={palette.accent} />}
         {phase === 'transmision' && <TerminalOverlay lines={terminalLines} accent={palette.accent} />}
         {phase === 'escaneo' && <EscaneoOverlay onContinue={() => setPhase('presencia')} accent={palette.accent} />}
         {phase === 'presencia' && (
@@ -182,7 +229,7 @@ export function Virtualization() {
             onEnter={() => setPhase('virtualizacion')}
           />
         )}
-        {phase === 'virtualizacion' && <VirtualizacionOverlay accent={palette.accent} onContinue={() => close()} />}
+        {phase === 'virtualizacion' && <VirtualizacionOverlay accent={palette.accent} completion={completion} onContinue={finishAndClose} />}
       </div>
     </div>
   )
@@ -323,7 +370,15 @@ function PresenciaOverlay({
   )
 }
 
-function VirtualizacionOverlay({ accent, onContinue }: { accent: string; onContinue: () => void }) {
+function VirtualizacionOverlay({
+  accent,
+  completion,
+  onContinue,
+}: {
+  accent: string
+  completion: CompleteVirtualizationResult | null
+  onContinue: () => void
+}) {
   const [ready, setReady] = useState(false)
   useEffect(() => {
     const t = setTimeout(() => setReady(true), 1400)
@@ -332,6 +387,11 @@ function VirtualizacionOverlay({ accent, onContinue }: { accent: string; onConti
   return (
     <div className="flex flex-col items-center gap-4">
       <p className="text-sm opacity-70">{ready ? 'Virtualización completa.' : 'Materializando…'}</p>
+      {ready && completion && (
+        <p className="text-lg font-semibold tabular-nums" style={{ color: accent }}>
+          +{completion.xpAwarded} XP · Racha {completion.streak} {completion.streak === 1 ? 'día' : 'días'}
+        </p>
+      )}
       {ready && (
         <Button size="md" onClick={onContinue} style={{ background: accent, color: '#04121a' }}>
           Continuar

@@ -423,6 +423,15 @@ export interface Settings {
   meditationPattern?: MeditationPattern
   /** Duración objetivo de la fase Presencia, en segundos (1-5 min). Sin definir = 120 (2 min). */
   meditationDurationSec?: number
+  /** Activa el ritual de Virtualización al abrir el día. Sin definir = activado. */
+  virtualizationEnabled?: boolean
+  /** Hora (0-23) a partir de la cual ya no tiene sentido proponer el ritual matutino. Sin definir = 12. */
+  virtualizationWindowEndHour?: number
+  /** Rutina que sigue a la Virtualización — la que instala `installMorningRecipe`. `null`/sin definir
+   * = aún no configurada (no se siembra ninguna receta). */
+  virtualizationRoutineId?: number | null
+  /** Sonido del ritual (zumbido, barrido, destello final). Sin definir = activado. */
+  virtualizationSoundEnabled?: boolean
 }
 
 export interface DemoSeedRecord {

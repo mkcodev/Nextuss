@@ -16,6 +16,18 @@ export function xpForTaskCompletion(priority?: number): number {
   return XP_PER_TASK + (priority ? (TASK_PRIORITY_XP_BONUS[priority] ?? 0) : 0)
 }
 
+/** Virtualización (#97): ritual estrella de la app, XP base más generoso que un hábito suelto, con un
+ * bonus que crece con la racha (+2 %/día) hasta un tope del +50 % — "con esteroides", como pidió el
+ * usuario, sin volverse infinito. */
+export const VIRTUALIZATION_XP_BASE = 20
+export const VIRTUALIZATION_XP_STREAK_BONUS_STEP = 0.02
+export const VIRTUALIZATION_XP_STREAK_BONUS_CAP = 0.5
+
+export function xpForVirtualization(streakDays: number): number {
+  const bonus = Math.min(Math.max(0, streakDays) * VIRTUALIZATION_XP_STREAK_BONUS_STEP, VIRTUALIZATION_XP_STREAK_BONUS_CAP)
+  return Math.round(VIRTUALIZATION_XP_BASE * (1 + bonus))
+}
+
 export function xpForLevel(level: number): number {
   return 25 * (level - 1) * level
 }

@@ -25,6 +25,7 @@ import { NotificationsSection } from './NotificationsSection'
 import { PomodoroSection } from './PomodoroSection'
 import { AiSection } from './AiSection'
 import { TelegramSection } from './TelegramSection'
+import { VirtualizationSection } from './VirtualizationSection'
 
 const THEME_OPTIONS: { value: ThemePreference; label: string; icon: typeof Sun }[] = [
   { value: 'system', label: 'Sistema', icon: Monitor },
@@ -141,6 +142,8 @@ export function SettingsPage() {
       <AiSection />
 
       <TelegramSection />
+
+      <VirtualizationSection />
 
       <PomodoroSection />
 
