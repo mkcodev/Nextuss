@@ -357,6 +357,8 @@ export interface Settings {
   notifyPomodoroEnd?: boolean
   /** Rutinas (Fase 28): aviso a su hora y al cambiar de paso en el reproductor. */
   notifyRoutines?: boolean
+  /** Transiciones (Fase 28b): 5 min antes de un bloque y al terminarlo. */
+  notifyTransitions?: boolean
   /** Sonido al cambiar de paso en el reproductor de rutinas. Sin definir = activado. */
   routineSoundEnabled?: boolean
   /** Vista del reproductor: un paso cada vez o línea de tiempo con horas. Sin definir = 'step'. */

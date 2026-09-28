@@ -8,7 +8,9 @@ import {
   pomodoroEndNotification,
   routineStartNotifications,
   routineStepNotification,
+  taskEndNotifications,
   taskStartNotifications,
+  taskUpcomingNotifications,
   weeklyReviewNudgeNotifications,
   zombieTaskNotifications,
 } from './rules'
@@ -257,5 +259,48 @@ describe('routineStepNotification', () => {
     const end = routineStepNotification({ settings: settings(), runKey: 99, stepIndex: 2, routineName: 'Mañana', nextStep: null })
     expect(end?.key).toBe('routine-step:99:end')
     expect(routineStepNotification({ settings: settings({ notifyRoutines: false }), runKey: 1, stepIndex: 0, routineName: 'x', nextStep: null })).toBeNull()
+  })
+})
+
+describe('taskUpcomingNotifications', () => {
+  const at = (h: number, m: number) => new Date(2026, 8, 28, h, m)
+  const block = task({ id: 5, scheduledDate: '2026-09-28', scheduledStart: '10:00', scheduledEnd: '11:00' })
+
+  it('avisa 5 min antes de un bloque pendiente', () => {
+    const [n] = taskUpcomingNotifications({ now: at(9, 55), settings: settings(), tasksToday: [block] })
+    expect(n).toMatchObject({ key: 'task-soon:5:2026-09-28', title: 'En 5 min: Escribir informe', body: 'De 10:00 a 11:00' })
+  })
+
+  it('ni a otra hora, ni si está hecha, ni con el aviso apagado', () => {
+    expect(taskUpcomingNotifications({ now: at(9, 54), settings: settings(), tasksToday: [block] })).toEqual([])
+    expect(taskUpcomingNotifications({ now: at(9, 55), settings: settings(), tasksToday: [{ ...block, status: 'done' }] })).toEqual([])
+    expect(taskUpcomingNotifications({ now: at(9, 55), settings: settings({ notifyTransitions: false }), tasksToday: [block] })).toEqual([])
+  })
+})
+
+describe('taskEndNotifications', () => {
+  const at = (h: number, m: number) => new Date(2026, 8, 28, h, m)
+  const a = task({ id: 1, title: 'Informe', scheduledDate: '2026-09-28', scheduledStart: '10:00', scheduledEnd: '11:00' })
+  const b = task({ id: 2, title: 'Correo', scheduledDate: '2026-09-28', scheduledStart: '11:30', scheduledEnd: '12:00' })
+
+  it('al acabar el hueco avisa y dice qué viene', () => {
+    const [n] = taskEndNotifications({ now: at(11, 0), settings: settings(), tasksToday: [a, b] })
+    expect(n).toMatchObject({ key: 'task-end:1:2026-09-28', title: 'Se acabó el tiempo de: Informe', body: 'Después: Correo a las 11:30' })
+  })
+
+  it('sin nada después, propone cerrarla o moverla', () => {
+    const [n] = taskEndNotifications({ now: at(12, 0), settings: settings(), tasksToday: [a, b] })
+    expect(n.body).toBe('¿La das por hecha o la mueves?')
+  })
+
+  it('no avisa si ya está hecha', () => {
+    expect(taskEndNotifications({ now: at(11, 0), settings: settings(), tasksToday: [{ ...a, status: 'done' }, b] })).toEqual([])
+  })
+
+  it('si otra empieza justo entonces, el aviso de inicio ya cubre el cambio', () => {
+    const c = task({ id: 3, title: 'Llamada', scheduledDate: '2026-09-28', scheduledStart: '11:00', scheduledEnd: '11:15' })
+    expect(taskEndNotifications({ now: at(11, 0), settings: settings(), tasksToday: [a, c] })).toEqual([])
+    const [n] = taskEndNotifications({ now: at(11, 0), settings: settings({ notifyTaskStart: false }), tasksToday: [a, c] })
+    expect(n.body).toBe('Después: Llamada a las 11:00')
   })
 })

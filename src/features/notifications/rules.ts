@@ -74,6 +74,57 @@ export function taskStartNotifications(input: {
     }))
 }
 
+/** Minutos antes de un bloque en los que llega el aviso de "prepárate". */
+export const UPCOMING_LEAD_MIN = 5
+
+/** Transición (Fase 28b): aviso 5 min antes de que empiece una tarea programada, para cerrar lo que
+ * se esté haciendo sin que el cambio pille por sorpresa. */
+export function taskUpcomingNotifications(input: {
+  now: Date
+  settings: Settings
+  tasksToday: Task[]
+}): PendingNotification[] {
+  const { now, settings, tasksToday } = input
+  if (settings.notificationsEnabled === false || settings.notifyTransitions === false) return []
+  const nowMin = now.getHours() * 60 + now.getMinutes()
+  const today = dateKey(now)
+  return tasksToday
+    .filter((t) => t.status !== 'done' && t.scheduledStart && timeToMinutes(t.scheduledStart) - nowMin === UPCOMING_LEAD_MIN)
+    .map((t) => ({
+      key: `task-soon:${t.id}:${today}`,
+      title: `En ${UPCOMING_LEAD_MIN} min: ${t.title}`,
+      body: t.scheduledEnd ? `De ${t.scheduledStart} a ${t.scheduledEnd}` : `A las ${t.scheduledStart}`,
+      url: '/',
+    }))
+}
+
+/** Transición (Fase 28b): al acabar el hueco de una tarea que sigue sin hacer, avisa y dice qué viene.
+ * Si otra tarea empieza justo entonces y su aviso de inicio está activo, ese aviso ya cubre el cambio. */
+export function taskEndNotifications(input: {
+  now: Date
+  settings: Settings
+  tasksToday: Task[]
+}): PendingNotification[] {
+  const { now, settings, tasksToday } = input
+  if (settings.notificationsEnabled === false || settings.notifyTransitions === false) return []
+  const time = hhmm(now)
+  const today = dateKey(now)
+  const pending = tasksToday.filter((t) => t.status !== 'done' && t.scheduledStart)
+  const startsNow = pending.some((t) => t.scheduledStart === time)
+  if (startsNow && settings.notifyTaskStart !== false) return []
+  const next = pending
+    .filter((t) => timeToMinutes(t.scheduledStart!) >= timeToMinutes(time))
+    .sort((a, b) => timeToMinutes(a.scheduledStart!) - timeToMinutes(b.scheduledStart!))[0]
+  return pending
+    .filter((t) => t.scheduledEnd === time)
+    .map((t) => ({
+      key: `task-end:${t.id}:${today}`,
+      title: `Se acabó el tiempo de: ${t.title}`,
+      body: next ? `Después: ${next.title} a las ${next.scheduledStart}` : '¿La das por hecha o la mueves?',
+      url: '/',
+    }))
+}
+
 export function morningSummaryNotifications(input: {
   now: Date
   settings: Settings
