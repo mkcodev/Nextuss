@@ -1,5 +1,10 @@
 # Changelog
 
+## Fase 28b.3 — Indicador de tiempo en la barra superior (#93)
+- «Tiempo de hoy» en miniatura junto a los de foco y rutina, con el estilo elegido en Hoy: «Llamada en
+  25 min» (regla), anillo + «6 h 02» (anillo) o «11 libres» (bloques). Solo durante la jornada y fuera de
+  Hoy; clic lleva a Hoy. Etiqueta accesible con el resumen completo.
+
 ## Fase 28b.2 — Tiempo de hoy (#92)
 - Tarjeta «Tiempo de hoy» en Hoy (encima de «Ahora»): cuánto queda de la jornada, cuánto de eso está
   libre y cuánto falta para el siguiente bloque. Tres estilos intercambiables, guardados en Ajustes
