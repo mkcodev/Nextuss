@@ -41,7 +41,8 @@ export function InsightsPanel() {
           <button
             onClick={() => dismiss(insight.key)}
             title="Descartar"
-            className="mt-0.5 shrink-0 rounded p-0.5 text-text-faint opacity-0 transition-opacity hover:text-text group-hover:opacity-100"
+            aria-label={`Descartar: ${insight.title}`}
+            className="mt-0.5 shrink-0 rounded p-0.5 text-text-faint transition-opacity hover:text-text [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-visible:opacity-100"
           >
             <X size={12} strokeWidth={1.75} />
           </button>

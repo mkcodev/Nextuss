@@ -224,7 +224,8 @@ export function TaskBlock({
             void startFocusOnTask(task.id!)
           }}
           title="Empezar foco"
-          className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-bg/80 text-text-faint opacity-0 transition-opacity hover:text-accent group-hover:opacity-100"
+          aria-label={`Empezar foco: ${task.title}`}
+          className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-bg/80 text-text-faint transition-opacity hover:text-accent [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-visible:opacity-100"
         >
           <Play size={9} strokeWidth={2} fill="currentColor" />
         </button>

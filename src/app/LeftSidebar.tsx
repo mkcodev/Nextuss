@@ -19,6 +19,7 @@ export function LeftSidebar() {
           to={to}
           end={end}
           title={collapsed ? `${label} (g ${goKey})` : undefined}
+          aria-label={collapsed ? label : undefined}
           className={({ isActive }) =>
             cn(
               'flex h-8 items-center gap-2.5 rounded-sm px-2.5 text-sm font-medium transition-colors',
