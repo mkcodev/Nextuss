@@ -30,6 +30,11 @@ import {
   Sparkles,
   Star,
   Sun,
+  Sunrise,
+  Sunset,
+  BedDouble,
+  ShowerHead,
+  House,
   Target,
   Timer,
   Trophy,
@@ -54,6 +59,11 @@ export const ICON_REGISTRY = {
   bike: Bike,
   moon: Moon,
   sun: Sun,
+  sunrise: Sunrise,
+  sunset: Sunset,
+  bed: BedDouble,
+  shower: ShowerHead,
+  home: House,
   pill: Pill,
   salad: Salad,
   coffee: Coffee,
@@ -96,6 +106,11 @@ export const ICON_LABELS: Record<IconKey, string> = {
   bike: 'Bicicleta',
   moon: 'Luna',
   sun: 'Sol',
+  sunrise: 'Amanecer',
+  sunset: 'Atardecer',
+  bed: 'Cama',
+  shower: 'Ducha',
+  home: 'Casa',
   pill: 'Pastilla',
   salad: 'Ensalada',
   coffee: 'Café',
@@ -170,3 +185,22 @@ export const DEFAULT_PROJECT_ICON_KEY: IconKey = 'folder'
 export function resolveIcon(key: string): LucideIcon | null {
   return (ICON_REGISTRY as Record<string, LucideIcon>)[key] ?? null
 }
+
+export const ROUTINE_ICON_KEYS: IconKey[] = [
+  'sunrise',
+  'sunset',
+  'moon',
+  'sun',
+  'bed',
+  'shower',
+  'home',
+  'coffee',
+  'briefcase',
+  'dumbbell',
+  'brain',
+  'book',
+  'leaf',
+  'zap',
+]
+
+export const DEFAULT_ROUTINE_ICON_KEY: IconKey = 'sunrise'

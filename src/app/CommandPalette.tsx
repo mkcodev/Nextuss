@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Command } from 'cmdk'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { useNavigate } from 'react-router-dom'
 import {
   ClipboardCheck,
@@ -15,6 +16,7 @@ import {
   Moon,
   PanelLeft,
   PanelRight,
+  Play,
   Plus,
   Repeat,
   Search,
@@ -35,6 +37,9 @@ import { useTaskFormStore } from '../features/tasks/taskFormStore'
 import { useGoalFormStore } from '../features/planner/goalFormStore'
 import { useWeeklyReviewStore } from '../features/planner/weeklyReviewStore'
 import { useProjectFormStore } from '../features/projects/projectFormStore'
+import { useRoutineFormStore } from '../features/routines/routineFormStore'
+import { startRoutine } from '../features/routines/actions'
+import { listRoutines } from '../db/repositories/routines'
 import { useTemplatePickerStore } from '../features/templates/templatePickerStore'
 import { searchIndex, type SearchDoc } from '../features/search/searchIndex'
 import { NAV_ITEMS } from './navItems'
@@ -67,6 +72,8 @@ export function CommandPalette() {
   const openGoalEdit = useGoalFormStore((s) => s.openEdit)
   const openWeeklyReview = useWeeklyReviewStore((s) => s.openReview)
   const openProjectCreate = useProjectFormStore((s) => s.openCreate)
+  const openRoutineCreate = useRoutineFormStore((s) => s.openCreate)
+  const routines = useLiveQuery(() => listRoutines(), []) ?? []
   const openTemplatePicker = useTemplatePickerStore((s) => s.openFor)
 
   const [query, setQuery] = useState('')
@@ -186,6 +193,19 @@ export function CommandPalette() {
           >
             <FolderKanban size={15} strokeWidth={1.75} /> Crear proyecto
           </Command.Item>
+          <Command.Item onSelect={() => run(openRoutineCreate)} className={ITEM_CLASS}>
+            <Repeat size={15} strokeWidth={1.75} /> Crear rutina
+          </Command.Item>
+          {routines.map((r) => (
+            <Command.Item
+              key={`routine-${r.id}`}
+              value={`Empezar rutina ${r.name}`}
+              onSelect={() => run(() => void startRoutine(r))}
+              className={ITEM_CLASS}
+            >
+              <Play size={15} strokeWidth={1.75} /> Empezar rutina: {r.name}
+            </Command.Item>
+          ))}
           <Command.Item onSelect={() => run(() => openTemplatePicker('task'))} className={ITEM_CLASS}>
             <LayoutTemplate size={15} strokeWidth={1.75} /> Tarea desde plantilla
           </Command.Item>
