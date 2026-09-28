@@ -421,6 +421,8 @@ export interface Settings {
   virtualizationTheme?: VirtualizationTheme
   /** Patrón de respiración de la fase Presencia. Sin definir = 'box4444' (caja 4-4-4-4). */
   meditationPattern?: MeditationPattern
+  /** Duración objetivo de la fase Presencia, en segundos (1-5 min). Sin definir = 120 (2 min). */
+  meditationDurationSec?: number
 }
 
 export interface DemoSeedRecord {
