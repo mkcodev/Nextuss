@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from './schema'
 import { listTrash, purgeExpiredTrash, purgeTrashEntry, restoreTrashEntry, trashRows } from './trash'
 import { useUndoStore } from '../lib/undoStore'
-import { createTask, getTask, getTasksForDate, trashTask } from './repositories/tasks'
+import { createTask, discardNewTask, getTask, getTasksForDate, trashTask } from './repositories/tasks'
 import { createHabit, listHabits } from './repositories/habits'
-import { createGoal, listGoalsForPeriod, trashGoal } from './repositories/goals'
+import { createGoal, linkTaskToGoal, listGoalsForPeriod, trashGoal } from './repositories/goals'
 
 beforeEach(async () => {
   await db.transaction('rw', db.tables, async () => {
@@ -130,5 +130,20 @@ describe('restore / purge', () => {
     expect(await db.tasks.get(oldId)).toBeUndefined()
     expect(await db.tasks.get(recentId)).not.toBeUndefined()
     expect((await listTrash()).map((e) => e.label)).toEqual(['recent'])
+  })
+})
+
+describe('discardNewTask', () => {
+  it('borra la tarea recién creada y su enlace al objetivo, sin papelera ni entrada de deshacer', async () => {
+    const goalId = await createGoal({ period: 'week', periodKey: '2026-W40', title: 'g' })
+    const id = await createTask({ title: 'Recién creada', scheduledDate: '2026-09-28' })
+    await linkTaskToGoal(goalId, id)
+
+    await discardNewTask(id)
+
+    expect(await db.tasks.get(id)).toBeUndefined()
+    expect((await db.goals.get(goalId))?.taskIds).toEqual([])
+    expect(await listTrash()).toEqual([])
+    expect(useUndoStore.getState().past).toEqual([])
   })
 })
