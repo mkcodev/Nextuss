@@ -22,10 +22,11 @@ import { FocusIndicator } from '../features/focus/FocusIndicator'
 import { RoutineIndicator } from '../features/routines/RoutineIndicator'
 import { DayTimeIndicator } from '../features/today/DayTimeIndicator'
 import { initials } from '../lib/text'
-import { NAV_ITEMS } from './navItems'
+import { NAV_ITEMS, useNavItems } from './navItems'
+import { usePluginEnabled } from '../features/plugins/pluginsStore'
 import { Avatar, Kbd, Menu, MenuItem, MenuLabel } from '../design/primitives'
 
-const AVATAR_NAV = NAV_ITEMS.filter((n) => n.to === '/estadisticas' || n.to === '/proyectos' || n.to === '/rutinas')
+const AVATAR_NAV_ROUTES = new Set(['/estadisticas', '/proyectos', '/rutinas'])
 
 const BREADCRUMB: Record<string, string> = Object.fromEntries(
   NAV_ITEMS.map((n) => [n.to, n.label]),
@@ -35,6 +36,7 @@ function AvatarMenu() {
   const settings = useLiveQuery(() => db.settings.get(1), [])
   const { openHelp } = useOverlayStore()
   const navigate = useNavigate()
+  const avatarNav = useNavItems().filter((n) => AVATAR_NAV_ROUTES.has(n.to))
 
   const name = settings?.displayName?.trim()
 
@@ -51,7 +53,7 @@ function AvatarMenu() {
     >
       {name && <MenuLabel>{name}</MenuLabel>}
       {/* Destinos que no caben en la barra móvil: aquí siguen a un toque. */}
-      {AVATAR_NAV.map(({ to, label, icon: NavIcon }) => (
+      {avatarNav.map(({ to, label, icon: NavIcon }) => (
         <MenuItem key={to} onSelect={() => navigate(to)} icon={<NavIcon size={15} strokeWidth={1.75} />}>
           {label}
         </MenuItem>
@@ -73,6 +75,10 @@ export function Navbar() {
   const location = useLocation()
   const leftCollapsed = useUIStore((s) => s.leftCollapsed)
   const toggleLeft = useUIStore((s) => s.toggleLeft)
+  const dayTimeOn = usePluginEnabled('dayTime')
+  const routinesOn = usePluginEnabled('routines')
+  const focusOn = usePluginEnabled('focus')
+  const gamificationOn = usePluginEnabled('gamification')
   const rightOpen = useUIStore((s) => s.rightOpen)
   const toggleRight = useUIStore((s) => s.toggleRight)
   const openPalette = useOverlayStore((s) => s.openPalette)
@@ -133,9 +139,9 @@ export function Navbar() {
           </div>
         )}
 
-        <DayTimeIndicator />
-        <RoutineIndicator />
-        <FocusIndicator />
+        {dayTimeOn && <DayTimeIndicator />}
+        {routinesOn && <RoutineIndicator />}
+        {focusOn && <FocusIndicator />}
 
         <button
           type="button"
@@ -149,12 +155,14 @@ export function Navbar() {
           <Kbd className="hidden sm:inline-flex">n</Kbd>
         </button>
 
-        <div
-          className="hidden items-center gap-1 rounded-sm border border-border px-2 py-1.5 text-text-muted sm:flex"
-          title="Tu nivel"
-        >
-          <span className="text-xs font-semibold tabular-nums text-accent">Nv. {level}</span>
-        </div>
+        {gamificationOn && (
+          <div
+            className="hidden items-center gap-1 rounded-sm border border-border px-2 py-1.5 text-text-muted sm:flex"
+            title="Tu nivel"
+          >
+            <span className="text-xs font-semibold tabular-nums text-accent">Nv. {level}</span>
+          </div>
+        )}
 
         <AvatarMenu />
 

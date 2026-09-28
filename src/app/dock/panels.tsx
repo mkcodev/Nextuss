@@ -1,5 +1,6 @@
 import { Activity, Gauge, NotebookPen, PanelTop, Sparkles, Timer, type LucideIcon } from 'lucide-react'
 import type { ComponentType } from 'react'
+import type { PluginId } from '../../features/plugins/types'
 import { ProgressPanel } from './panels/ProgressPanel'
 import { ActivityPanel } from './panels/ActivityPanel'
 import { CapturePanel } from './panels/CapturePanel'
@@ -14,17 +15,24 @@ export interface PanelDef {
   label: string
   icon: LucideIcon
   component: ComponentType
+  pluginId?: PluginId // sin él, el panel se ve siempre
 }
 
 export const PANEL_REGISTRY: Record<PanelKey, PanelDef> = {
-  progress: { key: 'progress', label: 'Progreso', icon: Gauge, component: ProgressPanel },
+  progress: { key: 'progress', label: 'Progreso', icon: Gauge, component: ProgressPanel, pluginId: 'gamification' },
   context: { key: 'context', label: 'Contextual', icon: PanelTop, component: ContextPanel },
   activity: { key: 'activity', label: 'Actividad', icon: Activity, component: ActivityPanel },
   capture: { key: 'capture', label: 'Captura', icon: NotebookPen, component: CapturePanel },
-  focus: { key: 'focus', label: 'Enfoque', icon: Timer, component: FocusPanel },
-  insights: { key: 'insights', label: 'Insights', icon: Sparkles, component: InsightsPanel },
+  focus: { key: 'focus', label: 'Enfoque', icon: Timer, component: FocusPanel, pluginId: 'focus' },
+  insights: { key: 'insights', label: 'Insights', icon: Sparkles, component: InsightsPanel, pluginId: 'stats' },
 }
 
 export const PANEL_LIST: PanelDef[] = Object.values(PANEL_REGISTRY)
 
 export const DEFAULT_PANEL_ORDER: PanelKey[] = PANEL_LIST.map((p) => p.key)
+
+/** Paneles de plugins activos. El orden guardado en `uiStore` conserva los ocultos para cuando vuelvan. */
+export function isPanelVisible(key: PanelKey, enabled: ReadonlySet<PluginId>): boolean {
+  const pluginId = PANEL_REGISTRY[key].pluginId
+  return !pluginId || enabled.has(pluginId)
+}

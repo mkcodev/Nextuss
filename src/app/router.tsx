@@ -3,6 +3,7 @@ import { AppShell } from './AppShell'
 import { RouteErrorBoundary } from './RouteErrorBoundary'
 import { TodayView } from '../features/today/TodayView'
 import { lazyNamed } from './lazy'
+import { PluginGate } from '../features/plugins/PluginGate'
 
 // Solo "Hoy" (la ruta de entrada) va en el bundle inicial; el resto se descarga al visitarla. Recharts
 // vive entero detrás de `/estadisticas`.
@@ -22,9 +23,9 @@ export const router = createBrowserRouter([
     children: [
       { path: '/', element: <TodayView /> },
       { path: '/planificacion', element: <PlanningPage /> },
-      { path: '/habitos', element: <HabitsPage /> },
-      { path: '/rutinas', element: <RoutinesPage /> },
-      { path: '/estadisticas', element: <StatsPage /> },
+      { path: '/habitos', element: <PluginGate id="habits"><HabitsPage /></PluginGate> },
+      { path: '/rutinas', element: <PluginGate id="routines"><RoutinesPage /></PluginGate> },
+      { path: '/estadisticas', element: <PluginGate id="stats"><StatsPage /></PluginGate> },
       { path: '/proyectos', element: <ProjectsPage /> },
       { path: '/proyectos/:id', element: <ProjectDetailPage /> },
       { path: '/tareas', element: <TasksPage /> },

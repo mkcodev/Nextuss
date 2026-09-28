@@ -32,6 +32,8 @@ import { CheckInCard } from './CheckInCard'
 import { NowBlock } from './NowBlock'
 import { RoutineNowCard } from '../routines/RoutineNowCard'
 import { DayTimeCard } from './DayTimeCard'
+import { IfPlugin } from '../plugins/PluginGate'
+import { usePluginEnabled } from '../plugins/pluginsStore'
 import { db } from '../../db/schema'
 import { shouldOpenDayStart, shouldShowDayClose } from '../rituals/gates'
 import type { Task } from '../../db/types'
@@ -70,7 +72,8 @@ export function TodayView() {
   const lastWeekReview = useLiveQuery(() => getReview(lastWeekKey), [lastWeekKey])
   // Solo hay algo que revisar si la semana pasada tuvo objetivos (el primer día de uso, no).
   const lastWeekGoalCount = useLiveQuery(async () => (await listGoalsForPeriod('week', lastWeekKey)).length, [lastWeekKey])
-  const needsReview = isToday && lastWeekReview === null && (lastWeekGoalCount ?? 0) > 0
+  const weeklyReviewOn = usePluginEnabled('weeklyReview')
+  const needsReview = weeklyReviewOn && isToday && lastWeekReview === null && (lastWeekGoalCount ?? 0) > 0
   const openWeeklyReview = useWeeklyReviewStore((s) => s.openReview)
   const navigate = useNavigate()
   const { insights } = useInsights('30d')
@@ -251,8 +254,8 @@ export function TodayView() {
               </Button>
             </div>
           )}
-          {isToday && <DayTimeCard date={date} />}
-          {isToday && <RoutineNowCard date={date} />}
+          {isToday && <IfPlugin id="dayTime"><DayTimeCard date={date} /></IfPlugin>}
+          {isToday && <IfPlugin id="routines"><RoutineNowCard date={date} /></IfPlugin>}
           {isToday && <NowBlock date={date} />}
           {needsReview && (
             <Alert tone="info">
@@ -268,48 +271,52 @@ export function TodayView() {
 
         <div className="space-y-6 lg:order-2">
           <NorthStarCallout period="week" periodKey={currentWeekKey} />
-          <CheckInCard date={date} />
+          <IfPlugin id="checkin">
+            <CheckInCard date={date} />
+          </IfPlugin>
 
-          <div>
-            <div className="mb-1 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-text">{isToday ? 'Hábitos de hoy' : 'Hábitos ese día'}</h2>
-              <Button variant="ghost" size="sm" onClick={() => openCreate()}>
-                <Plus size={14} strokeWidth={2} /> Nuevo hábito
-              </Button>
-            </div>
-
-            {todaysEntries === undefined && (
-              <div className="space-y-2">
-                <Skeleton className="h-14 w-full" />
-                <Skeleton className="h-14 w-full" />
+          <IfPlugin id="habits">
+            <div>
+              <div className="mb-1 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-text">{isToday ? 'Hábitos de hoy' : 'Hábitos ese día'}</h2>
+                <Button variant="ghost" size="sm" onClick={() => openCreate()}>
+                  <Plus size={14} strokeWidth={2} /> Nuevo hábito
+                </Button>
               </div>
-            )}
 
-            {todaysEntries?.length === 0 && (
-              <EmptyState
-                icon={Target}
-                title="Sin hábitos programados para hoy"
-                description="Crea tu primer hábito y empieza a construir una racha."
-                action={
-                  <Button onClick={() => openCreate()} className="text-xs">
-                    <Plus size={13} strokeWidth={2} /> Crear hábito
-                  </Button>
-                }
-              />
-            )}
+              {todaysEntries === undefined && (
+                <div className="space-y-2">
+                  <Skeleton className="h-14 w-full" />
+                  <Skeleton className="h-14 w-full" />
+                </div>
+              )}
 
-            <div className="space-y-2">
-              {todaysEntries?.map((entry, i) => (
-                <HabitCard
-                  key={entry.habit.id}
-                  entry={entry}
-                  date={date}
-                  selected={i === selectedIndex}
-                  onEdit={() => openEdit(entry.habit)}
+              {todaysEntries?.length === 0 && (
+                <EmptyState
+                  icon={Target}
+                  title="Sin hábitos programados para hoy"
+                  description="Crea tu primer hábito y empieza a construir una racha."
+                  action={
+                    <Button onClick={() => openCreate()} className="text-xs">
+                      <Plus size={13} strokeWidth={2} /> Crear hábito
+                    </Button>
+                  }
                 />
-              ))}
+              )}
+
+              <div className="space-y-2">
+                {todaysEntries?.map((entry, i) => (
+                  <HabitCard
+                    key={entry.habit.id}
+                    entry={entry}
+                    date={date}
+                    selected={i === selectedIndex}
+                    onEdit={() => openEdit(entry.habit)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          </IfPlugin>
 
           <UnscheduledSection date={date} />
         </div>
