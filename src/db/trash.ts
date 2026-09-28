@@ -21,7 +21,7 @@ export async function trashRows(table: TrashableTable, ids: number[], label: str
 
   await db.table(table).where('id').anyOf(ids).modify({ deletedAt: now })
 
-  useUndoStore.getState().push({
+  const undoId = useUndoStore.getState().push({
     label,
     undo: async () => {
       await db.transaction('rw', db.table(table), db.trash, async () => {
@@ -40,10 +40,8 @@ export async function trashRows(table: TrashableTable, ids: number[], label: str
 
   useToastStore.getState().push({
     title: label,
-    description: 'Se movió a la papelera. Toca para deshacer.',
-    onClick: () => {
-      void useUndoStore.getState().undo()
-    },
+    description: 'Se movió a la papelera.',
+    action: { label: 'Deshacer', onClick: () => void useUndoStore.getState().undoEntry(undoId) },
   })
 }
 

@@ -7,9 +7,9 @@ export interface Toast {
   description?: string
   icon?: IconKey
   variant?: 'default' | 'celebrate' | 'success' | 'warning' | 'error'
-  /** Si se da, el toast se vuelve una acción: al hacer click se llama y luego se descarta. */
-  onClick?: () => void
-  /** No se auto-descarta a los 4s — para toasts con `onClick` que el usuario debe poder ver hasta que actúe. */
+  /** Botón de acción del toast (p. ej. «Deshacer»); al pulsarlo se ejecuta y el toast se descarta. */
+  action?: { label: string; onClick: () => void }
+  /** No se auto-descarta — para toasts cuya acción el usuario debe poder ver hasta que actúe. */
   sticky?: boolean
 }
 
@@ -27,9 +27,10 @@ export const useToastStore = create<ToastState>((set) => ({
     const id = nextId++
     set((state) => ({ toasts: [...state.toasts, { ...toast, id }] }))
     if (!toast.sticky) {
+      // Con acción dura más: da tiempo a leer y a pulsar «Deshacer».
       setTimeout(() => {
         set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }))
-      }, 4000)
+      }, toast.action ? 7000 : 4000)
     }
   },
   dismiss: (id) => set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),

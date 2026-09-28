@@ -13,10 +13,10 @@ export function useServiceWorker() {
   useEffect(() => {
     if (!needRefresh) return
     push({
-      title: 'Actualización disponible · Recargar',
+      title: 'Actualización disponible',
       icon: 'sparkles',
       sticky: true,
-      onClick: () => updateServiceWorker(true),
+      action: { label: 'Recargar', onClick: () => void updateServiceWorker(true) },
     })
   }, [needRefresh, updateServiceWorker, push])
 }

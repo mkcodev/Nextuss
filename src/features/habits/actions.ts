@@ -17,10 +17,10 @@ export async function logHabitWithFeedback(
     const streak = result.streak > 1 ? ` · racha de ${result.streak} días` : ''
     push({
       title: result.habitName,
-      description: `+${XP_PER_COMPLETION} XP${streak}. Toca para deshacer.`,
+      description: `+${XP_PER_COMPLETION} XP${streak}`,
       icon: 'flame',
       variant: 'success',
-      onClick: () => void setHabitLog(habitId, date, result.previousValue, note),
+      action: { label: 'Deshacer', onClick: () => void setHabitLog(habitId, date, result.previousValue, note) },
     })
   }
 

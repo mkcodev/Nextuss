@@ -11,10 +11,10 @@ export async function toggleTaskDoneWithFeedback(id: number, title: string) {
   if (result.done && result.xpDelta > 0) {
     push({
       title: '¡Tarea completada!',
-      description: `"${title}" — +${result.xpDelta} XP. Toca para deshacer.`,
+      description: `"${title}" — +${result.xpDelta} XP`,
       icon: 'zap',
       variant: 'celebrate',
-      onClick: () => void toggleTaskDone(id),
+      action: { label: 'Deshacer', onClick: () => void toggleTaskDone(id) },
     })
   }
 
