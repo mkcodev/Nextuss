@@ -1,5 +1,12 @@
 # Changelog
 
+## Fase 28b.1 — Avisos de transición (#91)
+- Aviso 5 min antes de que empiece una tarea programada y al acabarse su hueco si sigue sin hacer (dice
+  qué viene después). Si otra tarea empieza justo entonces, basta con su aviso de inicio.
+- Interruptor «Transiciones» en Ajustes › Notificaciones.
+- Arreglo: dos evaluaciones simultáneas del programador (dos pestañas, doble montaje en desarrollo) ya no
+  lanzan `ConstraintError` al apuntar el mismo aviso.
+
 ## Fase 28a — Rutinas (#88)
 - Dexie v14: tablas `routines` (pasos con duración, hora y días opcionales; papelera y orden manual) y
   `routineRuns` (pasadas, de donde sale «hecha hoy»). Sin `.upgrade()`: tablas nuevas.
