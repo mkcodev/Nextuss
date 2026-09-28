@@ -82,9 +82,9 @@ export function QuickAddDialog() {
     if (matchedGoal?.id) await linkTaskToGoal(matchedGoal.id, id)
     push({
       title: 'Tarea creada',
-      description: `${finalTitle.trim()} · ${formatDateChip(finalScheduledDate)}. Toca para deshacer.`,
+      description: `${finalTitle.trim()} · ${finalScheduledDate === todayKey() ? 'hoy' : formatDateChip(finalScheduledDate)}`,
       variant: 'success',
-      onClick: () => void trashTask(id),
+      action: { label: 'Deshacer', onClick: () => void trashTask(id) },
     })
     handleClose()
   }

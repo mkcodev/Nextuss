@@ -1,5 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useId, useRef, useState } from 'react'
+import { X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
@@ -15,6 +16,8 @@ interface DialogProps {
   /** Fuerza (o anula) el aviso de "cambios sin guardar". Si se omite, el diálogo lo deduce: en cuanto
    *  el usuario escribe en cualquier campo de dentro, cerrar con Esc o clic fuera pide confirmación. */
   dirty?: boolean
+  /** El título solo para lectores de pantalla, cuando el contenido ya trae su propio encabezado. */
+  hideTitle?: boolean
 }
 
 const SIZE_CLASSES: Record<DialogSize, string> = {
@@ -38,7 +41,7 @@ export function Dialog({ open, ...props }: DialogProps) {
   return <AnimatePresence>{open && <DialogPanel {...props} />}</AnimatePresence>
 }
 
-function DialogPanel({ onClose, title, children, size = 'sm', dirty }: Omit<DialogProps, 'open'>) {
+function DialogPanel({ onClose, title, children, size = 'sm', dirty, hideTitle }: Omit<DialogProps, 'open'>) {
   const panelRef = useRef<HTMLDivElement>(null)
   const isTopmost = useRef(false)
   const pointerDownOnBackdrop = useRef(false)
@@ -153,7 +156,7 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty }: Omit<Dial
         exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.98, y: 6 }}
         transition={{ duration: reduceMotion ? 0 : 0.15, ease: [0.25, 1, 0.5, 1] }}
       >
-        <h2 id={titleId} className="mb-4 text-base font-semibold text-balance text-text">
+        <h2 id={titleId} className={hideTitle ? 'sr-only' : 'mb-4 pr-8 text-base font-semibold text-balance text-text'}>
           {title}
         </h2>
         {children}
@@ -183,6 +186,15 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty }: Omit<Dial
             </button>
           </div>
         )}
+        {/* Último en el DOM: el foco inicial sigue yendo al primer campo, no a la X. */}
+        <button
+          type="button"
+          onClick={requestClose}
+          aria-label="Cerrar"
+          className="absolute top-5 right-5 rounded-sm p-1 text-text-faint transition-colors hover:bg-surface-hover hover:text-text"
+        >
+          <X size={16} strokeWidth={1.75} />
+        </button>
       </motion.div>
     </motion.div>
   )

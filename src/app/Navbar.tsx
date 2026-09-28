@@ -23,6 +23,8 @@ import { initials } from '../lib/text'
 import { NAV_ITEMS } from './navItems'
 import { Avatar, Kbd, Menu, MenuItem, MenuLabel } from '../design/primitives'
 
+const AVATAR_NAV = NAV_ITEMS.filter((n) => n.to === '/estadisticas' || n.to === '/proyectos')
+
 const BREADCRUMB: Record<string, string> = Object.fromEntries(
   NAV_ITEMS.map((n) => [n.to, n.label]),
 )
@@ -46,6 +48,12 @@ function AvatarMenu() {
       )}
     >
       {name && <MenuLabel>{name}</MenuLabel>}
+      {/* Destinos que no caben en la barra móvil: aquí siguen a un toque. */}
+      {AVATAR_NAV.map(({ to, label, icon: NavIcon }) => (
+        <MenuItem key={to} onSelect={() => navigate(to)} icon={<NavIcon size={15} strokeWidth={1.75} />}>
+          {label}
+        </MenuItem>
+      ))}
       <MenuItem onSelect={() => navigate('/ajustes')} icon={<SettingsIcon size={15} strokeWidth={1.75} />}>
         Ajustes
       </MenuItem>

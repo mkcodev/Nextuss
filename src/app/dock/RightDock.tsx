@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import type { DragEvent as ReactDragEvent, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 import { ChevronsDown, ChevronsUp, X } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
@@ -8,6 +8,8 @@ import { SectionErrorBoundary } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 
 const DRAG_MIME = 'application/x-nextuss-panel-order'
+const SPLIT_MIN = 8
+const SPLIT_MAX = 92
 
 interface DropTarget {
   key: PanelKey
@@ -19,10 +21,12 @@ function PanelTabs({
   zone,
   activeKey,
   onSelect,
+  idBase,
 }: {
   zone: DockZone
   activeKey: PanelKey | null
   onSelect: (key: PanelKey) => void
+  idBase: string
 }) {
   const order = useUIStore((s) => s.panelOrder[zone])
   const movePanel = useUIStore((s) => s.movePanel)
@@ -63,8 +67,35 @@ function PanelTabs({
     setDropTarget(null)
   }
 
+  // Pestañas ARIA: flechas mueven y seleccionan, Inicio/Fin a los extremos; Alt+flechas reordena
+  // (alternativa de teclado al arrastre), igual que en el resto de listas (Fase 19).
+  const listRef = useRef<HTMLDivElement>(null)
+  const focusTab = (key: PanelKey) =>
+    requestAnimationFrame(() => listRef.current?.querySelector<HTMLButtonElement>(`[data-panel="${key}"]`)?.focus())
+  const onTabKeyDown = (e: ReactKeyboardEvent<HTMLButtonElement>, key: PanelKey) => {
+    const i = order.indexOf(key)
+    const dir = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0
+    if (dir && e.altKey) {
+      const target = order[i + dir]
+      if (!target) return
+      e.preventDefault()
+      movePanel(zone, key, target, dir > 0 ? 'after' : 'before')
+      focusTab(key)
+      return
+    }
+    let next: PanelKey | undefined
+    if (dir) next = order[(i + dir + order.length) % order.length]
+    else if (e.key === 'Home') next = order[0]
+    else if (e.key === 'End') next = order[order.length - 1]
+    if (!next) return
+    e.preventDefault()
+    onSelect(next)
+    focusTab(next)
+  }
+  const tabStop = activeKey && order.includes(activeKey) ? activeKey : order[0]
+
   return (
-    <div role="tablist" aria-label={`Paneles (zona ${zone === 'top' ? 'superior' : 'inferior'})`} className="flex shrink-0 items-center gap-0.5 border-b border-border px-2 py-1.5">
+    <div ref={listRef} role="tablist" aria-label={`Paneles (zona ${zone === 'top' ? 'superior' : 'inferior'})`} className="flex shrink-0 items-center gap-0.5 border-b border-border px-2 py-1.5">
       {order.map((key) => {
         const p = PANEL_REGISTRY[key]
         return (
@@ -74,7 +105,12 @@ function PanelTabs({
             )}
             <button
               role="tab"
+              id={`${idBase}-tab-${key}`}
+              data-panel={key}
               aria-selected={activeKey === key}
+              aria-controls={`${idBase}-panel`}
+              tabIndex={key === tabStop ? 0 : -1}
+              onKeyDown={(e) => onTabKeyDown(e, key)}
               draggable
               onDragStart={(e) => handleDragStart(e, key)}
               onDragEnd={handleDragEnd}
@@ -84,7 +120,7 @@ function PanelTabs({
               title={p.label}
               aria-label={p.label}
               className={cn(
-                'flex h-6 w-6 cursor-grab items-center justify-center rounded-md transition-colors active:cursor-grabbing',
+                'flex h-9 w-9 md:h-6 md:w-6 cursor-grab items-center justify-center rounded-md transition-colors active:cursor-grabbing',
                 draggedKey === key && 'opacity-30',
                 activeKey === key
                   ? 'bg-accent-soft text-accent'
@@ -103,11 +139,16 @@ function PanelTabs({
   )
 }
 
-function DockZoneBody({ panelKey }: { panelKey: PanelKey | null }) {
+function DockZoneBody({ panelKey, idBase }: { panelKey: PanelKey | null; idBase: string }) {
   const def = panelKey ? PANEL_REGISTRY[panelKey] : null
   const PanelComponent = def?.component
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto p-3">
+    <div
+      id={`${idBase}-panel`}
+      role="tabpanel"
+      aria-labelledby={panelKey ? `${idBase}-tab-${panelKey}` : undefined}
+      className="min-h-0 flex-1 overflow-y-auto p-3"
+    >
       {PanelComponent ? (
         <SectionErrorBoundary resetKey={panelKey} label={`el panel ${def.label}`}>
           <PanelComponent />
@@ -132,6 +173,8 @@ function DockZones() {
   const [livePct, setLivePct] = useState<number | null>(null)
   const pendingPct = useRef<number | null>(null)
   const frame = useRef(0)
+  const topId = useId()
+  const bottomId = useId()
 
   const onPointerDown = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
     dragging.current = true
@@ -141,7 +184,7 @@ function DockZones() {
   const onPointerMove = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
     if (!dragging.current || !bodyRef.current) return
     const rect = bodyRef.current.getBoundingClientRect()
-    pendingPct.current = Math.min(85, Math.max(15, ((e.clientY - rect.top) / rect.height) * 100))
+    pendingPct.current = Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, ((e.clientY - rect.top) / rect.height) * 100))
     if (frame.current) return
     frame.current = requestAnimationFrame(() => {
       frame.current = 0
@@ -167,9 +210,9 @@ function DockZones() {
     if (e.target !== e.currentTarget) return
     const step = { ArrowUp: -5, ArrowDown: 5 }[e.key]
     let next: number | null = null
-    if (step != null) next = Math.min(85, Math.max(15, dock.splitPct + step))
-    else if (e.key === 'Home') next = 15
-    else if (e.key === 'End') next = 85
+    if (step != null) next = Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, dock.splitPct + step))
+    else if (e.key === 'Home') next = SPLIT_MIN
+    else if (e.key === 'End') next = SPLIT_MAX
     if (next == null) return
     e.preventDefault()
     setSplitPct(next)
@@ -178,8 +221,8 @@ function DockZones() {
   return (
     <div ref={bodyRef} className="flex min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-col" style={{ height: `${livePct ?? dock.splitPct}%` }}>
-        <PanelTabs zone="top" activeKey={dock.top} onSelect={(k) => assignPanel('top', k)} />
-        <DockZoneBody panelKey={dock.top} />
+        <PanelTabs zone="top" idBase={topId} activeKey={dock.top} onSelect={(k) => assignPanel('top', k)} />
+        <DockZoneBody idBase={topId} panelKey={dock.top} />
       </div>
 
       <div
@@ -187,8 +230,8 @@ function DockZones() {
         aria-orientation="horizontal"
         aria-label="Redimensionar paneles"
         aria-valuenow={Math.round(livePct ?? dock.splitPct)}
-        aria-valuemin={8}
-        aria-valuemax={92}
+        aria-valuemin={SPLIT_MIN}
+        aria-valuemax={SPLIT_MAX}
         aria-valuetext={`Zona superior al ${Math.round(livePct ?? dock.splitPct)} %`}
         tabIndex={0}
         onKeyDown={onSeparatorKeyDown}
@@ -201,7 +244,7 @@ function DockZones() {
         <div className="absolute flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
           <button
             type="button"
-            onClick={() => setSplitPct(92)}
+            onClick={() => setSplitPct(SPLIT_MAX)}
             title="Maximizar zona superior"
             aria-label="Maximizar zona superior"
             className="rounded bg-surface p-0.5 text-text-faint hover:text-accent"
@@ -210,7 +253,7 @@ function DockZones() {
           </button>
           <button
             type="button"
-            onClick={() => setSplitPct(8)}
+            onClick={() => setSplitPct(SPLIT_MIN)}
             title="Maximizar zona inferior"
             aria-label="Maximizar zona inferior"
             className="rounded bg-surface p-0.5 text-text-faint hover:text-accent"
@@ -221,8 +264,8 @@ function DockZones() {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
-        <PanelTabs zone="bottom" activeKey={dock.bottom} onSelect={(k) => assignPanel('bottom', k)} />
-        <DockZoneBody panelKey={dock.bottom} />
+        <PanelTabs zone="bottom" idBase={bottomId} activeKey={dock.bottom} onSelect={(k) => assignPanel('bottom', k)} />
+        <DockZoneBody idBase={bottomId} panelKey={dock.bottom} />
       </div>
     </div>
   )
@@ -235,6 +278,24 @@ function MobileDockSheet() {
   const open = useUIStore((s) => s.mobileDockOpen)
   const close = useUIStore((s) => s.closeMobileDock)
   const reduceMotion = useReducedMotion()
+  const closeRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const previous = document.activeElement as HTMLElement | null
+    const overflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    closeRef.current?.focus()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = overflow
+      previous?.focus()
+    }
+  }, [open, close])
 
   return (
     <AnimatePresence>
@@ -261,7 +322,7 @@ function MobileDockSheet() {
           >
             <div className="flex h-12 shrink-0 items-center justify-between border-b border-border px-4">
               <span className="text-xs font-semibold uppercase tracking-wide text-text-faint">Panel</span>
-              <button onClick={close} aria-label="Cerrar panel" className="rounded-md p-1.5 text-text-faint hover:bg-surface-hover hover:text-text">
+              <button ref={closeRef} onClick={close} aria-label="Cerrar panel" className="rounded-md p-1.5 text-text-faint hover:bg-surface-hover hover:text-text">
                 <X size={16} strokeWidth={1.75} />
               </button>
             </div>
