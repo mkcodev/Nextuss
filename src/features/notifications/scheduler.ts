@@ -12,7 +12,9 @@ import {
   habitReminderNotifications,
   morningSummaryNotifications,
   routineStartNotifications,
+  taskEndNotifications,
   taskStartNotifications,
+  taskUpcomingNotifications,
   weeklyReviewNudgeNotifications,
   zombieTaskNotifications,
 } from './rules'
@@ -40,6 +42,8 @@ async function evaluate(now: Date): Promise<void> {
   const pending = [
     ...habitReminderNotifications({ now, settings, habits, todayLogs: todayLogsByHabit }),
     ...taskStartNotifications({ now, settings, tasksToday }),
+    ...taskUpcomingNotifications({ now, settings, tasksToday }),
+    ...taskEndNotifications({ now, settings, tasksToday }),
     ...routineStartNotifications({ now, settings, routines, runsToday: routineRunsToday }),
     ...morningSummaryNotifications({
       now,

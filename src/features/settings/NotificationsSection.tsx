@@ -11,6 +11,7 @@ import type { Settings } from '../../db/types'
 const NOTIFICATION_TYPES: { key: keyof Settings; label: string; description: string }[] = [
   { key: 'notifyHabitReminders', label: 'Recordatorios de hábitos', description: 'A la hora configurada en cada hábito' },
   { key: 'notifyTaskStart', label: 'Inicio de bloques', description: 'Cuando empieza una tarea programada en el timeline' },
+  { key: 'notifyTransitions', label: 'Transiciones', description: '5 min antes de un bloque y al acabarse su tiempo si sigue sin hacer' },
   { key: 'notifyMorningSummary', label: 'Resumen de la mañana', description: 'Tareas del día y objetivo North Star' },
   { key: 'notifyEveningSummary', label: 'Cierre del día', description: 'Cuántas tareas se completaron' },
   { key: 'notifyWeeklyReviewNudge', label: 'Revisión semanal', description: 'Empujón los lunes si no la has hecho' },
