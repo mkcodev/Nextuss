@@ -607,7 +607,7 @@ export function TasksPage() {
               <EmptyState
                 icon={ListTodo}
                 title="Aún no tienes tareas"
-                description="Crea la primera aquí o captúrala desde cualquier pantalla con la tecla i."
+                description="Crea la primera aquí o créala desde cualquier pantalla con la tecla n."
                 action={
                   <Button onClick={() => openCreateTask()}>
                     <Plus size={14} strokeWidth={2} /> Crear tarea

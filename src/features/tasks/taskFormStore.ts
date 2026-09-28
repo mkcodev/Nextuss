@@ -17,7 +17,9 @@ interface TaskFormState {
   }
   /** Bumped on every open so the form remounts with fresh state even for two back-to-back creates with different prefills. */
   nonce: number
-  openCreate: (prefill?: TaskFormState['prefill']) => void
+  /** Se llama tras crear (no al cancelar): p. ej. la captura marca su nota como triada solo entonces. */
+  onCreated?: () => void
+  openCreate: (prefill?: TaskFormState['prefill'], onCreated?: () => void) => void
   openEdit: (task: Task) => void
   close: () => void
 }
@@ -27,7 +29,7 @@ export const useTaskFormStore = create<TaskFormState>((set) => ({
   task: undefined,
   prefill: undefined,
   nonce: 0,
-  openCreate: (prefill) => set((s) => ({ open: true, task: undefined, prefill, nonce: s.nonce + 1 })),
-  openEdit: (task) => set((s) => ({ open: true, task, prefill: undefined, nonce: s.nonce + 1 })),
+  openCreate: (prefill, onCreated) => set((s) => ({ open: true, task: undefined, prefill, onCreated, nonce: s.nonce + 1 })),
+  openEdit: (task) => set((s) => ({ open: true, task, prefill: undefined, onCreated: undefined, nonce: s.nonce + 1 })),
   close: () => set({ open: false }),
 }))

@@ -73,7 +73,7 @@ function Chip({ empty, children, ...props }: { empty: boolean; children: ReactNo
 
 /** Single global instance mounted once in AppShell, remounted via `key` when the target task changes. */
 export function TaskForm() {
-  const { open, task, prefill, close, openEdit } = useTaskFormStore()
+  const { open, task, prefill, close, openEdit, onCreated } = useTaskFormStore()
   const isEdit = !!task
   const isSeries = !!(isEdit && task?.recurrenceId)
   const { available: aiAvailable } = useAiAvailable()
@@ -267,6 +267,7 @@ export function TaskForm() {
       for (const subtitle of pendingSubtasks) await createTask({ title: subtitle, parentId: newId, status: 'backlog' })
       if (goalId) await linkTaskToGoal(goalId, newId)
     }
+    if (!isEdit) onCreated?.()
 
     if (createMore) {
       // "Crear otra": se queda abierto con las mismas propiedades y el título vacío, listo para la siguiente.

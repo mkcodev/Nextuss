@@ -62,7 +62,7 @@ const dateInput = 'h-8 rounded-sm border border-border bg-surface px-2 text-sm t
  * state below only ever needs to initialize once per edit/create session.
  */
 export function HabitForm() {
-  const { open, habit, prefillName, close } = useHabitFormStore()
+  const { open, habit, prefillName, close, onCreated } = useHabitFormStore()
   const isEdit = !!habit
   const nameRef = useRef<HTMLInputElement>(null)
   const ids = { target: useId(), unit: useId(), schedule: useId(), every: useId(), times: useId(), reminder: useId(), attr: useId(), more: useId(), pauseFrom: useId(), pauseUntil: useId(), skip: useId() }
@@ -181,6 +181,7 @@ export function HabitForm() {
       await updateHabit(habit.id, payload)
     } else {
       await createHabit(payload)
+      onCreated?.()
     }
     handleClose()
   }

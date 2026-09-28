@@ -7,7 +7,8 @@ interface HabitFormState {
   prefillName?: string
   /** Bumped on every open so the form remounts with fresh state even for two back-to-back creates with different prefills. */
   nonce: number
-  openCreate: (prefillName?: string) => void
+  onCreated?: () => void
+  openCreate: (prefillName?: string, onCreated?: () => void) => void
   openEdit: (habit: Habit) => void
   close: () => void
 }
@@ -18,7 +19,7 @@ export const useHabitFormStore = create<HabitFormState>((set) => ({
   habit: undefined,
   prefillName: undefined,
   nonce: 0,
-  openCreate: (prefillName) => set((s) => ({ open: true, habit: undefined, prefillName, nonce: s.nonce + 1 })),
-  openEdit: (habit) => set((s) => ({ open: true, habit, prefillName: undefined, nonce: s.nonce + 1 })),
+  openCreate: (prefillName, onCreated) => set((s) => ({ open: true, habit: undefined, prefillName, onCreated, nonce: s.nonce + 1 })),
+  openEdit: (habit) => set((s) => ({ open: true, habit, prefillName: undefined, onCreated: undefined, nonce: s.nonce + 1 })),
   close: () => set({ open: false }),
 }))
