@@ -221,6 +221,8 @@ export interface RoutineRun {
 
 export type RoutineView = 'step' | 'timeline'
 
+export type DayTimeView = 'ruler' | 'ring' | 'blocks'
+
 export type RecurrenceFreq = 'daily' | 'weekly' | 'monthly'
 /** `schedule`: fechas de calendario fijas (p.ej. "cada lunes"), se generan por adelantado.
  * `completion`: la siguiente ocurrencia se genera solo al completar la anterior, desplazada
@@ -357,6 +359,8 @@ export interface Settings {
   notifyPomodoroEnd?: boolean
   /** Rutinas (Fase 28): aviso a su hora y al cambiar de paso en el reproductor. */
   notifyRoutines?: boolean
+  /** Estilo de «tiempo de hoy» (Fase 28b): regla, anillo o casillas de 30 min. Sin definir = 'ruler'. */
+  dayTimeView?: DayTimeView
   /** Transiciones (Fase 28b): 5 min antes de un bloque y al terminarlo. */
   notifyTransitions?: boolean
   /** Sonido al cambiar de paso en el reproductor de rutinas. Sin definir = activado. */

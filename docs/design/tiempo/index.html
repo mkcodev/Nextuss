@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tiempo de hoy · 3 variantes</title>
+<style>
+  /* Tokens reales de la app (src/index.css, tema oscuro). */
+  :root {
+    --bg: #131316; --bg-soft: #0f0f11; --hover: #1f1f24; --border: #26262c; --border-strong: #34343c;
+    --text: #e7e7eb; --muted: #9d9da8; --faint: #8b8b96;
+    --accent: #7c84e8; --accent-soft: rgba(124,132,232,.16); --on-accent: #0f1020;
+    --success: #4cc38a; --warning: #f0a25e; --danger: #f07470;
+    --shadow: 0 24px 60px -12px rgba(0,0,0,.6);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg-soft); color: var(--text); font: 14px/1.5 InterVariable, ui-sans-serif, system-ui, -apple-system, sans-serif; }
+  .lucide { width: 15px; height: 15px; stroke-width: 1.75; flex: none; }
+  .page { max-width: 1180px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -.01em; margin: 0 0 6px; }
+  .lead { color: var(--muted); max-width: 72ch; margin: 0 0 24px; }
+  .tabs { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); margin-bottom: 24px; flex-wrap: wrap; }
+  .tabs button { font: inherit; color: var(--muted); background: none; border: 0; padding: 6px 14px; border-radius: 6px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--hover); color: var(--text); font-weight: 500; }
+  .variant { display: none; }
+  .variant.on { display: block; }
+  .vhead { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 4px; }
+  .vhead h2 { font-size: 17px; font-weight: 600; margin: 0; }
+  .tag { font-size: 12px; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0 8px; }
+  .idea { color: var(--muted); margin: 0 0 20px; max-width: 80ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
+  .scene { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .scene > .cap { font-size: 12px; color: var(--faint); padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+  .scene > .cap b { color: var(--muted); font-weight: 500; }
+  .stage { padding: 16px; position: relative; }
+  .pc { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+  .pc > div { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: var(--bg); }
+  .pc h3 { font-size: 13px; margin: 0 0 6px; font-weight: 600; }
+  .pc ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .pc li { margin: 3px 0; }
+  .pro h3 { color: var(--success); } .con h3 { color: var(--warning); }
+  @media (max-width: 700px) { .pc { grid-template-columns: 1fr; } }
+
+  /* Piezas de la app */
+  .hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .hdr .t { font-size: 16px; font-weight: 600; margin-right: auto; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 6px; font: inherit; font-size: 13px; border: 1px solid var(--border-strong); background: transparent; color: var(--text); cursor: default; white-space: nowrap; }
+  .btn.p { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 500; }
+  .btn.g { border-color: transparent; color: var(--muted); }
+  .btn.sm { height: 26px; font-size: 12px; padding: 0 8px; }
+  .btn .lucide { width: 14px; height: 14px; }
+  .ai { color: var(--accent); }
+  .row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; background: var(--bg); }
+  .row .n { flex: 1; min-width: 0; }
+  .row .n small { display: block; color: var(--faint); font-size: 12px; }
+  .ico { width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; background: var(--hover); color: var(--muted); flex: none; }
+  .chk { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border-strong); flex: none; display: grid; place-items: center; }
+  .chk.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .chk.on::after { content: ""; width: 8px; height: 4px; border: 2px solid currentColor; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px,-1px); }
+  .muted { color: var(--muted); } .faint { color: var(--faint); font-size: 12px; }
+  .dialog { border: 1px solid var(--border-strong); border-radius: 12px; background: var(--bg); box-shadow: var(--shadow); padding: 16px; }
+  .dialog .dt { font-size: 15px; font-weight: 600; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+  .field { border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 10px; color: var(--text); background: var(--bg-soft); margin-bottom: 10px; }
+  .field.ph { color: var(--faint); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .chip { font-size: 12px; border: 1px solid var(--border-strong); border-radius: 999px; padding: 2px 9px; color: var(--muted); }
+  .chip.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); align-items: center; }
+  .foot .faint { margin-right: auto; }
+  .ghost { border-style: dashed; background: transparent; }
+  .ghost .n { color: var(--muted); }
+  .iconbtn { width: 26px; height: 26px; border-radius: 6px; display: grid; place-items: center; color: var(--faint); border: 1px solid transparent; }
+  .iconbtn.ok { color: var(--success); border-color: var(--border); }
+  .iconbtn.no { border-color: var(--border); }
+  .goal { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .goal .gt { font-weight: 600; display: flex; gap: 8px; align-items: center; }
+  .bar { height: 4px; border-radius: 2px; background: var(--hover); margin: 8px 0 12px; }
+  .inline { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px dashed var(--border-strong); border-radius: 8px; color: var(--muted); font-size: 13px; }
+  .inline .n { flex: 1; }
+  .tree { margin: 0 0 0 14px; padding-left: 12px; border-left: 1px solid var(--border); }
+  .kbd { font-size: 11px; color: var(--faint); border: 1px solid var(--border-strong); border-radius: 4px; padding: 0 5px; }
+  .palette { border: 1px solid var(--border-strong); border-radius: 12px; background: var(--bg); box-shadow: var(--shadow); overflow: hidden; }
+  .palette .q { display: flex; gap: 8px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 15px; }
+  .palette .sec { padding: 8px 14px 4px; font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
+  .palette .it { display: flex; gap: 10px; align-items: center; padding: 7px 14px; font-size: 13px; }
+  .palette .it.sel { background: var(--hover); }
+  .palette .it .n { flex: 1; }
+  .kind { font-size: 11px; color: var(--faint); border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; }
+  .rec { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 16px 18px; margin: 28px 0 0; }
+  .rec h2 { font-size: 15px; margin: 0 0 6px; }
+  .rec p { margin: 4px 0; color: var(--text); }
+  .common { border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; margin-top: 16px; background: var(--bg); }
+  .common h2 { font-size: 14px; margin: 0 0 6px; }
+  .common ul { margin: 0; padding-left: 18px; color: var(--muted); }
+
+
+  /* Piezas de tiempo */
+  .card { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: var(--bg); }
+  .nav { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); margin-bottom: 14px; }
+  .nav .sp { flex: 1; }
+  .nav .srch { flex: 0 1 220px; height: 28px; border: 1px solid var(--border); border-radius: 6px; color: var(--faint); font-size: 12px; display: flex; align-items: center; padding: 0 8px; gap: 6px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 9px; border-radius: 6px; font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; border: 1px solid var(--border-strong); color: var(--muted); }
+  .pill.acc { border-color: rgba(124,132,232,.4); background: var(--accent-soft); color: var(--accent); }
+  .row2 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .row2 b { color: var(--text); font-weight: 600; }
+  .big2 { font-size: 22px; font-weight: 600; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+  /* A: regla */
+  .ruler { position: relative; height: 22px; margin: 12px 0 18px; }
+  .ruler .track { position: absolute; left: 0; right: 0; top: 9px; height: 4px; border-radius: 2px; background: var(--hover); }
+  .ruler .past { position: absolute; left: 0; top: 9px; height: 4px; border-radius: 2px; background: var(--border-strong); }
+  .ruler .blk { position: absolute; top: 6px; height: 10px; border-radius: 3px; background: var(--accent); opacity: .85; }
+  .ruler .blk.done { opacity: .35; }
+  .ruler .now { position: absolute; top: 0; width: 2px; height: 22px; background: var(--danger); border-radius: 1px; }
+  .ruler .now::after { content: ""; position: absolute; top: -3px; left: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); }
+  .ticks { position: relative; height: 14px; font-size: 11px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .ticks span { position: absolute; transform: translateX(-50%); }
+  /* B: anillo */
+  .ringrow { display: flex; gap: 16px; align-items: center; }
+  .dring { width: 78px; height: 78px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--border-strong) 0 58%, var(--accent) 58% 100%); flex: none; }
+  .dring > div { width: 66px; height: 66px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .mini { width: 16px; height: 16px; border-radius: 50%; background: conic-gradient(var(--border-strong) 0 58%, var(--accent) 58% 100%); -webkit-mask: radial-gradient(circle, transparent 4px, #000 5px); mask: radial-gradient(circle, transparent 4px, #000 5px); }
+  .next { display: flex; gap: 8px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 13px; }
+  .next .n { flex: 1; }
+  /* C: bloques */
+  .cells { display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; margin: 12px 0 8px; }
+  .cells i { height: 16px; border-radius: 3px; background: var(--hover); display: block; }
+  .cells i.past { background: transparent; border: 1px dashed var(--border); }
+  .cells i.busy { background: var(--accent); opacity: .85; }
+  .cells i.free { background: var(--success); opacity: .55; }
+  .cells i.cur { outline: 2px solid var(--text); outline-offset: 1px; }
+  .legend { display: flex; gap: 12px; font-size: 11px; color: var(--faint); }
+  .legend span { display: inline-flex; align-items: center; gap: 4px; }
+  .legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+</style>
+</head>
+<body>
+<main class="page">
+  <h1>Tiempo de hoy: 3 variantes</h1>
+  <p class="lead">Issues #92 y #93: ver cuánto queda de la jornada (según «inicio/fin del día» de Ajustes, p. ej. 07:00–22:00) y cuánto falta para el siguiente bloque. Cada variante muestra la pieza en <strong>Hoy</strong> (encima de «Ahora») y su versión mínima en la <strong>barra superior</strong>. Ejemplo: son las 13:40, quedan 8 h 20 min y «Correo» empieza a las 14:00.</p>
+
+  <div class="tabs" role="tablist" aria-label="Variantes">
+    <button role="tab" aria-selected="true" data-v="a">A · Regla del día</button>
+    <button role="tab" aria-selected="false" data-v="b">B · Anillo de jornada</button>
+    <button role="tab" aria-selected="false" data-v="c">C · Bloques de 30 min</button>
+  </div>
+
+  <!-- ============ A ============ -->
+  <section class="variant on" id="v-a">
+    <div class="vhead"><h2>A · Regla del día</h2><span class="tag">mismo lenguaje que la «línea de medida» de Ahora</span></div>
+    <p class="idea">Una regla fina de inicio a fin de la jornada: lo pasado en gris, tus bloques programados como marcas y una línea roja en «ahora» (igual que en la línea de tiempo). Debajo, dos datos: lo que queda y lo siguiente.</p>
+    <div class="grid">
+      <div class="scene" style="grid-column: span 2"><div class="cap"><b>Barra superior</b> · siguiente bloque</div><div class="stage">
+        <div class="nav"><span class="srch"><i data-lucide="search"></i>Buscar…</span><span class="sp"></span><span class="pill acc"><i data-lucide="clock-3"></i>Correo en 20 min</span><span class="btn sm"><i data-lucide="plus"></i>Nuevo</span></div>
+        <div class="faint">Sin más bloques hoy, muestra «Quedan 8 h 20 min». Clic: va a Hoy.</div>
+      </div></div>
+      <div class="scene" style="grid-column: span 2"><div class="cap"><b>Hoy</b> · encima de «Ahora»</div><div class="stage">
+        <div class="card">
+          <div class="row2"><span><b>Quedan 8 h 20 min</b> de jornada · 3 h 15 min ya planificadas</span><span>Siguiente: <b>Correo</b> en 20 min</span></div>
+          <div class="ruler">
+            <div class="track"></div><div class="past" style="width:44%"></div>
+            <div class="blk done" style="left:13%;width:7%"></div>
+            <div class="blk done" style="left:27%;width:10%"></div>
+            <div class="blk" style="left:47%;width:4%"></div>
+            <div class="blk" style="left:60%;width:13%"></div>
+            <div class="now" style="left:44%"></div>
+          </div>
+          <div class="ticks"><span style="left:0;transform:none">07:00</span><span style="left:20%">10:00</span><span style="left:40%">13:00</span><span style="left:60%">16:00</span><span style="left:80%">19:00</span><span style="right:0;transform:none">22:00</span></div>
+        </div>
+      </div></div>
+    </div>
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>Ves el día entero y los huecos libres de un vistazo.</li><li>Coherente con la línea de tiempo y el bloque «Ahora».</li><li>Ocupa una sola franja: poco ruido.</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>Repite en pequeño parte de la línea de tiempo de debajo.</li><li>Bloques muy cortos casi no se ven.</li></ul></div>
+    </div>
+  </section>
+
+  <!-- ============ B ============ -->
+  <section class="variant" id="v-b">
+    <div class="vhead"><h2>B · Anillo de jornada</h2><span class="tag">reusa RingProgress</span></div>
+    <p class="idea">Un anillo que se va vaciando con el día, con las horas que quedan en grande, y debajo el siguiente bloque con su cuenta atrás. Más «reloj», menos «mapa».</p>
+    <div class="grid">
+      <div class="scene"><div class="cap"><b>Barra superior</b></div><div class="stage">
+        <div class="nav"><span class="sp"></span><span class="pill"><span class="mini"></span>8 h 20</span><span class="pill acc"><i data-lucide="clock-3"></i>Correo 20 min</span></div>
+      </div></div>
+      <div class="scene"><div class="cap"><b>Hoy</b> · columna derecha</div><div class="stage">
+        <div class="card">
+          <div class="ringrow"><div class="dring"><div>42%</div></div>
+            <div><div class="big2">8 h 20 min</div><div class="faint">quedan hasta las 22:00</div></div></div>
+          <div class="next"><i data-lucide="clock-3" class="ai"></i><span class="n">Siguiente: <b>Correo</b> a las 14:00</span><span class="faint" style="font-size:13px">en 20 min</span></div>
+        </div>
+      </div></div>
+    </div>
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>El número grande se lee en un segundo.</li><li>Encaja en la columna derecha, junto al check-in.</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>No muestra dónde están los huecos libres.</li><li>Dos indicadores en la barra superior: más ruido.</li></ul></div>
+    </div>
+  </section>
+
+  <!-- ============ C ============ -->
+  <section class="variant" id="v-c">
+    <div class="vhead"><h2>C · Bloques de 30 min</h2><span class="tag">tiempo «tangible» para TDAH</span></div>
+    <p class="idea">La jornada partida en casillas de 30 min: las pasadas desaparecen, las ocupadas en color y las libres en verde. En vez de «8 h 20 min» (abstracto) ves «16 bloques, 9 libres»: algo que se puede contar y repartir.</p>
+    <div class="grid">
+      <div class="scene"><div class="cap"><b>Barra superior</b></div><div class="stage">
+        <div class="nav"><span class="sp"></span><span class="pill acc"><i data-lucide="grid-3x3"></i>9 libres · Correo 20 min</span></div>
+      </div></div>
+      <div class="scene"><div class="cap"><b>Hoy</b> · encima de «Ahora»</div><div class="stage">
+        <div class="card">
+          <div class="row2"><span><b>16 bloques</b> de 30 min hasta las 22:00 · 9 libres</span><span>Correo en 20 min</span></div>
+          <div class="cells">
+            <i class="past"></i><i class="past"></i><i class="past"></i><i class="past"></i><i class="past"></i><i class="past"></i><i class="past"></i><i class="past"></i><i class="past"></i><i class="past"></i><i class="past"></i><i class="past"></i><i class="past"></i><i class="cur free"></i><i class="busy"></i>
+            <i class="free"></i><i class="free"></i><i class="free"></i><i class="busy"></i><i class="busy"></i><i class="busy"></i><i class="busy"></i><i class="free"></i><i class="free"></i><i class="free"></i><i class="free"></i><i class="busy"></i><i class="free"></i><i class="free"></i><i></i>
+          </div>
+          <div class="legend"><span><i style="background:var(--accent)"></i>ocupado</span><span><i style="background:var(--success);opacity:.55"></i>libre</span><span><i style="border:1px dashed var(--border)"></i>pasado</span></div>
+        </div>
+      </div></div>
+    </div>
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>Lo más concreto contra la «ceguera temporal».</li><li>Deja claro cuánto cabe aún en el día.</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>Redondea a 30 min: menos exacto.</li><li>Visualmente más pesado; 30 casillas en móvil se aprietan.</li></ul></div>
+    </div>
+  </section>
+
+  <div class="common">
+    <h2>Igual en las tres</h2>
+    <ul>
+      <li>Jornada = inicio y fin del día de Ajustes. Fuera de la jornada, la pieza se oculta (o dice «Jornada terminada»).</li>
+      <li>El siguiente bloque es la próxima tarea programada sin hacer; si no hay, solo el tiempo que queda.</li>
+      <li>Se actualiza cada 30 s; tiene su texto para lectores de pantalla.</li>
+    </ul>
+  </div>
+
+  <div class="rec">
+    <h2>Recomendación: A</h2>
+    <p>Muestra lo que queda, dónde están los huecos y qué viene, en una franja fina coherente con «Ahora» y la línea de tiempo. En la barra superior, un solo indicador («Correo en 20 min» o «Quedan 8 h 20 min»).</p>
+    <p class="muted">De C tomaría el dato «x h libres» en el texto de la regla, que da la parte tangible sin las casillas.</p>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script>
+  lucide.createIcons();
+  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    document.querySelectorAll('.variant').forEach((v) => v.classList.toggle('on', v.id === 'v-' + b.dataset.v));
+  }));
+</script>
+</body>
+</html>

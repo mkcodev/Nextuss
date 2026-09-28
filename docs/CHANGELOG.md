@@ -1,5 +1,15 @@
 # Changelog
 
+## Fase 28b.2 — Tiempo de hoy (#92)
+- Tarjeta «Tiempo de hoy» en Hoy (encima de «Ahora»): cuánto queda de la jornada, cuánto de eso está
+  libre y cuánto falta para el siguiente bloque. Tres estilos intercambiables, guardados en Ajustes
+  (`dayTimeView`): **Regla** (la jornada con tus bloques y la línea de ahora), **Anillo** (lo que queda en
+  grande) y **Bloques** (casillas de 30 min libres/ocupadas/pasadas). Se oculta al acabar la jornada.
+- En hoy, el aviso de capacidad solo sale si te pasas: su «te quedan x libres» contaba la jornada entera y
+  contradecía a la tarjeta.
+- `useNowMinutes` pasa a `lib/` para compartirlo.
+- Mockups: `docs/design/tiempo/` (se eligieron las tres, con selector).
+
 ## Fase 28b.1 — Avisos de transición (#91)
 - Aviso 5 min antes de que empiece una tarea programada y al acabarse su hueco si sigue sin hacer (dice
   qué viene después). Si otra tarea empieza justo entonces, basta con su aviso de inicio.

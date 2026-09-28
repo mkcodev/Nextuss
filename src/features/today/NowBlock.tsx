@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react'
+import { useId } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { motion, useReducedMotion } from 'framer-motion'
 import { CalendarClock, Check, CheckCheck, Play, Plus } from 'lucide-react'
@@ -10,6 +10,7 @@ import { nextRelativeDate, timeToMinutes } from '../../lib/dates'
 import { PRIORITY_NAMES } from '../../lib/priority'
 import { PriorityBars } from '../tasks/PriorityBars'
 import { cn } from '../../lib/cn'
+import { useNowMinutes } from '../../lib/useNowMinutes'
 import { useSubmitGuard } from '../../lib/useSubmitGuard'
 import { startFocusOnTask } from '../focus/startFocusOnTask'
 import { toggleTaskDoneWithFeedback } from '../tasks/actions'
@@ -25,15 +26,6 @@ function formatDuration(min: number): string {
   const h = Math.floor(min / 60)
   const m = min % 60
   return m === 0 ? `${h} h` : `${h} h ${m} min`
-}
-
-function useNowMinutes() {
-  const [now, setNow] = useState(() => new Date())
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 30_000)
-    return () => clearInterval(id)
-  }, [])
-  return now.getHours() * 60 + now.getMinutes()
 }
 
 /** Bloque "Ahora" de Hoy (DESIGN.md, componente firma): la tarea que toca, cuánto dura y cuánto
