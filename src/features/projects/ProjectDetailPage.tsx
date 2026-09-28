@@ -152,6 +152,7 @@ export function ProjectDetailPage() {
             ]}
             value={filter}
             onChange={setFilter}
+            label="Filtrar tareas"
           />
         </div>
 

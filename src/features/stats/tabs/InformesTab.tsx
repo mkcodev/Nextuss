@@ -11,13 +11,13 @@ import { downloadCsv, downloadJson } from '../export'
 import { getReview } from '../../../db/repositories/reviews'
 import { getNorthStarStreak, listGoalsForPeriod } from '../../../db/repositories/goals'
 import { ACHIEVEMENTS_BY_KEY } from '../../../lib/achievements'
-import { Badge, Button, Card, Icon, Skeleton, Tabs } from '../../../design/primitives'
+import { Badge, Button, Card, Icon, SegmentedControl, Skeleton } from '../../../design/primitives'
 import { useToastStore } from '../../../lib/toastStore'
 import type { GoalPeriod, WeeklyReview } from '../../../db/types'
 
-const PERIOD_TABS: { key: GoalPeriod; label: string }[] = [
-  { key: 'week', label: 'Semana' },
-  { key: 'month', label: 'Mes' },
+const PERIOD_TABS: { value: GoalPeriod; label: string }[] = [
+  { value: 'week', label: 'Semana' },
+  { value: 'month', label: 'Mes' },
 ]
 
 function currentKeyFor(period: GoalPeriod): string {
@@ -107,9 +107,10 @@ export function InformesTab() {
     <div className="space-y-6">
       <div className="no-print flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Tabs tabs={PERIOD_TABS} value={period} onChange={changePeriod} />
+          <SegmentedControl options={PERIOD_TABS} value={period} onChange={changePeriod} label="Periodo del informe" size="md" />
           <button
             onClick={() => setPeriodKey((k) => previousPeriodKey(period, k))}
+            aria-label="Periodo anterior"
             className="rounded-lg border border-border p-1.5 text-text-muted hover:bg-surface-hover hover:text-text"
           >
             <ChevronLeft size={15} strokeWidth={1.75} />
@@ -119,6 +120,7 @@ export function InformesTab() {
           </div>
           <button
             onClick={() => setPeriodKey((k) => nextPeriodKey(period, k))}
+            aria-label="Periodo siguiente"
             className="rounded-lg border border-border p-1.5 text-text-muted hover:bg-surface-hover hover:text-text"
           >
             <ChevronRight size={15} strokeWidth={1.75} />

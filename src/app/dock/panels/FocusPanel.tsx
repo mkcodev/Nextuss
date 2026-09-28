@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Pause, Play, RotateCcw, TriangleAlert } from 'lucide-react'
-import { Button, IconButton, RingProgress, Select, Tabs } from '../../../design/primitives'
+import { Button, IconButton, RingProgress, SegmentedControl, Select } from '../../../design/primitives'
 import { listActiveTasks } from '../../../db/repositories/tasks'
 import { getOrCreateSettings } from '../../../db/repositories/settings'
 import { cn } from '../../../lib/cn'
@@ -12,9 +12,9 @@ import { formatTime } from '../../../features/focus/format'
 import { logWorkSegmentIfSignificant } from '../../../features/focus/logSegment'
 
 const MODE_TABS = [
-  { key: 'work' as FocusMode, label: 'Foco' },
-  { key: 'break' as FocusMode, label: 'Descanso' },
-  { key: 'longBreak' as FocusMode, label: 'D. largo' },
+  { value: 'work' as FocusMode, label: 'Foco' },
+  { value: 'break' as FocusMode, label: 'Descanso' },
+  { value: 'longBreak' as FocusMode, label: 'D. largo' },
 ]
 
 /** Isolates the once-per-second re-render to just the ring + countdown text, so the rest of the
@@ -70,7 +70,7 @@ export function FocusPanel() {
 
   return (
     <div className="flex flex-col items-center gap-4 py-2">
-      <Tabs tabs={MODE_TABS} value={mode} onChange={switchMode} />
+      <SegmentedControl options={MODE_TABS} value={mode} onChange={switchMode} label="Modo del temporizador" size="md" />
 
       <div className="flex items-center gap-1.5" title={`${mode === 'longBreak' ? 4 : cyclesCompleted % 4}/4 pomodoros de este ciclo`}>
         {[0, 1, 2, 3].map((i) => (
@@ -100,10 +100,10 @@ export function FocusPanel() {
       <Countdown plannedSec={plannedSec} />
 
       <div className="flex items-center gap-2">
-        <Button variant="primary" onClick={togglePlay} className="h-9 w-9 rounded-full p-0">
+        <Button variant="primary" onClick={togglePlay} aria-label={running ? 'Pausar' : 'Empezar'} className="h-9 w-9 rounded-full p-0">
           {running ? <Pause size={15} strokeWidth={2} /> : <Play size={15} strokeWidth={2} />}
         </Button>
-        <Button variant="ghost" onClick={reset} className="h-9 w-9 rounded-full p-0">
+        <Button variant="ghost" onClick={reset} aria-label="Reiniciar tramo" className="h-9 w-9 rounded-full p-0">
           <RotateCcw size={14} strokeWidth={2} />
         </Button>
         {mode === 'work' && (

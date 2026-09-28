@@ -15,11 +15,13 @@ interface SegmentedControlProps<T extends string> {
   label?: string
   size?: 'sm' | 'md'
   className?: string
+  /** `radio` (por defecto) para filtros y modos; `tabs` solo cuando cada opción muestra un panel. */
+  semantics?: 'radio' | 'tabs'
 }
 
-/** Selector de una opción entre varias, con semántica de pestañas (`tablist`): la opción activa lleva
- *  `aria-selected`, solo ella está en el orden de tabulación y las flechas mueven la selección.
- *  `Tabs` es este mismo componente con otra forma de declarar las opciones. */
+/** Selector de una opción entre varias: grupo de radio (filtros, modos) o `tablist` (secciones).
+ *  Solo la opción activa está en el orden de tabulación y las flechas mueven la selección.
+ *  `Tabs` es este mismo componente en modo pestañas. */
 export function SegmentedControl<T extends string>({
   options,
   value,
@@ -27,11 +29,13 @@ export function SegmentedControl<T extends string>({
   label,
   size = 'sm',
   className,
+  semantics = 'radio',
 }: SegmentedControlProps<T>) {
+  const tabs = semantics === 'tabs'
   const refs = useRef<(HTMLButtonElement | null)[]>([])
 
   function onKeyDown(e: KeyboardEvent, index: number) {
-    const delta = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0
+    const delta = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0
     const jump = e.key === 'Home' ? 0 : e.key === 'End' ? options.length - 1 : null
     if (!delta && jump === null) return
     e.preventDefault()
@@ -41,7 +45,7 @@ export function SegmentedControl<T extends string>({
   }
 
   return (
-    <div role="tablist" aria-label={label} className={cn('inline-flex gap-0.5 rounded-md border border-border p-0.5', className)}>
+    <div role={tabs ? 'tablist' : 'radiogroup'} aria-label={label} className={cn('inline-flex gap-0.5 rounded-md border border-border p-0.5', className)}>
       {options.map((o, i) => {
         const selected = value === o.value
         return (
@@ -51,8 +55,9 @@ export function SegmentedControl<T extends string>({
               refs.current[i] = el
             }}
             type="button"
-            role="tab"
-            aria-selected={selected}
+            role={tabs ? 'tab' : 'radio'}
+            aria-selected={tabs ? selected : undefined}
+            aria-checked={tabs ? undefined : selected}
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(o.value)}
             onKeyDown={(e) => onKeyDown(e, i)}

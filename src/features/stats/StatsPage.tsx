@@ -44,8 +44,8 @@ export function StatsPage() {
           <h1 className="text-xl font-semibold tracking-tight text-text">Cómo te ha ido</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {tab !== 'informes' && <SegmentedControl options={STATS_RANGE_OPTIONS} value={range} onChange={setRange} />}
-          <Tabs tabs={TABS} value={tab} onChange={setTab} />
+          {tab !== 'informes' && <SegmentedControl options={STATS_RANGE_OPTIONS} value={range} onChange={setRange} label="Rango de fechas" />}
+          <Tabs tabs={TABS} value={tab} onChange={setTab} label="Sección de estadísticas" />
         </div>
       </header>
 

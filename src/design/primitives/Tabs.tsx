@@ -25,6 +25,7 @@ export function Tabs<T extends string>({ tabs, value, onChange, label, className
       onChange={onChange}
       label={label}
       size="md"
+      semantics="tabs"
       className={className}
     />
   )
