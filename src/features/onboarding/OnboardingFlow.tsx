@@ -7,6 +7,7 @@ import { generateDemoData } from '../../db/demoSeed'
 import { Button, Dialog, Input, Kbd } from '../../design/primitives'
 import { useQuickAddStore } from '../tasks/quickAddStore'
 import { useToastStore } from '../../lib/toastStore'
+import { useStage } from '../../app/stage/stageStore'
 
 type Step = 'welcome' | 'choice' | 'tips'
 type DataChoice = 'fresh' | 'demo' | null
@@ -38,7 +39,8 @@ const TIPS = [
 ]
 
 export function OnboardingFlow() {
-  const { show } = useOnboardingGate()
+  const { show: wanted } = useOnboardingGate()
+  const show = useStage('onboarding', wanted)
   const [step, setStep] = useState<Step>('welcome')
   const [name, setName] = useState('')
   const [choice, setChoice] = useState<DataChoice>(null)

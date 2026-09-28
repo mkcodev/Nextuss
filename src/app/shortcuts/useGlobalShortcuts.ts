@@ -10,7 +10,7 @@ import { useUndoStore } from '../../lib/undoStore'
 import { EXTRA_GO_ITEMS, NAV_ITEMS, selectNav } from '../navItems'
 import { usePluginsStore } from '../../features/plugins/pluginsStore'
 import { ensurePanelVisible } from '../dock/ensurePanelVisible'
-import { useRoutinePlayerStore } from '../../features/routines/routinePlayerStore'
+import { stageOwnsKeyboard } from '../stage/stageStore'
 
 const GO_SEQUENCE_WINDOW_MS = 700
 
@@ -36,9 +36,9 @@ export function useGlobalShortcuts() {
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      // El reproductor de rutinas a pantalla completa lleva su propio teclado: nada de abrir cosas detrás.
-      const player = useRoutinePlayerStore.getState()
-      if (player.visible && player.routineId != null) return
+      // Una pantalla completa con su propio teclado (reproductor de rutinas, Virtualización) delante:
+      // nada de abrir cosas detrás.
+      if (stageOwnsKeyboard()) return
 
       const { toggleLeft, toggleRight } = useUIStore.getState()
       const { paletteOpen, helpOpen, togglePalette, closePalette, closeHelp, openHelp } =

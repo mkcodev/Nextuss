@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { useStage } from '../../app/stage/stageStore'
 import { format } from 'date-fns'
 import { Check, CircleCheckBig, Minimize2, Pause, Play, Plus, SkipForward, Volume2, VolumeX, X } from 'lucide-react'
 import { Button, Icon, IconButton, Kbd, ProgressBar, RingProgress, SegmentedControl } from '../../design/primitives'
@@ -50,8 +51,9 @@ function useNow(): number {
  * mismo estado: "Paso" (un paso enorme con su cuenta atrás) y "Línea" (todos los pasos con su hora).
  * Las dos llevan arriba la barra de progreso total y la hora a la que terminarás. */
 export function RoutinePlayer() {
-  const visible = useRoutinePlayerStore((s) => s.visible && s.routineId != null)
-  return <AnimatePresence>{visible && <PlayerPanel />}</AnimatePresence>
+  const wanted = useRoutinePlayerStore((s) => s.visible && s.routineId != null)
+  const onStage = useStage('routinePlayer', wanted)
+  return <AnimatePresence>{onStage && <PlayerPanel />}</AnimatePresence>
 }
 
 function PlayerPanel() {

@@ -11,11 +11,13 @@ import { useHabitsWithStats } from '../habits/useHabitsWithStats'
 import { useDayCloseStore } from './dayCloseStore'
 import type { Task } from '../../db/types'
 import { emit } from '../../lib/events/bus'
+import { useStage } from '../../app/stage/stageStore'
 
 type Step = 1 | 2 | 3
 
 export function DayCloseFlow() {
-  const { open, date, close } = useDayCloseStore()
+  const { open: wanted, date, close } = useDayCloseStore()
+  const open = useStage('dayClose', wanted)
   const [step, setStep] = useState<Step>(1)
   const [reflection, setReflection] = useState('')
 

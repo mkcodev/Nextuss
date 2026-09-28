@@ -10,6 +10,7 @@ import { CheckInFields } from '../checkin/CheckInFields'
 import { OverdueTasks } from '../planner/OverdueTasks'
 import { useDayStartStore } from './dayStartStore'
 import type { Task } from '../../db/types'
+import { useStage } from '../../app/stage/stageStore'
 
 type Step = 1 | 2 | 3
 
@@ -20,7 +21,8 @@ function formatHours(min: number): string {
 }
 
 export function DayStartFlow() {
-  const { open, date, close } = useDayStartStore()
+  const { open: wanted, date, close } = useDayStartStore()
+  const open = useStage('dayStart', wanted)
   const [step, setStep] = useState<Step>(1)
 
   const overdueTasks = useLiveQuery(() => (date ? getOverdueTasks(date) : Promise.resolve([] as Task[])), [date])
