@@ -144,7 +144,7 @@ export function TodayView() {
       {topInsight && (
         <button
           onClick={() => navigate('/estadisticas?tab=insights')}
-          className="flex w-full items-start gap-1.5 rounded-xl border border-border p-2.5 text-left hover:border-accent"
+          className="flex w-full items-start gap-1.5 rounded-lg border border-border p-2.5 text-left hover:border-accent"
         >
           <Sparkles size={12} strokeWidth={1.75} className="mt-0.5 shrink-0 text-accent" />
           <span className="truncate text-xs text-text-muted">{topInsight.title}</span>

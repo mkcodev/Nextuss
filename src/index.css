@@ -29,6 +29,12 @@
   --color-danger: var(--nx-danger);
 
   --color-on-accent: var(--nx-on-accent);
+  /* Fondo tras diálogos y hojas. */
+  --color-scrim: rgb(0 0 0 / 0.35);
+
+  /* Tamaño intermedio de controles (botones, cabeceras de tabla): entre text-xs y text-sm. */
+  --text-ui: 0.8125rem;
+  --text-ui--line-height: 1.25rem;
 
   --shadow-card: var(--nx-shadow-card);
   --shadow-dialog: var(--nx-shadow-dialog);

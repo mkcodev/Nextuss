@@ -44,7 +44,7 @@ export function ToggleGroup<T extends string | number>({
             onClick={() => onChange(on && allowDeselect ? undefined : o.value)}
             style={on ? o.activeStyle : undefined}
             className={cn(
-              'inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border px-2.5 text-[13px] font-medium transition-colors',
+              'inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border px-2.5 text-ui font-medium transition-colors',
               on
                 ? o.activeStyle
                   ? 'font-semibold'

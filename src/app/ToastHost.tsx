@@ -51,7 +51,7 @@ export function ToastHost() {
               {toast.icon && (
                 <span
                   className={cn(
-                    'flex shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent',
+                    'flex shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent',
                     toast.variant === 'celebrate' ? 'h-11 w-11' : 'h-9 w-9',
                     toast.variant && VARIANT_ICON_CLASSES[toast.variant],
                   )}

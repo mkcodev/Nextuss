@@ -27,7 +27,7 @@ export function FocusIndicator() {
       type="button"
       onClick={() => ensurePanelVisible('focus')}
       aria-label={`${label}: quedan ${formatTime(remaining)}${timer.running ? '' : ', en pausa'}. Abrir panel de enfoque`}
-      className="flex h-8 items-center gap-1.5 rounded-sm border border-accent/40 bg-accent-soft px-2.5 text-[13px] font-medium tabular-nums text-accent transition-colors hover:border-accent"
+      className="flex h-8 items-center gap-1.5 rounded-sm border border-accent/40 bg-accent-soft px-2.5 text-ui font-medium tabular-nums text-accent transition-colors hover:border-accent"
     >
       {timer.running ? <Timer size={14} strokeWidth={1.75} /> : <Pause size={14} strokeWidth={1.75} />}
       <span className="hidden sm:inline">{label}</span>

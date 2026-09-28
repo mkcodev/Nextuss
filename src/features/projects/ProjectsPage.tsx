@@ -119,7 +119,7 @@ export function ProjectsPage() {
           {archivedProjects.map((project) => (
             <div
               key={project.id}
-              className="flex items-center justify-between rounded-xl border border-border bg-bg-soft px-3.5 py-2.5"
+              className="flex items-center justify-between rounded-lg border border-border bg-bg-soft px-3.5 py-2.5"
             >
               <span className="text-sm text-text-muted">{project.name}</span>
               <Button variant="secondary" onClick={() => archiveProject(project.id!, false)} className="px-2.5 py-1 text-xs">

@@ -171,14 +171,14 @@ export function ResumenTab({ range }: ResumenTabProps) {
 
       <ChartCard title="Objetivos" subtitle="Periodo actual">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="flex items-center gap-3 rounded-xl border border-border p-3">
+          <div className="flex items-center gap-3 rounded-lg border border-border p-3">
             <Compass size={18} strokeWidth={1.75} className="shrink-0 text-accent" />
             <div>
               <p className="text-xs text-text-faint">Racha North Star</p>
               <p className="text-lg font-semibold text-text">{northStarStreak === undefined ? '—' : `${northStarStreak} periodos`}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 rounded-xl border border-border p-3">
+          <div className="flex items-center gap-3 rounded-lg border border-border p-3">
             <CheckCircle2 size={18} strokeWidth={1.75} className="shrink-0 text-accent" />
             <div>
               <p className="text-xs text-text-faint">Objetivos de la semana</p>
@@ -187,7 +187,7 @@ export function ResumenTab({ range }: ResumenTabProps) {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 rounded-xl border border-border p-3">
+          <div className="flex items-center gap-3 rounded-lg border border-border p-3">
             <CheckCircle2 size={18} strokeWidth={1.75} className="shrink-0 text-accent" />
             <div>
               <p className="text-xs text-text-faint">Objetivos del mes</p>

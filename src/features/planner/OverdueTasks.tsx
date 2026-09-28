@@ -59,14 +59,14 @@ export function OverdueTasks({ date }: { date: string }) {
           <button
             type="button"
             onClick={() => void moveTasksToDateBulk(ids, tomorrow)}
-            className="rounded-sm px-2 py-1 text-[13px] font-medium text-text-muted hover:bg-surface-hover hover:text-text"
+            className="rounded-sm px-2 py-1 text-ui font-medium text-text-muted hover:bg-surface-hover hover:text-text"
           >
             Mover todas a mañana
           </button>
           <button
             type="button"
             onClick={() => void parkTasksBulk(ids)}
-            className="rounded-sm px-2 py-1 text-[13px] font-medium text-text-muted hover:bg-surface-hover hover:text-text"
+            className="rounded-sm px-2 py-1 text-ui font-medium text-text-muted hover:bg-surface-hover hover:text-text"
           >
             Aparcar todas
           </button>
@@ -122,7 +122,7 @@ export function OverdueTasks({ date }: { date: string }) {
           type="button"
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
-          className="mt-1.5 rounded-sm px-1 text-[13px] font-medium text-text-muted hover:text-text"
+          className="mt-1.5 rounded-sm px-1 text-ui font-medium text-text-muted hover:text-text"
         >
           {expanded ? 'Ver menos' : `Ver las ${tasks.length - VISIBLE} restantes`}
         </button>

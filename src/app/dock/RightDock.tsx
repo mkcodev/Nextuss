@@ -301,7 +301,7 @@ function MobileDockSheet() {
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-dialog flex items-end bg-black/35 md:hidden"
+          className="fixed inset-0 z-dialog flex items-end bg-scrim md:hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
