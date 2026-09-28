@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { addDays, format, subDays } from 'date-fns'
@@ -21,7 +21,7 @@ import { UnscheduledTray } from '../planner/UnscheduledTray'
 import { CapacityBanner } from '../planner/CapacityBanner'
 import { OverdueTasks } from '../planner/OverdueTasks'
 import { NorthStarCallout } from '../planner/NorthStarCallout'
-import { getTasksForDate, getOverdueTasks, getUnscheduledTasks } from '../../db/repositories/tasks'
+import { getTasksForDate, getUnscheduledTasks } from '../../db/repositories/tasks'
 import { getReview } from '../../db/repositories/reviews'
 import { listGoalsForPeriod } from '../../db/repositories/goals'
 import { getCheckInForDate } from '../../db/repositories/checkins'
@@ -35,9 +35,8 @@ import { DayTimeCard } from './DayTimeCard'
 import { IfPlugin } from '../plugins/PluginGate'
 import { usePluginEnabled } from '../plugins/pluginsStore'
 import { db } from '../../db/schema'
-import { shouldOpenDayStart, shouldShowDayClose } from '../rituals/gates'
+import { shouldShowDayClose } from '../rituals/gates'
 import type { Task } from '../../db/types'
-import { useDayStartStore } from '../rituals/dayStartStore'
 import { useDayCloseStore } from '../rituals/dayCloseStore'
 
 export function TodayView() {
@@ -95,36 +94,12 @@ export function TodayView() {
     () => (isToday ? getCheckInForDate(date) : Promise.resolve(null)),
     [isToday, date],
   )
-  const overdueForGate = useLiveQuery(() => (isToday ? getOverdueTasks(date) : Promise.resolve([] as Task[])), [isToday, date])
   const tasksToday = useLiveQuery(() => (isToday ? getTasksForDate(date) : Promise.resolve([] as Task[])), [isToday, date])
   const settings = useLiveQuery(() => db.settings.get(1), [])
-  const openDayStart = useDayStartStore((s) => s.openFlow)
   const openDayClose = useDayCloseStore((s) => s.openFlow)
-  const dayStartOpen = useDayStartStore((s) => s.open)
   const dayCloseOpen = useDayCloseStore((s) => s.open)
-  // Una vez se ha abierto (o descartado) un ritual para `date` en esta sesión, no se vuelve a
-  // proponer aunque `checkin` tarde en reflejar el `markRitual*` que se escribió al cerrar — ese
-  // escritura es fire-and-forget (`void markRitualStart(...)`), así que depender solo del
-  // round-trip a Dexie para no reabrirse dejaba una ventana real en la que el diálogo se
-  // reabría solo a sí mismo justo después de terminarlo.
-  const promptedDayStartRef = useRef<string | null>(null)
-
-  // Convención de carga (docs/CONVENCIONES.md): `undefined` = cargando, `null` = sin fila. Las
-  // puertas esperan a todas sus entradas, `checkin` incluido — un día sin check-in resuelve a `null`.
-  useEffect(() => {
-    if (!isToday || dayStartOpen || dayCloseOpen || promptedDayStartRef.current === date) return
-    const open = shouldOpenDayStart({
-      checkin,
-      overdueCount: overdueForGate?.length,
-      habitCount: entries?.length,
-      taskCount: tasksToday?.length,
-      onboardingCompleted: settings?.onboardingCompleted,
-    })
-    if (open) {
-      promptedDayStartRef.current = date
-      openDayStart(date)
-    }
-  }, [isToday, dayStartOpen, dayCloseOpen, checkin, overdueForGate, date, openDayStart, settings, entries, tasksToday])
+  // «Empezar el día» ya no se abre desde aquí: lo abre su lanzador integrado al arrancar la app
+  // (`db/builtinLaunchers.ts`, puerta en `rituals/dayStartGate.ts`).
 
   // Cierre del día: se sugiere en línea en vez de abrir un modal por sorpresa (a última hora del día,
   // un recuento de lo pendiente delante de todo era un valle emocional al abrir la app).

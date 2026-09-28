@@ -34,7 +34,11 @@ let intervalId: ReturnType<typeof setInterval> | null = null
  * render ya estén suscritos. Devuelve la función que lo para. */
 export function startAppClock(): () => void {
   if (intervalId != null) return () => {}
-  const first = setTimeout(() => tick(new Date()), 0)
+  const first = setTimeout(() => {
+    const now = new Date()
+    emit('app.opened', { date: logicalDateKey(now) })
+    tick(now)
+  }, 0)
   intervalId = setInterval(() => tick(new Date()), TICK_MS)
   return () => {
     clearTimeout(first)

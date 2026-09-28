@@ -11,9 +11,10 @@ import { logicalDateKey } from '../../lib/events/clock'
 import { setNavigator } from '../../app/navigateBridge'
 import { usePluginsStore } from '../plugins/pluginsStore'
 import { launcherCauseId, matchLaunchers, type RunnerContext } from './runner'
-import { runActions } from './actions'
+import { LauncherSkip, runActions } from './actions'
 
 const LISTENED: AppEventType[] = [
+  'app.opened',
   'day.firstOpen',
   'clock.tick',
   'task.completed',
@@ -68,7 +69,8 @@ export async function processEvent(event: AppEvent, now: Date = new Date()): Pro
       await logLauncherRun({ ...base, launcherId: launcher.id!, firedAt: Date.now(), status: 'ok' })
     } catch (e) {
       const reason = e instanceof Error ? e.message : String(e)
-      await logLauncherRun({ ...base, launcherId: launcher.id!, firedAt: Date.now(), status: 'error', reason })
+      const status = e instanceof LauncherSkip ? 'skipped' : 'error'
+      await logLauncherRun({ ...base, launcherId: launcher.id!, firedAt: Date.now(), status, reason })
     }
   }
 }

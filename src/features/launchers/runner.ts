@@ -2,7 +2,7 @@
 // de los que coincidían. Sin Dexie ni React: todo lo que necesita llega en `RunnerContext`.
 import type { Launcher, LauncherTrigger } from '../../db/types'
 import type { AppEvent } from '../../lib/events/bus'
-import { getPlugin } from '../plugins/registry'
+import { PLUGINS } from '../plugins/registry'
 import type { PluginId } from '../plugins/types'
 
 /** Largo máximo de una cadena de lanzadores (A dispara un evento que dispara B…). */
@@ -51,6 +51,8 @@ export function triggerMatches(trigger: LauncherTrigger, event: AppEvent, now: D
       )
     case 'habit.logged':
       return trigger.habitId == null || p.habitId === trigger.habitId
+    case 'virtualization.completed':
+      return trigger.skipped == null || p.skipped === trigger.skipped
     default:
       return true
   }
@@ -62,7 +64,9 @@ export function skipReason(launcher: Launcher, event: AppEvent, ctx: RunnerConte
   const { conditions: c } = launcher
   if (!ctx.onboardingCompleted) return 'la bienvenida no ha terminado'
   if (launcher.pluginId && !ctx.enabledPlugins.has(launcher.pluginId as PluginId)) {
-    return `el plugin ${getPlugin(launcher.pluginId as PluginId).name} está desactivado`
+    // Un plugin que aún no existe en el registro (p. ej. la Virtualización antes de #97) cuenta como desactivado.
+    const name = PLUGINS.find((p) => p.id === launcher.pluginId)?.name ?? launcher.pluginId
+    return `el plugin ${name} está desactivado`
   }
   if (event.meta.cause.includes(launcherCauseId(id))) return 'bucle: ya se disparó en esta cadena'
   if (event.meta.cause.length >= MAX_CHAIN_DEPTH) return 'cadena demasiado larga'
