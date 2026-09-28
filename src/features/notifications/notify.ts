@@ -3,6 +3,7 @@ import type { Settings } from '../../db/types'
 import { getNotificationPermissionState } from './permission'
 import { isWithinQuietHours, type PendingNotification } from './rules'
 import { sendMessage as sendTelegramMessage } from '../telegram/client'
+import { isPluginEnabled } from '../plugins/pluginsStore'
 
 /** Envía un aviso a notificación nativa, a Telegram, o a ambos según Ajustes (Fase 5.5 reutiliza
  * exactamente esta regla y el `notificationLog` de 5.2 — un mismo evento, dos canales posibles).
@@ -16,7 +17,7 @@ export async function sendNotification(
   if (isWithinQuietHours(settings, now)) return false
 
   const nativeOk = getNotificationPermissionState() === 'granted'
-  const telegramOk = !!(settings.telegramBotToken?.trim() && settings.telegramChatId?.trim() && settings.telegramForwardNotifications)
+  const telegramOk = isPluginEnabled('telegram') && !!(settings.telegramBotToken?.trim() && settings.telegramChatId?.trim() && settings.telegramForwardNotifications)
   if (!nativeOk && !telegramOk) return false
 
   const already = await db.notificationLog.where('key').equals(pending.key).first()
