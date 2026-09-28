@@ -31,6 +31,7 @@ import { DayPlanSuggestion } from '../ai/DayPlanSuggestion'
 import { CheckInCard } from './CheckInCard'
 import { NowBlock } from './NowBlock'
 import { RoutineNowCard } from '../routines/RoutineNowCard'
+import { DayTimeCard } from './DayTimeCard'
 import { db } from '../../db/schema'
 import { shouldOpenDayStart, shouldShowDayClose } from '../rituals/gates'
 import type { Task } from '../../db/types'
@@ -250,6 +251,7 @@ export function TodayView() {
               </Button>
             </div>
           )}
+          {isToday && <DayTimeCard date={date} />}
           {isToday && <RoutineNowCard date={date} />}
           {isToday && <NowBlock date={date} />}
           {needsReview && (
@@ -260,7 +262,7 @@ export function TodayView() {
             </Alert>
           )}
           {isToday && <OverdueTasks date={date} />}
-          <CapacityBanner date={date} />
+          <CapacityBanner date={date} onlyWarn={isToday} />
           <Timeline date={date} />
         </div>
 
