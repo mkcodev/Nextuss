@@ -9,21 +9,24 @@ import { sendNotification } from '../notifications/notify'
 import { routineStepNotification } from '../notifications/rules'
 import { stepPlannedSec, stepRemainingSec } from './player'
 import { useRoutinePlayerStore } from './routinePlayerStore'
+import { emit } from '../../lib/events/bus'
 
 /** Guarda la pasada en curso: terminada siempre; abandonada, solo si se hizo al menos un paso
  * (salir al segundo 3 no es una pasada). */
 async function saveRun(): Promise<void> {
   const s = useRoutinePlayerStore.getState()
   if (s.routineId == null || (!s.finished && s.completedSteps === 0)) return
+  const date = dateKey(new Date(s.runStartedAt))
   await logRoutineRun({
     routineId: s.routineId,
-    date: dateKey(new Date(s.runStartedAt)),
+    date,
     startedAt: s.runStartedAt,
     finishedAt: Date.now(),
     completedSteps: s.completedSteps,
     totalSteps: s.steps.length,
     finished: s.finished,
   })
+  emit('routine.finished', { routineId: s.routineId, date, finished: s.finished })
 }
 
 /** Empieza `routine` a pantalla completa. Si ya iba otra, se guarda lo hecho de esa antes de cambiar;

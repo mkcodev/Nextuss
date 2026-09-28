@@ -8,6 +8,7 @@ import { dateKey, weekKey } from '../../lib/dates'
 import { previousPeriodKey } from '../../lib/periods'
 import { sendNotification } from './notify'
 import { isPluginEnabled } from '../plugins/pluginsStore'
+import { on } from '../../lib/events/bus'
 import type { PluginId } from '../plugins/types'
 import type { Habit, HabitLog, Routine, RoutineRun, Settings, Task } from '../../db/types'
 import {
@@ -71,8 +72,6 @@ export function collectNotifications(
   return RULES.filter((r) => !r.pluginId || enabled(r.pluginId)).flatMap((r) => r.run(inputs))
 }
 
-const POLL_MS = 30_000
-
 async function evaluate(now: Date): Promise<void> {
   const settings = await getOrCreateSettings()
   if (!settings.notificationsEnabled) return
@@ -106,19 +105,16 @@ async function evaluate(now: Date): Promise<void> {
   }
 }
 
-let intervalId: ReturnType<typeof setInterval> | null = null
+let unsubscribe: (() => void) | null = null
 
-/** Un único poller de 30s mientras la app está abierta — nada de `setTimeout` por regla ni SW
- * timers, que son estrangulados/matados por el navegador cuando la pestaña está en segundo plano. */
+/** Evalúa en cada tick del reloj de la app (`clock.tick`, 30 s) mientras está abierta — nada de
+ * `setTimeout` por regla ni SW timers, que el navegador estrangula con la pestaña en segundo plano. */
 export function startNotificationScheduler(): void {
-  if (intervalId != null) return
-  void evaluate(new Date())
-  intervalId = setInterval(() => void evaluate(new Date()), POLL_MS)
+  if (unsubscribe) return
+  unsubscribe = on('clock.tick', () => void evaluate(new Date()))
 }
 
 export function stopNotificationScheduler(): void {
-  if (intervalId != null) {
-    clearInterval(intervalId)
-    intervalId = null
-  }
+  unsubscribe?.()
+  unsubscribe = null
 }

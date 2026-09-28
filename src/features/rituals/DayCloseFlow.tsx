@@ -10,6 +10,7 @@ import { getCheckInForDate, markRitualClose, upsertCheckIn } from '../../db/repo
 import { useHabitsWithStats } from '../habits/useHabitsWithStats'
 import { useDayCloseStore } from './dayCloseStore'
 import type { Task } from '../../db/types'
+import { emit } from '../../lib/events/bus'
 
 type Step = 1 | 2 | 3
 
@@ -47,6 +48,7 @@ export function DayCloseFlow() {
   const finish = async () => {
     await upsertCheckIn(date, { note: reflection.trim() || undefined })
     await markRitualClose(date)
+    emit('day.closed', { date })
     close()
   }
 

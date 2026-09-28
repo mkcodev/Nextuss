@@ -1,5 +1,8 @@
 import { db } from '../schema'
 import type { CheckIn } from '../types'
+import { emit } from '../../lib/events/bus'
+
+const isAnswered = (c: Pick<CheckIn, 'energy' | 'mood' | 'focus'>) => c.energy != null && c.mood != null && c.focus != null
 
 /** `null` (no `undefined`) si no hay check-in: `undefined` queda reservado para "cargando" en `useLiveQuery`. */
 export async function getCheckInForDate(date: string): Promise<CheckIn | null> {
@@ -22,6 +25,8 @@ export async function upsertCheckIn(
     const entry: CheckIn = { date, energy: null, mood: null, focus: null, ...values }
     await db.checkins.add(entry)
   }
+  const before = existing ?? { energy: null, mood: null, focus: null }
+  if (!isAnswered(before) && isAnswered({ ...before, ...values })) emit('checkin.completed', { date })
 }
 
 async function markRitual(date: string, field: 'ritualStartDismissedAt' | 'ritualCloseDismissedAt') {

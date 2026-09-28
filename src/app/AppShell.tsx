@@ -14,6 +14,7 @@ import { useGlobalShortcuts } from './shortcuts/useGlobalShortcuts'
 import { usePwaShortcutActions } from './shortcuts/usePwaShortcutActions'
 import { useServiceWorker } from '../features/pwa/useServiceWorker'
 import { useNotificationScheduler } from '../features/notifications/useNotificationScheduler'
+import { useAppClock } from '../features/events/useAppClock'
 import { RoutineForm } from '../features/routines/RoutineForm'
 import { useRoutineFormStore } from '../features/routines/routineFormStore'
 import { useTheme } from '../design/useTheme'
@@ -60,6 +61,7 @@ export function AppShell() {
   usePwaShortcutActions()
   useServiceWorker()
   useNotificationScheduler()
+  useAppClock() // después de los oyentes del reloj: su primer tick ya los encuentra suscritos
   useBackupGuard()
   useTheme()
   const formHabitNonce = useHabitFormStore((s) => s.nonce)
