@@ -21,7 +21,14 @@ export async function sendNotification(
 
   const already = await db.notificationLog.where('key').equals(pending.key).first()
   if (already) return false
-  await db.notificationLog.add({ key: pending.key, sentAt: Date.now() })
+  // `key` es único: si otra evaluación (otra pestaña, el doble montaje de desarrollo) lo apuntó entre la
+  // consulta y aquí, el `add` falla con ConstraintError y ese aviso ya es suyo — no se repite.
+  try {
+    await db.notificationLog.add({ key: pending.key, sentAt: Date.now() })
+  } catch (e) {
+    if (e instanceof Error && e.name === 'ConstraintError') return false
+    throw e
+  }
 
   if (nativeOk) {
     const options: NotificationOptions & { data?: { url?: string } } = {
