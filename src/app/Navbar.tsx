@@ -18,6 +18,7 @@ import { useOverlayStore } from './shortcuts/overlayStore'
 import { useQuickAddStore } from '../features/tasks/quickAddStore'
 import { usePlayerProgress } from '../features/gamification/usePlayerProgress'
 import { useOnlineStatus } from '../features/pwa/useOnlineStatus'
+import { FocusIndicator } from '../features/focus/FocusIndicator'
 import { initials } from '../lib/text'
 import { NAV_ITEMS } from './navItems'
 import { Avatar, Kbd, Menu, MenuItem, MenuLabel } from '../design/primitives'
@@ -122,16 +123,18 @@ export function Navbar() {
           </div>
         )}
 
+        <FocusIndicator />
+
         <button
           type="button"
           onClick={() => openQuickAdd()}
-          aria-label="Captura rápida"
-          title="Captura rápida (i)"
+          aria-label="Nueva tarea"
+          title="Nueva tarea (n)"
           className="flex h-8 items-center gap-1.5 rounded-sm border border-border bg-surface px-2.5 text-[13px] font-medium text-text transition-colors hover:bg-surface-hover"
         >
           <Plus size={14} strokeWidth={2} />
           <span className="hidden sm:inline">Nuevo</span>
-          <Kbd className="hidden sm:inline-flex">i</Kbd>
+          <Kbd className="hidden sm:inline-flex">n</Kbd>
         </button>
 
         <div

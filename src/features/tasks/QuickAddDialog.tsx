@@ -5,7 +5,7 @@ import { Button, Dialog, Input, Kbd } from '../../design/primitives'
 import { quickParse } from '../../lib/quickParse'
 import { foldText } from '../../lib/text'
 import { minutesToTime, timeToMinutes, todayKey } from '../../lib/dates'
-import { createTask } from '../../db/repositories/tasks'
+import { createTask, trashTask } from '../../db/repositories/tasks'
 import { linkTaskToGoal, listOpenGoals } from '../../db/repositories/goals'
 import { findOrCreateTag } from '../../db/repositories/tags'
 import { useQuickAddStore } from './quickAddStore'
@@ -48,7 +48,8 @@ export function QuickAddDialog() {
     : undefined
 
   const finalTitle = aiResult?.title ?? parsed.title
-  const finalScheduledDate = aiResult?.scheduledDate ?? parsed.scheduledDate
+  // Sin fecha escrita cae en hoy: una tarea sin fecha queda en «Sin planificar» y se pierde de vista.
+  const finalScheduledDate = aiResult?.scheduledDate ?? parsed.scheduledDate ?? todayKey()
   const finalEstimateMin = aiResult?.estimateMin ?? parsed.estimateMin
   const finalEnergy = aiResult?.energy
 
@@ -79,6 +80,12 @@ export function QuickAddDialog() {
       tagIds,
     })
     if (matchedGoal?.id) await linkTaskToGoal(matchedGoal.id, id)
+    push({
+      title: 'Tarea creada',
+      description: `${finalTitle.trim()} · ${formatDateChip(finalScheduledDate)}. Toca para deshacer.`,
+      variant: 'success',
+      onClick: () => void trashTask(id),
+    })
     handleClose()
   }
 
@@ -112,9 +119,6 @@ export function QuickAddDialog() {
     }
   }
 
-  const hasPreview =
-    finalScheduledDate || parsed.scheduledStart || parsed.priority || finalEstimateMin || parsed.tagNames.length > 0 || parsed.goalQuery
-
   return (
     <Dialog open={open} onClose={handleClose} title="Tarea rápida">
       <form
@@ -141,48 +145,44 @@ export function QuickAddDialog() {
           className="!py-2.5 !text-sm"
         />
 
-        {hasPreview && (
-          <div className="flex flex-wrap gap-1.5">
-            {finalScheduledDate && (
-              <span className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-text-muted">
-                <Calendar size={11} strokeWidth={1.75} /> {formatDateChip(finalScheduledDate)}
-              </span>
-            )}
-            {parsed.scheduledStart && (
-              <span className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-text-muted">
-                <Clock size={11} strokeWidth={1.75} /> {parsed.scheduledStart}
-              </span>
-            )}
-            {parsed.priority && (
-              <span className="flex items-center gap-1.5 rounded-full border border-border bg-surface px-2 py-0.5 text-xs font-medium text-text">
-                <PriorityBars p={parsed.priority} /> {PRIORITY_NAMES[parsed.priority]}
-              </span>
-            )}
-            {finalEstimateMin != null && (
-              <span className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-text-muted">
-                <Hourglass size={11} strokeWidth={1.75} />
-                {finalEstimateMin < 60 ? `${finalEstimateMin} min` : `${finalEstimateMin / 60} h`}
-              </span>
-            )}
-            {parsed.tagNames.map((tag) => (
-              <span
-                key={tag}
-                className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-text-muted"
-              >
-                <Tag size={11} strokeWidth={1.75} /> {tag}
-              </span>
-            ))}
-            {parsed.goalQuery && (
-              <span
-                className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${
-                  matchedGoal ? 'border-accent bg-accent-soft text-accent' : 'border-border bg-surface text-text-faint'
-                }`}
-              >
-                <Target size={11} strokeWidth={1.75} /> {matchedGoal ? matchedGoal.title : `sin coincidencia: ${parsed.goalQuery}`}
-              </span>
-            )}
-          </div>
-        )}
+        <div className="flex flex-wrap gap-1.5">
+          <span className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-text-muted">
+            <Calendar size={11} strokeWidth={1.75} /> {finalScheduledDate === todayKey() ? 'Hoy' : formatDateChip(finalScheduledDate)}
+          </span>
+          {parsed.scheduledStart && (
+            <span className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-text-muted">
+              <Clock size={11} strokeWidth={1.75} /> {parsed.scheduledStart}
+            </span>
+          )}
+          {parsed.priority && (
+            <span className="flex items-center gap-1.5 rounded-full border border-border bg-surface px-2 py-0.5 text-xs font-medium text-text">
+              <PriorityBars p={parsed.priority} /> {PRIORITY_NAMES[parsed.priority]}
+            </span>
+          )}
+          {finalEstimateMin != null && (
+            <span className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-text-muted">
+              <Hourglass size={11} strokeWidth={1.75} />
+              {finalEstimateMin < 60 ? `${finalEstimateMin} min` : `${finalEstimateMin / 60} h`}
+            </span>
+          )}
+          {parsed.tagNames.map((tag) => (
+            <span
+              key={tag}
+              className="flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-text-muted"
+            >
+              <Tag size={11} strokeWidth={1.75} /> {tag}
+            </span>
+          ))}
+          {parsed.goalQuery && (
+            <span
+              className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${
+                matchedGoal ? 'border-accent bg-accent-soft text-accent' : 'border-border bg-surface text-text-faint'
+              }`}
+            >
+              <Target size={11} strokeWidth={1.75} /> {matchedGoal ? matchedGoal.title : `sin coincidencia: ${parsed.goalQuery}`}
+            </span>
+          )}
+        </div>
 
         {aiAvailable && (
           <button
