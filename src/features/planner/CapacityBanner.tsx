@@ -7,9 +7,11 @@ function formatHours(min: number): string {
   return m === 0 ? `${h} h` : `${h} h ${m} min`
 }
 
-export function CapacityBanner({ date }: { date: string }) {
+/** `onlyWarn`: solo el aviso de exceso. En el hoy real, "Tiempo de hoy" ya da el tiempo libre contando
+ * desde ahora, y el cálculo de aquí (jornada entera) contradecía ese número. */
+export function CapacityBanner({ date, onlyWarn = false }: { date: string; onlyWarn?: boolean }) {
   const { scheduledMin, availableMin, overCapacity } = useDailyCapacity(date)
-  if (scheduledMin === 0) return null
+  if (scheduledMin === 0 || (onlyWarn && !overCapacity)) return null
 
   if (overCapacity) {
     return (
