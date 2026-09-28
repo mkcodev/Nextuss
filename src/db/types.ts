@@ -223,6 +223,14 @@ export type RoutineView = 'step' | 'timeline'
 
 export type DayTimeView = 'ruler' | 'ring' | 'blocks'
 
+/** Estilo visual de la Virtualización (#97): 'a' nítido/geométrico (por defecto), 'b' orgánico de
+ * partículas, 'c' terminal/glitch. Los 3 comparten el mismo motor de fase (`features/virtualization/engine`). */
+export type VirtualizationTheme = 'a' | 'b' | 'c'
+
+/** Patrón de respiración guiada de la fase Presencia. Segundos por sub-fase en `BREATH_PATTERNS`
+ * (`features/virtualization/engine/breathCycle.ts`). */
+export type MeditationPattern = 'box4444' | '478' | 'coherence55'
+
 export type RecurrenceFreq = 'daily' | 'weekly' | 'monthly'
 /** `schedule`: fechas de calendario fijas (p.ej. "cada lunes"), se generan por adelantado.
  * `completion`: la siguiente ocurrencia se genera solo al completar la anterior, desplazada
@@ -385,6 +393,10 @@ export interface Settings {
   /** Plugins que el usuario ha activado o desactivado (clave = `PluginId`). Sin definir = valor por
    * defecto del registro (`features/plugins/registry.ts`). Desactivar nunca borra datos. */
   plugins?: Partial<Record<string, boolean>>
+  /** Estilo visual de la Virtualización (#97), elegible desde la Cabina y desde Ajustes. Sin definir = 'a'. */
+  virtualizationTheme?: VirtualizationTheme
+  /** Patrón de respiración de la fase Presencia. Sin definir = 'box4444' (caja 4-4-4-4). */
+  meditationPattern?: MeditationPattern
 }
 
 export interface DemoSeedRecord {

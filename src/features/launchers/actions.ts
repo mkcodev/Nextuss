@@ -16,6 +16,8 @@ import { playChime } from '../focus/chime'
 import { sendNotification } from '../notifications/notify'
 import { isPluginEnabled } from '../plugins/pluginsStore'
 import type { PluginId } from '../plugins/types'
+import { shouldOpenVirtualizationOn } from '../virtualization/gates'
+import { useVirtualizationStore } from '../virtualization/engine/useVirtualizationStore'
 
 export interface ActionContext {
   launcher: Launcher
@@ -60,6 +62,14 @@ export async function runActions(actions: readonly LauncherAction[], ctx: Action
   }
 }
 
+registerLauncherAction(
+  'virtualization.start',
+  async (_action, ctx) => {
+    if (!(await shouldOpenVirtualizationOn(ctx.date))) throw new LauncherSkip('la Virtualización está desactivada hoy')
+    useVirtualizationStore.getState().open()
+  },
+  'virtualization',
+)
 registerLauncherAction(
   'routine.start',
   async (action) => {

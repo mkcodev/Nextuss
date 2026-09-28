@@ -6,6 +6,7 @@ export const PLUGIN_IDS = [
   'tasks',
   'projects',
   'planning',
+  'virtualization',
   'checkin',
   'routines',
   'dayTime',
