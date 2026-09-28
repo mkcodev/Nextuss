@@ -5,7 +5,7 @@ import { Button, Dialog, Input, Kbd } from '../../design/primitives'
 import { quickParse } from '../../lib/quickParse'
 import { foldText } from '../../lib/text'
 import { minutesToTime, timeToMinutes, todayKey } from '../../lib/dates'
-import { createTask, trashTask } from '../../db/repositories/tasks'
+import { createTask, discardNewTask } from '../../db/repositories/tasks'
 import { linkTaskToGoal, listOpenGoals } from '../../db/repositories/goals'
 import { findOrCreateTag } from '../../db/repositories/tags'
 import { useQuickAddStore } from './quickAddStore'
@@ -84,7 +84,7 @@ export function QuickAddDialog() {
       title: 'Tarea creada',
       description: `${finalTitle.trim()} · ${finalScheduledDate === todayKey() ? 'hoy' : formatDateChip(finalScheduledDate)}`,
       variant: 'success',
-      action: { label: 'Deshacer', onClick: () => void trashTask(id) },
+      action: { label: 'Deshacer', onClick: () => void discardNewTask(id) },
     })
     handleClose()
   }

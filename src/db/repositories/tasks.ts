@@ -117,6 +117,19 @@ export async function trashTask(id: number): Promise<void> {
   await trashRows('tasks', ids, `Tarea eliminada: "${task.title}"`)
 }
 
+/** «Deshacer» justo después de crear: como si nunca hubiera existido. Borra la fila y su enlace a
+ * objetivos, sin pasar por la papelera (no es una eliminación que el usuario quiera recuperar). */
+export async function discardNewTask(id: number): Promise<void> {
+  await db.transaction('rw', db.tasks, db.goals, async () => {
+    await db.tasks.delete(id)
+    await db.goals
+      .filter((g) => g.taskIds.includes(id))
+      .modify((g) => {
+        g.taskIds = g.taskIds.filter((t) => t !== id)
+      })
+  })
+}
+
 export function scheduleTask(
   id: number,
   scheduledDate: string,
