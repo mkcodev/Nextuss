@@ -9,6 +9,10 @@ import './index.css'
 
 const root = createRoot(document.getElementById('root')!)
 
+// Sin esto el navegador puede desalojar IndexedDB bajo presión de espacio (sobre todo Safari/iOS),
+// y aquí están todos los datos del usuario. Si lo deniega no pasa nada: se sigue igual.
+void navigator.storage?.persist?.().catch(() => false)
+
 ensureSingletons()
   .then(async () => {
     await runDailyMaintenance()

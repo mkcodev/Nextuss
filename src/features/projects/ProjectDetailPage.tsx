@@ -171,7 +171,7 @@ export function ProjectDetailPage() {
                   aria-label={t.status === 'done' ? `Reabrir "${t.title}"` : `Completar "${t.title}"`}
                   className={cn(
                     'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
-                    t.status === 'done' ? 'border-accent bg-accent text-white' : 'border-text-faint',
+                    t.status === 'done' ? 'border-accent bg-accent text-on-accent' : 'border-text-faint',
                   )}
                 >
                   {t.status === 'done' && <Check size={10} strokeWidth={3} />}
