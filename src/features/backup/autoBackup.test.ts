@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import Dexie from 'dexie'
-import { markBackedUp, runAutoBackupIfDue, shouldRemindBackup, staleBackups } from './autoBackup'
+import { backupReminderContent, markBackedUp, runAutoBackupIfDue, shouldRemindBackup, staleBackups } from './autoBackup'
 
 const DAY = 24 * 60 * 60 * 1000
 
@@ -44,5 +44,15 @@ describe('recordatorio y copia automática', () => {
 
   it('sin carpeta elegida la copia automática no hace nada', async () => {
     expect(await runAutoBackupIfDue()).toBe('no-dir')
+  })
+})
+
+describe('backupReminderContent', () => {
+  it('ofrece elegir carpeta si el navegador puede y aún no hay ninguna', () => {
+    expect(backupReminderContent(-1, true)).toMatchObject({ title: 'Aún no tienes copia de seguridad', action: 'choose-folder' })
+  })
+
+  it('ofrece descargar si no se puede elegir carpeta', () => {
+    expect(backupReminderContent(9, false)).toMatchObject({ title: '9 días sin copia de seguridad', action: 'download' })
   })
 })
