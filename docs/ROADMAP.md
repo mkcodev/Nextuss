@@ -35,8 +35,8 @@ por fase, una versión Dexie por porción entregable (ninguna fase de este plan 
 | 25 | Arreglos y fricciones TDAH | Hecha (#81) |
 | 26 | Accesibilidad, móvil mínimo y consistencia visual | Hecha (#84, #85) |
 | 27 | Técnica y seguridad de datos (índices, copia automática) | Hecha (#87) |
-| 28a | Rutinas: pasos temporizados, reproductor con vistas Paso/Línea, tarjeta en Hoy (#88) | Hecha |
-| 28b | Conciencia del tiempo: barra «tiempo que queda hoy», cuenta atrás al siguiente bloque, avisos de transición (#89) | Pendiente |
+| 28a | Rutinas: pasos temporizados, reproductor con vistas Paso/Línea, tarjeta en Hoy (#88) | Hecha (#90) |
+| 28b | Conciencia del tiempo: avisos de transición (#91), tiempo de hoy con vistas Regla/Anillo/Bloques (#92), indicador en la barra superior (#93) | Hecha (#94, #95, #96) |
 | 29 | Diario y notas enlazables | Pendiente |
 | 30 | Recompensas y gamificación | Pendiente |
 | 31 | Calendario ICS | Pendiente |
