@@ -14,13 +14,8 @@ import { useGlobalShortcuts } from './shortcuts/useGlobalShortcuts'
 import { usePwaShortcutActions } from './shortcuts/usePwaShortcutActions'
 import { useServiceWorker } from '../features/pwa/useServiceWorker'
 import { useNotificationScheduler } from '../features/notifications/useNotificationScheduler'
-import { useFocusTimerEngine } from '../features/focus/useFocusTimerEngine'
-import { useRoutinePlayerEngine } from '../features/routines/useRoutinePlayerEngine'
 import { RoutineForm } from '../features/routines/RoutineForm'
 import { useRoutineFormStore } from '../features/routines/routineFormStore'
-import { RoutinePlayer } from '../features/routines/RoutinePlayer'
-import { useTelegramPoller } from '../features/telegram/useTelegramPoller'
-import { useTelegramWorkerSync } from '../features/telegram/useTelegramWorkerSync'
 import { useTheme } from '../design/useTheme'
 import { HabitForm } from '../features/habits/HabitForm'
 import { useHabitFormStore } from '../features/habits/habitFormStore'
@@ -43,6 +38,7 @@ import { DayStartFlow } from '../features/rituals/DayStartFlow'
 import { DayCloseFlow } from '../features/rituals/DayCloseFlow'
 import { useBackupGuard } from '../features/backup/useBackupGuard'
 import { usePluginsSync } from '../features/plugins/pluginsStore'
+import { PluginEngines } from '../features/plugins/PluginEngines'
 
 const CommandPalette = lazyNamed(() => import('./CommandPalette'), 'CommandPalette')
 const TaskBreakdownDialog = lazyNamed(() => import('../features/ai/TaskBreakdownDialog'), 'TaskBreakdownDialog')
@@ -64,11 +60,7 @@ export function AppShell() {
   usePwaShortcutActions()
   useServiceWorker()
   useNotificationScheduler()
-  useFocusTimerEngine()
-  useRoutinePlayerEngine()
-  useTelegramPoller()
   useBackupGuard()
-  useTelegramWorkerSync()
   useTheme()
   const formHabitNonce = useHabitFormStore((s) => s.nonce)
   const formTaskNonce = useTaskFormStore((s) => s.nonce)
@@ -131,7 +123,7 @@ export function AppShell() {
       <OnboardingFlow />
       <DayStartFlow />
       <DayCloseFlow />
-      <RoutinePlayer />
+      <PluginEngines />
       <ToastHost />
     </div>
   )
