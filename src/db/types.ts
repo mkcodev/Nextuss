@@ -382,6 +382,9 @@ export interface Settings {
   /** Se marca `true` en cuanto el usuario termina o descarta la bienvenida inicial, para no
    * volver a mostrarla — también se marca automáticamente en cuanto se detectan datos reales. */
   onboardingCompleted?: boolean
+  /** Plugins que el usuario ha activado o desactivado (clave = `PluginId`). Sin definir = valor por
+   * defecto del registro (`features/plugins/registry.ts`). Desactivar nunca borra datos. */
+  plugins?: Partial<Record<string, boolean>>
 }
 
 export interface DemoSeedRecord {
