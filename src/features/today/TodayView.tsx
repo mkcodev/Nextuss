@@ -30,6 +30,7 @@ import { useWeeklyReviewStore } from '../planner/weeklyReviewStore'
 import { DayPlanSuggestion } from '../ai/DayPlanSuggestion'
 import { CheckInCard } from './CheckInCard'
 import { NowBlock } from './NowBlock'
+import { RoutineNowCard } from '../routines/RoutineNowCard'
 import { db } from '../../db/schema'
 import { shouldOpenDayStart, shouldShowDayClose } from '../rituals/gates'
 import type { Task } from '../../db/types'
@@ -249,6 +250,7 @@ export function TodayView() {
               </Button>
             </div>
           )}
+          {isToday && <RoutineNowCard date={date} />}
           {isToday && <NowBlock date={date} />}
           {needsReview && (
             <Alert tone="info">

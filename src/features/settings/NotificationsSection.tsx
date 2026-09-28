@@ -16,6 +16,7 @@ const NOTIFICATION_TYPES: { key: keyof Settings; label: string; description: str
   { key: 'notifyWeeklyReviewNudge', label: 'Revisión semanal', description: 'Empujón los lunes si no la has hecho' },
   { key: 'notifyZombieTasks', label: 'Tareas atascadas', description: 'Cuando se acumulan tareas sin mover' },
   { key: 'notifyPomodoroEnd', label: 'Fin de sesión de foco', description: 'Al terminar un pomodoro o un descanso' },
+  { key: 'notifyRoutines', label: 'Rutinas', description: 'A la hora de cada rutina y al cambiar de paso con la pestaña en segundo plano' },
 ]
 
 export function NotificationsSection() {

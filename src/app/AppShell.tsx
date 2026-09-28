@@ -15,6 +15,10 @@ import { usePwaShortcutActions } from './shortcuts/usePwaShortcutActions'
 import { useServiceWorker } from '../features/pwa/useServiceWorker'
 import { useNotificationScheduler } from '../features/notifications/useNotificationScheduler'
 import { useFocusTimerEngine } from '../features/focus/useFocusTimerEngine'
+import { useRoutinePlayerEngine } from '../features/routines/useRoutinePlayerEngine'
+import { RoutineForm } from '../features/routines/RoutineForm'
+import { useRoutineFormStore } from '../features/routines/routineFormStore'
+import { RoutinePlayer } from '../features/routines/RoutinePlayer'
 import { useTelegramPoller } from '../features/telegram/useTelegramPoller'
 import { useTelegramWorkerSync } from '../features/telegram/useTelegramWorkerSync'
 import { useTheme } from '../design/useTheme'
@@ -59,6 +63,7 @@ export function AppShell() {
   useServiceWorker()
   useNotificationScheduler()
   useFocusTimerEngine()
+  useRoutinePlayerEngine()
   useTelegramPoller()
   useBackupGuard()
   useTelegramWorkerSync()
@@ -67,6 +72,7 @@ export function AppShell() {
   const formTaskNonce = useTaskFormStore((s) => s.nonce)
   const formGoalNonce = useGoalFormStore((s) => s.nonce)
   const formProjectNonce = useProjectFormStore((s) => s.nonce)
+  const formRoutineNonce = useRoutineFormStore((s) => s.nonce)
   const logTimeNonce = useLogTimeStore((s) => s.nonce)
   const templatePickerNonce = useTemplatePickerStore((s) => s.nonce)
   const paletteOpen = useOverlayStore((s) => s.paletteOpen)
@@ -105,6 +111,7 @@ export function AppShell() {
       <TaskForm key={`task-${formTaskNonce}`} />
       <GoalForm key={`goal-${formGoalNonce}`} />
       <ProjectForm key={`project-${formProjectNonce}`} />
+      <RoutineForm key={`routine-${formRoutineNonce}`} />
       <LogTimeDialog key={`logtime-${logTimeNonce}`} />
       <TemplatePickerDialog key={`template-${templatePickerNonce}`} />
       <QuickAddDialog />
@@ -122,6 +129,7 @@ export function AppShell() {
       <OnboardingFlow />
       <DayStartFlow />
       <DayCloseFlow />
+      <RoutinePlayer />
       <ToastHost />
     </div>
   )

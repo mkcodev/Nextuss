@@ -1,5 +1,20 @@
 # Changelog
 
+## Fase 28a — Rutinas (#88)
+- Dexie v14: tablas `routines` (pasos con duración, hora y días opcionales; papelera y orden manual) y
+  `routineRuns` (pasadas, de donde sale «hecha hoy»). Sin `.upgrade()`: tablas nuevas.
+- Página `/rutinas` (`g u`, paleta: «Crear rutina» y «Empezar rutina: …»): lista con arrastre, j/k/Enter,
+  editor con pasos (Enter añade, Alt+flechas mueve), total y hora de fin.
+- Reproductor a pantalla completa con dos vistas intercambiables (`V` o selector): «Paso» (un paso
+  enorme con cuenta atrás) y «Línea» (todos los pasos con su hora real o estimada). Las dos llevan barra de
+  progreso total y «Terminas a las HH:mm (x min tarde/antes)». Pausa, +1 min, Saltar, Hecho; minimizar a
+  un indicador en la barra superior; sobrevive a recargar (reloj real, no ticks).
+- Tras suspender el equipo se pone al día de golpe: cada paso vencido acaba en su hora exacta y suena una vez.
+- Sonido al cambiar de paso (silenciable) y aviso si la pestaña está oculta; aviso a la hora de la rutina y
+  tarjeta «Rutina de ahora» en Hoy (15 min antes hasta 30 min después de su fin). Interruptor «Rutinas» en
+  Ajustes › Notificaciones.
+- Mockups: `docs/design/rutinas/` (se eligieron A + B combinadas).
+
 ## Fase 17 — Convención de carga/error para `useLiveQuery`
 - Convención documentada en `docs/CONVENCIONES.md`: `undefined` = cargando, `null` = sin fila; `?? []` solo
   para datos auxiliares; las puertas esperan a todas sus entradas; los errores suben a un límite.

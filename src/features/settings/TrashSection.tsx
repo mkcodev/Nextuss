@@ -12,6 +12,7 @@ const TABLE_LABELS: Record<string, string> = {
   habits: 'Hábito',
   goals: 'Objetivo',
   projects: 'Proyecto',
+  routines: 'Rutina',
 }
 
 /** Papelera: lo que `trashRows` ha ido apuntando — cada fila sigue viva (`deletedAt` puesto) hasta

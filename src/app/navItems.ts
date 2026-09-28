@@ -5,6 +5,7 @@ import {
   LayoutGrid,
   ListChecks,
   ListTodo,
+  Repeat,
   Settings as SettingsIcon,
   type LucideIcon,
 } from 'lucide-react'
@@ -22,6 +23,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Hoy', icon: LayoutGrid, end: true, goKey: 'h' },
   { to: '/planificacion', label: 'Planificación', icon: CalendarRange, end: false, goKey: 'p' },
   { to: '/habitos', label: 'Hábitos', icon: ListChecks, end: false, goKey: 'b' },
+  { to: '/rutinas', label: 'Rutinas', icon: Repeat, end: false, goKey: 'u' },
   { to: '/estadisticas', label: 'Estadísticas', icon: BarChart3, end: false, goKey: 's' },
   { to: '/tareas', label: 'Tareas', icon: ListTodo, end: false, goKey: 't' },
   { to: '/proyectos', label: 'Proyectos', icon: FolderKanban, end: false, goKey: 'r' },

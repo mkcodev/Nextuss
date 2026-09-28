@@ -13,6 +13,7 @@ const StatsPage = lazyNamed(() => import('../features/stats/StatsPage'), 'StatsP
 const ProjectsPage = lazyNamed(() => import('../features/projects/ProjectsPage'), 'ProjectsPage')
 const ProjectDetailPage = lazyNamed(() => import('../features/projects/ProjectDetailPage'), 'ProjectDetailPage')
 const TasksPage = lazyNamed(() => import('../features/tasks/TasksPage'), 'TasksPage')
+const RoutinesPage = lazyNamed(() => import('../features/routines/RoutinesPage'), 'RoutinesPage')
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
       { path: '/', element: <TodayView /> },
       { path: '/planificacion', element: <PlanningPage /> },
       { path: '/habitos', element: <HabitsPage /> },
+      { path: '/rutinas', element: <RoutinesPage /> },
       { path: '/estadisticas', element: <StatsPage /> },
       { path: '/proyectos', element: <ProjectsPage /> },
       { path: '/proyectos/:id', element: <ProjectDetailPage /> },

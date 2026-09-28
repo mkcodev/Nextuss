@@ -19,11 +19,12 @@ import { useQuickAddStore } from '../features/tasks/quickAddStore'
 import { usePlayerProgress } from '../features/gamification/usePlayerProgress'
 import { useOnlineStatus } from '../features/pwa/useOnlineStatus'
 import { FocusIndicator } from '../features/focus/FocusIndicator'
+import { RoutineIndicator } from '../features/routines/RoutineIndicator'
 import { initials } from '../lib/text'
 import { NAV_ITEMS } from './navItems'
 import { Avatar, Kbd, Menu, MenuItem, MenuLabel } from '../design/primitives'
 
-const AVATAR_NAV = NAV_ITEMS.filter((n) => n.to === '/estadisticas' || n.to === '/proyectos')
+const AVATAR_NAV = NAV_ITEMS.filter((n) => n.to === '/estadisticas' || n.to === '/proyectos' || n.to === '/rutinas')
 
 const BREADCRUMB: Record<string, string> = Object.fromEntries(
   NAV_ITEMS.map((n) => [n.to, n.label]),
@@ -131,6 +132,7 @@ export function Navbar() {
           </div>
         )}
 
+        <RoutineIndicator />
         <FocusIndicator />
 
         <button

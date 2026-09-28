@@ -64,7 +64,7 @@ export async function purgeTrashEntry(trashId: number): Promise<void> {
   if (!entry) return
   await db.transaction(
     'rw',
-    [db.tasks, db.habits, db.habitLogs, db.goals, db.projects, db.trash],
+    [db.tasks, db.habits, db.habitLogs, db.goals, db.projects, db.routines, db.routineRuns, db.trash],
     async () => {
       if (entry.table === 'habits') {
         await db.habitLogs.where('habitId').anyOf(entry.entityIds).delete()
@@ -81,6 +81,9 @@ export async function purgeTrashEntry(trashId: number): Promise<void> {
         for (const goalId of entry.entityIds) {
           await db.goals.where('parentGoalId').equals(goalId).modify({ parentGoalId: undefined })
         }
+      }
+      if (entry.table === 'routines') {
+        await db.routineRuns.where('routineId').anyOf(entry.entityIds).delete()
       }
       if (entry.table === 'projects') {
         await db.tasks.where('projectId').anyOf(entry.entityIds).modify({ projectId: undefined })
