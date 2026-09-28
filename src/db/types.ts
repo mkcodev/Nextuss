@@ -422,3 +422,75 @@ export interface TrashEntry {
   label: string
   deletedAt: number
 }
+
+// Lanzadores (#118): reglas «cuando pase X, haz Y». Los eventos vienen del bus (`lib/events/bus.ts`).
+export type LauncherTrigger =
+  | { type: 'day.firstOpen' }
+  | { type: 'virtualization.completed' }
+  | { type: 'routine.finished'; routineId?: number }
+  | { type: 'task.completed'; taskId?: number; projectId?: number; tagId?: number }
+  | { type: 'habit.logged'; habitId?: number }
+  | { type: 'focus.finished' }
+  | { type: 'checkin.completed' }
+  | { type: 'day.closed' }
+  /** A una hora; con `catchUpMin`, si la app se abre hasta N min después, se dispara al abrir. */
+  | { type: 'time'; at: string; catchUpMin?: number }
+
+export type LauncherUnlessDone = 'checkin' | 'dayStart' | { routineId: number }
+
+export interface LauncherConditions {
+  /** 0=domingo..6=sábado; vacío o sin definir = todos. */
+  days?: number[]
+  /** Franja 'HH:mm' [from, to). */
+  window?: { from: string; to: string }
+  oncePerDay?: boolean
+  /** No se dispara si eso ya está hecho hoy. */
+  unlessDone?: LauncherUnlessDone
+}
+
+export type LauncherAction =
+  | { type: 'virtualization.start' }
+  | { type: 'routine.start'; routineId: number }
+  | { type: 'checkin.open' }
+  | { type: 'dayStart.open' }
+  | { type: 'focus.start' }
+  | { type: 'weeklyReview.open' }
+  | { type: 'navigate'; to: string }
+  | { type: 'message'; text: string }
+  | { type: 'notify'; text: string }
+  | { type: 'sound' }
+  /** Pregunta con Sí / No; con Sí ejecuta `yes`, con No, `no`. */
+  | { type: 'ask'; text: string; yes: LauncherAction[]; no?: LauncherAction[] }
+
+export interface Launcher {
+  id?: number
+  name: string
+  enabled: boolean
+  trigger: LauncherTrigger
+  conditions: LauncherConditions
+  actions: LauncherAction[]
+  /** Lanzadores de una misma receta (p. ej. 'morning') se pintan juntos como un flujo (#99). */
+  recipeKey?: string
+  /** Lanzador integrado de la app (p. ej. 'dayStart'); no se borra, solo se desactiva. */
+  builtinKey?: string
+  /** Plugin del que depende; desactivado el plugin, el lanzador no se dispara. */
+  pluginId?: string
+  sortKey: number
+  deletedAt: number
+  createdAt: number
+}
+
+export type LauncherRunStatus = 'ok' | 'skipped' | 'error'
+
+export interface LauncherRun {
+  id?: number
+  launcherId: number
+  date: string
+  firedAt: number
+  eventType: string
+  /** Largo de la cadena de lanzadores que llevó hasta aquí (0 = evento directo). */
+  depth: number
+  status: LauncherRunStatus
+  /** Por qué se saltó o falló, en palabras («ya se hizo hoy», «fuera de franja»…). */
+  reason?: string
+}

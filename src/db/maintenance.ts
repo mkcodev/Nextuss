@@ -6,12 +6,15 @@
 import { reconcileShields } from './repositories/habits'
 import { purgeExpiredTrash } from './trash'
 import { generateUpcomingOccurrences } from './repositories/recurrence'
+import { purgeOldLauncherRuns } from './repositories/launchers'
 import { dateKey } from '../lib/dates'
 
 const TRASH_RETENTION_MS = 30 * 24 * 60 * 60 * 1000
+const LAUNCHER_RUNS_RETENTION_MS = 30 * 24 * 60 * 60 * 1000
 
 export async function runDailyMaintenance(today: Date = new Date()): Promise<void> {
   await reconcileShields(today)
   await purgeExpiredTrash(today.getTime(), TRASH_RETENTION_MS)
   await generateUpcomingOccurrences(dateKey(today))
+  await purgeOldLauncherRuns(today.getTime(), LAUNCHER_RUNS_RETENTION_MS)
 }
