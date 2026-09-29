@@ -24,6 +24,13 @@ describe('upsertDailyEntry', () => {
     const all = await db.dailyEntries.where('date').equals('2026-09-29').toArray()
     expect(all).toHaveLength(1)
   })
+
+  it('guarda intentionKept al cerrar el día', async () => {
+    await upsertDailyEntry('2026-09-29', { intention: 'Ir con calma' })
+    await upsertDailyEntry('2026-09-29', { intentionKept: true })
+    const entry = await getDailyEntry('2026-09-29')
+    expect(entry?.intentionKept).toBe(true)
+  })
 })
 
 describe('upsertReflection', () => {
