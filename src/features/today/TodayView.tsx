@@ -29,6 +29,7 @@ import { previousPeriodKey } from '../../lib/periods'
 import { useWeeklyReviewStore } from '../planner/weeklyReviewStore'
 import { DayPlanSuggestion } from '../ai/DayPlanSuggestion'
 import { CheckInCard } from './CheckInCard'
+import { DayIntentionCard } from './DayIntentionCard'
 import { NowBlock } from './NowBlock'
 import { RoutineNowCard } from '../routines/RoutineNowCard'
 import { DayTimeCard } from './DayTimeCard'
@@ -229,6 +230,7 @@ export function TodayView() {
               </Button>
             </div>
           )}
+          {isToday && <IfPlugin id="virtualization"><DayIntentionCard date={date} /></IfPlugin>}
           {isToday && <IfPlugin id="dayTime"><DayTimeCard date={date} /></IfPlugin>}
           {isToday && <IfPlugin id="routines"><RoutineNowCard date={date} /></IfPlugin>}
           {isToday && <NowBlock date={date} />}
