@@ -183,12 +183,22 @@ export interface ProjectTemplate {
   sortKey: number
 }
 
+/** Tipo de paso (#97 PR5): 'simple' (por defecto, título + minutos, sin cuerpo propio) o uno de los
+ * 4 tipos con cuerpo propio en el reproductor — ver `RoutineStepKinds.tsx`. Todos menos 'simple'
+ * leen/escriben `dailyEntries` para el día en curso. */
+export type RoutineStepKind = 'simple' | 'gratitude' | 'intention' | 'visualization' | 'focusTask'
+
 /** Paso de una rutina: vive dentro de `Routine.steps` (no en tabla propia) porque solo tiene sentido
- * junto a su rutina y siempre se lee y se escribe con ella. `id` estable para las claves de React. */
+ * junto a su rutina y siempre se lee y se escribe con ella. `id` estable para las claves de React.
+ * `kind`/`prompt` opcionales: pasos ya guardados sin ellos se tratan como 'simple' (sin migración). */
 export interface RoutineStep {
   id: string
   title: string
   durationMin: number
+  kind?: RoutineStepKind
+  /** Pregunta guía mostrada en el reproductor; solo se usa en 'visualization' (las otras 3 tienen
+   * su propio texto fijo). */
+  prompt?: string
 }
 
 /** Rutina (Fase 28): secuencia de pasos temporizados que se sigue en el reproductor a pantalla
@@ -254,6 +264,28 @@ export type VirtualizationTheme = 'a' | 'b' | 'c'
 /** Patrón de respiración guiada de la fase Presencia. Segundos por sub-fase en `BREATH_PATTERNS`
  * (`features/virtualization/engine/breathCycle.ts`). */
 export type MeditationPattern = 'box4444' | '478' | 'coherence55'
+
+/** Estilo visual de los pasos con tipo en rutinas (#97 PR5), las 3 variantes de
+ * `docs/design/pasos-rutina/index.html` — mismo patrón que `VirtualizationTheme`. 'direct' (por
+ * defecto) ya incorpora la pregunta grande de 'card' para intention/visualization; 'card' y
+ * 'journal' se aplican tal cual a los 4 tipos con cuerpo propio. */
+export type RoutineStepStyle = 'direct' | 'card' | 'journal'
+
+/** Una entrada de diario mínima por día (#97 PR5), sembrada por los pasos de tipo
+ * gratitude/intention/visualization/focusTask de la rutina matutina. La Fase 29 (#105) la amplía
+ * como diario completo — no crear una tabla nueva entonces, seguir escribiendo aquí. */
+export interface DailyEntry {
+  id?: number
+  date: string // 'YYYY-MM-DD'
+  intention?: string
+  intentionSetAt?: number
+  /** null = todavía sin responder al cerrar el día; solo tiene sentido si hubo `intention`. */
+  intentionKept: boolean | null
+  gratitudes: string[]
+  reflections: { prompt: string; answer: string; at: number }[]
+  focusTaskId?: number
+  updatedAt: number
+}
 
 export type RecurrenceFreq = 'daily' | 'weekly' | 'monthly'
 /** `schedule`: fechas de calendario fijas (p.ej. "cada lunes"), se generan por adelantado.
@@ -432,6 +464,9 @@ export interface Settings {
   virtualizationRoutineId?: number | null
   /** Sonido del ritual (zumbido, barrido, destello final). Sin definir = activado. */
   virtualizationSoundEnabled?: boolean
+  /** Estilo de los pasos con tipo en rutinas (#97 PR5), elegible desde el reproductor y desde
+   * Ajustes. Sin definir = 'direct'. */
+  routineStepStyle?: RoutineStepStyle
 }
 
 export interface DemoSeedRecord {

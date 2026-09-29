@@ -1,10 +1,13 @@
 // Cálculos puros del reproductor de rutinas. Todo sale del reloj real (`startedAt` + segundos
 // acumulados antes de la última pausa), nunca de contar ticks: igual que el pomodoro, una pestaña en
 // segundo plano o una recarga no retrasan ni congelan la rutina.
+import type { RoutineStepKind } from '../../db/types'
 
 export interface PlayerStep {
   title: string
   durationSec: number
+  kind: RoutineStepKind
+  prompt?: string
 }
 
 export interface PlayerSnapshot {

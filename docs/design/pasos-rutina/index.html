@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pasos con tipo · 3 variantes</title>
+<style>
+  :root {
+    --bg: #131316; --bg-soft: #0f0f11; --hover: #1f1f24; --border: #26262c; --border-strong: #34343c;
+    --text: #e7e7eb; --muted: #9d9da8; --faint: #8b8b96;
+    --accent: #7c84e8; --accent-soft: rgba(124,132,232,.16); --on-accent: #0f1020;
+    --success: #4cc38a; --warning: #f0a25e; --danger: #f07470;
+    --shadow: 0 24px 60px -12px rgba(0,0,0,.6);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg-soft); color: var(--text); font: 14px/1.5 InterVariable, ui-sans-serif, system-ui, -apple-system, sans-serif; }
+  .lucide { width: 15px; height: 15px; stroke-width: 1.75; flex: none; }
+  .page { max-width: 1180px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -.01em; margin: 0 0 6px; }
+  .lead { color: var(--muted); max-width: 72ch; margin: 0 0 24px; }
+  .tabs { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); margin-bottom: 24px; flex-wrap: wrap; }
+  .tabs button { font: inherit; color: var(--muted); background: none; border: 0; padding: 6px 14px; border-radius: 6px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--hover); color: var(--text); font-weight: 500; }
+  .variant { display: none; }
+  .variant.on { display: block; }
+  .vhead { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 4px; }
+  .vhead h2 { font-size: 17px; font-weight: 600; margin: 0; }
+  .tag { font-size: 12px; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0 8px; }
+  .idea { color: var(--muted); margin: 0 0 20px; max-width: 80ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .scene { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .scene > .cap { font-size: 12px; color: var(--faint); padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+  .scene > .cap b { color: var(--muted); font-weight: 500; }
+  .stage { padding: 16px; position: relative; }
+  .pc { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+  .pc > div { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: var(--bg); }
+  .pc h3 { font-size: 13px; margin: 0 0 6px; font-weight: 600; }
+  .pc ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .pc li { margin: 3px 0; }
+  .pro h3 { color: var(--success); } .con h3 { color: var(--warning); }
+  @media (max-width: 700px) { .pc { grid-template-columns: 1fr; } }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 6px; font: inherit; font-size: 13px; border: 1px solid var(--border-strong); background: transparent; color: var(--text); cursor: default; white-space: nowrap; }
+  .btn.p { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 500; }
+  .btn.g { border-color: transparent; color: var(--muted); }
+  .btn.sm { height: 26px; font-size: 12px; padding: 0 8px; }
+  .btn .lucide { width: 14px; height: 14px; }
+  .muted { color: var(--muted); } .faint { color: var(--faint); font-size: 12px; }
+  .field { border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 10px; color: var(--text); background: var(--bg-soft); margin-bottom: 8px; font-size: 13px; }
+  .field.ph { color: var(--faint); }
+  .kind { font-size: 11px; color: var(--faint); border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; margin-left: 6px; }
+  .rec { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 16px 18px; margin: 28px 0 0; }
+  .rec h2 { font-size: 15px; margin: 0 0 6px; }
+  .rec p { margin: 4px 0; color: var(--text); }
+  .common { border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; margin-top: 16px; background: var(--bg); }
+  .common h2 { font-size: 14px; margin: 0 0 6px; }
+  .common ul { margin: 0; padding-left: 18px; color: var(--muted); }
+
+  /* Reproductor a pantalla completa (mock) */
+  .full { background: #0b0b0d; border-radius: 10px; min-height: 420px; display: flex; flex-direction: column; padding: 16px; position: relative; }
+  .full .top { display: flex; align-items: center; gap: 8px; color: var(--faint); font-size: 12px; }
+  .full .top .sp { flex: 1; }
+  .full .mid { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 16px 8px; }
+  .ring-sm { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--accent) 0 40%, var(--hover) 40% 100%); flex: none; }
+  .ring-sm > div { width: 56px; height: 56px; border-radius: 50%; background: #0b0b0d; display: grid; place-items: center; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .q { font-size: 20px; font-weight: 600; max-width: 30ch; letter-spacing: -.01em; }
+  .yesterday { font-size: 12px; color: var(--faint); font-style: italic; }
+  .form { width: 100%; max-width: 360px; margin-top: 6px; text-align: left; }
+  .form textarea, .form input[type=text] { width: 100%; font: inherit; font-size: 13px; color: var(--text); background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 10px; resize: none; }
+  .form textarea::placeholder, .form input::placeholder { color: var(--faint); }
+  .glist { width: 100%; max-width: 360px; margin-top: 4px; text-align: left; }
+  .glist .grow { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+  .glist .grow .num { width: 16px; color: var(--faint); font-size: 12px; text-align: right; }
+  .tlist { width: 100%; max-width: 360px; margin-top: 4px; text-align: left; display: flex; flex-direction: column; gap: 4px; }
+  .trow { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; }
+  .trow.sel { border-color: var(--accent); background: var(--accent-soft); }
+  .trow .n { flex: 1; font-size: 13px; }
+  .radio { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--border-strong); flex: none; }
+  .trow.sel .radio { border-color: var(--accent); background: var(--accent); box-shadow: inset 0 0 0 3px #0b0b0d; }
+  .ctrls { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+  .hint { color: var(--faint); font-size: 12px; text-align: center; margin-top: 10px; }
+
+  /* Tarjeta "Hoy" */
+  .today { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 12px 14px; }
+  .today .row1 { display: flex; align-items: center; gap: 10px; }
+  .today .n { flex: 1; min-width: 0; } .today .n small { display: block; color: var(--muted); font-size: 12px; }
+  .today .n b { font-weight: 600; }
+  .today .row2 { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(124,132,232,.25); }
+  .chk { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border-strong); flex: none; display: grid; place-items: center; }
+  .chk.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .chk.on::after { content: ""; width: 8px; height: 4px; border: 2px solid currentColor; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px,-1px); }
+  .editicon { color: var(--faint); flex: none; }
+
+  .journal-card { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: var(--bg); }
+  .journal-card h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); margin: 0 0 8px; }
+  .journal-line { display: flex; gap: 8px; align-items: baseline; margin-bottom: 4px; }
+  .journal-line .num { color: var(--accent); font-weight: 600; font-size: 13px; }
+</style>
+</head>
+<body>
+<main class="page">
+  <h1>Pasos con tipo en rutinas: 3 variantes</h1>
+  <p class="lead">#97 PR5: además de pasos "simples", una rutina puede tener pasos de <b>Agradecimientos</b>, <b>Intención del día</b>, <b>Visualización</b> (con pregunta guía) y <b>Tarea del día</b>. Las tres variantes muestran cómo se ven esos pasos dentro del reproductor a pantalla completa y cómo aparece luego la intención/tarea en "Hoy". Guardan lo mismo (<code>dailyEntries</code>); cambia la presentación.</p>
+
+  <div class="tabs" role="tablist" aria-label="Variantes">
+    <button role="tab" aria-selected="true" data-v="a">A · Directo (igual que un paso normal)</button>
+    <button role="tab" aria-selected="false" data-v="b">B · Tarjeta grande (la pregunta manda)</button>
+    <button role="tab" aria-selected="false" data-v="c">C · Diario (tono editorial)</button>
+  </div>
+
+  <!-- ============ VARIANTE A ============ -->
+  <section class="variant on" data-v="a">
+    <div class="vhead"><h2>A · Directo</h2><span class="tag">Recomendada</span></div>
+    <p class="idea">El anillo de tiempo se hace pequeño y sube a una esquina (sigue corriendo, no desaparece); el hueco que deja lo ocupa el campo. Mismo esqueleto que el paso "Simple" de siempre — menor salto visual entre tipos, coherente con el resto del reproductor ya construido.</p>
+
+    <div class="grid">
+      <div class="scene"><div class="cap"><b>Agradecimientos</b></div><div class="stage">
+        <div class="full"><div class="top"><span>Paso 2 de 5</span><span class="sp"></span><span>en pausa</span></div>
+          <div class="mid">
+            <div class="ring-sm"><div>1:42</div></div>
+            <p class="eyebrow">Agradecimientos</p>
+            <div class="glist">
+              <div class="grow"><span class="num">1</span><input class="field" style="margin:0" placeholder="Algo bueno de hoy…" /></div>
+              <div class="grow"><span class="num">2</span><input class="field" style="margin:0" value="Que ha salido el sol" /></div>
+              <div class="grow"><span class="num">3</span><input class="field" style="margin:0" placeholder="…" /></div>
+            </div>
+            <p class="yesterday">Ayer: "Terminar la presentación a tiempo"</p>
+          </div>
+          <div class="ctrls"><button class="btn">Saltar</button><button class="btn p">Hecho</button></div>
+          <p class="hint">Ctrl + Enter · Hecho — Enter en un campo pasa al siguiente</p>
+        </div>
+      </div></div>
+      <div class="scene"><div class="cap"><b>Intención del día</b></div><div class="stage">
+        <div class="full"><div class="top"><span>Paso 4 de 5</span><span class="sp"></span></div>
+          <div class="mid">
+            <div class="ring-sm"><div>0:58</div></div>
+            <p class="eyebrow">Intención del día</p>
+            <div class="form"><input class="field ph" style="text-align:center;font-size:15px" placeholder="¿Qué quieres que hoy tenga de especial?" /></div>
+            <p class="yesterday">Ayer: "Salir a andar al mediodía" · no cumplida</p>
+          </div>
+          <div class="ctrls"><button class="btn">Saltar</button><button class="btn p">Hecho</button></div>
+        </div>
+      </div></div>
+      <div class="scene"><div class="cap"><b>Visualización</b></div><div class="stage">
+        <div class="full"><div class="top"><span>Paso 3 de 5</span></div>
+          <div class="mid">
+            <div class="ring-sm"><div>2:10</div></div>
+            <p class="q">¿Cómo quieres sentirte al terminar el día de hoy?</p>
+            <div class="form"><textarea class="field" rows="2" placeholder="Escribe si te ayuda (opcional)…"></textarea></div>
+          </div>
+          <div class="ctrls"><button class="btn">Saltar</button><button class="btn p">Hecho</button></div>
+        </div>
+      </div></div>
+      <div class="scene"><div class="cap"><b>Tarea del día</b></div><div class="stage">
+        <div class="full"><div class="top"><span>Paso 5 de 5</span></div>
+          <div class="mid">
+            <div class="ring-sm"><div>0:35</div></div>
+            <p class="eyebrow">Elige tu tarea del día</p>
+            <div class="tlist">
+              <div class="trow sel"><span class="radio"></span><span class="n">Terminar el informe de gastos</span><span class="faint">30 min</span></div>
+              <div class="trow"><span class="radio"></span><span class="n">Llamar al dentista</span><span class="faint">10 min</span></div>
+              <div class="trow"><span class="radio"></span><span class="n">Revisar PR de Ana</span><span class="faint">—</span></div>
+            </div>
+          </div>
+          <div class="ctrls"><button class="btn">Saltar</button><button class="btn p">Hecho</button></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="common"><h2>En "Hoy" tras la rutina</h2>
+      <div class="today" style="max-width:420px">
+        <div class="row1"><svg class="lucide editicon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+          <div class="n"><b>Terminar el informe de gastos con calma</b><small>Intención de hoy</small></div>
+          <svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </div>
+        <div class="row2"><span class="chk"></span><span class="n">Terminar el informe de gastos</span><span class="faint">tarea del día</span></div>
+      </div>
+    </div>
+
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>Cero piezas nuevas de layout: reutiliza el anillo y los botones tal cual.</li><li>El usuario nunca pierde de vista cuánto tiempo lleva el paso.</li><li>Rápido de construir: un único wrapper <code>TypedStepBody</code>.</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>Menos ceremonia: agradecer/fijar intención puede sentirse igual de "mecánico" que vestirse.</li><li>El anillo pequeño en la esquina compite un poco con el campo si la pregunta es larga.</li></ul></div>
+    </div>
+  </section>
+
+  <!-- ============ VARIANTE B ============ -->
+  <section class="variant" data-v="b">
+    <div class="vhead"><h2>B · Tarjeta grande</h2></div>
+    <p class="idea">La pregunta ocupa el centro, grande, como en la fase Presencia de la Virtualización; el tiempo pasa a una barra fina arriba, casi invisible. Da más peso emocional a estos pasos frente a los simples — encaja con el espíritu "ritual" de #97.</p>
+
+    <div class="grid">
+      <div class="scene"><div class="cap"><b>Agradecimientos</b></div><div class="stage">
+        <div class="full">
+          <div class="hbar" style="height:3px;border-radius:2px;background:var(--hover);overflow:hidden"><span style="display:block;height:100%;width:58%;background:var(--accent)"></span></div>
+          <div class="mid" style="padding-top:24px">
+            <p class="q" style="font-size:22px">Tres cosas buenas de hoy</p>
+            <div class="glist" style="max-width:320px">
+              <input class="field" style="margin-bottom:8px" placeholder="1…" />
+              <input class="field" style="margin-bottom:8px" value="Que ha salido el sol" />
+              <input class="field" placeholder="3…" />
+            </div>
+            <p class="yesterday">Ayer escribiste: "Terminar la presentación a tiempo"</p>
+          </div>
+          <div class="ctrls"><button class="btn">Saltar</button><button class="btn p">Hecho</button></div>
+        </div>
+      </div></div>
+      <div class="scene"><div class="cap"><b>Intención del día</b></div><div class="stage">
+        <div class="full">
+          <div class="hbar" style="height:3px;border-radius:2px;background:var(--hover);overflow:hidden"><span style="display:block;height:100%;width:80%;background:var(--accent)"></span></div>
+          <div class="mid" style="padding-top:32px">
+            <p class="eyebrow">Hoy quiero…</p>
+            <p class="q" style="font-size:24px;max-width:22ch">Terminar el informe de gastos con calma</p>
+            <p class="faint">se fijará en Hoy hasta que cierres el día</p>
+          </div>
+          <div class="ctrls"><button class="btn">Saltar</button><button class="btn p">Hecho</button></div>
+        </div>
+      </div></div>
+      <div class="scene"><div class="cap"><b>Visualización</b></div><div class="stage">
+        <div class="full">
+          <div class="hbar" style="height:3px;border-radius:2px;background:var(--hover);overflow:hidden"><span style="display:block;height:100%;width:35%;background:var(--accent)"></span></div>
+          <div class="mid" style="padding-top:20px">
+            <div class="ring-sm" style="width:44px;height:44px;margin-bottom:4px"><div style="font-size:11px">2:10</div></div>
+            <p class="q">Cierra los ojos e imagina cómo quieres sentirte al terminar el día de hoy</p>
+            <textarea class="field" rows="2" style="max-width:300px;width:100%" placeholder="Si quieres, anótalo…"></textarea>
+          </div>
+          <div class="ctrls"><button class="btn">Saltar</button><button class="btn p">Hecho</button></div>
+        </div>
+      </div></div>
+      <div class="scene"><div class="cap"><b>Tarea del día</b></div><div class="stage">
+        <div class="full">
+          <div class="hbar" style="height:3px;border-radius:2px;background:var(--hover);overflow:hidden"><span style="display:block;height:100%;width:90%;background:var(--accent)"></span></div>
+          <div class="mid" style="padding-top:20px">
+            <p class="q" style="font-size:18px">¿Cuál es tu tarea más importante hoy?</p>
+            <div class="tlist" style="max-width:320px">
+              <div class="trow sel"><span class="radio"></span><span class="n">Terminar el informe de gastos</span></div>
+              <div class="trow"><span class="radio"></span><span class="n">Llamar al dentista</span></div>
+              <div class="trow"><span class="radio"></span><span class="n">Revisar PR de Ana</span></div>
+            </div>
+          </div>
+          <div class="ctrls"><button class="btn">Saltar</button><button class="btn p">Hecho</button></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="common"><h2>En "Hoy" tras la rutina</h2>
+      <div class="rec" style="max-width:420px;margin-top:8px">
+        <h2>Terminar el informe de gastos con calma</h2>
+        <p class="faint">Tu intención de hoy · <a href="#" style="color:var(--accent)">cambiar</a></p>
+        <div class="row2" style="border-top:1px solid rgba(124,132,232,.25);margin-top:8px;padding-top:8px;display:flex;gap:8px;align-items:center"><span class="chk"></span><span>Terminar el informe de gastos</span></div>
+      </div>
+    </div>
+
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>Se siente distinto de un paso "vestirse 5 min": más presencia, más ritual.</li><li>La pregunta grande empuja a responder de verdad, no a rellenar por rellenar.</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>Más piezas nuevas (barra fina arriba, layouts distintos por tipo) → más trabajo en PR5a.</li><li>El usuario pierde de un vistazo "cuánto me queda" si no mira arriba.</li></ul></div>
+    </div>
+  </section>
+
+  <!-- ============ VARIANTE C ============ -->
+  <section class="variant" data-v="c">
+    <div class="vhead"><h2>C · Diario</h2></div>
+    <p class="idea">Tono de página de diario: tipografía algo más editorial, los agradecimientos numerados como líneas de una lista escrita a mano, la intención con una raya de guion. Menos "app de productividad", más "cuaderno". Encaja con que estos datos van a alimentar el diario real de la Fase 29.</p>
+
+    <div class="grid">
+      <div class="scene"><div class="cap"><b>Agradecimientos</b></div><div class="stage">
+        <div class="full">
+          <div class="top"><span>Paso 2 de 5</span></div>
+          <div class="mid">
+            <div class="ring-sm" style="width:40px;height:40px"><div style="font-size:10px">1:42</div></div>
+            <div class="journal-card" style="max-width:320px;width:100%;text-align:left">
+              <h3>Hoy agradezco</h3>
+              <div class="journal-line"><span class="num">1.</span><input class="field" style="margin:0;flex:1;border:0;border-bottom:1px solid var(--border-strong);border-radius:0;background:transparent" placeholder="…" /></div>
+              <div class="journal-line"><span class="num">2.</span><input class="field" style="margin:0;flex:1;border:0;border-bottom:1px solid var(--border-strong);border-radius:0;background:transparent" value="Que ha salido el sol" /></div>
+              <div class="journal-line"><span class="num">3.</span><input class="field" style="margin:0;flex:1;border:0;border-bottom:1px solid var(--border-strong);border-radius:0;background:transparent" placeholder="…" /></div>
+            </div>
+            <p class="yesterday">Ayer: "Terminar la presentación a tiempo"</p>
+          </div>
+          <div class="ctrls"><button class="btn">Saltar</button><button class="btn p">Hecho</button></div>
+        </div>
+      </div></div>
+      <div class="scene"><div class="cap"><b>Intención del día</b></div><div class="stage">
+        <div class="full">
+          <div class="top"><span>Paso 4 de 5</span></div>
+          <div class="mid">
+            <div class="ring-sm" style="width:40px;height:40px"><div style="font-size:10px">0:58</div></div>
+            <p class="eyebrow" style="font-style:italic;text-transform:none;letter-spacing:0">Hoy me propongo —</p>
+            <input class="field ph" style="text-align:center;font-size:16px;font-family:Georgia, serif;border:0;border-bottom:1px solid var(--border-strong);border-radius:0;background:transparent;max-width:320px;width:100%" placeholder="escribe tu intención…" />
+          </div>
+          <div class="ctrls"><button class="btn">Saltar</button><button class="btn p">Hecho</button></div>
+        </div>
+      </div></div>
+      <div class="scene"><div class="cap"><b>Visualización</b></div><div class="stage">
+        <div class="full">
+          <div class="top"><span>Paso 3 de 5</span></div>
+          <div class="mid">
+            <div class="ring-sm" style="width:40px;height:40px"><div style="font-size:10px">2:10</div></div>
+            <p class="q" style="font-family:Georgia, serif;font-weight:500;font-style:italic">¿Cómo quieres sentirte al terminar el día de hoy?</p>
+            <textarea class="field" rows="2" style="max-width:300px;width:100%;border:0;border-bottom:1px solid var(--border-strong);border-radius:0;background:transparent" placeholder="unas líneas, si quieres…"></textarea>
+          </div>
+          <div class="ctrls"><button class="btn">Saltar</button><button class="btn p">Hecho</button></div>
+        </div>
+      </div></div>
+      <div class="scene"><div class="cap"><b>Tarea del día</b></div><div class="stage">
+        <div class="full">
+          <div class="top"><span>Paso 5 de 5</span></div>
+          <div class="mid">
+            <div class="ring-sm" style="width:40px;height:40px"><div style="font-size:10px">0:35</div></div>
+            <p class="eyebrow" style="font-style:italic;text-transform:none;letter-spacing:0">Mi tarea de hoy —</p>
+            <div class="tlist" style="max-width:320px">
+              <div class="trow sel"><span class="radio"></span><span class="n">Terminar el informe de gastos</span></div>
+              <div class="trow"><span class="radio"></span><span class="n">Llamar al dentista</span></div>
+              <div class="trow"><span class="radio"></span><span class="n">Revisar PR de Ana</span></div>
+            </div>
+          </div>
+          <div class="ctrls"><button class="btn">Saltar</button><button class="btn p">Hecho</button></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="common"><h2>En "Hoy" tras la rutina</h2>
+      <div class="journal-card" style="max-width:420px">
+        <h3>Hoy</h3>
+        <p style="font-family:Georgia, serif;font-style:italic;font-size:16px;margin:0 0 8px">"Terminar el informe de gastos con calma"</p>
+        <div class="row2" style="border-top:1px solid var(--border);margin-top:0;padding-top:8px;display:flex;gap:8px;align-items:center"><span class="chk"></span><span>Terminar el informe de gastos</span></div>
+      </div>
+    </div>
+
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>Coherente con el destino real del dato (diario de la Fase 29).</li><li>Look distintivo, memorable.</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>Mezclar una fuente serif suelta puede desentonar con el resto de la app (todo sans, `InterVariable`).</li><li>Los inputs sin borde completo son menos obvios como "campo editable" a primera vista.</li></ul></div>
+    </div>
+  </section>
+
+  <div class="rec">
+    <h2>Recomendación</h2>
+    <p><b>A (Directo)</b> como base: menor riesgo, coherente con el reproductor ya construido, no exige nuevas piezas de layout. Tomar de <b>C</b> el detalle del "eco de ayer" en cursiva discreta (ya está en A también) y, si al verlo en Chrome se siente demasiado plano, subir el tamaño de la pregunta como en B solo para Visualización/Intención (los dos pasos más "de ritual"), dejando Agradecimientos/Tarea del día con el layout compacto de A.</p>
+  </div>
+</main>
+<script>
+  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach((x) => x.setAttribute('aria-selected', String(x === b)))
+    const v = b.dataset.v
+    document.querySelectorAll('.variant').forEach((s) => s.classList.toggle('on', s.dataset.v === v))
+  }))
+</script>
+</body>
+</html>

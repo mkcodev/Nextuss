@@ -3,6 +3,7 @@ import type {
   Achievement,
   Attribute,
   CheckIn,
+  DailyEntry,
   DemoSeedRecord,
   FocusSession,
   Goal,
@@ -64,6 +65,7 @@ export class NextussDB extends Dexie {
   launchers!: EntityTable<Launcher, 'id'>
   launcherRuns!: EntityTable<LauncherRun, 'id'>
   virtualizationDays!: EntityTable<VirtualizationDay, 'id'>
+  dailyEntries!: EntityTable<DailyEntry, 'id'>
 
   constructor() {
     // Nombre real de la base de datos IndexedDB — deliberadamente NO sigue el rebranding a
@@ -212,6 +214,13 @@ export class NextussDB extends Dexie {
     // por día, indexada por `date` para leer el rango reciente al calcular la racha.
     this.version(16).stores({
       virtualizationDays: '++id, date',
+    })
+
+    // Diario mínimo (#97 PR5): tabla nueva, sin datos previos que migrar, sin `.upgrade()` — una
+    // fila por día, sembrada por los pasos con tipo de las rutinas. La Fase 29 (#105) la reutiliza,
+    // así que esa fase pasa a ocupar v18.
+    this.version(17).stores({
+      dailyEntries: '++id, &date',
     })
   }
 }

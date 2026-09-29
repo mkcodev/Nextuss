@@ -6,8 +6,9 @@ import { format } from 'date-fns'
 import { Check, CircleCheckBig, Minimize2, Pause, Play, Plus, SkipForward, Volume2, VolumeX, X } from 'lucide-react'
 import { Button, Icon, IconButton, Kbd, ProgressBar, RingProgress, SegmentedControl } from '../../design/primitives'
 import { getOrCreateSettings, updateSettings } from '../../db/repositories/settings'
-import type { RoutineView } from '../../db/types'
+import type { RoutineStepKind, RoutineStepStyle, RoutineView } from '../../db/types'
 import { cn } from '../../lib/cn'
+import { dateKey } from '../../lib/dates'
 import { formatTime } from '../focus/format'
 import { advanceStep, exitRoutine } from './actions'
 import {
@@ -23,10 +24,18 @@ import {
 } from './player'
 import { useRoutinePlayerStore } from './routinePlayerStore'
 import { formatMinutes } from './schedule'
+import { TypedStepBody } from './StepKinds'
+import { ROUTINE_STEP_KIND_ICONS } from './routineStepKinds'
 
 const VIEW_OPTIONS: { value: RoutineView; label: string }[] = [
   { value: 'step', label: 'Paso' },
   { value: 'timeline', label: 'Línea' },
+]
+
+const STEP_STYLE_OPTIONS: { value: RoutineStepStyle; label: string }[] = [
+  { value: 'direct', label: 'Directo' },
+  { value: 'card', label: 'Tarjeta' },
+  { value: 'journal', label: 'Diario' },
 ]
 
 const clock = (ms: number) => format(ms, 'HH:mm')
@@ -60,6 +69,7 @@ function PlayerPanel() {
   const s = useRoutinePlayerStore()
   const settings = useLiveQuery(() => getOrCreateSettings(), [])
   const view: RoutineView = settings?.routineView ?? 'step'
+  const stepStyle: RoutineStepStyle = settings?.routineStepStyle ?? 'direct'
   const soundOn = settings?.routineSoundEnabled !== false
   const now = useNow()
   const reduceMotion = useReducedMotion()
@@ -76,6 +86,7 @@ function PlayerPanel() {
 
   const togglePause = () => (s.running ? s.pause() : s.resume())
   const setView = (v: RoutineView) => void updateSettings({ routineView: v })
+  const setStepStyle = (v: RoutineStepStyle) => void updateSettings({ routineStepStyle: v })
   const toggleSound = () => void updateSettings({ routineSoundEnabled: !soundOn })
   const minimize = () => s.setVisible(false)
   const requestExit = () => {
@@ -99,6 +110,13 @@ function PlayerPanel() {
 
     const onKeyDown = (e: KeyboardEvent) => {
       const h = handlers.current
+      // Ctrl+Enter = Hecho desde cualquier sitio, incluido un campo de texto de un paso con tipo
+      // (#97 PR5) — se comprueba antes del "return" genérico de teclas con modificador de abajo.
+      if (e.key === 'Enter' && e.ctrlKey && !h.finished && !h.confirmingExit) {
+        e.preventDefault()
+        void advanceStep(true)
+        return
+      }
       if (e.ctrlKey || e.metaKey || e.altKey) return
       if (e.key === 'Escape') {
         e.preventDefault()
@@ -124,6 +142,10 @@ function PlayerPanel() {
         return
       }
       if (h.finished || h.confirmingExit) return
+      // Escribiendo en un campo de un paso con tipo (agradecimientos, intención…): ni Espacio ni
+      // S/V/M/+ deben disparar sus atajos — solo Ctrl+Enter (ya gestionado arriba) avanza.
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
       // Espacio/Enter sobre un botón enfocado ya lo pulsan: no duplicar la acción.
       const onButton = e.target instanceof HTMLElement && e.target.closest('button')
       if (e.key === ' ' && !onButton) {
@@ -237,7 +259,7 @@ function PlayerPanel() {
           {s.finished ? (
             <FinishedView />
           ) : view === 'step' ? (
-            <StepView now={now} />
+            <StepView now={now} stepStyle={stepStyle} setStepStyle={setStepStyle} />
           ) : (
             <TimelineView now={now} />
           )}
@@ -277,13 +299,20 @@ function PlayerPanel() {
                 <Check size={16} strokeWidth={2.25} /> Hecho
               </Button>
             </div>
-            <p className="hidden items-center gap-3 text-xs text-text-faint sm:flex" aria-hidden="true">
-              <span><Kbd>Espacio</Kbd> pausa</span>
-              <span><Kbd>Enter</Kbd> hecho</span>
-              <span><Kbd>S</Kbd> saltar</span>
-              <span><Kbd>+</Kbd> 1 min</span>
-              <span><Kbd>V</Kbd> vista</span>
-            </p>
+            {step?.kind && step.kind !== 'simple' ? (
+              <p className="hidden items-center gap-3 text-xs text-text-faint sm:flex" aria-hidden="true">
+                <span><Kbd>Ctrl</Kbd> + <Kbd>Enter</Kbd> hecho</span>
+                <span>escribiendo, el resto de atajos se desactiva</span>
+              </p>
+            ) : (
+              <p className="hidden items-center gap-3 text-xs text-text-faint sm:flex" aria-hidden="true">
+                <span><Kbd>Espacio</Kbd> pausa</span>
+                <span><Kbd>Enter</Kbd> hecho</span>
+                <span><Kbd>S</Kbd> saltar</span>
+                <span><Kbd>+</Kbd> 1 min</span>
+                <span><Kbd>V</Kbd> vista</span>
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -295,7 +324,15 @@ function PlayerPanel() {
   )
 }
 
-function StepView({ now }: { now: number }) {
+function StepView({
+  now,
+  stepStyle,
+  setStepStyle,
+}: {
+  now: number
+  stepStyle: RoutineStepStyle
+  setStepStyle: (v: RoutineStepStyle) => void
+}) {
   const s = useRoutinePlayerStore()
   const reduceMotion = useReducedMotion()
   const step = s.steps[s.index]
@@ -304,33 +341,60 @@ function StepView({ now }: { now: number }) {
   const elapsed = stepElapsedSec(s, now)
   const remaining = stepRemainingSec(s, now)
   if (!step) return null
+  const typed = step.kind && step.kind !== 'simple'
 
   return (
     <div className="flex flex-col items-center text-center">
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={s.index}
-          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
-          transition={{ duration: reduceMotion ? 0.1 : 0.22, ease: [0.25, 1, 0.5, 1] }}
-          className="flex flex-col items-center"
-        >
-          <p className="text-xs font-medium tracking-wide text-text-muted uppercase">Ahora</p>
-          <p className="mt-2 max-w-xl text-3xl font-semibold tracking-tight text-balance text-text sm:text-4xl">{step.title}</p>
-          <RingProgress value={planned > 0 ? elapsed / planned : 0} size={232} strokeWidth={8} className="mt-8">
-            <div className="flex flex-col items-center">
-              <span className={cn('text-5xl font-semibold tabular-nums text-text', !s.running && 'text-text-muted')}>
-                {formatTime(remaining)}
-              </span>
-              <span className="mt-1 text-xs tabular-nums text-text-muted">
-                de {formatMinutes(Math.round(step.durationSec / 60))}
-                {s.extraSec > 0 && ` + ${s.extraSec / 60} min`}
-              </span>
-            </div>
+      {typed ? (
+        // Sin AnimatePresence/motion aquí: TypedStepBody usa useLiveQuery (Dexie) y depender del
+        // ciclo de salida de Framer Motion para desmontar el paso anterior dejaba el cuerpo
+        // congelado en el tipo del primer paso tras dos transiciones seguidas (bug encontrado
+        // verificando en Chrome). `key={s.index}` fuerza un remount limpio en cada paso.
+        <div className="flex w-full flex-col items-center">
+          <div className="self-end">
+            <SegmentedControl options={STEP_STYLE_OPTIONS} value={stepStyle} onChange={setStepStyle} label="Estilo del paso" />
+          </div>
+          <RingProgress value={planned > 0 ? elapsed / planned : 0} size={64} strokeWidth={5} className="mt-2">
+            <span className={cn('text-xs font-semibold tabular-nums text-text', !s.running && 'text-text-muted')}>
+              {formatTime(remaining)}
+            </span>
           </RingProgress>
-        </motion.div>
-      </AnimatePresence>
+          <div className="mt-4 w-full">
+            <TypedStepBody
+              key={s.index}
+              kind={step.kind as Exclude<RoutineStepKind, 'simple'>}
+              prompt={step.prompt}
+              style={stepStyle}
+              date={dateKey(new Date(s.runStartedAt))}
+            />
+          </div>
+        </div>
+      ) : (
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={s.index}
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
+            transition={{ duration: reduceMotion ? 0.1 : 0.22, ease: [0.25, 1, 0.5, 1] }}
+            className="flex w-full flex-col items-center"
+          >
+            <p className="text-xs font-medium tracking-wide text-text-muted uppercase">Ahora</p>
+            <p className="mt-2 max-w-xl text-3xl font-semibold tracking-tight text-balance text-text sm:text-4xl">{step.title}</p>
+            <RingProgress value={planned > 0 ? elapsed / planned : 0} size={232} strokeWidth={8} className="mt-8">
+              <div className="flex flex-col items-center">
+                <span className={cn('text-5xl font-semibold tabular-nums text-text', !s.running && 'text-text-muted')}>
+                  {formatTime(remaining)}
+                </span>
+                <span className="mt-1 text-xs tabular-nums text-text-muted">
+                  de {formatMinutes(Math.round(step.durationSec / 60))}
+                  {s.extraSec > 0 && ` + ${s.extraSec / 60} min`}
+                </span>
+              </div>
+            </RingProgress>
+          </motion.div>
+        </AnimatePresence>
+      )}
 
       {/* Pasos como segmentos: cuántos quedan de un vistazo. */}
       <div className="mt-8 flex gap-1" aria-hidden="true">
@@ -389,6 +453,9 @@ function TimelineRow({ step, index, now }: { step: TimelineStep; index: number; 
       <div className="min-w-0">
         <p className={cn('flex items-center gap-1.5 truncate text-sm', current ? 'font-semibold text-text' : 'text-text', done && 'line-through decoration-text-faint')}>
           {done && <Check size={13} strokeWidth={2.25} className="shrink-0 text-success" aria-label="Hecho" />}
+          {ROUTINE_STEP_KIND_ICONS[step.kind] && (
+            <Icon name={ROUTINE_STEP_KIND_ICONS[step.kind]!} size={12} strokeWidth={1.75} className="shrink-0 text-text-faint" aria-hidden="true" />
+          )}
           <span className="truncate">{step.title}</span>
         </p>
         {current && <ProgressBar value={planned > 0 ? elapsed / planned : 0} className="mt-1.5 h-1" />}
