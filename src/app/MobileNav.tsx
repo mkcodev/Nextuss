@@ -8,7 +8,7 @@ import { useQuickAddStore } from '../features/tasks/quickAddStore'
 // En el móvil caben 4 destinos + Crear + Panel. Tareas entra (es la lista principal); Estadísticas,
 // Proyectos y Ajustes quedan en la paleta y el menú del avatar — una barra de 8 en un teléfono es
 // "técnicamente alcanzable", no usable.
-const MOBILE_EXCLUDED = new Set(['/ajustes', '/proyectos', '/estadisticas', '/rutinas'])
+const MOBILE_EXCLUDED = new Set(['/ajustes', '/proyectos', '/estadisticas', '/rutinas', '/plugins'])
 
 export function MobileNav() {
   const openMobileDock = useUIStore((s) => s.openMobileDock)
