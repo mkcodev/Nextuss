@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Plugins · Mapa 3D</title>
+<style>
+  /* Mismos tokens que index.html (src/index.css, tema oscuro) — prototipo desechable, three.js plano
+     vía CDN, igual convención que docs/design/virtualizacion/*.html. No es código final de la app:
+     la implementación real será React Three Fiber, cargada perezosa, igual que la Virtualización. */
+  :root {
+    --bg: #131316; --bg-soft: #0f0f11; --hover: #1f1f24; --border: #26262c; --border-strong: #34343c;
+    --text: #e7e7eb; --muted: #9d9da8; --faint: #8b8b96;
+    --accent: #7c84e8; --accent-soft: rgba(124,132,232,.16); --on-accent: #0f1020;
+    --success: #4cc38a; --warning: #f0a25e;
+    --shadow: 0 24px 60px -12px rgba(0,0,0,.6);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #05050a; color: var(--text); font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, sans-serif; overflow: hidden; }
+  canvas#scene { position: fixed; inset: 0; display: block; touch-action: none; }
+
+  #hud { position: fixed; inset: 0; pointer-events: none; }
+  #hud a, #hud button, #hud [tabindex] { pointer-events: auto; }
+
+  #topbar { position: fixed; top: 14px; left: 14px; right: 14px; display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; z-index: 20; }
+  .panel { background: rgba(19,19,22,.82); border: 1px solid var(--border-strong); border-radius: 10px; backdrop-filter: blur(8px); box-shadow: var(--shadow); }
+  #layoutbar { display: inline-flex; gap: 2px; padding: 3px; }
+  #layoutbar button { font: inherit; font-size: 12.5px; color: var(--muted); background: none; border: 0; padding: 7px 12px; border-radius: 7px; cursor: pointer; }
+  #layoutbar button.on { background: var(--hover); color: var(--text); font-weight: 500; }
+  #status { padding: 8px 12px; font-size: 12px; color: var(--faint); font-family: ui-monospace, monospace; display: flex; gap: 10px; }
+  #status b { color: var(--muted); font-weight: 500; }
+  #legend { position: fixed; bottom: 14px; left: 14px; display: flex; gap: 12px; flex-wrap: wrap; padding: 8px 12px; font-size: 12px; color: var(--muted); z-index: 20; }
+  #legend .lg { display: inline-flex; align-items: center; gap: 6px; }
+  #legend .sw { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  #hint { position: fixed; bottom: 14px; right: 14px; padding: 8px 12px; font-size: 12px; color: var(--faint); z-index: 20; max-width: 320px; text-align: right; }
+
+  #switches { position: fixed; top: 70px; left: 14px; width: 230px; max-height: 60vh; overflow-y: auto; z-index: 20; padding: 6px; }
+  #switches .row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; font-size: 12.5px; border-radius: 7px; }
+  #switches .row:hover { background: var(--hover); }
+  #switches .row .n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #switches .switch { width: 30px; height: 18px; border-radius: 999px; background: var(--hover); border: 1px solid var(--border-strong); position: relative; flex: none; cursor: pointer; }
+  #switches .switch.on { background: var(--accent); border-color: var(--accent); }
+  #switches .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--text); transition: transform .15s; }
+  #switches .switch.on::after { transform: translateX(12px); background: var(--on-accent); }
+
+  #tooltip { position: fixed; z-index: 25; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: var(--shadow); max-width: 210px; transform: translate(-50%, calc(-100% - 14px)); display: none; }
+  #tooltip b { display: block; font-size: 12.5px; margin-bottom: 2px; }
+  #tooltip .badge { margin-top: 5px; font-size: 11px; border-radius: 999px; padding: 0 7px; display: inline-block; }
+  #tooltip .badge.acc { color: var(--accent); border: 1px solid var(--accent); }
+  #tooltip .badge.soft { color: var(--muted); border: 1px solid var(--border); }
+
+  #ficha { position: fixed; top: 0; right: 0; bottom: 0; width: min(320px, 86vw); background: rgba(15,15,17,.94); border-left: 1px solid var(--border-strong); box-shadow: var(--shadow); z-index: 24; padding: 18px; transform: translateX(100%); transition: transform .28s ease; overflow-y: auto; }
+  #ficha.open { transform: translateX(0); }
+  #ficha h3 { margin: 0 0 4px; font-size: 16px; }
+  #ficha p { margin: 0 0 14px; color: var(--muted); font-size: 12.5px; }
+  #ficha .close { position: absolute; top: 14px; right: 14px; background: none; border: 0; color: var(--faint); font: inherit; font-size: 13px; cursor: pointer; }
+  #ficha .stat { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+
+  #canRender3DWarning { position: fixed; inset: 0; display: none; place-items: center; text-align: center; padding: 24px; z-index: 30; background: #0b0b0e; }
+  #canRender3DWarning.show { display: grid; }
+  #canRender3DWarning .box { max-width: 420px; }
+  #canRender3DWarning a { color: var(--accent); }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div id="hud">
+  <div id="topbar">
+    <div class="panel" id="layoutbar" role="tablist" aria-label="Disposición 3D">
+      <button role="tab" aria-selected="true" data-layout="orbits">3a · Órbitas inclinadas</button>
+      <button role="tab" aria-selected="false" data-layout="sphere">3b · Esfera de red</button>
+      <button role="tab" aria-selected="false" data-layout="spiral">3c · Galaxia por brazos</button>
+    </div>
+    <div class="panel" id="status">
+      <span><b id="fpsOut">–</b> fps</span>
+      <span>dpr <b id="dprOut">–</b></span>
+      <span>bloom <b id="bloomOut">on</b></span>
+    </div>
+  </div>
+  <div class="panel" id="switches" aria-label="Activar o desactivar plugins (previsualiza la cascada)"></div>
+  <div id="legend"></div>
+  <div id="hint">Arrastra para girar · Ctrl+rueda para zoom · Shift+rueda para desplazar · clic en un nodo lo abre y centra la cámara · Esc cierra la ficha · el mapa gira solo en reposo</div>
+  <div id="tooltip"></div>
+  <div id="ficha" role="dialog" aria-label="Ficha del plugin">
+    <button class="close" data-close>Cerrar ✕</button>
+    <div id="fichaBody"></div>
+  </div>
+</div>
+<div id="canRender3DWarning">
+  <div class="box">
+    <h2>Sin WebGL o con movimiento reducido</h2>
+    <p class="sr-only">Este prototipo necesita WebGL. En la app real, <code>useCanRender3D()</code> cae automáticamente al mapa 2D (<a href="./index.html">index.html</a>, pestaña C) en este caso.</p>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script type="module" src="./mapa-3d.js"></script>
+</body>
+</html>

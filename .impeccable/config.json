@@ -107,6 +107,51 @@
         ],
         "createdAt": "2026-09-29T08:47:37.576Z",
         "reason": "mockup de exploracion (numeros del anillo decorativo, variantes B/C no elegidas tal cual); no es codigo de produccion"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "docs/design/plugins/index.html"
+        ],
+        "createdAt": "2026-09-29T09:50:34.357Z",
+        "reason": "mockup de mapa constelación/radar (#98), mismo lenguaje visual bloom/glow que Virtualización #97; usuario pidió explícitamente esteroides para este mapa"
+      },
+      {
+        "rule": "marquee",
+        "value": "*",
+        "files": [
+          "docs/design/plugins/index.html"
+        ],
+        "createdAt": "2026-09-29T09:53:16.972Z",
+        "reason": "radar/escaneo lento (70-130s) y brazo de sonar del mapa de constelación (#98): mismo lenguaje visual bloom/escaneo ya aprobado para Virtualización #97, usuario pidió explícitamente esteroides para este mapa; no es texto ni oculta contenido"
+      },
+      {
+        "rule": "pulsing-dot",
+        "value": "*",
+        "files": [
+          "docs/design/plugins/index.html"
+        ],
+        "createdAt": "2026-09-29T09:53:17.135Z",
+        "reason": "idea 7 elegida por el usuario en el plan (preview animada en bucle por ficha de plugin), decorativa a propósito, no simula datos reales"
+      },
+      {
+        "rule": "all-caps-body",
+        "value": "*",
+        "files": [
+          "docs/design/plugins/index.html"
+        ],
+        "createdAt": "2026-09-29T09:53:17.298Z",
+        "reason": ".cat-title son eyebrows de categoría cortos (Núcleo, Ritual de mañana, Hacer...), no párrafos; encaja con la propia guía de la regla de reservar mayúsculas para etiquetas cortas"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "docs/design/plugins/index.html"
+        ],
+        "createdAt": "2026-09-29T09:53:17.455Z",
+        "reason": "chrome de maestro-detalle (.md): el marco exterior no lleva padding propio por diseño (patrón habitual tipo Ajustes del Sistema/VS Code); todo el texto real dentro (buscador, filas, cabecera de ficha) ya tiene su propio padding >=8px"
       }
     ]
   }
