@@ -80,6 +80,15 @@
         "value": "cascadia code",
         "createdAt": "2026-09-28T18:24:20.480Z",
         "reason": "prototipo desechable docs/design/virtualizacion (issue #97), fuera de src/ y del sistema de diseño real; terminal monoespaciado solo para decidir estilo"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "georgia",
+        "files": [
+          "docs/design/pasos-rutina/index.html"
+        ],
+        "createdAt": "2026-09-29T08:06:37.011Z",
+        "reason": "mockup de exploracion (variante C, no elegida) comparando serif vs sans; no es codigo de produccion"
       }
     ]
   }
