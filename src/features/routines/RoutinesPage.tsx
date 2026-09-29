@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Check, Pencil, Play, Plus, Repeat } from 'lucide-react'
 import { Button, DropIndicator, EmptyState, Icon, IconButton, Skeleton } from '../../design/primitives'
-import { getRoutineRunsForDate, listRoutines, moveRoutineBetween } from '../../db/repositories/routines'
+import { getRoutine, getRoutineRunsForDate, listRoutines, moveRoutineBetween } from '../../db/repositories/routines'
 import type { Routine, RoutineRun } from '../../db/types'
 import { cn } from '../../lib/cn'
 import { todayKey, WEEKDAY_LABELS_ES, WEEKDAY_ORDER_MON_FIRST } from '../../lib/dates'
@@ -13,6 +13,8 @@ import { startRoutine } from './actions'
 import { useRoutineFormStore } from './routineFormStore'
 import { useRoutinePlayerStore } from './routinePlayerStore'
 import { formatMinutes, isRoutineDone, routineTotalMin } from './schedule'
+import { createMorningRoutine } from './templates'
+import { useSubmitGuard } from '../../lib/useSubmitGuard'
 
 const ROUTINE_DRAG_MIME = 'application/x-nextuss-routine'
 
@@ -33,7 +35,14 @@ export function RoutinesPage() {
   const today = todayKey()
   const runsToday = useLiveQuery(() => getRoutineRunsForDate(today), [today]) ?? []
   const openCreate = useRoutineFormStore((s) => s.openCreate)
+  const openEdit = useRoutineFormStore((s) => s.openEdit)
   const list = routines ?? []
+
+  const [creatingTemplate, createFromTemplate] = useSubmitGuard(async () => {
+    const id = await createMorningRoutine()
+    const routine = await getRoutine(id)
+    if (routine) openEdit(routine)
+  })
 
   const handleMove = (draggedId: number, targetId: number, position: DropPosition) => {
     const n = reorderNeighbors(list, (r) => r.id, draggedId, targetId, position)
@@ -66,9 +75,14 @@ export function RoutinesPage() {
           <h1 className="text-xl font-semibold tracking-tight text-text">Rutinas</h1>
           <p className="mt-0.5 text-sm text-text-muted">Secuencias de pasos con tiempo, para seguirlas sin pensar.</p>
         </div>
-        <Button onClick={() => openCreate()}>
-          <Plus size={14} strokeWidth={2} /> Nueva rutina
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" loading={creatingTemplate} onClick={() => void createFromTemplate()}>
+            Desde plantilla
+          </Button>
+          <Button onClick={() => openCreate()}>
+            <Plus size={14} strokeWidth={2} /> Nueva rutina
+          </Button>
+        </div>
       </header>
 
       {routines === undefined && (

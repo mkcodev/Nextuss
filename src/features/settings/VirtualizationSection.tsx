@@ -1,11 +1,13 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Radar } from 'lucide-react'
-import { Card, Switch, Select, SegmentedControl, NumberInput, type SegmentOption } from '../../design/primitives'
+import { Button, Card, Switch, Select, SegmentedControl, NumberInput, type SegmentOption } from '../../design/primitives'
 import { db } from '../../db/schema'
 import { updateSettings } from '../../db/repositories/settings'
 import { listRoutines } from '../../db/repositories/routines'
 import { installMorningRecipe } from '../launchers/recipes'
+import { createMorningRoutine } from '../routines/templates'
 import { VirtualizationThemeSwitch } from '../virtualization/VirtualizationThemeSwitch'
+import { useSubmitGuard } from '../../lib/useSubmitGuard'
 import type { MeditationPattern } from '../../db/types'
 
 const PATTERN_OPTIONS: SegmentOption<MeditationPattern>[] = [
@@ -22,6 +24,12 @@ const PATTERN_OPTIONS: SegmentOption<MeditationPattern>[] = [
 export function VirtualizationSection() {
   const settings = useLiveQuery(() => db.settings.get(1), [])
   const routines = useLiveQuery(() => listRoutines(), [])
+
+  const [creatingTemplate, createFromTemplate] = useSubmitGuard(async () => {
+    const id = await createMorningRoutine()
+    await updateSettings({ virtualizationRoutineId: id })
+    await installMorningRecipe(id)
+  })
 
   if (!settings) return null
   const routineId = settings.virtualizationRoutineId ?? null
@@ -96,7 +104,13 @@ export function VirtualizationSection() {
             ))}
           </Select>
         </label>
-        {routineId != null && <p className="mt-1 text-xs text-text-faint">La receta «Mañana consciente» ya sigue esta rutina y desactivó «Empezar el día».</p>}
+        {routineId != null ? (
+          <p className="mt-1 text-xs text-text-faint">La receta «Mañana consciente» ya sigue esta rutina y desactivó «Empezar el día».</p>
+        ) : (
+          <Button variant="secondary" size="sm" loading={creatingTemplate} onClick={() => void createFromTemplate()} className="mt-2">
+            Crear rutina «Mañana consciente»
+          </Button>
+        )}
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
