@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Plugins · 3 variantes</title>
+<style>
+  /* Tokens reales de la app (src/index.css, tema oscuro). */
+  :root {
+    --bg: #131316; --bg-soft: #0f0f11; --hover: #1f1f24; --border: #26262c; --border-strong: #34343c;
+    --text: #e7e7eb; --muted: #9d9da8; --faint: #8b8b96;
+    --accent: #7c84e8; --accent-soft: rgba(124,132,232,.16); --on-accent: #0f1020;
+    --success: #4cc38a; --warning: #f0a25e; --danger: #f07470;
+    --shadow: 0 24px 60px -12px rgba(0,0,0,.6);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg-soft); color: var(--text); font: 14px/1.5 InterVariable, ui-sans-serif, system-ui, -apple-system, sans-serif; }
+  .lucide { width: 15px; height: 15px; stroke-width: 1.75; flex: none; }
+  .page { max-width: 1180px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -.01em; margin: 0 0 6px; }
+  .lead { color: var(--muted); max-width: 78ch; margin: 0 0 24px; }
+  .tabs { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); margin-bottom: 24px; flex-wrap: wrap; }
+  .tabs button { font: inherit; color: var(--muted); background: none; border: 0; padding: 6px 14px; border-radius: 6px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--hover); color: var(--text); font-weight: 500; }
+  .variant { display: none; }
+  .variant.on { display: block; }
+  .vhead { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 4px; }
+  .vhead h2 { font-size: 17px; font-weight: 600; margin: 0; }
+  .tag { font-size: 12px; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0 8px; }
+  .idea { color: var(--muted); margin: 0 0 20px; max-width: 84ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
+  .scene { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .scene > .cap { font-size: 12px; color: var(--faint); padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+  .scene > .cap b { color: var(--muted); font-weight: 500; }
+  .stage { padding: 16px; position: relative; }
+  .pc { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+  .pc > div { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: var(--bg); }
+  .pc h3 { font-size: 13px; margin: 0 0 6px; font-weight: 600; }
+  .pc ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .pc li { margin: 3px 0; }
+  .pro h3 { color: var(--success); } .con h3 { color: var(--warning); }
+  @media (max-width: 700px) { .pc { grid-template-columns: 1fr; } }
+
+  /* Piezas de la app */
+  .hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .hdr .t { font-size: 16px; font-weight: 600; margin-right: auto; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 6px; font: inherit; font-size: 13px; border: 1px solid var(--border-strong); background: transparent; color: var(--text); cursor: default; white-space: nowrap; }
+  .btn.p { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 500; }
+  .btn.g { border-color: transparent; color: var(--muted); }
+  .btn.sm { height: 26px; font-size: 12px; padding: 0 8px; }
+  .btn .lucide { width: 14px; height: 14px; }
+  .ico { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: var(--hover); color: var(--muted); flex: none; }
+  .muted { color: var(--muted); } .faint { color: var(--faint); font-size: 12px; }
+  .dialog { border: 1px solid var(--border-strong); border-radius: 12px; background: var(--bg); box-shadow: var(--shadow); padding: 16px; }
+  .dialog .dt { font-size: 15px; font-weight: 600; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+  .foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); align-items: center; }
+  .foot .faint { margin-right: auto; }
+  .kbd { font-size: 11px; color: var(--faint); border: 1px solid var(--border-strong); border-radius: 4px; padding: 0 5px; }
+  .palette { border: 1px solid var(--border-strong); border-radius: 12px; background: var(--bg); box-shadow: var(--shadow); overflow: hidden; }
+  .palette .q { display: flex; gap: 8px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 15px; }
+  .palette .sec { padding: 8px 14px 4px; font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
+  .palette .it { display: flex; gap: 10px; align-items: center; padding: 7px 14px; font-size: 13px; }
+  .palette .it.sel { background: var(--hover); }
+  .palette .it .n { flex: 1; }
+  .common { border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; margin-top: 16px; background: var(--bg); }
+  .common h2 { font-size: 14px; margin: 0 0 6px; }
+  .common ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .rec { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 16px 18px; margin: 28px 0 0; }
+  .rec h2 { font-size: 15px; margin: 0 0 6px; }
+  .rec p { margin: 4px 0; color: var(--text); }
+
+  /* Piezas nuevas de Plugins */
+  .switch { width: 34px; height: 20px; border-radius: 999px; background: var(--hover); border: 1px solid var(--border-strong); position: relative; flex: none; }
+  .switch.on { background: var(--accent); border-color: var(--accent); }
+  .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--text); transition: transform .15s; }
+  .switch.on::after { transform: translateX(14px); background: var(--on-accent); }
+  .switch.core { opacity: .35; }
+  .badge { font-size: 11px; border-radius: 999px; padding: 0 7px; white-space: nowrap; }
+  .badge.warn { color: var(--warning); border: 1px solid var(--warning); }
+  .badge.soft { color: var(--muted); border: 1px solid var(--border); }
+  .badge.acc { color: var(--accent); border: 1px solid var(--accent); }
+  .cat-title { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); margin: 18px 0 8px; }
+  .cat-title:first-child { margin-top: 0; }
+  .pcard { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; display: flex; gap: 12px; align-items: center; }
+  .pcard .n { flex: 1; min-width: 0; font-weight: 500; }
+  .pcard .n small { display: block; color: var(--faint); font-size: 12px; font-weight: 400; margin-top: 1px; }
+  .pcard .meta { display: flex; gap: 5px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
+  .catgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+  .preview { width: 36px; height: 36px; border-radius: 8px; background: var(--hover); flex: none; position: relative; overflow: hidden; display: grid; place-items: center; }
+  .pulse { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: .3; transform: scale(.75); } 50% { opacity: 1; transform: scale(1.15); } }
+  .sweep { position: absolute; inset: 0; background: linear-gradient(90deg, transparent, var(--accent-soft), transparent); animation: sweep 2.2s linear infinite; }
+  @keyframes sweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+  .presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  .preset { font-size: 12px; border: 1px solid var(--border-strong); border-radius: 999px; padding: 5px 12px; color: var(--muted); }
+  .preset.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .toast { display: inline-flex; gap: 10px; align-items: center; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg); padding: 9px 12px; font-size: 13px; box-shadow: var(--shadow); }
+  .toast b { font-weight: 500; }
+  .toast .u { color: var(--accent); font-weight: 500; }
+  .banner { display: flex; gap: 10px; align-items: center; border: 1px dashed var(--border-strong); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--muted); }
+  .banner .n { flex: 1; }
+  .drawer { border: 1px solid var(--border-strong); border-radius: 12px; background: var(--bg); box-shadow: var(--shadow); overflow: hidden; }
+  .drawer .dhead { padding: 16px 18px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: center; }
+  .drawer .dhead .n { flex: 1; }
+  .drawer .dhead .n b { display: block; font-size: 15px; }
+  .drawer .dtabs { display: flex; gap: 4px; padding: 8px 14px 0; border-bottom: 1px solid var(--border); }
+  .drawer .dtabs span { font-size: 12px; color: var(--muted); padding: 7px 10px; border-radius: 6px 6px 0 0; }
+  .drawer .dtabs span.on { color: var(--text); background: var(--hover); font-weight: 500; }
+  .drawer .dbody { padding: 14px 18px; }
+  .stat { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .stat:last-child { border-bottom: 0; }
+  .stat .k { color: var(--muted); }
+  .enhance { display: flex; gap: 8px; align-items: center; padding: 7px 10px; border: 1px dashed var(--border-strong); border-radius: 8px; margin-bottom: 6px; font-size: 12.5px; color: var(--muted); }
+  .enhance .n { flex: 1; }
+
+  /* Maestro-detalle (B) */
+  .md { display: grid; grid-template-columns: 240px 1fr; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; min-height: 460px; }
+  .md .list { border-right: 1px solid var(--border); background: var(--bg); overflow-y: auto; }
+  .md .search { padding: 10px; border-bottom: 1px solid var(--border); display: flex; gap: 6px; align-items: center; color: var(--faint); font-size: 12.5px; }
+  .md .litem { display: flex; gap: 8px; align-items: center; padding: 7px 12px; font-size: 12.5px; border-left: 2px solid transparent; }
+  .md .litem.sel { background: var(--hover); border-left-color: var(--accent); }
+  .md .litem .n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .md .detail { padding: 0; }
+  @media (max-width: 760px) { .md { grid-template-columns: 1fr; } .md .list { display: none; } }
+
+  /* Constelación (C) — mapa vivo: estrellas de fondo, radar girando, fotones viajando por las líneas */
+  .starmap { border-radius: 16px; overflow: hidden; background:
+      radial-gradient(ellipse 70% 55% at 50% 42%, rgba(124,132,232,.14), transparent 62%),
+      radial-gradient(1.6px 1.6px at 18% 24%, rgba(255,255,255,.4) 0, transparent 60%),
+      radial-gradient(1.6px 1.6px at 76% 16%, rgba(255,255,255,.32) 0, transparent 60%),
+      radial-gradient(1.4px 1.4px at 62% 78%, rgba(255,255,255,.28) 0, transparent 60%),
+      radial-gradient(1.4px 1.4px at 12% 70%, rgba(255,255,255,.22) 0, transparent 60%),
+      radial-gradient(1.4px 1.4px at 88% 60%, rgba(255,255,255,.24) 0, transparent 60%),
+      radial-gradient(1.2px 1.2px at 40% 88%, rgba(255,255,255,.2) 0, transparent 60%),
+      radial-gradient(1.2px 1.2px at 30% 8%, rgba(255,255,255,.18) 0, transparent 60%),
+      #0b0b0e;
+  }
+  .orbit { position: relative; margin: 0 auto; }
+  .orbit svg { position: absolute; inset: 0; overflow: visible; }
+  .ring { position: absolute; top: 50%; left: 50%; border-radius: 50%; border: 1px solid rgba(124,132,232,.16); transform: translate(-50%, -50%); }
+  .ring.spin1 { animation: ringSpin 70s linear infinite; }
+  .ring.spin2 { animation: ringSpin 130s linear infinite reverse; }
+  @keyframes ringSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+  .sweep-arm { position: absolute; top: 50%; left: 50%; border-radius: 50%; transform: translate(-50%, -50%) rotate(0deg); animation: sweepSpin 5s linear infinite; mix-blend-mode: screen; pointer-events: none; }
+  @keyframes sweepSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+  .core { position: absolute; border-radius: 50%; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.16), var(--accent-soft) 55%); border: 1px solid var(--accent); box-shadow: 0 0 0 1px rgba(124,132,232,.35), 0 0 34px 6px rgba(124,132,232,.28); display: grid; place-items: center; text-align: center; font-weight: 600; color: var(--text); line-height: 1.25; padding: 4px; }
+  .core small { display: block; color: var(--accent); font-weight: 500; letter-spacing: .02em; margin-top: 2px; }
+  .core-ping { position: absolute; border-radius: 50%; border: 1px solid var(--accent); pointer-events: none; transform: translate(-50%, -50%); }
+  @keyframes corePing { from { transform: translate(-50%, -50%) scale(1); opacity: .55; } to { transform: translate(-50%, -50%) scale(2.4); opacity: 0; } }
+  .node { position: absolute; text-align: center; }
+  .node .dot { border-radius: 50%; background: var(--bg); border: 1.5px solid var(--border-strong); display: grid; place-items: center; margin: 0 auto 5px; color: var(--muted); }
+  .node.on .dot { box-shadow: 0 0 14px -3px var(--nc, var(--accent)); }
+  .node .lbl { font-size: 12px; font-weight: 500; color: var(--text); line-height: 1.2; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,.8), 0 0 8px rgba(0,0,0,.6); }
+  .node.off .dot, .node.off .lbl { opacity: .38; }
+  .node.here .dot { box-shadow: 0 0 0 3px var(--accent-soft), 0 0 18px -1px var(--accent); }
+  .flowdash { stroke-dasharray: 3 7; animation: flowDash 1.1s linear infinite; }
+  @keyframes flowDash { to { stroke-dashoffset: -20; } }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-top: 4px; padding: 10px 0 14px; font-size: 11.5px; color: var(--muted); }
+  .legend .lg { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .sw { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .orbit-cap { text-align: center; font-size: 12px; color: var(--faint); margin-top: 10px; max-width: 70ch; margin-left: auto; margin-right: auto; }
+  .mini-wrap { display: flex; gap: 14px; align-items: center; padding: 10px 0 12px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+  .mini-wrap p { margin: 0; }
+
+  /* Esteroides del mapa: foco/hover, atenuado, cascada, dormido, tooltip, control de vista */
+  .node { cursor: pointer; }
+  .node:focus-visible { outline: none; }
+  .node:focus-visible .dot, .node.hovered .dot { box-shadow: 0 0 0 2px var(--text), 0 0 18px -1px var(--nc, var(--accent)); }
+  .orbit.interactive.has-focus .node:not(.hovered):not(.here):not(.neighbor) { opacity: .3; transition: opacity .15s; }
+  .orbit.interactive .node { transition: opacity .15s; }
+  .node.cascade-off .dot { animation: cascadeBlink .6s steps(2, jump-none) infinite; }
+  .node.dormant .dot { border-style: dashed; }
+  @keyframes cascadeBlink { 50% { opacity: .35; box-shadow: none; } }
+  .maptip { position: fixed; z-index: 6; pointer-events: none; background: var(--bg); border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: var(--shadow); max-width: 210px; transform: translate(-50%, calc(-100% - 12px)); }
+  .maptip b { display: block; font-size: 12.5px; margin-bottom: 2px; }
+  .maptip .badge { margin-top: 5px; }
+  .viewbar { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); margin-bottom: 10px; }
+  .viewbar button { font: inherit; font-size: 12px; color: var(--muted); background: none; border: 0; padding: 5px 10px; border-radius: 6px; cursor: pointer; }
+  .viewbar button.on { background: var(--hover); color: var(--text); font-weight: 500; }
+  .md.map-mode .list { display: none; }
+  .md.map-mode .detail { display: grid; place-items: center; padding: 16px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+  .reduced .ring, .reduced .sweep-arm, .reduced .core-ping, .reduced .flowdash { animation: none !important; }
+  .reduced svg animateMotion { display: none; }
+  .paused .ring, .paused .sweep-arm, .paused .core-ping, .paused .flowdash { animation-play-state: paused; }
+</style>
+</head>
+<body>
+<main class="page">
+  <h1>Plugins: 3 variantes</h1>
+  <p class="lead">Issue #98: página nueva donde cada función grande de la app se activa, desactiva y configura por separado. Núcleo fijo (Hoy, Tareas, Proyectos, Planificación) siempre visible; el resto son fichas con interruptor. Desactivar <strong>nunca borra datos</strong>. Las tres variantes muestran lo mismo (16 plugins, dependencias, cascada) y cambia <strong>cómo se navega entre ficha y ficha</strong>.</p>
+
+  <div class="tabs" role="tablist" aria-label="Variantes">
+    <button role="tab" aria-selected="true" data-v="a">A · Galería por categorías</button>
+    <button role="tab" aria-selected="false" data-v="b">B · Maestro-detalle</button>
+    <button role="tab" aria-selected="false" data-v="c">C · Constelación</button>
+  </div>
+
+  <!-- ============ A ============ -->
+  <section class="variant on" id="v-a">
+    <div class="vhead"><h2>A · Galería por categorías</h2><span class="tag">rejilla escaneable, ficha en panel lateral</span></div>
+    <p class="idea">Tarjetas agrupadas por categoría (Núcleo · Ritual de mañana · Hacer · Motivación · Análisis · Integraciones). Cada tarjeta: icono, frase, interruptor y chips de estado. Un clic abre la ficha completa en un panel lateral (drawer) sin salir de la rejilla.</p>
+    <div class="grid">
+      <div class="scene"><div class="cap"><b>/plugins</b> · rejilla</div><div class="stage">
+        <div class="hdr"><span class="t">Plugins</span><span class="faint">12 de 16 activos</span></div>
+        <div class="cat-title">Núcleo · siempre activo</div>
+        <div class="catgrid">
+          <div class="pcard"><span class="ico"><i data-lucide="layout-grid"></i></span><span class="n">Hoy<small>Tu día de un vistazo</small></span><span class="switch on core"></span></div>
+          <div class="pcard"><span class="ico"><i data-lucide="calendar-range"></i></span><span class="n">Planificación<small>Calendario y bloques</small></span><span class="switch on core"></span></div>
+        </div>
+        <div class="cat-title">Ritual de mañana</div>
+        <div class="catgrid">
+          <div class="pcard"><span class="ico"><i data-lucide="radar"></i></span><span class="n">Virtualización<small>Transmisión, escaneo, presencia<span class="meta"><span class="badge acc">funciona mejor con 3 más</span></span></small></span><span class="switch on"></span></div>
+          <div class="pcard"><span class="ico"><i data-lucide="repeat"></i></span><span class="n">Rutinas<small>Pasos con temporizador</small></span><span class="switch on"></span></div>
+        </div>
+        <div class="cat-title">Integraciones</div>
+        <div class="catgrid">
+          <div class="pcard"><span class="preview"><span class="pulse"></span></span><span class="n">IA<small>Divide tareas con Claude<span class="meta"><span class="badge warn">Necesita clave</span></span></small></span><span class="switch on"></span></div>
+          <div class="pcard"><span class="preview"><span class="sweep"></span><i data-lucide="send" style="position:relative"></i></span><span class="n">Telegram<small>Captura y avisos<span class="meta"><span class="badge warn">Necesita token</span></span></small></span><span class="switch"></span></div>
+        </div>
+      </div></div>
+      <div class="scene"><div class="cap"><b>Panel lateral</b> · ficha de un plugin</div><div class="stage">
+        <div class="drawer">
+          <div class="dhead"><span class="ico"><i data-lucide="list-checks"></i></span><span class="n"><b>Hábitos</b><span class="faint">Hábitos diarios con rachas y recordatorios</span></span><span class="switch on"></span></div>
+          <div class="dtabs"><span class="on">Resumen</span><span>Ajustes</span><span>Tus datos</span></div>
+          <div class="dbody">
+            <div class="enhance"><i data-lucide="info" class="faint"></i><span class="n">Aporta: página /hábitos · atajo <span class="kbd">g b</span> · tarjeta en Hoy · 1 aviso</span></div>
+            <div class="stat"><span class="k">Hábitos registrados</span><span>7</span></div>
+            <div class="stat"><span class="k">Mejor racha</span><span>23 días</span></div>
+            <div class="foot"><span class="faint">Datos siempre a salvo</span><span class="btn g sm">Desactivar</span></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>Se escanea de un vistazo; buena primera impresión y en móvil.</li><li>Las categorías cuentan una historia (ritual, hacer, motivación...).</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>La configuración larga (IA, Telegram) queda un clic más lejos, dentro del drawer.</li><li>Con 16 plugins la rejilla pesa: hace falta buen scroll o categorías plegables.</li></ul></div>
+    </div>
+  </section>
+
+  <!-- ============ B ============ -->
+  <section class="variant" id="v-b">
+    <div class="vhead"><h2>B · Maestro-detalle</h2><span class="tag">como Ajustes del Sistema o extensiones de un editor</span></div>
+    <p class="idea">Lista compacta a la izquierda con interruptores y búsqueda; a la derecha la ficha entera del seleccionado, con sitio real para la configuración que se muda de Ajustes. En móvil la lista pasa a pantalla completa y la ficha es <code>/plugins/:id</code>.</p>
+    <div class="viewbar" role="tablist" aria-label="Vista de la lista">
+      <button role="tab" aria-selected="true" data-mdview="list">Lista</button>
+      <button role="tab" aria-selected="false" data-mdview="map">Mapa</button>
+    </div>
+    <div class="scene"><div class="cap"><b>/plugins</b> · maestro-detalle</div><div class="stage">
+      <div class="md" id="md-root">
+        <div class="list">
+          <div class="search"><i data-lucide="search"></i>Buscar plugin…</div>
+          <div class="cat-title" style="padding:0 12px">Núcleo</div>
+          <div class="litem"><span class="n">Hoy</span><span class="switch on core"></span></div>
+          <div class="litem"><span class="n">Planificación</span><span class="switch on core"></span></div>
+          <div class="cat-title" style="padding:0 12px">Ritual de mañana</div>
+          <div class="litem sel" data-plugin="virtualization"><span class="n">Virtualización</span><span class="switch on" data-plugin-switch="virtualization"></span></div>
+          <div class="litem" data-plugin="checkin"><span class="n">Check-in</span><span class="switch on" data-plugin-switch="checkin"></span></div>
+          <div class="litem" data-plugin="routines"><span class="n">Rutinas</span><span class="switch on" data-plugin-switch="routines"></span></div>
+          <div class="cat-title" style="padding:0 12px">Hacer</div>
+          <div class="litem" data-plugin="dayTime"><span class="n">Tiempo de hoy</span><span class="switch on" data-plugin-switch="dayTime"></span></div>
+          <div class="litem" data-plugin="habits"><span class="n">Hábitos</span><span class="switch on" data-plugin-switch="habits"></span></div>
+          <div class="litem" data-plugin="focus"><span class="n">Foco</span><span class="switch on" data-plugin-switch="focus"></span></div>
+          <div class="litem" data-plugin="launchers"><span class="n">Lanzadores</span><span class="switch on" data-plugin-switch="launchers"></span></div>
+          <div class="cat-title" style="padding:0 12px">Integraciones</div>
+          <div class="litem" data-plugin="ai"><span class="n">IA</span><span class="badge warn" style="margin-right:6px">!</span><span class="switch on" data-plugin-switch="ai"></span></div>
+          <div class="litem" data-plugin="telegram"><span class="n">Telegram</span><span class="switch" data-plugin-switch="telegram"></span></div>
+        </div>
+        <div class="detail">
+          <div class="drawer" style="border:0;border-radius:0;box-shadow:none">
+            <div class="dhead"><span class="ico"><i data-lucide="radar"></i></span><span class="n"><b>Virtualización</b><span class="faint">Ritual de entrada al día: transmisión, escaneo, presencia y arranque de la rutina</span></span><span class="switch on"></span></div>
+            <div class="dtabs"><span class="on">Resumen</span><span>Ajustes</span><span>Qué aporta</span><span>Tus datos</span></div>
+            <div class="dbody">
+              <div class="enhance"><i data-lucide="sparkles" class="faint"></i><span class="n">Funciona mejor con <b>Rutinas</b>, <b>Check-in</b> y <b>Lanzadores</b> — ya están activos</span></div>
+              <div class="mini-wrap">
+                <div class="orbit mini starmap interactive" id="orbit-mini" data-focus="virtualization"></div>
+                <p class="faint">Mapa de dependencias de esta ficha — clic en un nodo cambia de ficha.<br><span style="color:var(--accent)">Ver el mapa completo →</span></p>
+              </div>
+              <div class="stat"><span class="k">Tema</span><span>Nítido</span></div>
+              <div class="stat"><span class="k">Horario</span><span>Hasta las 10:00</span></div>
+              <div class="stat"><span class="k">Rutina que arranca</span><span>Mañana consciente</span></div>
+              <div class="stat"><span class="k">Racha</span><span>12 días</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <p class="orbit-cap" id="md-live" aria-live="polite"></p>
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>La configuración mudada de Ajustes tiene sitio fijo y grande: cabe todo (horario, tema, sonido…).</li><li>Navegación con teclado (↑↓/j k), buena para muchos plugins.</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>Menos «wow» que una rejilla o un mapa; se parece a un panel de ajustes más.</li><li>En móvil pierde la vista de conjunto (hay que entrar a la lista primero).</li></ul></div>
+    </div>
+  </section>
+
+  <!-- ============ C ============ -->
+  <section class="variant" id="v-c">
+    <div class="vhead"><h2>C · Constelación</h2><span class="tag">mapa vivo, estética de la Virtualización</span></div>
+    <p class="idea">El núcleo en el centro; el ritual de mañana en el anillo cercano, el resto más lejos. Fotones viajan del núcleo a cada plugin activo por líneas de su color de categoría — el mismo lenguaje de «transmisión» que la Virtualización. Anillos girando muy lento tipo radar, núcleo con pulso de sonar. Los apagados quedan en gris, sin línea de flujo. Un interruptor cambia a la vista de lista (B) para configurar de verdad.</p>
+    <div class="scene starmap"><div class="cap"><b>/plugins</b> · mapa vivo · flechas ←/→/↑/↓ entre nodos, Enter para abrir, Esc para quitar el foco</div><div class="stage" style="padding:20px 16px 4px">
+      <div class="orbit interactive" id="orbit-full" role="group" aria-label="Mapa de dependencias de los plugins"></div>
+      <div class="legend" id="legend-full"></div>
+    </div></div>
+    <p class="orbit-cap" id="full-live" aria-live="polite">Clic en un nodo → mismo drawer de A. Este mismo mapa, recortado a un plugin y sus dependencias, es el que se mete dentro de cada ficha (ver pestaña «Resumen» de Virtualización en B). Pasa el ratón por un interruptor de la lista para previsualizar la cascada.</p>
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>Enseña de un vistazo qué se apoya en qué — encaja con la identidad visual de la Virtualización (bloom, escaneo).</li><li>Muy vistoso para el test de entrada (#100) y para presumir la app.</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>Más caro de construir (SVG + `animateMotion`) y peor en pantallas pequeñas — por eso vive también en miniatura dentro de la ficha, no solo a página completa.</li><li>Para configurar de verdad hay que saltar a otra vista igualmente.</li></ul></div>
+    </div>
+  </section>
+
+  <div class="common">
+    <h2>Igual en las tres — las 7 ideas extra</h2>
+    <p class="idea" style="margin-bottom:14px">Da igual la variante elegida: estas piezas se comportan igual encima de cualquiera de las tres.</p>
+
+    <div class="cat-title">1 · Perfiles / presets</div>
+    <div class="presets">
+      <span class="preset on">Mínimo</span><span class="preset">Enfoque TDAH</span><span class="preset">Completo</span><span class="preset">Solo tareas</span><span class="preset">Personalizado</span>
+    </div>
+
+    <div class="cat-title">2 · Vista previa al desactivar + deshacer</div>
+    <div class="grid" style="margin-bottom:6px">
+      <div class="dialog">
+        <div class="dt"><i data-lucide="list-checks"></i>¿Desactivar Hábitos?</div>
+        <p class="faint" style="margin:0 0 10px">Desaparecerá: página /hábitos · atajo <span class="kbd">g b</span> · tarjeta en Hoy · 1 aviso. Tus 7 hábitos y sus rachas no se borran.</p>
+        <div class="foot"><span class="btn g">Cancelar</span><span class="btn p">Desactivar</span></div>
+      </div>
+      <div class="stage" style="display:grid;place-items:center"><div class="toast"><i data-lucide="check-circle-2"></i>Hábitos desactivado <span class="u">Deshacer</span></div></div>
+    </div>
+
+    <div class="cat-title">3 · «Tus datos» en la ficha</div>
+    <div class="dialog" style="max-width:420px">
+      <div class="stat"><span class="k">Hábitos registrados</span><span>7</span></div>
+      <div class="stat"><span class="k">Registros totales</span><span>412</span></div>
+      <div class="stat"><span class="k">Mejor racha</span><span>23 días</span></div>
+    </div>
+
+    <div class="cat-title">4 · «Necesita configuración»</div>
+    <div class="pcard" style="max-width:420px"><span class="ico"><i data-lucide="send"></i></span><span class="n">Telegram<small>Captura y avisos por Telegram</small></span><span class="badge warn">Necesita token</span><span class="switch"></span></div>
+
+    <div class="cat-title">5 · Sugerencia de ruido</div>
+    <div class="banner" style="max-width:520px"><i data-lucide="moon-star"></i><span class="n">Foco está activo pero sin usar en 32 días. ¿Lo desactivas?</span><span class="btn g sm">Descartar</span><span class="btn sm">Desactivar</span></div>
+
+    <div class="cat-title">6 · Paleta y acorde <span class="kbd">g x</span></div>
+    <div class="palette" style="max-width:420px">
+      <div class="q"><i data-lucide="search"></i>habitos</div>
+      <div class="sec">Plugins</div>
+      <div class="it sel"><i data-lucide="power-off"></i><span class="n">Desactivar Hábitos</span></div>
+      <div class="it"><i data-lucide="external-link"></i><span class="n">Ir a Plugins</span><span class="kbd">g x</span></div>
+    </div>
+
+    <div class="cat-title">7 · Preview animada en la ficha</div>
+    <div class="pcard" style="max-width:420px"><span class="preview"><span class="pulse"></span></span><span class="n">IA<small>Mini demo en bucle, sin imágenes</small></span></div>
+  </div>
+
+  <div class="rec">
+    <h2>Elegido: B como base, con el mapa vivo de C dentro de la ficha</h2>
+    <p>La configuración mudada de Ajustes (horario, tema, sonido, claves...) necesita sitio fijo, y B es la que mejor lo da. El mapa de C entra en miniatura dentro de la pestaña «Resumen» de cada ficha que tenga dependencias o «funciona mejor con» (Virtualización es la principal), y como vista opcional de toda la página desde un interruptor arriba de la lista — mismo patrón que Rutinas/Tiempo de hoy: se guarda la variante que no gana.</p>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script type="module">
+  import { CATS, PLUGINS, buildConstellation, computeCascade, nodePosition } from './model.js';
+
+  lucide.createIcons();
+  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    document.querySelectorAll('.variant').forEach((v) => v.classList.toggle('on', v.id === 'v-' + b.dataset.v));
+  }));
+
+  // ---- Mapa de constelación: generado desde `model.js` (mismo dato para el mapa completo de C y la
+  // miniatura de la ficha en B), nunca ángulos puestos a mano. Esteroides sobre el primer boceto:
+  // vecindario resaltado al pasar el ratón/foco, tooltip, cascada previsualizada al pasar por un
+  // interruptor de la lista, encendido/apagado animado, teclado, reduced-motion y pausa fuera de vista. ----
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const enabled = new Set(PLUGINS.filter((p) => p.on).map((p) => p.id));
+  const maps = new Map(); // el -> { nodes, edges, radii, focusId, showPing }
+
+  function buildOrbit(el, { focusId, size, coreR, coreSub, nodeR, dotR, showPing }) {
+    const { nodes, edges, radii } = buildConstellation({ enabledSet: enabled, focusId });
+    maps.set(el, { nodes, edges, radii, focusId, showPing, size, nodeR, dotR });
+    const cx = size / 2, cy = size / 2;
+    el.style.width = size + 'px';
+    el.style.height = size + 'px';
+    let svg = `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">`;
+    let nodesHtml = '';
+    nodes.forEach((n) => {
+      const p = nodePosition(n, radii);
+      const cat = CATS[n.cat];
+      const pathId = 'path-' + el.id + '-' + n.id;
+      const x = (cx + p.x).toFixed(1), y = (cy + p.y).toFixed(1);
+      svg += `<path id="${pathId}" d="M ${cx} ${cy} L ${x} ${y}" fill="none" stroke="${cat.color}" stroke-width="1.2" opacity="${n.on ? 0.5 : 0.14}" />`;
+      if (n.on && !reducedMotion) {
+        const speed = 2.8 - Math.min(1.8, n.activity * 1.8); // más uso -> fotón más rápido
+        svg += `<path d="M ${cx} ${cy} L ${x} ${y}" fill="none" stroke="${cat.color}" stroke-width="1.4" class="flowdash" opacity=".85" />`;
+        svg += `<circle r="${(2 + n.activity * 1.6).toFixed(1)}" fill="#fff"><animateMotion dur="${speed.toFixed(1)}s" repeatCount="indefinite"><mpath href="#${pathId}"/></animateMotion></circle>`;
+      } else if (n.on) {
+        svg += `<path d="M ${cx} ${cy} L ${x} ${y}" fill="none" stroke="${cat.color}" stroke-width="1.4" opacity=".6" />`;
+      }
+      for (const e of edges) {
+        if (e.kind !== 'enhances' || e.from !== n.id) continue;
+        const to = nodes.find((m) => m.id === e.to);
+        if (!to) continue;
+        const q = nodePosition(to, radii);
+        svg += `<path d="M ${x} ${y} L ${(cx + q.x).toFixed(1)} ${(cy + q.y).toFixed(1)}" fill="none" stroke="${e.color}" stroke-width="1" stroke-dasharray="2 4" opacity="${e.on ? 0.55 : 0.15}" />`;
+      }
+      const dormant = n.on && n.activity < 0.25;
+      nodesHtml += `<div class="node ${n.on ? 'on' : 'off'}${n.here ? ' here' : ''}${dormant ? ' dormant' : ''}" data-node="${n.id}" tabindex="0" role="button"
+          aria-label="${n.label}${n.on ? ', activo' : ', desactivado'}${dormant ? ', sin uso reciente' : ''}"
+          style="--nc:${cat.color};left:${(cx + p.x - nodeR / 2).toFixed(1)}px;top:${(cy + p.y - nodeR / 2).toFixed(1)}px;width:${nodeR}px">
+        <div class="dot" style="width:${dotR}px;height:${dotR}px;${n.on ? `border-color:${cat.color};color:${cat.color};background:${cat.color}22` : ''}"><i data-lucide="${n.icon}" style="width:${Math.round(dotR * 0.42)}px;height:${Math.round(dotR * 0.42)}px"></i></div>
+        <div class="lbl">${n.label}</div>
+      </div>`;
+    });
+    svg += '</svg>';
+    const r1 = radii.r1, r2 = radii.r2 ?? radii.r1;
+    el.innerHTML = `
+      <div class="ring spin1" style="width:${r1 * 2 - 6}px;height:${r1 * 2 - 6}px"></div>
+      <div class="ring spin2" style="width:${r2 * 2 - 6}px;height:${r2 * 2 - 6}px"></div>
+      <div class="sweep-arm" style="width:${r2 * 2}px;height:${r2 * 2}px;background:conic-gradient(from 0deg, rgba(124,132,232,.28), transparent 30deg, transparent 360deg)"></div>
+      ${svg}
+      ${showPing ? `<div class="core-ping" style="width:${coreR}px;height:${coreR}px;left:${cx}px;top:${cy}px;animation:corePing 3s ease-out infinite"></div>
+      <div class="core-ping" style="width:${coreR}px;height:${coreR}px;left:${cx}px;top:${cy}px;animation:corePing 3s ease-out infinite 1.5s"></div>` : ''}
+      <div class="core" style="width:${coreR}px;height:${coreR}px;left:${cx - coreR / 2}px;top:${cy - coreR / 2}px;font-size:${coreR > 70 ? 11 : 8.5}px">NÚCLEO${coreSub ? `<small>${coreSub}</small>` : ''}</div>
+      ${nodesHtml}
+    `;
+    if (reducedMotion) el.classList.add('reduced');
+    lucide.createIcons();
+    wireInteraction(el);
+  }
+
+  // Tooltip compartido, reposicionado sobre el nodo con foco/hover de cada mapa.
+  const tip = document.createElement('div');
+  tip.className = 'maptip';
+  tip.style.display = 'none';
+  document.body.appendChild(tip);
+
+  function neighborsOf(el, id) {
+    const { edges } = maps.get(el);
+    const set = new Set([id]);
+    edges.forEach((e) => {
+      if (e.from === id) set.add(e.to);
+      if (e.to === id) set.add(e.from);
+    });
+    return set;
+  }
+
+  function showTip(nodeEl, plugin) {
+    const r = nodeEl.getBoundingClientRect();
+    tip.innerHTML = `<b>${plugin.label}</b>${plugin.desc}<div class="badge ${plugin.on ? 'acc' : 'soft'}">${plugin.on ? 'Activo' : 'Desactivado'}</div>`;
+    tip.style.left = r.left + r.width / 2 + 'px';
+    tip.style.top = r.top + 'px';
+    tip.style.display = 'block';
+  }
+  function hideTip() { tip.style.display = 'none'; }
+
+  function focusNode(el, id, live) {
+    const { nodes } = maps.get(el);
+    const nbrs = neighborsOf(el, id);
+    el.classList.toggle('has-focus', !!id);
+    el.querySelectorAll('.node').forEach((n) => {
+      const nid = n.dataset.node;
+      n.classList.toggle('hovered', nid === id);
+      n.classList.toggle('neighbor', nbrs.has(nid) && nid !== id);
+    });
+    if (id) {
+      const plugin = nodes.find((n) => n.id === id);
+      const nodeEl = el.querySelector(`[data-node="${id}"]`);
+      if (plugin && nodeEl) showTip(nodeEl, plugin);
+      if (live && plugin) live.textContent = `${plugin.label}: ${plugin.on ? 'activo' : 'desactivado'}. ${plugin.desc}`;
+    } else {
+      hideTip();
+    }
+  }
+
+  function selectNode(id) {
+    // En B, clic en un nodo del mapa selecciona la misma ficha que clicar en la lista (mismo patrón
+    // que "clic en un nodo → mismo drawer de A" del mockup original).
+    document.querySelectorAll('.litem[data-plugin]').forEach((li) => li.classList.toggle('sel', li.dataset.plugin === id));
+    document.getElementById('md-live')?.replaceChildren(document.createTextNode(`Ficha seleccionada: ${PLUGINS.find((p) => p.id === id)?.label ?? id}`));
+  }
+
+  function wireInteraction(el) {
+    const liveId = el.id === 'orbit-full' ? 'full-live' : null;
+    const live = liveId ? document.getElementById(liveId) : null;
+    const nodeEls = () => [...el.querySelectorAll('.node')];
+    el.addEventListener('pointerover', (e) => {
+      const n = e.target.closest('.node');
+      if (n) focusNode(el, n.dataset.node, live);
+    });
+    el.addEventListener('pointerleave', () => focusNode(el, null, live));
+    el.addEventListener('focusin', (e) => {
+      const n = e.target.closest('.node');
+      if (n) focusNode(el, n.dataset.node, live);
+    });
+    el.addEventListener('click', (e) => {
+      const n = e.target.closest('.node');
+      if (n) selectNode(n.dataset.node);
+    });
+    el.addEventListener('keydown', (e) => {
+      const items = nodeEls();
+      const i = items.indexOf(document.activeElement);
+      if (e.key === 'Enter' && i >= 0) { selectNode(items[i].dataset.node); return; }
+      if (e.key === 'Escape') { document.activeElement.blur(); focusNode(el, null, live); return; }
+      if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp'].includes(e.key) || i < 0) return;
+      e.preventDefault();
+      const dir = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1;
+      items[(i + dir + items.length) % items.length].focus();
+    });
+  }
+
+  // Idea 2 (vista previa al desactivar), traída al mapa: pasar el ratón por un interruptor de la
+  // lista de B enciende/apaga en gris parpadeante justo los nodos que arrastraría ese cambio,
+  // calculado con la misma regla que `planToggle` en el código real (aquí `computeCascade`).
+  document.querySelectorAll('[data-plugin-switch]').forEach((sw) => {
+    const id = sw.dataset.pluginSwitch;
+    const preview = (on) => {
+      const cascade = computeCascade(id, !enabled.has(id));
+      document.querySelectorAll('.orbit .node').forEach((n) => n.classList.toggle('cascade-off', on && cascade.includes(n.dataset.node)));
+    };
+    sw.addEventListener('mouseenter', () => preview(true));
+    sw.addEventListener('mouseleave', () => preview(false));
+    sw.addEventListener('click', () => {
+      const nextOn = !enabled.has(id);
+      const cascade = computeCascade(id, nextOn);
+      if (nextOn) { enabled.add(id); cascade.forEach((c) => enabled.add(c)); }
+      else { enabled.delete(id); cascade.forEach((c) => enabled.delete(c)); }
+      sw.classList.toggle('on', enabled.has(id));
+      rebuildAll();
+    });
+  });
+
+  function rebuildAll() {
+    buildOrbit(document.getElementById('orbit-full'), FULL_CFG);
+    buildOrbit(document.getElementById('orbit-mini'), MINI_CFG);
+    document.getElementById('legend-full').innerHTML = Object.values(CATS)
+      .map((c) => `<span class="lg"><span class="sw" style="background:${c.color}"></span>${c.label}</span>`)
+      .join('');
+  }
+
+  const FULL_CFG = { size: 560, coreR: 96, coreSub: 'Hoy · Tareas<br>Proyectos · Plan.', nodeR: 66, dotR: 40, showPing: true };
+  const MINI_CFG = { focusId: 'virtualization', size: 190, coreR: 44, coreSub: null, nodeR: 38, dotR: 26, showPing: false };
+  rebuildAll();
+
+  // Lista · Mapa dentro de B: la vista de mapa reusa el mismo `.orbit-full` reconstruido a tamaño de
+  // panel — ninguna posición nueva puesta a mano, es `buildConstellation()` otra vez.
+  const mdRoot = document.getElementById('md-root');
+  document.querySelectorAll('[data-mdview]').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-mdview]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    const isMap = b.dataset.mdview === 'map';
+    mdRoot.classList.toggle('map-mode', isMap);
+    if (isMap && !mdRoot.querySelector('#orbit-embedded')) {
+      const holder = document.createElement('div');
+      holder.id = 'orbit-embedded';
+      holder.className = 'orbit interactive starmap';
+      mdRoot.querySelector('.detail').prepend(holder);
+      buildOrbit(holder, { ...FULL_CFG, size: 420, coreR: 76, nodeR: 54, dotR: 32 });
+    }
+  }));
+
+  // Rendimiento: pausar las animaciones CSS de los mapas fuera de pantalla o con la pestaña oculta —
+  // no es una pantalla a pantalla completa como la Virtualización, así que el coste debe ser comedido.
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => entry.target.classList.toggle('paused', !entry.isIntersecting));
+  }, { threshold: 0.05 });
+  document.querySelectorAll('.orbit').forEach((el) => io.observe(el));
+  document.addEventListener('visibilitychange', () => {
+    document.querySelectorAll('.orbit').forEach((el) => el.classList.toggle('paused', document.hidden));
+  });
+</script>
+</body>
+</html>
