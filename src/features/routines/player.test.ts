@@ -17,9 +17,9 @@ const MIN = 60_000
 function snapshot(overrides: Partial<PlayerSnapshot> = {}): PlayerSnapshot {
   return {
     steps: [
-      { title: 'Vestirse', durationSec: 300 },
-      { title: 'Desayunar', durationSec: 900 },
-      { title: 'Mochila', durationSec: 300 },
+      { title: 'Vestirse', durationSec: 300, kind: 'simple' },
+      { title: 'Desayunar', durationSec: 900, kind: 'simple' },
+      { title: 'Mochila', durationSec: 300, kind: 'simple' },
     ],
     index: 0,
     running: true,

@@ -72,13 +72,19 @@ export async function advanceStep(completed: boolean): Promise<void> {
 
 /** Pasa todos los pasos cuyo tiempo ya se agotó, cada uno en el instante exacto en que acabó. Tras
  * suspender el portátil 10 min no suena diez veces ni deja horas de inicio falsas: se pone al día de
- * golpe y avisa una vez. Lo llama el motor en cada tick. */
+ * golpe y avisa una vez. Lo llama el motor en cada tick.
+ *
+ * Un paso con tipo (#97 PR5: agradecimientos/intención/visualización/tarea del día) nunca se
+ * auto-avanza aquí aunque su tiempo se agote — se queda "en negativo" esperando a que el usuario
+ * pulse Hecho, para no perder lo que esté escribiendo o descartar el paso sin que responda. */
 export async function catchUpExpiredSteps(now: number = Date.now()): Promise<void> {
   let advanced = false
   for (;;) {
     const s = useRoutinePlayerStore.getState()
     if (s.routineId == null || s.finished || !s.running || s.startedAt == null) break
     if (stepRemainingSec(s, now) > 0) break
+    const kind = s.steps[s.index]?.kind
+    if (kind && kind !== 'simple') break
     const endedAt = s.startedAt + (stepPlannedSec(s) - s.accumulatedSec) * 1000
     s.advance(true, Math.min(endedAt, now))
     advanced = true

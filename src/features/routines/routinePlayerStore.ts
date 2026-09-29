@@ -51,7 +51,12 @@ export const useRoutinePlayerStore = create<RoutinePlayerState>()(
     (set) => ({
       ...EMPTY,
       begin: (routine, now = Date.now()) => {
-        const steps = routine.steps.map((st) => ({ title: st.title, durationSec: Math.round(st.durationMin * 60) }))
+        const steps = routine.steps.map((st) => ({
+          title: st.title,
+          durationSec: Math.round(st.durationMin * 60),
+          kind: st.kind ?? 'simple',
+          prompt: st.prompt,
+        }))
         const totalSec = steps.reduce((sum, st) => sum + st.durationSec, 0)
         set({
           ...EMPTY,

@@ -55,6 +55,21 @@ describe('routinePlayerStore', () => {
     store().advance(true, 20_000)
     expect(store()).toMatchObject({ index: 1, running: true, startedAt: 20_000, accumulatedSec: 0 })
   })
+
+  it('begin copia kind/prompt de cada paso, con "simple" por defecto en pasos sin kind (#97 PR5)', () => {
+    const withTypes: Routine = {
+      ...routine,
+      steps: [
+        { id: 'a', title: 'Vestirse', durationMin: 5 },
+        { id: 'b', title: 'Visualización', durationMin: 3, kind: 'visualization', prompt: '¿Cómo te sientes?' },
+      ],
+    }
+    store().begin(withTypes, 0)
+    expect(store().steps).toMatchObject([
+      { kind: 'simple', prompt: undefined },
+      { kind: 'visualization', prompt: '¿Cómo te sientes?' },
+    ])
+  })
 })
 
 describe('catchUpExpiredSteps', () => {
@@ -71,5 +86,21 @@ describe('catchUpExpiredSteps', () => {
     // Vuelve a los 12 min: Uno (0-5) y Dos (5-10) vencidos; Tres empezó a los 10.
     await catchUpExpiredSteps(12 * 60_000)
     expect(store()).toMatchObject({ index: 2, completedSteps: 2, startedAt: 10 * 60_000, stepStartedAt: [0, 5 * 60_000, 10 * 60_000] })
+  })
+
+  it('se detiene en un paso con tipo aunque su tiempo se haya agotado (#97 PR5): espera a "Hecho"', async () => {
+    const withGratitude: Routine = {
+      ...routine,
+      steps: [
+        { id: 'a', title: 'Uno', durationMin: 5 },
+        { id: 'b', title: 'Agradecimientos', durationMin: 5, kind: 'gratitude' },
+        { id: 'c', title: 'Tres', durationMin: 5 },
+      ],
+    }
+    store().begin(withGratitude, 0)
+    // Vuelve a los 12 min: "Uno" venció a los 5; "Agradecimientos" (con tipo) no se salta solo aunque
+    // también haya vencido a los 10 — se queda ahí esperando que el usuario pulse Hecho.
+    await catchUpExpiredSteps(12 * 60_000)
+    expect(store()).toMatchObject({ index: 1, completedSteps: 1, startedAt: 5 * 60_000 })
   })
 })
