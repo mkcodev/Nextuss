@@ -1,24 +1,28 @@
 import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { addDays } from 'date-fns'
-import { ArrowRight, Check } from 'lucide-react'
+import { ArrowRight, Check, X } from 'lucide-react'
 import { Button, Dialog, Skeleton, Textarea } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { dateKey, isHabitScheduledOn, parseDateKey } from '../../lib/dates'
 import { getTasksForDate, parkTask, trashTask, updateTask } from '../../db/repositories/tasks'
 import { getCheckInForDate, markRitualClose, upsertCheckIn } from '../../db/repositories/checkins'
+import { getDailyEntry, upsertDailyEntry } from '../../db/repositories/dailyEntries'
 import { useHabitsWithStats } from '../habits/useHabitsWithStats'
 import { useDayCloseStore } from './dayCloseStore'
 import type { Task } from '../../db/types'
 import { emit } from '../../lib/events/bus'
 import { useStage } from '../../app/stage/stageStore'
 
-type Step = 1 | 2 | 3
+/** «intention» solo forma parte de la secuencia visible cuando el día tiene una intención fijada
+ * (`DayIntentionCard`/paso «Intención del día» de la rutina) — ver `steps` más abajo. */
+type StepKey = 'summary' | 'intention' | 'pending' | 'reflection'
+const ALL_STEPS: StepKey[] = ['summary', 'intention', 'pending', 'reflection']
 
 export function DayCloseFlow() {
   const { open: wanted, date, close } = useDayCloseStore()
   const open = useStage('dayClose', wanted)
-  const [step, setStep] = useState<Step>(1)
+  const [stepIndex, setStepIndex] = useState(0)
   const [reflection, setReflection] = useState('')
 
   const tasksQuery = useLiveQuery(() => (date ? getTasksForDate(date) : Promise.resolve([] as Task[])), [date])
@@ -37,9 +41,14 @@ export function DayCloseFlow() {
     [date],
   )
 
+  const dailyEntry = useLiveQuery(() => (date ? getDailyEntry(date) : Promise.resolve(null)), [date])
+  const hasIntention = !!dailyEntry?.intention
+  const steps = hasIntention ? ALL_STEPS : ALL_STEPS.filter((s) => s !== 'intention')
+  const step = steps[stepIndex] ?? steps[steps.length - 1]
+
   useEffect(() => {
     if (open) {
-      setStep(1)
+      setStepIndex(0)
       setReflection(checkin?.note ?? '')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,18 +63,23 @@ export function DayCloseFlow() {
     close()
   }
 
+  const setIntentionKept = async (kept: boolean) => {
+    await upsertDailyEntry(date, { intentionKept: kept })
+    setStepIndex((i) => Math.min(i + 1, steps.length - 1))
+  }
+
   const moveToTomorrow = (task: Task) => updateTask(task.id!, { scheduledDate: dateKey(addDays(new Date(), 1)) })
 
   return (
     <Dialog open={open} onClose={() => void finish()} title="Cerrar el día">
       <div className="space-y-4">
         <div className="flex items-center gap-1.5">
-          {([1, 2, 3] as Step[]).map((s) => (
-            <div key={s} className={cn('h-1 flex-1 rounded-full', s <= step ? 'bg-accent' : 'bg-border')} />
+          {steps.map((s) => (
+            <div key={s} className={cn('h-1 flex-1 rounded-full', steps.indexOf(s) <= stepIndex ? 'bg-accent' : 'bg-border')} />
           ))}
         </div>
 
-        {step === 1 && (
+        {step === 'summary' && (
           <div className="space-y-3">
             <p className="text-xs text-text-faint">Lo conseguido hoy</p>
             {tasksQuery === undefined ? (
@@ -91,7 +105,23 @@ export function DayCloseFlow() {
           </div>
         )}
 
-        {step === 2 && (
+        {step === 'intention' && (
+          <div className="space-y-3">
+            <p className="text-xs text-text-faint">Tu intención de hoy</p>
+            <p className="text-sm font-medium text-text">{dailyEntry?.intention}</p>
+            <p className="text-xs text-text-muted">¿La cumpliste?</p>
+            <div className="flex gap-2">
+              <Button type="button" variant="secondary" onClick={() => void setIntentionKept(true)}>
+                <Check size={14} strokeWidth={2} /> Sí
+              </Button>
+              <Button type="button" variant="secondary" onClick={() => void setIntentionKept(false)}>
+                <X size={14} strokeWidth={2} /> No
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === 'pending' && (
           <div className="space-y-3">
             <p className="text-xs text-text-faint">¿Qué quedó sin hacer y a dónde va?</p>
             {tasksQuery === undefined ? (
@@ -131,7 +161,7 @@ export function DayCloseFlow() {
           </div>
         )}
 
-        {step === 3 && (
+        {step === 'reflection' && (
           <div className="space-y-3">
             <label className="block text-xs font-medium text-text-muted">¿Cómo ha ido el día? (opcional)</label>
             <Textarea
@@ -149,13 +179,13 @@ export function DayCloseFlow() {
             Saltar
           </Button>
           <div className="flex gap-2">
-            {step > 1 && (
-              <Button type="button" variant="secondary" onClick={() => setStep((s) => (s - 1) as Step)}>
+            {stepIndex > 0 && (
+              <Button type="button" variant="secondary" onClick={() => setStepIndex((i) => i - 1)}>
                 Atrás
               </Button>
             )}
-            {step < 3 ? (
-              <Button type="button" onClick={() => setStep((s) => (s + 1) as Step)}>
+            {stepIndex < steps.length - 1 ? (
+              <Button type="button" onClick={() => setStepIndex((i) => i + 1)}>
                 Siguiente <ArrowRight size={14} strokeWidth={2} />
               </Button>
             ) : (
