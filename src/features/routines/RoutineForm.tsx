@@ -1,9 +1,10 @@
 import { useId, useRef, useState } from 'react'
 import { ArrowDown, ArrowUp, Plus, Trash2, X } from 'lucide-react'
-import { Button, ColorPicker, Dialog, FormRow, FormRows, IconButton, IconPicker, NumberInput, TitleField } from '../../design/primitives'
+import { Button, ColorPicker, Dialog, FormRow, FormRows, IconButton, IconPicker, NumberInput, Select, TitleField } from '../../design/primitives'
 import { DEFAULT_ROUTINE_ICON_KEY, ROUTINE_ICON_KEYS } from '../../design/icons'
 import { createRoutine, trashRoutine, updateRoutine } from '../../db/repositories/routines'
-import type { RoutineStep } from '../../db/types'
+import type { RoutineStep, RoutineStepKind } from '../../db/types'
+import { DEFAULT_VISUALIZATION_PROMPT, ROUTINE_STEP_KIND_LABELS, ROUTINE_STEP_KIND_ORDER } from './routineStepKinds'
 import { ENTITY_COLORS } from '../../lib/colors'
 import { cn } from '../../lib/cn'
 import { minutesToTime, timeToMinutes, WEEKDAY_LABELS_ES, WEEKDAY_LABELS_ES_FULL, WEEKDAY_ORDER_MON_FIRST } from '../../lib/dates'
@@ -13,7 +14,12 @@ import { formatMinutes } from './schedule'
 
 const DEFAULT_STEP_MIN = 5
 
-const newStep = (title = '', durationMin = DEFAULT_STEP_MIN): RoutineStep => ({ id: crypto.randomUUID(), title, durationMin })
+const newStep = (title = '', durationMin = DEFAULT_STEP_MIN): RoutineStep => ({
+  id: crypto.randomUUID(),
+  title,
+  durationMin,
+  kind: 'simple',
+})
 
 const dayButton = (on: boolean) =>
   cn(
@@ -121,7 +127,7 @@ export function RoutineForm() {
           error={nameError ? 'Ponle un nombre para poder guardarla.' : undefined}
         />
 
-        <fieldset className="mt-4">
+        <fieldset className="mt-4 min-w-0">
           <legend className="mb-2 flex w-full items-baseline justify-between text-sm font-medium text-text">
             Pasos
             <span className="text-xs font-normal tabular-nums text-text-muted">
@@ -131,7 +137,8 @@ export function RoutineForm() {
           </legend>
           <ol className="space-y-1.5">
             {steps.map((step, i) => (
-              <li key={step.id} className="group flex items-center gap-2">
+              <li key={step.id} className="group flex flex-col gap-1.5">
+              <div className="flex items-center gap-2">
                 <span aria-hidden="true" className="w-4 shrink-0 text-right text-xs tabular-nums text-text-faint">
                   {i + 1}
                 </span>
@@ -172,6 +179,23 @@ export function RoutineForm() {
                   />
                   min
                 </label>
+                <div className="w-28 shrink-0">
+                  <Select
+                    aria-label={`Tipo del paso ${i + 1}`}
+                    value={step.kind ?? 'simple'}
+                    onChange={(e) => {
+                      const kind = e.target.value as RoutineStepKind
+                      updateStep(step.id, { kind, prompt: kind === 'visualization' ? (step.prompt ?? '') : undefined })
+                    }}
+                    className="h-8 text-xs"
+                  >
+                    {ROUTINE_STEP_KIND_ORDER.map((kind) => (
+                      <option key={kind} value={kind}>
+                        {ROUTINE_STEP_KIND_LABELS[kind]}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
                 <div className="flex shrink-0 opacity-60 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
                   <IconButton type="button" label="Subir paso" onClick={() => moveStep(i, -1)} disabled={i === 0} className="p-1.5 disabled:opacity-30">
                     <ArrowUp size={14} strokeWidth={1.75} />
@@ -189,6 +213,16 @@ export function RoutineForm() {
                     <X size={14} strokeWidth={1.75} />
                   </IconButton>
                 </div>
+              </div>
+              {step.kind === 'visualization' && (
+                <input
+                  aria-label={`Pregunta guía del paso ${i + 1}`}
+                  value={step.prompt ?? ''}
+                  onChange={(e) => updateStep(step.id, { prompt: e.target.value })}
+                  placeholder={DEFAULT_VISUALIZATION_PROMPT}
+                  className="ml-6 h-8 min-w-0 rounded-sm border border-border bg-surface px-2.5 text-sm text-text placeholder:text-text-faint focus:border-accent"
+                />
+              )}
               </li>
             ))}
           </ol>
