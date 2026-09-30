@@ -1,6 +1,15 @@
+import { lazyNamed } from '../../app/lazy'
 import type { PluginSettingsSpec } from '../plugins/settings/types'
 
-/** La tarjeta «Logros» es una pieza a medida — llega en P5. */
 export const gamificationSettingsSpec: PluginSettingsSpec = {
-  fields: [],
+  fields: [
+    {
+      kind: 'custom',
+      id: 'achievements',
+      label: 'Logros',
+      group: 'Progreso',
+      keywords: ['logros', 'achievements', 'xp'],
+      component: lazyNamed(() => import('./AchievementsSettings'), 'AchievementsSettings'),
+    },
+  ],
 }

@@ -1,7 +1,7 @@
 import { useId, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronRight, ClipboardCheck } from 'lucide-react'
-import { Card, EmptyState } from '../../design/primitives'
+import { EmptyState } from '../../design/primitives'
 import { listReviews } from '../../db/repositories/reviews'
 import { formatPeriodLabel } from '../../lib/periods'
 import { cn } from '../../lib/cn'
@@ -10,16 +10,14 @@ import type { WeeklyReview } from '../../db/types'
 /** Pregunta de cada clave de `answers` (la revisión guarda por clave, no por texto). */
 const QUESTION_LABELS: Record<string, string> = { reflection: '¿Cómo fue la semana?' }
 
-/** Historial de revisiones semanales (Fase 18): hasta ahora se escribían y no se podían releer. */
-export function ReviewsHistorySection() {
+/** Historial de revisiones semanales — pieza a medida (#98 P5): lista expandible sobre datos de Dexie,
+ * no un campo plano del esquema. */
+export function WeeklyReviewSettings() {
   const reviews = useLiveQuery(async () => (await listReviews()).sort((a, b) => b.weekKey.localeCompare(a.weekKey)), [])
 
   return (
-    <Card className="p-4">
-      <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-text">
-        <ClipboardCheck size={15} strokeWidth={1.75} aria-hidden="true" /> Revisiones semanales
-      </h2>
-      <p className="mb-3 text-sm text-text-muted">Lo que respondiste al cerrar cada semana.</p>
+    <div className="py-2.5">
+      <p className="mb-2 text-xs text-text-faint">Lo que respondiste al cerrar cada semana.</p>
       {reviews != null && reviews.length === 0 && (
         <EmptyState icon={ClipboardCheck} title="Aún no has hecho ninguna" description="La revisión se propone en Hoy al empezar una semana con objetivos en la anterior." />
       )}
@@ -30,7 +28,7 @@ export function ReviewsHistorySection() {
           ))}
         </ul>
       )}
-    </Card>
+    </div>
   )
 }
 

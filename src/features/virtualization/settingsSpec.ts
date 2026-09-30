@@ -1,7 +1,6 @@
+import { lazyNamed } from '../../app/lazy'
 import type { PluginSettingsSpec } from '../plugins/settings/types'
 
-/** El selector de rutina que instala «Mañana consciente» (`installMorningRecipe`) es una pieza a medida
- * (kind: 'custom') — llega en P5 junto con su componente real, no aquí. */
 export const virtualizationSettingsSpec: PluginSettingsSpec = {
   fields: [
     {
@@ -59,6 +58,14 @@ export const virtualizationSettingsSpec: PluginSettingsSpec = {
       label: 'Sonido del ritual',
       help: 'Zumbido, barrido y destello final',
       group: 'Aspecto',
+    },
+    {
+      kind: 'custom',
+      id: 'virtualizationRoutineId',
+      label: 'Rutina',
+      group: 'Rutina',
+      keywords: ['rutina', 'mañana consciente', 'receta'],
+      component: lazyNamed(() => import('./RoutineSettings'), 'RoutineSettings'),
     },
   ],
 }

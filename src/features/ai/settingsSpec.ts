@@ -1,7 +1,16 @@
+import { lazyNamed } from '../../app/lazy'
 import type { PluginSettingsSpec } from '../plugins/settings/types'
 
-/** Clave, modelo y uso viven en `AiSection` (pieza a medida: la clave es un secreto y hay que poder
- * «probarla») — llega en P5, con el chip «Necesita configuración» cuando falte la clave. */
+/** El chip «Necesita configuración» cuando falte la clave llega en un PR aparte (#98 P5, Tus datos +
+ * configuración pendiente). */
 export const aiSettingsSpec: PluginSettingsSpec = {
-  fields: [],
+  fields: [
+    {
+      kind: 'custom',
+      id: 'claudeApiKey',
+      label: 'Clave y modelo',
+      keywords: ['clave', 'api', 'anthropic', 'modelo', 'claude'],
+      component: lazyNamed(() => import('./AiSettings'), 'AiSettings'),
+    },
+  ],
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../../../lib/cn'
 import { updateSettings } from '../../../db/repositories/settings'
@@ -11,11 +11,10 @@ import type { PluginSettingsSpec, SettingField } from './types'
 const DEFAULT_GROUP = 'Ajustes'
 const NOTIFY_GROUP = 'Avisos'
 
-function groupFields(fields: SettingField[]): { group: string; fields: Exclude<SettingField, { kind: 'custom' }>[] }[] {
+function groupFields(fields: SettingField[]): { group: string; fields: SettingField[] }[] {
   const order: string[] = []
-  const byGroup = new Map<string, Exclude<SettingField, { kind: 'custom' }>[]>()
+  const byGroup = new Map<string, SettingField[]>()
   for (const field of fields) {
-    if (field.kind === 'custom') continue // llega en P5, cuando exista su componente real
     const group = field.group ?? DEFAULT_GROUP
     if (!byGroup.has(group)) {
       byGroup.set(group, [])
@@ -115,9 +114,17 @@ export function PluginSettingsPanel({
           <section key={g.group} id={slug(g.group)}>
             <h3 className="mb-1 text-xs font-medium tracking-wide text-text-faint uppercase">{g.group}</h3>
             <div className="divide-y divide-border rounded-md border border-border bg-bg-soft px-3">
-              {g.fields.map((field) => (
-                <SettingRow key={field.key} field={field} settings={settings} id={field.key} highlighted={highlight === field.key} />
-              ))}
+              {g.fields.map((field) =>
+                field.kind === 'custom' ? (
+                  <div key={field.id} id={field.id} className={cn(highlight === field.id && 'bg-accent-soft transition-colors')}>
+                    <Suspense fallback={null}>
+                      <field.component />
+                    </Suspense>
+                  </div>
+                ) : (
+                  <SettingRow key={field.key} field={field} settings={settings} id={field.key} highlighted={highlight === field.key} />
+                ),
+              )}
             </div>
           </section>
         ))}
