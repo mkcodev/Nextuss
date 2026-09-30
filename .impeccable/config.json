@@ -152,6 +152,24 @@
         ],
         "createdAt": "2026-09-29T09:53:17.455Z",
         "reason": "chrome de maestro-detalle (.md): el marco exterior no lleva padding propio por diseño (patrón habitual tipo Ajustes del Sistema/VS Code); todo el texto real dentro (buscador, filas, cabecera de ficha) ya tiene su propio padding >=8px"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "docs/design/plugins-ficha/index.html"
+        ],
+        "createdAt": "2026-09-30T11:56:43.430Z",
+        "reason": "Claude: mockup de comparación estático, tokens reales de la app a tamaño pequeño (faint/muted), sin usuarios reales tecleando"
+      },
+      {
+        "rule": "clipped-overflow-container",
+        "value": "*",
+        "files": [
+          "docs/design/plugins-ficha/index.html"
+        ],
+        "createdAt": "2026-09-30T11:56:43.613Z",
+        "reason": "Claude: .hi-note es anotación decorativa del propio mockup (marca dónde aterriza un enlace profundo), no un popover real que deba escapar del panel"
       }
     ]
   }
