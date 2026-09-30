@@ -5,11 +5,12 @@ interface NumberInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, '
   value: number
   onChange: (value: number) => void
   min?: number
+  max?: number
 }
 
-/** Campo numérico que deja borrarlo para escribir otro número: el mínimo se aplica al salir del
+/** Campo numérico que deja borrarlo para escribir otro número: el límite se aplica al salir del
  *  campo, no en cada tecla (antes, borrar ponía 1 y al escribir "5" quedaba "15"). */
-export function NumberInput({ value, onChange, min = 1, className, onBlur, ...props }: NumberInputProps) {
+export function NumberInput({ value, onChange, min = 1, max, className, onBlur, ...props }: NumberInputProps) {
   const [draft, setDraft] = useState<string | null>(null)
 
   return (
@@ -18,15 +19,19 @@ export function NumberInput({ value, onChange, min = 1, className, onBlur, ...pr
       type="number"
       inputMode="numeric"
       min={min}
+      max={max}
       value={draft ?? String(value)}
       onChange={(e) => {
         setDraft(e.target.value)
         const n = Number(e.target.value)
-        if (e.target.value !== '' && Number.isFinite(n) && n >= min) onChange(n)
+        if (e.target.value !== '' && Number.isFinite(n) && n >= min && (max === undefined || n <= max)) onChange(n)
       }}
       onBlur={(e) => {
         const n = Number(draft)
-        if (draft !== null && (draft === '' || !Number.isFinite(n) || n < min)) onChange(min)
+        if (draft !== null) {
+          if (draft === '' || !Number.isFinite(n) || n < min) onChange(min)
+          else if (max !== undefined && n > max) onChange(max)
+        }
         setDraft(null)
         onBlur?.(e)
       }}

@@ -1,36 +1,24 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Bell, BellOff } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Bell, BellOff, ChevronRight } from 'lucide-react'
 import { Card, Switch, Input } from '../../design/primitives'
 import { db } from '../../db/schema'
 import { updateSettings } from '../../db/repositories/settings'
-import { readSetting } from '../../db/settingsDefaults'
 import { useToastStore } from '../../lib/toastStore'
 import { getNotificationPermissionState, requestNotificationPermission, type NotificationPermissionState } from '../notifications/permission'
+import { NOTIFY_META } from '../notifications/notifyMeta'
+import { PLUGINS } from '../plugins/registry'
+import { PLUGIN_SETTINGS } from '../plugins/settings'
 
-type NotifyKey =
-  | 'notifyHabitReminders'
-  | 'notifyTaskStart'
-  | 'notifyTransitions'
-  | 'notifyMorningSummary'
-  | 'notifyEveningSummary'
-  | 'notifyWeeklyReviewNudge'
-  | 'notifyZombieTasks'
-  | 'notifyPomodoroEnd'
-  | 'notifyRoutines'
+const NOTIFY_OWNERS = PLUGINS.filter((p) => (PLUGIN_SETTINGS[p.id].notify?.length ?? 0) > 0).map((p) => ({
+  plugin: p,
+  labels: (PLUGIN_SETTINGS[p.id].notify ?? []).map((key) => NOTIFY_META.find((m) => m.key === key)?.label).filter((l): l is string => !!l),
+}))
 
-const NOTIFICATION_TYPES: { key: NotifyKey; label: string; description: string }[] = [
-  { key: 'notifyHabitReminders', label: 'Recordatorios de hábitos', description: 'A la hora configurada en cada hábito' },
-  { key: 'notifyTaskStart', label: 'Inicio de bloques', description: 'Cuando empieza una tarea programada en el timeline' },
-  { key: 'notifyTransitions', label: 'Transiciones', description: '5 min antes de un bloque y al acabarse su tiempo si sigue sin hacer' },
-  { key: 'notifyMorningSummary', label: 'Resumen de la mañana', description: 'Tareas del día y objetivo North Star' },
-  { key: 'notifyEveningSummary', label: 'Cierre del día', description: 'Cuántas tareas se completaron' },
-  { key: 'notifyWeeklyReviewNudge', label: 'Revisión semanal', description: 'Empujón los lunes si no la has hecho' },
-  { key: 'notifyZombieTasks', label: 'Tareas atascadas', description: 'Cuando se acumulan tareas sin mover' },
-  { key: 'notifyPomodoroEnd', label: 'Fin de sesión de foco', description: 'Al terminar un pomodoro o un descanso' },
-  { key: 'notifyRoutines', label: 'Rutinas', description: 'A la hora de cada rutina y al cambiar de paso con la pestaña en segundo plano' },
-]
-
+/** Interruptor maestro + horas de silencio (global) — el resto de avisos vive en la ficha de cada
+ * plugin (#98 P4): esta lista solo enlaza allí, `NOTIFY_OWNERS` sale de `PLUGIN_SETTINGS`, así que
+ * nunca hay que tocar dos sitios al mudar un aviso de plugin. */
 export function NotificationsSection() {
   const settings = useLiveQuery(() => db.settings.get(1), [])
   const [permission, setPermission] = useState<NotificationPermissionState>(getNotificationPermissionState)
@@ -61,8 +49,6 @@ export function NotificationsSection() {
     await updateSettings({ notificationsEnabled: true })
   }
 
-  const toggleType = (key: NotifyKey, next: boolean) => updateSettings({ [key]: next })
-
   return (
     <Card className="p-4">
       <div className="mb-1 flex items-center justify-between gap-3">
@@ -82,41 +68,7 @@ export function NotificationsSection() {
 
       {masterOn && (
         <>
-          <div className="divide-y divide-border">
-            {NOTIFICATION_TYPES.map(({ key, label, description }) => (
-              <div key={key} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
-                <div>
-                  <p className="text-xs font-medium text-text">{label}</p>
-                  <p className="text-xs text-text-faint">{description}</p>
-                </div>
-                <Switch
-                  checked={readSetting(settings, key)}
-                  onChange={(next) => toggleType(key, next)}
-                  label={label}
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-3 border-t border-border pt-3">
-            <label className="text-xs text-text-muted">
-              Resumen mañana
-              <Input
-                type="time"
-                value={readSetting(settings, 'morningSummaryTime')}
-                onChange={(e) => updateSettings({ morningSummaryTime: e.target.value })}
-                className="mt-1 !px-2"
-              />
-            </label>
-            <label className="text-xs text-text-muted">
-              Cierre del día
-              <Input
-                type="time"
-                value={readSetting(settings, 'eveningSummaryTime')}
-                onChange={(e) => updateSettings({ eveningSummaryTime: e.target.value })}
-                className="mt-1 !px-2"
-              />
-            </label>
+          <div className="grid grid-cols-2 gap-3 border-t border-border pt-3">
             <label className="text-xs text-text-muted">
               Silencio desde
               <Input
@@ -135,6 +87,25 @@ export function NotificationsSection() {
                 className="mt-1 !px-2"
               />
             </label>
+          </div>
+
+          <div className="mt-3 border-t border-border pt-3">
+            <p className="mb-1.5 text-xs font-medium text-text-muted">Avisos por plugin</p>
+            <div className="divide-y divide-border">
+              {NOTIFY_OWNERS.map(({ plugin, labels }) => (
+                <Link
+                  key={plugin.id}
+                  to={`/plugins/${plugin.id}#avisos`}
+                  className="flex items-center gap-2.5 py-2 text-xs text-text-muted hover:text-text"
+                >
+                  <plugin.icon size={14} strokeWidth={1.75} className="shrink-0 text-text-faint" />
+                  <span className="flex-1 truncate">
+                    {plugin.name} <span className="text-text-faint">· {labels.join(', ')}</span>
+                  </span>
+                  <ChevronRight size={13} strokeWidth={1.75} className="shrink-0 text-text-faint" />
+                </Link>
+              ))}
+            </div>
           </div>
         </>
       )}

@@ -16,6 +16,9 @@ import { getPlugin, PLUGINS } from './registry'
 import { planToggle } from './resolve'
 import { PLUGIN_CATEGORIES } from './types'
 import type { PluginCategory, PluginId, PluginManifest } from './types'
+import { PLUGIN_SETTINGS } from './settings'
+import { PluginSettingsPanel } from './settings/PluginSettingsPanel'
+import type { Settings } from '../../db/types'
 
 type ConfirmState = { plugin: PluginManifest; on: boolean; cascaded: PluginId[] }
 
@@ -124,7 +127,7 @@ export function PluginsPage() {
 
         <div className={cn(!idParam && 'hidden md:block')}>
           {selected ? (
-            <PluginDetail plugin={selected} on={enabled.has(selected.id)} onToggle={(on) => void requestToggle(selected, on)} />
+            <PluginDetail plugin={selected} on={enabled.has(selected.id)} onToggle={(on) => void requestToggle(selected, on)} settings={settings} />
           ) : (
             <EmptyState icon={Search} title="Sin resultados" description="Ningún plugin coincide con la búsqueda." />
           )}
@@ -165,9 +168,10 @@ interface PluginDetailProps {
   plugin: PluginManifest
   on: boolean
   onToggle: (on: boolean) => void
+  settings: Settings | undefined
 }
 
-function PluginDetail({ plugin, on, onToggle }: PluginDetailProps) {
+function PluginDetail({ plugin, on, onToggle, settings }: PluginDetailProps) {
   const category = plugin.category ? PLUGIN_CATEGORIES[plugin.category] : undefined
   return (
     <div className="space-y-5 rounded-lg border border-border bg-surface p-5 lg:p-6">
@@ -216,6 +220,8 @@ function PluginDetail({ plugin, on, onToggle }: PluginDetailProps) {
           )}
         </div>
       )}
+
+      <PluginSettingsPanel spec={PLUGIN_SETTINGS[plugin.id]} settings={settings} notificationsEnabled={settings?.notificationsEnabled === true} />
     </div>
   )
 }
