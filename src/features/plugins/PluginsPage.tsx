@@ -18,6 +18,7 @@ import { PLUGIN_CATEGORIES } from './types'
 import type { PluginCategory, PluginId, PluginManifest } from './types'
 import { PLUGIN_SETTINGS } from './settings'
 import { PluginSettingsPanel } from './settings/PluginSettingsPanel'
+import { searchSettings } from './settings/searchSettings'
 import type { Settings } from '../../db/types'
 
 type ConfirmState = { plugin: PluginManifest; on: boolean; cascaded: PluginId[] }
@@ -38,6 +39,7 @@ export function PluginsPage() {
   const enabled = useEnabledPlugins()
   const settings = useLiveQuery(() => db.settings.get(1), [])
   const [query, setQuery] = useState('')
+  const [includeDisabled, setIncludeDisabled] = useState(false)
   const [confirm, setConfirm] = useState<ConfirmState | null>(null)
 
   const q = query.trim().toLowerCase()
@@ -47,6 +49,16 @@ export function PluginsPage() {
   )
   const groups = useMemo(() => groupPlugins(filtered), [filtered])
   const flatList = useMemo(() => groups.flatMap((g) => g.items), [groups])
+
+  // Buscador de ajustes (#98 P6): además de filtrar plugins por nombre/descripción, busca por campo
+  // (label + keywords) y enlaza directo al campo (`/plugins/:id#anchor`). Oculta por defecto los campos
+  // de plugins apagados (no son los que el usuario probablemente busca) tras un toggle «incluir apagados».
+  const settingsMatches = useMemo(() => searchSettings(query), [query])
+  const visibleSettingsMatches = useMemo(
+    () => settingsMatches.filter((m) => includeDisabled || enabled.has(m.pluginId) || getPlugin(m.pluginId).core),
+    [settingsMatches, includeDisabled, enabled],
+  )
+  const hiddenSettingsCount = settingsMatches.length - visibleSettingsMatches.length
 
   const selectedId = (idParam as PluginId | undefined) ?? flatList.find((p) => !p.core)?.id
   const selected = selectedId ? getPlugin(selectedId) : undefined
@@ -88,6 +100,32 @@ export function PluginsPage() {
               />
             </div>
           </div>
+
+          {visibleSettingsMatches.length > 0 && (
+            <div>
+              <h2 className="mb-1.5 px-1 text-xs font-medium tracking-wide text-text-faint uppercase">Ajustes</h2>
+              <div className="space-y-0.5">
+                {visibleSettingsMatches.map((m) => (
+                  <Link
+                    key={`${m.pluginId}-${m.anchorId}`}
+                    to={{ pathname: `/plugins/${m.pluginId}`, hash: m.anchorId }}
+                    className="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-text hover:bg-surface-hover"
+                  >
+                    <m.icon size={16} strokeWidth={1.75} className="shrink-0 text-text-faint" />
+                    <span className="min-w-0 flex-1 truncate">
+                      {m.pluginName} <span className="text-text-faint">›</span> {m.label}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+              {hiddenSettingsCount > 0 && (
+                <label className="mt-1.5 flex items-center gap-2 px-1 text-xs text-text-faint">
+                  <Switch checked={includeDisabled} onChange={setIncludeDisabled} label="Incluir apagados" />
+                  Incluir apagados ({hiddenSettingsCount} oculto{hiddenSettingsCount === 1 ? '' : 's'})
+                </label>
+              )}
+            </div>
+          )}
 
           <nav aria-label="Lista de plugins" className="space-y-4">
             {groups.map((g) => (
@@ -221,7 +259,12 @@ function PluginDetail({ plugin, on, onToggle, settings }: PluginDetailProps) {
         </div>
       )}
 
-      <PluginSettingsPanel spec={PLUGIN_SETTINGS[plugin.id]} settings={settings} notificationsEnabled={settings?.notificationsEnabled === true} />
+      {!plugin.core && !on && (
+        <p className="rounded-md border border-border bg-bg-soft px-3 py-2 text-sm text-text-muted">Actívalo para usar estos ajustes.</p>
+      )}
+      <div className={cn(!plugin.core && !on && 'pointer-events-none opacity-60')}>
+        <PluginSettingsPanel spec={PLUGIN_SETTINGS[plugin.id]} settings={settings} notificationsEnabled={settings?.notificationsEnabled === true} />
+      </div>
     </div>
   )
 }
