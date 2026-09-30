@@ -25,8 +25,8 @@ export type PluginId = (typeof PLUGIN_IDS)[number]
 /** Lo que guarda `Settings.plugins`: solo los que el usuario ha cambiado. Sin definir = `defaultEnabled`. */
 export type StoredPluginState = Partial<Record<PluginId, boolean>>
 
-/** Agrupa los plugins no-núcleo en el mapa de constelación (#98/#135). Núcleo no lleva categoría: se
- * resume en el hub central del mapa. */
+/** Agrupa los plugins no-núcleo en la lista de la página de Plugins (#98) y colorea el badge de la ficha.
+ * Núcleo no lleva categoría: forma su propio grupo aparte. */
 export const PLUGIN_CATEGORIES = {
   ritual: { label: 'Ritual de mañana', color: '#7c84e8' },
   hacer: { label: 'Hacer', color: '#42c9b8' },
@@ -48,8 +48,8 @@ export interface PluginManifest {
   defaultEnabled: boolean
   /** Plugins que tienen que estar activos para que este funcione (dependencia dura). */
   requires?: readonly PluginId[]
-  /** Grupo en el mapa de constelación; obligatoria para todo plugin no-núcleo. */
+  /** Grupo en la lista de la página de Plugins; obligatoria para todo plugin no-núcleo. */
   category?: PluginCategory
-  /** Plugins que este mejora sin exigirlos (dependencia blanda, solo dibuja una línea en el mapa). */
+  /** Plugins que este mejora sin exigirlos (dependencia blanda: se ofrecen activar desde la ficha). */
   enhances?: readonly PluginId[]
 }
