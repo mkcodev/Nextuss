@@ -2,28 +2,21 @@ import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Monitor, Moon, Sun } from 'lucide-react'
-import { Card, Icon, Skeleton, Input } from '../../design/primitives'
+import { Card, Input } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { useTheme } from '../../design/useTheme'
 import { db } from '../../db/schema'
 import { updateSettings } from '../../db/repositories/settings'
-import { listAchievements } from '../../db/repositories/gamification'
-import { ACHIEVEMENTS } from '../../lib/achievements'
 import { initials } from '../../lib/text'
 import { InstallPrompt } from '../pwa/InstallPrompt'
 import { BackupSection } from './BackupSection'
 import { TrashSection } from './TrashSection'
 import { TagsSection } from './TagsSection'
-import { DismissedInsightsSection } from './DismissedInsightsSection'
 import { RecurrenceSection } from './RecurrenceSection'
 import { TemplatesSection } from './TemplatesSection'
-import { ReviewsHistorySection } from './ReviewsHistorySection'
 import type { ThemePreference } from '../../db/types'
 import { DemoDataSection } from './DemoDataSection'
 import { NotificationsSection } from './NotificationsSection'
-import { AiSection } from './AiSection'
-import { TelegramSection } from './TelegramSection'
-import { VirtualizationSection } from './VirtualizationSection'
 
 const THEME_OPTIONS: { value: ThemePreference; label: string; icon: typeof Sun }[] = [
   { value: 'system', label: 'Sistema', icon: Monitor },
@@ -42,8 +35,6 @@ export function SettingsPage() {
   }, [hash])
   const { theme, setTheme } = useTheme()
   const settings = useLiveQuery(() => db.settings.get(1), [])
-  const unlocked = useLiveQuery(() => listAchievements(), [])
-  const unlockedKeys = new Set(unlocked?.map((a) => a.key))
   const [name, setName] = useState<string | null>(null)
   const displayName = name ?? settings?.displayName ?? ''
 
@@ -95,34 +86,6 @@ export function SettingsPage() {
         </div>
       </Card>
 
-      <Card className="p-4">
-        <h2 className="mb-3 text-sm font-semibold text-text">
-          Logros{unlocked && ` (${unlocked.length}/${ACHIEVEMENTS.length})`}
-        </h2>
-        {unlocked === undefined ? (
-          <Skeleton className="h-40 w-full" />
-        ) : (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {ACHIEVEMENTS.map((a) => {
-              const isUnlocked = unlockedKeys.has(a.key)
-              return (
-                <div
-                  key={a.key}
-                  title={a.description}
-                  className={cn(
-                    'flex flex-col items-center gap-1 rounded-lg border p-3 text-center',
-                    isUnlocked ? 'border-accent/30 bg-accent-soft' : 'border-border opacity-40',
-                  )}
-                >
-                  <Icon name={a.icon} size={20} strokeWidth={1.75} />
-                  <span className="text-xs font-medium text-text">{a.title}</span>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </Card>
-
       <InstallPrompt />
 
       <TagsSection />
@@ -130,16 +93,6 @@ export function SettingsPage() {
       <RecurrenceSection />
 
       <TemplatesSection />
-
-      <ReviewsHistorySection />
-
-      <DismissedInsightsSection />
-
-      <AiSection />
-
-      <TelegramSection />
-
-      <VirtualizationSection />
 
       <NotificationsSection />
 
