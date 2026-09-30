@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { lazy } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
@@ -10,6 +11,22 @@ import type { Settings } from '../../../db/types'
 const SPEC: PluginSettingsSpec = {
   fields: [{ kind: 'number', key: 'pomodoroWorkMin', label: 'Foco', unit: 'min', min: 1, max: 180, group: 'Duraciones' }],
   notify: ['notifyPomodoroEnd'],
+}
+
+function FakeCustom() {
+  return <p>Pieza a medida</p>
+}
+
+const CUSTOM_SPEC: PluginSettingsSpec = {
+  fields: [
+    {
+      kind: 'custom',
+      id: 'miPiezaAMedida',
+      label: 'Mi pieza',
+      group: 'A medida',
+      component: lazy(() => Promise.resolve({ default: FakeCustom })),
+    },
+  ],
 }
 
 class FakeIntersectionObserver {
@@ -31,10 +48,10 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-function renderPanel(settings: Settings | undefined, initialEntry = '/plugins/focus') {
+function renderPanel(settings: Settings | undefined, initialEntry = '/plugins/focus', spec: PluginSettingsSpec = SPEC) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]}>
-      <PluginSettingsPanel spec={SPEC} settings={settings} notificationsEnabled={true} />
+      <PluginSettingsPanel spec={spec} settings={settings} notificationsEnabled={true} />
     </MemoryRouter>,
   )
 }
@@ -66,6 +83,25 @@ describe('enlace profundo', () => {
     renderPanel(settings, '/plugins/focus#pomodoroWorkMin')
 
     const row = document.getElementById('pomodoroWorkMin')
+    expect(row).toBeTruthy()
+    await waitFor(() => expect(row?.className).toContain('bg-accent-soft'))
+  })
+})
+
+describe('campo custom (pieza a medida, #98 P5)', () => {
+  it('carga y muestra el componente lazy', async () => {
+    const settings = await db.settings.get(1)
+    renderPanel(settings, '/plugins/virtualization', CUSTOM_SPEC)
+
+    expect(await screen.findByText('Pieza a medida')).toBeTruthy()
+  })
+
+  it('resalta su contenedor al llegar por enlace profundo', async () => {
+    const settings = await db.settings.get(1)
+    renderPanel(settings, '/plugins/virtualization#miPiezaAMedida', CUSTOM_SPEC)
+
+    await screen.findByText('Pieza a medida')
+    const row = document.getElementById('miPiezaAMedida')
     expect(row).toBeTruthy()
     await waitFor(() => expect(row?.className).toContain('bg-accent-soft'))
   })
