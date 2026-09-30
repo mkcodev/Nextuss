@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Eye, EyeOff, Send, TriangleAlert } from 'lucide-react'
-import { Button, Card, Switch, Input } from '../../design/primitives'
+import { Eye, EyeOff, TriangleAlert } from 'lucide-react'
+import { Button, Switch, Input } from '../../design/primitives'
 import { db } from '../../db/schema'
 import { updateSettings } from '../../db/repositories/settings'
-import { getMe, resolveChatId } from '../telegram/client'
+import { getMe, resolveChatId } from './client'
 
-export function TelegramSection() {
+/** Conexión del bot, reenvío de avisos y URL del worker — pieza a medida (#98 P5): conectar exige
+ * llamar a la API de Telegram y resolver el chat, no es un campo plano del esquema. */
+export function TelegramSettings() {
   const settings = useLiveQuery(() => db.settings.get(1), [])
   const [tokenDraft, setTokenDraft] = useState<string | null>(null)
   const [showToken, setShowToken] = useState(false)
@@ -47,11 +49,8 @@ export function TelegramSection() {
   }
 
   return (
-    <Card className="p-4">
-      <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-text">
-        <Send size={15} strokeWidth={1.75} /> Telegram
-      </h2>
-      <p className="mb-3 text-xs text-text-faint">
+    <div className="space-y-3 py-2.5">
+      <p className="text-xs text-text-faint">
         Habla con tu propio bot: /hoy, /add, /nota, /hecho, /habitos, /stats. Recibe también tus avisos si lo activas abajo.
       </p>
 
@@ -63,7 +62,7 @@ export function TelegramSection() {
           </Button>
         </div>
       ) : (
-        <>
+        <div>
           <label className="mb-1 block text-xs font-medium text-text-muted">Token del bot (de @BotFather)</label>
           <div className="flex gap-2">
             <div className="relative flex-1">
@@ -88,12 +87,12 @@ export function TelegramSection() {
             </Button>
           </div>
           {status && !status.ok && <p className="mt-2 text-xs text-danger">{status.message}</p>}
-        </>
+        </div>
       )}
 
       {connected && (
         <>
-          <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
+          <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
             <div>
               <p className="text-xs font-medium text-text">Reenviar avisos por Telegram</p>
               <p className="text-xs text-text-faint">Además de (o en vez de) la notificación nativa</p>
@@ -105,24 +104,26 @@ export function TelegramSection() {
             />
           </div>
 
-          <label className="mt-3 block border-t border-border pt-3 text-xs font-medium text-text-muted">
-            URL del worker (opcional, para recepción 24/7)
-          </label>
-          <Input
-            defaultValue={settings?.telegramWorkerUrl ?? ''}
-            onBlur={(e) => updateSettings({ telegramWorkerUrl: e.target.value.trim() || undefined })}
-            placeholder="https://nextuss-telegram-relay.tu-cuenta.workers.dev/tu-secreto"
-            className="mt-1 !px-3 !py-2"
-          />
+          <div className="border-t border-border pt-3">
+            <label className="block text-xs font-medium text-text-muted">URL del worker (opcional, para recepción 24/7)</label>
+            <Input
+              defaultValue={settings?.telegramWorkerUrl ?? ''}
+              onBlur={(e) => updateSettings({ telegramWorkerUrl: e.target.value.trim() || undefined })}
+              placeholder="https://nextuss-telegram-relay.tu-cuenta.workers.dev/tu-secreto"
+              className="mt-1 !px-3 !py-2"
+            />
+          </div>
         </>
       )}
 
-      <p className="mt-3 flex items-start gap-1.5 text-xs text-warning">
+      <p className="flex items-start gap-1.5 text-xs text-warning">
         <TriangleAlert size={13} strokeWidth={1.75} className="mt-0.5 shrink-0" />
-        La recepción de mensajes solo funciona con esta app abierta en una pestaña visible. Para 24/7
-        hace falta desplegar el worker opcional (ver <code>worker/README.md</code>) — el token deja de
-        ser solo local si lo haces.
+        <span>
+          La recepción de mensajes solo funciona con esta app abierta en una pestaña visible. Para 24/7
+          hace falta desplegar el worker opcional (ver <code>worker/README.md</code>) — el token deja de
+          ser solo local si lo haces.
+        </span>
       </p>
-    </Card>
+    </div>
   )
 }
