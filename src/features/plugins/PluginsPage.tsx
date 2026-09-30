@@ -4,9 +4,11 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ArrowLeft, Search } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Search, TriangleAlert } from 'lucide-react'
 import { db } from '../../db/schema'
 import { usePageTitle } from '../../app/pageTitleStore'
+import { ensurePanelVisible } from '../../app/dock/ensurePanelVisible'
+import { useVirtualizationStore } from '../virtualization/engine/useVirtualizationStore'
 import { Badge, Button, Dialog, EmptyState, Input, Switch } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { useListNav } from '../../app/shortcuts/listNavStore'
@@ -21,6 +23,14 @@ import { PluginSettingsPanel } from './settings/PluginSettingsPanel'
 import type { Settings } from '../../db/types'
 
 type ConfirmState = { plugin: PluginManifest; on: boolean; cascaded: PluginId[] }
+
+/** Acciones de «Ver en la app»/«Probar ahora» de tipo `action` (#98 P5): viven aquí, no en
+ * `registry.ts`, para no crear un ciclo de imports con `uiStore`/paneles (ver `types.ts#appView`). */
+const APP_VIEW_ACTIONS: Record<string, () => void> = {
+  virtualization: () => useVirtualizationStore.getState().open(),
+  focus: () => ensurePanelVisible('focus'),
+  gamification: () => ensurePanelVisible('progress'),
+}
 
 function groupPlugins(plugins: readonly PluginManifest[]): { label: string; items: PluginManifest[] }[] {
   const core = plugins.filter((p) => p.core)
@@ -173,6 +183,9 @@ interface PluginDetailProps {
 
 function PluginDetail({ plugin, on, onToggle, settings }: PluginDetailProps) {
   const category = plugin.category ? PLUGIN_CATEGORIES[plugin.category] : undefined
+  const spec = PLUGIN_SETTINGS[plugin.id]
+  const setup = settings && spec.needsSetup ? spec.needsSetup(settings) : null
+  const appView = plugin.appView
   return (
     <div className="space-y-5 rounded-lg border border-border bg-surface p-5 lg:p-6">
       <div className="flex items-start justify-between gap-4">
@@ -185,21 +198,45 @@ function PluginDetail({ plugin, on, onToggle, settings }: PluginDetailProps) {
           </span>
           <div>
             <h2 className="text-base font-semibold text-text">{plugin.name}</h2>
-            {category && (
-              <Badge tone="neutral" className="mt-1" style={{ color: category.color, background: `color-mix(in srgb, ${category.color} 14%, transparent)` }}>
-                {category.label}
-              </Badge>
-            )}
-            {plugin.core && (
-              <Badge tone="neutral" className="mt-1">
-                Núcleo · siempre activo
-              </Badge>
-            )}
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              {category && (
+                <Badge tone="neutral" style={{ color: category.color, background: `color-mix(in srgb, ${category.color} 14%, transparent)` }}>
+                  {category.label}
+                </Badge>
+              )}
+              {plugin.core && <Badge tone="neutral">Núcleo · siempre activo</Badge>}
+              {setup && (
+                <Link to={{ hash: setup.fieldId }}>
+                  <Badge tone="warning" className="cursor-pointer hover:brightness-110">
+                    <TriangleAlert size={11} strokeWidth={1.75} />
+                    {setup.reason}
+                  </Badge>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
-        {!plugin.core && (
-          <Switch checked={on} onChange={onToggle} label={`${on ? 'Desactivar' : 'Activar'} ${plugin.name}`} className="shrink-0" />
-        )}
+        <div className="flex shrink-0 items-center gap-3">
+          {appView && appView.kind === 'route' && (
+            <Link to={appView.path} className="inline-flex items-center gap-1 text-xs text-text-faint hover:text-accent">
+              Ver en la app
+              <ExternalLink size={12} strokeWidth={1.75} />
+            </Link>
+          )}
+          {appView && appView.kind === 'action' && (
+            <button
+              type="button"
+              onClick={() => APP_VIEW_ACTIONS[appView.id]?.()}
+              className="inline-flex items-center gap-1 text-xs text-text-faint hover:text-accent"
+            >
+              {appView.label}
+              <ExternalLink size={12} strokeWidth={1.75} />
+            </button>
+          )}
+          {!plugin.core && (
+            <Switch checked={on} onChange={onToggle} label={`${on ? 'Desactivar' : 'Activar'} ${plugin.name}`} />
+          )}
+        </div>
       </div>
 
       <p className="text-sm text-text-muted">{plugin.description}</p>
@@ -221,7 +258,7 @@ function PluginDetail({ plugin, on, onToggle, settings }: PluginDetailProps) {
         </div>
       )}
 
-      <PluginSettingsPanel spec={PLUGIN_SETTINGS[plugin.id]} settings={settings} notificationsEnabled={settings?.notificationsEnabled === true} />
+      <PluginSettingsPanel spec={spec} settings={settings} notificationsEnabled={settings?.notificationsEnabled === true} />
     </div>
   )
 }
