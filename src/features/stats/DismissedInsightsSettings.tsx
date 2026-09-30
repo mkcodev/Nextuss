@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Lightbulb, Undo2 } from 'lucide-react'
-import { Card, EmptyState } from '../../design/primitives'
+import { EmptyState } from '../../design/primitives'
 import { db } from '../../db/schema'
 
 /** Nombre legible de cada detector (`Insight.key`). Una clave sin entrada se muestra tal cual, para
@@ -22,9 +22,9 @@ const INSIGHT_LABELS: Record<string, string> = {
   recoverySpeed: 'Velocidad de recuperación',
 }
 
-/** Insights descartados con la (×) de la pestaña Insights / el dock: hasta ahora era irreversible
- * (Fase 18). Restaurar = borrar la fila de `insightFeedback`; `useInsights` lo recoge en vivo. */
-export function DismissedInsightsSection() {
+/** Insights descartados con la (×) de la pestaña Insights / el dock — pieza a medida (#98 P5).
+ * Restaurar = borrar la fila de `insightFeedback`; `useInsights` lo recoge en vivo. */
+export function DismissedInsightsSettings() {
   // `dismissedAt` no está indexado y la tabla es diminuta: ordenar en memoria evita una migración.
   const dismissed = useLiveQuery(
     async () => (await db.insightFeedback.toArray()).sort((a, b) => b.dismissedAt - a.dismissedAt),
@@ -32,11 +32,8 @@ export function DismissedInsightsSection() {
   )
 
   return (
-    <Card className="p-4">
-      <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-text">
-        <Lightbulb size={15} strokeWidth={1.75} /> Insights descartados
-      </h2>
-      <p className="mb-3 text-sm text-text-muted">Restaura uno para que vuelva a aparecer cuando se cumpla.</p>
+    <div className="py-2.5">
+      <p className="mb-2 text-xs text-text-faint">Restaura uno para que vuelva a aparecer cuando se cumpla.</p>
       {dismissed != null && dismissed.length === 0 && <EmptyState icon={Lightbulb} title="No has descartado ningún insight" />}
       {dismissed != null && dismissed.length > 0 && (
         <ul className="space-y-1.5">
@@ -60,6 +57,6 @@ export function DismissedInsightsSection() {
           ))}
         </ul>
       )}
-    </Card>
+    </div>
   )
 }

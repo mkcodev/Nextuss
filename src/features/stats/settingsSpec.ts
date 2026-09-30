@@ -1,6 +1,15 @@
+import { lazyNamed } from '../../app/lazy'
 import type { PluginSettingsSpec } from '../plugins/settings/types'
 
-/** `DismissedInsightsSection` es una pieza a medida — llega en P5. */
 export const statsSettingsSpec: PluginSettingsSpec = {
-  fields: [],
+  fields: [
+    {
+      kind: 'custom',
+      id: 'dismissedInsights',
+      label: 'Insights descartados',
+      group: 'Descartados',
+      keywords: ['insights', 'descartados', 'restaurar'],
+      component: lazyNamed(() => import('./DismissedInsightsSettings'), 'DismissedInsightsSettings'),
+    },
+  ],
 }
