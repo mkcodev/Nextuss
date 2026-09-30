@@ -6,11 +6,12 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { Button } from '../../design/primitives'
 import { dateKey } from '../../lib/dates'
 import { getOrCreateSettings } from '../../db/repositories/settings'
+import { readSetting } from '../../db/settingsDefaults'
 import { WeekGrid } from './WeekGrid'
 
 export function WeekView() {
   const settings = useLiveQuery(() => getOrCreateSettings(), [])
-  const weekStartsOn = (settings?.weekStartsOn ?? 1) as 0 | 1
+  const weekStartsOn = readSetting(settings, 'weekStartsOn')
   // Offset in weeks from "this week", not a raw Date — so changing weekStartsOn (e.g. once settings
   // load) just shifts what "this week" resolves to on the next render, no effect/resync needed.
   const [weekOffset, setWeekOffset] = useState(0)

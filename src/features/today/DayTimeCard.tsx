@@ -4,6 +4,7 @@ import { Clock3 } from 'lucide-react'
 import { RingProgress, SegmentedControl } from '../../design/primitives'
 import { getTasksForDate } from '../../db/repositories/tasks'
 import { getOrCreateSettings, updateSettings } from '../../db/repositories/settings'
+import { readSetting } from '../../db/settingsDefaults'
 import type { DayTimeView } from '../../db/types'
 import { cn } from '../../lib/cn'
 import { useNowMinutes } from '../../lib/useNowMinutes'
@@ -28,7 +29,7 @@ export function DayTimeCard({ date }: { date: string }) {
 
   const summary = summarizeDay({ tasks, nowMin, dayStartHour: settings.dayStartHour, dayEndHour: settings.dayEndHour })
   if (summary.phase === 'after') return null
-  const view: DayTimeView = settings.dayTimeView ?? 'ruler'
+  const view: DayTimeView = readSetting(settings, 'dayTimeView')
 
   return (
     <section aria-labelledby={titleId} className="rounded-md border border-border bg-surface px-4 py-3">

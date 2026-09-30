@@ -4,6 +4,7 @@ import { format, isSameDay } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { AlertTriangle } from 'lucide-react'
 import { db } from '../../db/schema'
+import { readSetting } from '../../db/settingsDefaults'
 import { cn } from '../../lib/cn'
 import { dateKey, minutesToTime, timeToMinutes } from '../../lib/dates'
 import { getTasksForRange, scheduleTaskWithUndo } from '../../db/repositories/tasks'
@@ -16,8 +17,8 @@ const EMPTY_TASKS: Task[] = []
 
 export function WeekGrid({ days }: { days: Date[] }) {
   const settings = useLiveQuery(() => db.settings.get(1), [])
-  const dayStartHour = settings?.dayStartHour ?? 7
-  const dayEndHour = settings?.dayEndHour ?? 22
+  const dayStartHour = readSetting(settings, 'dayStartHour')
+  const dayEndHour = readSetting(settings, 'dayEndHour')
   const dayStartMin = dayStartHour * 60
   const dayEndMin = dayEndHour * 60
   const availableMin = dayEndMin - dayStartMin

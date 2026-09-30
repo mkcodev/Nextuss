@@ -4,11 +4,22 @@ import { Bell, BellOff } from 'lucide-react'
 import { Card, Switch, Input } from '../../design/primitives'
 import { db } from '../../db/schema'
 import { updateSettings } from '../../db/repositories/settings'
+import { readSetting } from '../../db/settingsDefaults'
 import { useToastStore } from '../../lib/toastStore'
 import { getNotificationPermissionState, requestNotificationPermission, type NotificationPermissionState } from '../notifications/permission'
-import type { Settings } from '../../db/types'
 
-const NOTIFICATION_TYPES: { key: keyof Settings; label: string; description: string }[] = [
+type NotifyKey =
+  | 'notifyHabitReminders'
+  | 'notifyTaskStart'
+  | 'notifyTransitions'
+  | 'notifyMorningSummary'
+  | 'notifyEveningSummary'
+  | 'notifyWeeklyReviewNudge'
+  | 'notifyZombieTasks'
+  | 'notifyPomodoroEnd'
+  | 'notifyRoutines'
+
+const NOTIFICATION_TYPES: { key: NotifyKey; label: string; description: string }[] = [
   { key: 'notifyHabitReminders', label: 'Recordatorios de hábitos', description: 'A la hora configurada en cada hábito' },
   { key: 'notifyTaskStart', label: 'Inicio de bloques', description: 'Cuando empieza una tarea programada en el timeline' },
   { key: 'notifyTransitions', label: 'Transiciones', description: '5 min antes de un bloque y al acabarse su tiempo si sigue sin hacer' },
@@ -50,7 +61,7 @@ export function NotificationsSection() {
     await updateSettings({ notificationsEnabled: true })
   }
 
-  const toggleType = (key: keyof Settings, next: boolean) => updateSettings({ [key]: next })
+  const toggleType = (key: NotifyKey, next: boolean) => updateSettings({ [key]: next })
 
   return (
     <Card className="p-4">
@@ -79,7 +90,7 @@ export function NotificationsSection() {
                   <p className="text-xs text-text-faint">{description}</p>
                 </div>
                 <Switch
-                  checked={settings?.[key] !== false}
+                  checked={readSetting(settings, key)}
                   onChange={(next) => toggleType(key, next)}
                   label={label}
                 />
@@ -92,7 +103,7 @@ export function NotificationsSection() {
               Resumen mañana
               <Input
                 type="time"
-                value={settings?.morningSummaryTime ?? '08:00'}
+                value={readSetting(settings, 'morningSummaryTime')}
                 onChange={(e) => updateSettings({ morningSummaryTime: e.target.value })}
                 className="mt-1 !px-2"
               />
@@ -101,7 +112,7 @@ export function NotificationsSection() {
               Cierre del día
               <Input
                 type="time"
-                value={settings?.eveningSummaryTime ?? '21:00'}
+                value={readSetting(settings, 'eveningSummaryTime')}
                 onChange={(e) => updateSettings({ eveningSummaryTime: e.target.value })}
                 className="mt-1 !px-2"
               />

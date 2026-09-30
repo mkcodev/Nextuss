@@ -3,6 +3,7 @@ import { Timer } from 'lucide-react'
 import { Card, Switch, Input } from '../../design/primitives'
 import { db } from '../../db/schema'
 import { updateSettings } from '../../db/repositories/settings'
+import { readSetting } from '../../db/settingsDefaults'
 import { DEFAULT_DURATIONS_MIN } from '../focus/durations'
 
 export function PomodoroSection() {
@@ -22,7 +23,7 @@ export function PomodoroSection() {
             type="number"
             min={1}
             max={180}
-            value={settings?.pomodoroWorkMin ?? DEFAULT_DURATIONS_MIN.work}
+            value={readSetting(settings, 'pomodoroWorkMin')}
             onChange={(e) => updateSettings({ pomodoroWorkMin: Number(e.target.value) || DEFAULT_DURATIONS_MIN.work })}
             className="mt-1 !px-2"
           />
@@ -33,7 +34,7 @@ export function PomodoroSection() {
             type="number"
             min={1}
             max={60}
-            value={settings?.pomodoroBreakMin ?? DEFAULT_DURATIONS_MIN.break}
+            value={readSetting(settings, 'pomodoroBreakMin')}
             onChange={(e) => updateSettings({ pomodoroBreakMin: Number(e.target.value) || DEFAULT_DURATIONS_MIN.break })}
             className="mt-1 !px-2"
           />
@@ -44,7 +45,7 @@ export function PomodoroSection() {
             type="number"
             min={1}
             max={90}
-            value={settings?.pomodoroLongBreakMin ?? DEFAULT_DURATIONS_MIN.longBreak}
+            value={readSetting(settings, 'pomodoroLongBreakMin')}
             onChange={(e) => updateSettings({ pomodoroLongBreakMin: Number(e.target.value) || DEFAULT_DURATIONS_MIN.longBreak })}
             className="mt-1 !px-2"
           />

@@ -6,6 +6,7 @@ import { format } from 'date-fns'
 import { Check, CircleCheckBig, Minimize2, Pause, Play, Plus, SkipForward, Volume2, VolumeX, X } from 'lucide-react'
 import { Button, Icon, IconButton, Kbd, ProgressBar, RingProgress, SegmentedControl } from '../../design/primitives'
 import { getOrCreateSettings, updateSettings } from '../../db/repositories/settings'
+import { readSetting } from '../../db/settingsDefaults'
 import type { RoutineStepKind, RoutineStepStyle, RoutineView } from '../../db/types'
 import { cn } from '../../lib/cn'
 import { dateKey } from '../../lib/dates'
@@ -68,9 +69,9 @@ export function RoutinePlayer() {
 function PlayerPanel() {
   const s = useRoutinePlayerStore()
   const settings = useLiveQuery(() => getOrCreateSettings(), [])
-  const view: RoutineView = settings?.routineView ?? 'step'
-  const stepStyle: RoutineStepStyle = settings?.routineStepStyle ?? 'direct'
-  const soundOn = settings?.routineSoundEnabled !== false
+  const view: RoutineView = readSetting(settings, 'routineView')
+  const stepStyle: RoutineStepStyle = readSetting(settings, 'routineStepStyle')
+  const soundOn = readSetting(settings, 'routineSoundEnabled')
   const now = useNow()
   const reduceMotion = useReducedMotion()
   const titleId = useId()
