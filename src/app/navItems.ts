@@ -5,6 +5,7 @@ import {
   LayoutGrid,
   ListChecks,
   ListTodo,
+  Puzzle,
   Repeat,
   Settings as SettingsIcon,
   type LucideIcon,
@@ -30,6 +31,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/estadisticas', label: 'Estadísticas', icon: BarChart3, end: false, goKey: 's', pluginId: 'stats' },
   { to: '/tareas', label: 'Tareas', icon: ListTodo, end: false, goKey: 't', pluginId: 'tasks' },
   { to: '/proyectos', label: 'Proyectos', icon: FolderKanban, end: false, goKey: 'r', pluginId: 'projects' },
+  { to: '/plugins', label: 'Plugins', icon: Puzzle, end: false, goKey: 'x' },
   { to: '/ajustes', label: 'Ajustes', icon: SettingsIcon, end: false, goKey: 'a' },
 ]
 
