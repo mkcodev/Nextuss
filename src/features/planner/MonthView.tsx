@@ -19,6 +19,7 @@ import { cn } from '../../lib/cn'
 import { dateKey, WEEKDAY_LABELS_ES_FULL } from '../../lib/dates'
 import { getTasksForRange } from '../../db/repositories/tasks'
 import { getOrCreateSettings } from '../../db/repositories/settings'
+import { readSetting } from '../../db/settingsDefaults'
 import { useTaskFormStore } from '../tasks/taskFormStore'
 import { DEFAULT_ENTITY_COLOR } from '../../lib/colors'
 
@@ -30,7 +31,7 @@ export function MonthView() {
   const openEdit = useTaskFormStore((s) => s.openEdit)
   const openCreate = useTaskFormStore((s) => s.openCreate)
   const settings = useLiveQuery(() => getOrCreateSettings(), [])
-  const weekStartsOn = (settings?.weekStartsOn ?? 1) as 0 | 1
+  const weekStartsOn = readSetting(settings, 'weekStartsOn')
 
   const gridStart = startOfWeek(monthStart, { weekStartsOn })
   const gridEnd = endOfWeek(endOfMonth(monthStart), { weekStartsOn })

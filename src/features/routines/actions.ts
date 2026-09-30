@@ -1,6 +1,7 @@
 // Acciones del reproductor con efectos: registrar la pasada, sonar y avisar al cambiar de paso. El
 // estado vive en `routinePlayerStore`; aquí va todo lo que toca Dexie, audio o notificaciones.
 import { getOrCreateSettings } from '../../db/repositories/settings'
+import { readSetting } from '../../db/settingsDefaults'
 import { logRoutineRun } from '../../db/repositories/routines'
 import type { Routine } from '../../db/types'
 import { dateKey } from '../../lib/dates'
@@ -47,7 +48,7 @@ export async function startRoutine(routine: Routine): Promise<void> {
 async function afterAdvance(): Promise<void> {
   const s = useRoutinePlayerStore.getState()
   const settings = await getOrCreateSettings()
-  if (settings.routineSoundEnabled !== false) playChime()
+  if (readSetting(settings, 'routineSoundEnabled')) playChime()
   if (typeof document !== 'undefined' && document.hidden) {
     const next = s.finished ? null : s.steps[s.index]
     const pending = routineStepNotification({

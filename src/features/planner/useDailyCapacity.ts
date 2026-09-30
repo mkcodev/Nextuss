@@ -1,13 +1,14 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db/schema'
+import { readSetting } from '../../db/settingsDefaults'
 import { getTasksForDate } from '../../db/repositories/tasks'
 import { timeToMinutes } from '../../lib/dates'
 
 export function useDailyCapacity(date: string) {
   const settings = useLiveQuery(() => db.settings.get(1), [])
   const tasks = useLiveQuery(() => getTasksForDate(date), [date]) ?? []
-  const dayStartHour = settings?.dayStartHour ?? 7
-  const dayEndHour = settings?.dayEndHour ?? 22
+  const dayStartHour = readSetting(settings, 'dayStartHour')
+  const dayEndHour = readSetting(settings, 'dayEndHour')
   const availableMin = (dayEndHour - dayStartHour) * 60
 
   const scheduledMin = tasks

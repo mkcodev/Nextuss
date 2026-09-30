@@ -9,6 +9,7 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Flame, Trophy, Gem, Star, Clock3, ListTodo, HeartPulse, type LucideIcon } from 'lucide-react'
 import { getOrCreateSettings } from '../../db/repositories/settings'
+import { readSetting } from '../../db/settingsDefaults'
 import { getOverdueTasks, getTasksForDate } from '../../db/repositories/tasks'
 import { getCheckInForDate } from '../../db/repositories/checkins'
 import { completeVirtualization, getVirtualizationDays, upsertVirtualizationDay, type CompleteVirtualizationResult } from '../../db/repositories/virtualization'
@@ -26,8 +27,6 @@ import { useVirtualizationStore } from './engine/useVirtualizationStore'
 import { calculateVirtualizationStreak } from '../../lib/virtualizationStreak'
 import { THEMES } from './themes'
 import { virtualizationTone } from './audio/virtualizationTone'
-
-const DEFAULT_MEDITATION_DURATION_SEC = 120
 
 function useReducedMotion(): boolean {
   return useMemo(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false, [])
@@ -79,8 +78,8 @@ export function Virtualization() {
 
   const settings = useLiveQuery(() => getOrCreateSettings(), [])
   const tasks = useLiveQuery(() => getTasksForDate(todayKey()), [])
-  const theme = settings?.virtualizationTheme ?? 'a'
-  const breathPattern = BREATH_PATTERNS[settings?.meditationPattern ?? 'box4444']
+  const theme = readSetting(settings, 'virtualizationTheme')
+  const breathPattern = BREATH_PATTERNS[readSetting(settings, 'meditationPattern')]
 
   const [nowMs, setNowMs] = useState(() => Date.now())
   useEffect(() => {
@@ -99,8 +98,8 @@ export function Virtualization() {
   }, [active])
 
   useEffect(() => {
-    virtualizationTone.setMuted(settings?.virtualizationSoundEnabled === false)
-  }, [settings?.virtualizationSoundEnabled])
+    virtualizationTone.setMuted(!readSetting(settings, 'virtualizationSoundEnabled'))
+  }, [settings])
 
   useEffect(() => {
     if (!visible) return
@@ -130,7 +129,7 @@ export function Virtualization() {
   // de forma continua). Solo se escribe en `virtualizationDays` cuando el escalón realmente cambia,
   // así queda registrado el progreso de la sesión (para reanudar y para estadísticas futuras) sin
   // machacar Dexie varias veces por segundo.
-  const meditationDurationSec = settings?.meditationDurationSec ?? DEFAULT_MEDITATION_DURATION_SEC
+  const meditationDurationSec = readSetting(settings, 'meditationDurationSec')
   useEffect(() => {
     if (phase !== 'presencia') return
     const cycleDurationSec = breathPatternDuration(breathPattern)

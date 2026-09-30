@@ -4,6 +4,7 @@ import { Clock3, Grid3x3 } from 'lucide-react'
 import { RingProgress } from '../../design/primitives'
 import { getTasksForDate } from '../../db/repositories/tasks'
 import { getOrCreateSettings } from '../../db/repositories/settings'
+import { readSetting } from '../../db/settingsDefaults'
 import { todayKey } from '../../lib/dates'
 import { useNowMinutes } from '../../lib/useNowMinutes'
 import { formatMinutes } from '../routines/schedule'
@@ -22,7 +23,7 @@ export function DayTimeIndicator() {
 
   const s = summarizeDay({ tasks, nowMin, dayStartHour: settings.dayStartHour, dayEndHour: settings.dayEndHour })
   if (s.phase !== 'during') return null
-  const view = settings.dayTimeView ?? 'ruler'
+  const view = readSetting(settings, 'dayTimeView')
   const nextSoon = s.next && s.next.inMin <= 60 ? s.next : null
   const free = dayCells(s, nowMin).filter((c) => c.status === 'free').length
 

@@ -36,6 +36,7 @@ import { DayTimeCard } from './DayTimeCard'
 import { IfPlugin } from '../plugins/PluginGate'
 import { usePluginEnabled } from '../plugins/pluginsStore'
 import { db } from '../../db/schema'
+import { readSetting } from '../../db/settingsDefaults'
 import { shouldShowDayClose } from '../rituals/gates'
 import type { Task } from '../../db/types'
 import { useDayCloseStore } from '../rituals/dayCloseStore'
@@ -117,7 +118,7 @@ export function TodayView() {
     tasksToday !== undefined &&
     todaysEntries !== undefined &&
     !!settings?.onboardingCompleted &&
-    shouldShowDayClose(checkin, pendingForClose, new Date(), settings.eveningSummaryTime ?? '21:00')
+    shouldShowDayClose(checkin, pendingForClose, new Date(), readSetting(settings, 'eveningSummaryTime'))
 
   useContextPanel(
     'Resumen del día',

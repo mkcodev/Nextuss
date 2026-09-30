@@ -4,6 +4,7 @@ import { Card, Select } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { db } from '../../db/schema'
 import { updateSettings } from '../../db/repositories/settings'
+import { readSetting } from '../../db/settingsDefaults'
 
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, h) => h)
 
@@ -24,7 +25,7 @@ export function PlannerSection() {
         <label className="text-xs text-text-muted">
           El día empieza a las
           <Select
-            value={settings?.dayStartHour ?? 7}
+            value={readSetting(settings, 'dayStartHour')}
             onChange={(e) => updateSettings({ dayStartHour: Number(e.target.value) })}
             className="mt-1"
           >
@@ -38,7 +39,7 @@ export function PlannerSection() {
         <label className="text-xs text-text-muted">
           El día termina a las
           <Select
-            value={settings?.dayEndHour ?? 22}
+            value={readSetting(settings, 'dayEndHour')}
             onChange={(e) => updateSettings({ dayEndHour: Number(e.target.value) })}
             className="mt-1"
           >
@@ -63,7 +64,7 @@ export function PlannerSection() {
               onClick={() => updateSettings({ weekStartsOn: value as 0 | 1 })}
               className={cn(
                 'rounded-lg border p-2.5 text-xs font-medium transition-colors',
-                (settings?.weekStartsOn ?? 1) === value
+                readSetting(settings, 'weekStartsOn') === value
                   ? 'border-accent bg-accent-soft text-accent'
                   : 'border-border text-text-muted hover:bg-surface-hover',
               )}

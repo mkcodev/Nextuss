@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db/schema'
+import { readSetting } from '../../db/settingsDefaults'
 import { getTasksForDate, scheduleTaskWithUndo } from '../../db/repositories/tasks'
 import { minutesToTime, todayKey } from '../../lib/dates'
 import { DayColumn } from './DayColumn'
@@ -9,8 +10,8 @@ import type { TaskBlockCommit } from './TaskBlock'
 
 export function Timeline({ date }: { date: string }) {
   const settings = useLiveQuery(() => db.settings.get(1), [])
-  const dayStartHour = settings?.dayStartHour ?? 7
-  const dayEndHour = settings?.dayEndHour ?? 22
+  const dayStartHour = readSetting(settings, 'dayStartHour')
+  const dayEndHour = readSetting(settings, 'dayEndHour')
   const tasks = useLiveQuery(() => getTasksForDate(date), [date]) ?? []
   const [now, setNow] = useState(() => new Date())
 

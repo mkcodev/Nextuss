@@ -4,6 +4,7 @@
 // de testear con datos fijos.
 import { format } from 'date-fns'
 import type { Habit, HabitLog, Routine, RoutineRun, Settings, Task } from '../../db/types'
+import { readSetting } from '../../db/settingsDefaults'
 import { dateKey, isHabitScheduledOn, timeToMinutes, weekKey } from '../../lib/dates'
 import { ZOMBIE_THRESHOLD } from '../../db/repositories/tasks'
 import { formatMinutes, isRoutineDone, isRoutineScheduledOn, routineTotalMin } from '../routines/schedule'
@@ -36,7 +37,7 @@ export function habitReminderNotifications(input: {
   todayLogs: Map<number, HabitLog>
 }): PendingNotification[] {
   const { now, settings, habits, todayLogs } = input
-  if (settings.notificationsEnabled === false || settings.notifyHabitReminders === false) return []
+  if (settings.notificationsEnabled === false || !readSetting(settings, 'notifyHabitReminders')) return []
   const time = hhmm(now)
   const today = dateKey(now)
   return habits
@@ -61,7 +62,7 @@ export function taskStartNotifications(input: {
   tasksToday: Task[]
 }): PendingNotification[] {
   const { now, settings, tasksToday } = input
-  if (settings.notificationsEnabled === false || settings.notifyTaskStart === false) return []
+  if (settings.notificationsEnabled === false || !readSetting(settings, 'notifyTaskStart')) return []
   const time = hhmm(now)
   const today = dateKey(now)
   return tasksToday
@@ -85,7 +86,7 @@ export function taskUpcomingNotifications(input: {
   tasksToday: Task[]
 }): PendingNotification[] {
   const { now, settings, tasksToday } = input
-  if (settings.notificationsEnabled === false || settings.notifyTransitions === false) return []
+  if (settings.notificationsEnabled === false || !readSetting(settings, 'notifyTransitions')) return []
   const nowMin = now.getHours() * 60 + now.getMinutes()
   const today = dateKey(now)
   return tasksToday
@@ -106,12 +107,12 @@ export function taskEndNotifications(input: {
   tasksToday: Task[]
 }): PendingNotification[] {
   const { now, settings, tasksToday } = input
-  if (settings.notificationsEnabled === false || settings.notifyTransitions === false) return []
+  if (settings.notificationsEnabled === false || !readSetting(settings, 'notifyTransitions')) return []
   const time = hhmm(now)
   const today = dateKey(now)
   const pending = tasksToday.filter((t) => t.status !== 'done' && t.scheduledStart)
   const startsNow = pending.some((t) => t.scheduledStart === time)
-  if (startsNow && settings.notifyTaskStart !== false) return []
+  if (startsNow && readSetting(settings, 'notifyTaskStart')) return []
   const next = pending
     .filter((t) => timeToMinutes(t.scheduledStart!) >= timeToMinutes(time))
     .sort((a, b) => timeToMinutes(a.scheduledStart!) - timeToMinutes(b.scheduledStart!))[0]
@@ -132,8 +133,8 @@ export function morningSummaryNotifications(input: {
   northStarTitle?: string
 }): PendingNotification[] {
   const { now, settings, pendingTaskCount, northStarTitle } = input
-  if (settings.notificationsEnabled === false || settings.notifyMorningSummary === false) return []
-  if (hhmm(now) !== (settings.morningSummaryTime ?? '08:00')) return []
+  if (settings.notificationsEnabled === false || !readSetting(settings, 'notifyMorningSummary')) return []
+  if (hhmm(now) !== readSetting(settings, 'morningSummaryTime')) return []
   const today = dateKey(now)
   const body = northStarTitle
     ? `${pendingTaskCount} tareas hoy · objetivo: ${northStarTitle}`
@@ -148,8 +149,8 @@ export function eveningSummaryNotifications(input: {
   totalTaskCount: number
 }): PendingNotification[] {
   const { now, settings, doneTaskCount, totalTaskCount } = input
-  if (settings.notificationsEnabled === false || settings.notifyEveningSummary === false) return []
-  if (hhmm(now) !== (settings.eveningSummaryTime ?? '21:00')) return []
+  if (settings.notificationsEnabled === false || !readSetting(settings, 'notifyEveningSummary')) return []
+  if (hhmm(now) !== readSetting(settings, 'eveningSummaryTime')) return []
   const today = dateKey(now)
   return [
     {
@@ -169,8 +170,8 @@ export function weeklyReviewNudgeNotifications(input: {
   hasReviewForLastWeek: boolean
 }): PendingNotification[] {
   const { now, settings, hasReviewForLastWeek } = input
-  if (settings.notificationsEnabled === false || settings.notifyWeeklyReviewNudge === false) return []
-  if (hhmm(now) !== (settings.morningSummaryTime ?? '08:00')) return []
+  if (settings.notificationsEnabled === false || !readSetting(settings, 'notifyWeeklyReviewNudge')) return []
+  if (hhmm(now) !== readSetting(settings, 'morningSummaryTime')) return []
   if (hasReviewForLastWeek) return []
   return [
     {
@@ -188,7 +189,7 @@ export function zombieTaskNotifications(input: {
   overdueCount: number
 }): PendingNotification[] {
   const { now, settings, overdueCount } = input
-  if (settings.notificationsEnabled === false || settings.notifyZombieTasks === false) return []
+  if (settings.notificationsEnabled === false || !readSetting(settings, 'notifyZombieTasks')) return []
   if (overdueCount < ZOMBIE_THRESHOLD) return []
   const today = dateKey(now)
   return [
@@ -209,7 +210,7 @@ export function pomodoroEndNotification(input: {
   mode: 'work' | 'break'
 }): PendingNotification | null {
   const { now, settings, mode } = input
-  if (settings.notificationsEnabled === false || settings.notifyPomodoroEnd === false) return null
+  if (settings.notificationsEnabled === false || !readSetting(settings, 'notifyPomodoroEnd')) return null
   return mode === 'work'
     ? {
         key: `pomodoro:${now.getTime()}`,
@@ -231,7 +232,7 @@ export function routineStartNotifications(input: {
   runsToday: RoutineRun[]
 }): PendingNotification[] {
   const { now, settings, routines, runsToday } = input
-  if (settings.notificationsEnabled === false || settings.notifyRoutines === false) return []
+  if (settings.notificationsEnabled === false || !readSetting(settings, 'notifyRoutines')) return []
   const time = hhmm(now)
   const today = dateKey(now)
   return routines
@@ -257,7 +258,7 @@ export function routineStepNotification(input: {
   nextStep: { title: string; durationMin: number } | null
 }): PendingNotification | null {
   const { settings, runKey, stepIndex, routineName, nextStep } = input
-  if (settings.notificationsEnabled === false || settings.notifyRoutines === false) return null
+  if (settings.notificationsEnabled === false || !readSetting(settings, 'notifyRoutines')) return null
   return nextStep
     ? {
         key: `routine-step:${runKey}:${stepIndex}`,

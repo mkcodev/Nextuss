@@ -1,5 +1,6 @@
 import { SegmentedControl, type SegmentOption } from '../../design/primitives'
 import { updateSettings } from '../../db/repositories/settings'
+import { readSetting } from '../../db/settingsDefaults'
 import type { Settings, VirtualizationTheme } from '../../db/types'
 
 const THEME_OPTIONS: SegmentOption<VirtualizationTheme>[] = [
@@ -13,7 +14,7 @@ const THEME_OPTIONS: SegmentOption<VirtualizationTheme>[] = [
  * sin pasar por un formulario. Deliberadamente NO vive en la Cabina del ritual (#138): cambiar el tema
  * justo antes de empezar no es lo que se quiere ahí. */
 export function VirtualizationThemeSwitch({ settings, size = 'sm' }: { settings: Settings; size?: 'sm' | 'md' }) {
-  const theme: VirtualizationTheme = settings.virtualizationTheme ?? 'a'
+  const theme: VirtualizationTheme = readSetting(settings, 'virtualizationTheme')
   return (
     <SegmentedControl
       options={THEME_OPTIONS}

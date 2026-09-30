@@ -3,6 +3,7 @@ import { Radar } from 'lucide-react'
 import { Button, Card, Switch, Select, SegmentedControl, NumberInput, type SegmentOption } from '../../design/primitives'
 import { db } from '../../db/schema'
 import { updateSettings } from '../../db/repositories/settings'
+import { readSetting } from '../../db/settingsDefaults'
 import { listRoutines } from '../../db/repositories/routines'
 import { installMorningRecipe } from '../launchers/recipes'
 import { createMorningRoutine } from '../routines/templates'
@@ -47,7 +48,7 @@ export function VirtualizationSection() {
           <Radar size={15} strokeWidth={1.75} /> Virtualización
         </h2>
         <Switch
-          checked={settings.virtualizationEnabled !== false}
+          checked={readSetting(settings, 'virtualizationEnabled')}
           onChange={(next) => updateSettings({ virtualizationEnabled: next })}
           label="Activar la Virtualización"
         />
@@ -60,7 +61,7 @@ export function VirtualizationSection() {
           <NumberInput
             min={1}
             max={23}
-            value={settings.virtualizationWindowEndHour ?? 12}
+            value={readSetting(settings, 'virtualizationWindowEndHour')}
             onChange={(v) => updateSettings({ virtualizationWindowEndHour: Math.min(23, v) })}
             className="mt-1 w-full"
           />
@@ -70,7 +71,7 @@ export function VirtualizationSection() {
           <NumberInput
             min={1}
             max={5}
-            value={Math.round((settings.meditationDurationSec ?? 120) / 60)}
+            value={Math.round(readSetting(settings, 'meditationDurationSec') / 60)}
             onChange={(v) => updateSettings({ meditationDurationSec: Math.min(5, v) * 60 })}
             className="mt-1 w-full"
           />
@@ -81,7 +82,7 @@ export function VirtualizationSection() {
         <p className="mb-1 text-xs text-text-muted">Patrón de respiración</p>
         <SegmentedControl
           options={PATTERN_OPTIONS}
-          value={settings.meditationPattern ?? 'box4444'}
+          value={readSetting(settings, 'meditationPattern')}
           onChange={(v) => updateSettings({ meditationPattern: v })}
           label="Patrón de respiración"
         />
@@ -119,7 +120,7 @@ export function VirtualizationSection() {
           <p className="text-xs text-text-faint">Zumbido, barrido y destello final</p>
         </div>
         <Switch
-          checked={settings.virtualizationSoundEnabled !== false}
+          checked={readSetting(settings, 'virtualizationSoundEnabled')}
           onChange={(next) => updateSettings({ virtualizationSoundEnabled: next })}
           label="Sonido de la Virtualización"
         />
