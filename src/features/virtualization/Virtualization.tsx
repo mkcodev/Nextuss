@@ -12,7 +12,6 @@ import { getOrCreateSettings } from '../../db/repositories/settings'
 import { getOverdueTasks, getTasksForDate } from '../../db/repositories/tasks'
 import { getCheckInForDate } from '../../db/repositories/checkins'
 import { completeVirtualization, getVirtualizationDays, upsertVirtualizationDay, type CompleteVirtualizationResult } from '../../db/repositories/virtualization'
-import type { Settings } from '../../db/types'
 import { emit } from '../../lib/events/bus'
 import { todayKey, formatShortDate, subDaysKey } from '../../lib/dates'
 import { Button } from '../../design/primitives'
@@ -26,7 +25,6 @@ import { getSyncPercent } from './engine/syncMeter'
 import { useVirtualizationStore } from './engine/useVirtualizationStore'
 import { calculateVirtualizationStreak } from '../../lib/virtualizationStreak'
 import { THEMES } from './themes'
-import { VirtualizationThemeSwitch } from './VirtualizationThemeSwitch'
 import { virtualizationTone } from './audio/virtualizationTone'
 
 const DEFAULT_MEDITATION_DURATION_SEC = 120
@@ -217,7 +215,7 @@ export function Virtualization() {
           {PHASE_LABELS[phase]}
         </p>
 
-        {phase === 'cabina' && <CabinaOverlay settings={settings} onStart={() => setPhase('transmision')} onSkip={() => void skipToday()} accent={palette.accent} />}
+        {phase === 'cabina' && <CabinaOverlay onStart={() => setPhase('transmision')} onSkip={() => void skipToday()} accent={palette.accent} />}
         {phase === 'transmision' && <TerminalOverlay lines={terminalLines} accent={palette.accent} />}
         {phase === 'escaneo' && <EscaneoOverlay onContinue={() => setPhase('presencia')} accent={palette.accent} />}
         {phase === 'presencia' && (
@@ -236,12 +234,10 @@ export function Virtualization() {
 }
 
 function CabinaOverlay({
-  settings,
   onStart,
   onSkip,
   accent,
 }: {
-  settings: Settings
   onStart: () => void
   onSkip: () => void
   accent: string
@@ -250,7 +246,6 @@ function CabinaOverlay({
     <div className="flex flex-col items-center gap-5">
       <h1 className="text-2xl font-semibold tracking-tight">Virtualización</h1>
       <p className="text-sm opacity-70">{formatShortDate(todayKey())}</p>
-      <VirtualizationThemeSwitch settings={settings} />
       <div className="mt-2 flex items-center gap-3">
         <Button size="md" onClick={onStart} style={{ background: accent, color: '#04121a' }}>
           Iniciar virtualización
