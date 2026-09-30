@@ -1,8 +1,6 @@
 import { lazyNamed } from '../../app/lazy'
 import type { PluginSettingsSpec } from '../plugins/settings/types'
 
-/** El chip «Necesita configuración» cuando falte la clave llega en un PR aparte (#98 P5, Tus datos +
- * configuración pendiente). */
 export const aiSettingsSpec: PluginSettingsSpec = {
   fields: [
     {
@@ -13,4 +11,5 @@ export const aiSettingsSpec: PluginSettingsSpec = {
       component: lazyNamed(() => import('./AiSettings'), 'AiSettings'),
     },
   ],
+  needsSetup: (s) => (!s.claudeApiKey?.trim() ? { reason: 'Falta la clave', fieldId: 'claudeApiKey' } : null),
 }
