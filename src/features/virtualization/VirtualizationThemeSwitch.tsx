@@ -8,9 +8,10 @@ const THEME_OPTIONS: SegmentOption<VirtualizationTheme>[] = [
   { value: 'c', label: 'Terminal' },
 ]
 
-/** Selector del estilo visual de la Virtualización, usado tanto inline en la Cabina como en la sección
- * de Ajustes (#97 PR4) — mismo patrón que `dayTimeView`/`routineView` (`DayTimeCard`/`RoutinePlayer`):
- * lee y escribe `Settings` directamente, sin pasar por un formulario. */
+/** Selector del estilo visual de la Virtualización, en la sección de Ajustes (#97 PR4) — mismo patrón
+ * que `dayTimeView`/`routineView` (`DayTimeCard`/`RoutinePlayer`): lee y escribe `Settings` directamente,
+ * sin pasar por un formulario. Deliberadamente NO vive en la Cabina del ritual (#138): cambiar el tema
+ * justo antes de empezar no es lo que se quiere ahí. */
 export function VirtualizationThemeSwitch({ settings, size = 'sm' }: { settings: Settings; size?: 'sm' | 'md' }) {
   const theme: VirtualizationTheme = settings.virtualizationTheme ?? 'a'
   return (

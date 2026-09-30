@@ -107,7 +107,9 @@ export function ThemeA({ phase, breathPattern, reducedMotion }: ThemeProps) {
         <lineBasicMaterial color={ACCENT} transparent opacity={0.35} />
       </lineSegments>
       {DEFAULT_SCAN_RINGS.map((cfg, i) => (
-        <mesh key={i} ref={(el) => (ringRefs.current[i] = el)} rotation={[Math.PI / 2, 0, 0]}>
+        // Sin rotación: el toro ya encara la cámara así (mira a -Z) — tumbado de canto a la misma
+        // altura Y que la cámara [0,0,6], se veía como una línea horizontal en vez de un anillo (#138).
+        <mesh key={i} ref={(el) => (ringRefs.current[i] = el)}>
           <torusGeometry args={[cfg.maxRadius, 0.008, 8, 64]} />
           <meshBasicMaterial color={ACCENT} transparent opacity={0} />
         </mesh>
