@@ -1,20 +1,16 @@
 // Página de Plugins (#98 PR1): maestro-detalle (variante B elegida en el mockup #134) — lista con
 // búsqueda a la izquierda, ficha completa a la derecha. El interruptor usa `planToggle` para saber si
-// hay que confirmar (cascada) y `togglePluginWithUndo` para aplicar con un toast «Deshacer». El mapa de
-// constelación (#135) se embebe aquí: mini-mapa (ego-red) en cada ficha y el mapa completo como vista
-// alternativa a la lista.
+// hay que confirmar (cascada) y `togglePluginWithUndo` para aplicar con un toast «Deshacer».
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ArrowLeft, Search } from 'lucide-react'
 import { db } from '../../db/schema'
 import { usePageTitle } from '../../app/pageTitleStore'
-import { Badge, Button, Dialog, EmptyState, Input, SegmentedControl, Switch } from '../../design/primitives'
+import { Badge, Button, Dialog, EmptyState, Input, Switch } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { useListNav } from '../../app/shortcuts/listNavStore'
 import { togglePluginWithUndo } from './actions'
-import { ConstellationMap2D } from './constellation/ConstellationMap2D'
-import { ConstellationMap3D } from './constellation/ConstellationMap3D'
 import { useEnabledPlugins } from './pluginsStore'
 import { getPlugin, PLUGINS } from './registry'
 import { planToggle } from './resolve'
@@ -22,12 +18,6 @@ import { PLUGIN_CATEGORIES } from './types'
 import type { PluginCategory, PluginId, PluginManifest } from './types'
 
 type ConfirmState = { plugin: PluginManifest; on: boolean; cascaded: PluginId[] }
-type View = 'list' | 'map'
-
-const VIEW_OPTIONS = [
-  { value: 'list' as const, label: 'Lista' },
-  { value: 'map' as const, label: 'Mapa' },
-]
 
 function groupPlugins(plugins: readonly PluginManifest[]): { label: string; items: PluginManifest[] }[] {
   const core = plugins.filter((p) => p.core)
@@ -45,7 +35,6 @@ export function PluginsPage() {
   const enabled = useEnabledPlugins()
   const settings = useLiveQuery(() => db.settings.get(1), [])
   const [query, setQuery] = useState('')
-  const [view, setView] = useState<View>('list')
   const [confirm, setConfirm] = useState<ConfirmState | null>(null)
 
   const q = query.trim().toLowerCase()
@@ -73,10 +62,6 @@ export function PluginsPage() {
     onActivate: () => {}, // ya se navega con j/k; Enter no tiene una acción propia distinta aquí
   })
 
-  function selectPlugin(id: PluginId) {
-    navigate(`/plugins/${id}`)
-  }
-
   async function requestToggle(plugin: PluginManifest, on: boolean) {
     const { cascaded } = planToggle(plugin.id, on, settings?.plugins)
     if (cascaded.length > 0) setConfirm({ plugin, on, cascaded })
@@ -99,59 +84,47 @@ export function PluginsPage() {
                 aria-label="Buscar un plugin"
               />
             </div>
-            <SegmentedControl options={VIEW_OPTIONS} value={view} onChange={setView} label="Vista" className="hidden md:inline-flex" />
           </div>
 
-          {view === 'map' ? (
-            <div className="hidden justify-center md:flex">
-              <ConstellationMap3D size={300} selectedId={selectedId} onSelectNode={selectPlugin} showLegend={false} />
-            </div>
-          ) : (
-            <nav aria-label="Lista de plugins" className="space-y-4">
-              {groups.map((g) => (
-                <div key={g.label}>
-                  <h2 className="mb-1.5 px-1 text-xs font-medium tracking-wide text-text-faint uppercase">{g.label}</h2>
-                  <div className="space-y-0.5">
-                    {g.items.map((p) => (
-                      <div
-                        key={p.id}
-                        className={cn(
-                          'flex items-center gap-2.5 rounded-md pr-2.5 text-sm transition-colors',
-                          p.id === selectedId ? 'bg-accent-soft text-accent' : 'text-text hover:bg-surface-hover',
-                        )}
-                      >
-                        <Link to={`/plugins/${p.id}`} className="flex min-w-0 flex-1 items-center gap-2.5 px-2.5 py-2">
-                          <p.icon size={16} strokeWidth={1.75} className="shrink-0" />
-                          <span className="min-w-0 flex-1 truncate">{p.name}</span>
-                        </Link>
-                        {p.core ? (
-                          <Badge tone="neutral" className="shrink-0">Núcleo</Badge>
-                        ) : (
-                          <Switch
-                            checked={enabled.has(p.id)}
-                            onChange={(on) => void requestToggle(p, on)}
-                            label={`${enabled.has(p.id) ? 'Desactivar' : 'Activar'} ${p.name}`}
-                            className="shrink-0"
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
+          <nav aria-label="Lista de plugins" className="space-y-4">
+            {groups.map((g) => (
+              <div key={g.label}>
+                <h2 className="mb-1.5 px-1 text-xs font-medium tracking-wide text-text-faint uppercase">{g.label}</h2>
+                <div className="space-y-0.5">
+                  {g.items.map((p) => (
+                    <div
+                      key={p.id}
+                      className={cn(
+                        'flex items-center gap-2.5 rounded-md pr-2.5 text-sm transition-colors',
+                        p.id === selectedId ? 'bg-accent-soft text-accent' : 'text-text hover:bg-surface-hover',
+                      )}
+                    >
+                      <Link to={`/plugins/${p.id}`} className="flex min-w-0 flex-1 items-center gap-2.5 px-2.5 py-2">
+                        <p.icon size={16} strokeWidth={1.75} className="shrink-0" />
+                        <span className="min-w-0 flex-1 truncate">{p.name}</span>
+                      </Link>
+                      {p.core ? (
+                        <Badge tone="neutral" className="shrink-0">Núcleo</Badge>
+                      ) : (
+                        <Switch
+                          checked={enabled.has(p.id)}
+                          onChange={(on) => void requestToggle(p, on)}
+                          label={`${enabled.has(p.id) ? 'Desactivar' : 'Activar'} ${p.name}`}
+                          className="shrink-0"
+                        />
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-              {flatList.length === 0 && <p className="px-1 text-sm text-text-faint">Sin resultados.</p>}
-            </nav>
-          )}
+              </div>
+            ))}
+            {flatList.length === 0 && <p className="px-1 text-sm text-text-faint">Sin resultados.</p>}
+          </nav>
         </div>
 
         <div className={cn(!idParam && 'hidden md:block')}>
           {selected ? (
-            <PluginDetail
-              plugin={selected}
-              on={enabled.has(selected.id)}
-              onToggle={(on) => void requestToggle(selected, on)}
-              onSelectNode={selectPlugin}
-            />
+            <PluginDetail plugin={selected} on={enabled.has(selected.id)} onToggle={(on) => void requestToggle(selected, on)} />
           ) : (
             <EmptyState icon={Search} title="Sin resultados" description="Ningún plugin coincide con la búsqueda." />
           )}
@@ -192,10 +165,9 @@ interface PluginDetailProps {
   plugin: PluginManifest
   on: boolean
   onToggle: (on: boolean) => void
-  onSelectNode: (id: PluginId) => void
 }
 
-function PluginDetail({ plugin, on, onToggle, onSelectNode }: PluginDetailProps) {
+function PluginDetail({ plugin, on, onToggle }: PluginDetailProps) {
   const category = plugin.category ? PLUGIN_CATEGORIES[plugin.category] : undefined
   return (
     <div className="space-y-5 rounded-lg border border-border bg-surface p-5 lg:p-6">
@@ -242,12 +214,6 @@ function PluginDetail({ plugin, on, onToggle, onSelectNode }: PluginDetailProps)
               {plugin.enhances.map((id) => getPlugin(id).name).join(', ')}
             </p>
           )}
-        </div>
-      )}
-
-      {!plugin.core && (
-        <div className="flex justify-center border-t border-border pt-5">
-          <ConstellationMap2D focusId={plugin.id} onSelectNode={onSelectNode} />
         </div>
       )}
     </div>
