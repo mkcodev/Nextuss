@@ -68,4 +68,8 @@ export const virtualizationSettingsSpec: PluginSettingsSpec = {
       component: lazyNamed(() => import('./RoutineSettings'), 'RoutineSettings'),
     },
   ],
+  presets: [
+    { id: 'quick', label: 'Rápida', values: { meditationDurationSec: 60, virtualizationSoundEnabled: false } },
+    { id: 'full', label: 'Completa', values: { meditationDurationSec: 180, virtualizationSoundEnabled: true } },
+  ],
 }

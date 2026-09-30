@@ -8,4 +8,9 @@ export const focusSettingsSpec: PluginSettingsSpec = {
     { kind: 'switch', key: 'pomodoroSoundEnabled', label: 'Sonido al terminar' },
   ],
   notify: ['notifyPomodoroEnd'],
+  presets: [
+    { id: 'classic', label: 'Clásico', values: { pomodoroWorkMin: 25, pomodoroBreakMin: 5, pomodoroLongBreakMin: 15 } },
+    { id: 'deep', label: 'Profundo', values: { pomodoroWorkMin: 50, pomodoroBreakMin: 10, pomodoroLongBreakMin: 30 } },
+    { id: 'adhd', label: 'TDAH', values: { pomodoroWorkMin: 15, pomodoroBreakMin: 3, pomodoroLongBreakMin: 10 } },
+  ],
 }
