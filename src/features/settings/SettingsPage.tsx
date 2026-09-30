@@ -19,10 +19,8 @@ import { RecurrenceSection } from './RecurrenceSection'
 import { TemplatesSection } from './TemplatesSection'
 import { ReviewsHistorySection } from './ReviewsHistorySection'
 import type { ThemePreference } from '../../db/types'
-import { PlannerSection } from './PlannerSection'
 import { DemoDataSection } from './DemoDataSection'
 import { NotificationsSection } from './NotificationsSection'
-import { PomodoroSection } from './PomodoroSection'
 import { AiSection } from './AiSection'
 import { TelegramSection } from './TelegramSection'
 import { VirtualizationSection } from './VirtualizationSection'
@@ -127,8 +125,6 @@ export function SettingsPage() {
 
       <InstallPrompt />
 
-      <PlannerSection />
-
       <TagsSection />
 
       <RecurrenceSection />
@@ -144,8 +140,6 @@ export function SettingsPage() {
       <TelegramSection />
 
       <VirtualizationSection />
-
-      <PomodoroSection />
 
       <NotificationsSection />
 
