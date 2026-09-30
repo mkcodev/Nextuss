@@ -107,6 +107,33 @@
         ],
         "createdAt": "2026-09-29T08:47:37.576Z",
         "reason": "mockup de exploracion (numeros del anillo decorativo, variantes B/C no elegidas tal cual); no es codigo de produccion"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "docs/design/plugins-ficha/index.html"
+        ],
+        "createdAt": "2026-09-30T11:56:43.430Z",
+        "reason": "Claude: mockup de comparación estático, tokens reales de la app a tamaño pequeño (faint/muted), sin usuarios reales tecleando"
+      },
+      {
+        "rule": "clipped-overflow-container",
+        "value": "*",
+        "files": [
+          "docs/design/plugins-ficha/index.html"
+        ],
+        "createdAt": "2026-09-30T11:56:43.613Z",
+        "reason": "Claude: .hi-note es anotación decorativa del propio mockup (marca dónde aterriza un enlace profundo), no un popover real que deba escapar del panel"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "docs/design/plugins-ficha/index.html"
+        ],
+        "createdAt": "2026-09-30T12:00:18.915Z",
+        "reason": "Claude: mismo patrón ya aceptado en docs/design/plugins/index.html — chips/badges/pills compactos intencionales de estas páginas de comparación estáticas, no UI real"
       }
     ]
   }

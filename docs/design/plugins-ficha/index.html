@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ficha de plugin · 3 variantes</title>
+<style>
+  /* Tokens reales de la app (src/index.css, tema oscuro). */
+  :root {
+    --bg: #131316; --bg-soft: #0f0f11; --hover: #1f1f24; --border: #26262c; --border-strong: #34343c;
+    --text: #e7e7eb; --muted: #9d9da8; --faint: #8b8b96;
+    --accent: #7c84e8; --accent-soft: rgba(124,132,232,.16); --on-accent: #0f1020;
+    --success: #4cc38a; --warning: #f0a25e; --danger: #f07470;
+    --shadow: 0 24px 60px -12px rgba(0,0,0,.6);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg-soft); color: var(--text); font: 14px/1.5 InterVariable, ui-sans-serif, system-ui, -apple-system, sans-serif; }
+  .lucide { width: 15px; height: 15px; stroke-width: 1.75; flex: none; }
+  .page { max-width: 1200px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -.01em; margin: 0 0 6px; }
+  .lead { color: var(--muted); max-width: 84ch; margin: 0 0 24px; }
+  .tabs { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); margin-bottom: 24px; flex-wrap: wrap; }
+  .tabs button { font: inherit; color: var(--muted); background: none; border: 0; padding: 6px 14px; border-radius: 6px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--hover); color: var(--text); font-weight: 500; }
+  .variant { display: none; }
+  .variant.on { display: block; }
+  .vhead { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 4px; }
+  .vhead h2 { font-size: 17px; font-weight: 600; margin: 0; }
+  .tag { font-size: 12px; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0 8px; }
+  .idea { color: var(--muted); margin: 0 0 20px; max-width: 88ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; align-items: start; }
+  .scene { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .scene > .cap { font-size: 12px; color: var(--faint); padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+  .scene > .cap b { color: var(--muted); font-weight: 500; }
+  .stage { padding: 16px; position: relative; }
+  .pc { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+  .pc > div { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: var(--bg); }
+  .pc h3 { font-size: 13px; margin: 0 0 6px; font-weight: 600; }
+  .pc ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .pc li { margin: 3px 0; }
+  .pro h3 { color: var(--success); } .con h3 { color: var(--warning); }
+  @media (max-width: 700px) { .pc { grid-template-columns: 1fr; } }
+  .common { border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; margin-top: 16px; background: var(--bg); }
+  .common h2 { font-size: 14px; margin: 0 0 6px; }
+  .common ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .common li { margin: 3px 0; }
+  .rec { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 16px 18px; margin: 28px 0 0; }
+  .rec h2 { font-size: 15px; margin: 0 0 6px; }
+  .rec p { margin: 4px 0; color: var(--text); }
+  .muted { color: var(--muted); } .faint { color: var(--faint); font-size: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 6px; font: inherit; font-size: 12.5px; border: 1px solid var(--border-strong); background: transparent; color: var(--text); cursor: default; white-space: nowrap; }
+  .btn.g { border-color: transparent; color: var(--muted); }
+  .btn .lucide { width: 13px; height: 13px; }
+
+  /* Piezas de ficha, comunes a las 3 variantes */
+  .fpanel { border: 1px solid var(--border-strong); border-radius: 12px; background: var(--bg); overflow: hidden; }
+  .fhead { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .back { color: var(--faint); display: none; }
+  .ico { width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; background: var(--hover); color: var(--accent); flex: none; }
+  .fhead .n { flex: 1; min-width: 0; }
+  .fhead .n b { font-size: 14.5px; font-weight: 600; display: block; }
+  .fhead .n .sub { display: flex; gap: 6px; align-items: center; margin-top: 2px; }
+  .cat { font-size: 11px; color: var(--faint); }
+  .chip { font-size: 11px; border-radius: 999px; padding: 3px 9px 3px 7px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .chip.warn { color: var(--warning); border: 1px solid var(--warning); }
+  .chip .lucide { width: 11px; height: 11px; }
+  .switch { width: 32px; height: 19px; border-radius: 999px; background: var(--hover); border: 1px solid var(--border-strong); position: relative; flex: none; }
+  .switch.on { background: var(--accent); border-color: var(--accent); }
+  .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; border-radius: 50%; background: var(--text); }
+  .switch.on::after { transform: translateX(13px); background: var(--on-accent); }
+
+  .grp-title { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); padding: 14px 16px 4px; }
+  .setrow { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+  .setrow:last-child { border-bottom: 0; }
+  .setrow .lbl { flex: 1; min-width: 0; }
+  .setrow .lbl .l1 { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+  .setrow .lbl .help { color: var(--faint); font-size: 11.5px; margin-top: 1px; }
+  .dot-mod { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex: none; }
+  .revert { color: var(--faint); cursor: default; }
+  .revert .lucide { width: 12px; height: 12px; }
+  .ctrl { flex: none; display: flex; align-items: center; gap: 8px; }
+  .seg { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg-soft); }
+  .seg span { font-size: 12px; color: var(--muted); padding: 4px 9px; border-radius: 5px; }
+  .seg span.on { background: var(--hover); color: var(--text); font-weight: 500; }
+  .num { display: flex; align-items: center; gap: 4px; border: 1px solid var(--border-strong); border-radius: 6px; padding: 4px 8px; font-size: 12.5px; background: var(--bg-soft); }
+  .select { border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 8px; font-size: 12.5px; background: var(--bg-soft); color: var(--text); display: flex; align-items: center; gap: 6px; }
+  .saved { font-size: 11px; color: var(--success); display: inline-flex; align-items: center; gap: 3px; }
+  .saved .lucide { width: 11px; height: 11px; }
+
+  .theme-prev { display: flex; gap: 8px; }
+  .tp { width: 46px; height: 32px; border-radius: 6px; border: 1.5px solid var(--border-strong); position: relative; overflow: hidden; cursor: default; }
+  .tp.sel { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .tp.a { background: radial-gradient(circle at 50% 55%, rgba(124,132,232,.5), var(--bg-soft) 65%); }
+  .tp.b { background: radial-gradient(circle at 50% 60%, rgba(76,195,138,.4), var(--bg-soft) 70%); }
+  .tp.c { background: linear-gradient(var(--bg-soft), var(--bg-soft)); }
+  .tp.c::after { content:"01_"; position:absolute; inset:0; display:grid; place-items:center; font-size:9px; color: var(--success); font-family: monospace; }
+  .tp-lbl { font-size: 11px; color: var(--faint); text-align: center; margin-top: 3px; }
+
+  .hi { position: relative; background: var(--accent-soft); animation: hiPulse 1.6s ease-out 1; }
+  @keyframes hiPulse { from { box-shadow: inset 0 0 0 1px var(--accent); } to { box-shadow: inset 0 0 0 1px transparent; } }
+  .hi-note { font-size: 11px; color: var(--accent); position: absolute; right: 16px; top: -6px; background: var(--bg); padding: 2px 6px; }
+
+  .stat { display: flex; justify-content: space-between; padding: 7px 16px; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+  .stat:last-child { border-bottom: 0; }
+  .stat .k { color: var(--muted); }
+  .empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 28px 20px; color: var(--muted); }
+  .empty .lucide { width: 22px; height: 22px; color: var(--faint); }
+  .empty a { color: var(--accent); }
+  .linkout { display: inline-flex; align-items: center; gap: 5px; color: var(--accent); font-size: 12.5px; }
+  .presets-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .preset { font-size: 12px; border: 1px solid var(--border-strong); border-radius: 999px; padding: 4px 11px; color: var(--muted); }
+
+  /* Variante A: pestañas */
+  .ftabs { display: flex; gap: 2px; padding: 8px 12px 0; border-bottom: 1px solid var(--border); }
+  .ftabs span { font-size: 12.5px; color: var(--muted); padding: 7px 11px; border-radius: 6px 6px 0 0; }
+  .ftabs span.on { color: var(--text); background: var(--hover); font-weight: 500; }
+  .ftabs span.disabled { color: var(--faint); opacity: .5; }
+
+  /* Variante B: índice fijo */
+  .fb { display: grid; grid-template-columns: 128px 1fr; }
+  .idx { border-right: 1px solid var(--border); padding: 12px 0; }
+  .idx a { display: block; font-size: 12px; color: var(--muted); padding: 6px 14px; border-left: 2px solid transparent; }
+  .idx a.cur { color: var(--text); font-weight: 500; border-left-color: var(--accent); background: var(--hover); }
+  .idx.short { padding: 12px 0; }
+  .fb .content { max-height: 460px; overflow-y: auto; }
+  .idx-chips { display: none; }
+
+  /* Variante C: resumen + acordeones */
+  .cpanel-head { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .cpanel-head .row1 { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .cpanel-head .row2 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .acc { border-bottom: 1px solid var(--border); }
+  .acc:last-child { border-bottom: 0; }
+  .acc-head { display: flex; align-items: center; gap: 8px; padding: 11px 16px; font-size: 13px; font-weight: 500; cursor: default; }
+  .acc-head .lucide { transition: transform .15s; color: var(--faint); }
+  .acc.open .acc-head .lucide.chev { transform: rotate(180deg); }
+  .acc-sum { flex: 1; font-weight: 400; color: var(--faint); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .acc-body { display: none; }
+  .acc.open .acc-body { display: block; }
+
+  .phone { width: 375px; max-width: 100%; margin: 0 auto; border: 1px solid var(--border-strong); border-radius: 22px; overflow: hidden; background: var(--bg-soft); box-shadow: var(--shadow); }
+  .phone .fpanel { border: 0; border-radius: 0; }
+  .phone .fhead .back { display: block; }
+</style>
+</head>
+<body>
+<main class="page">
+  <h1>Ficha de plugin con configuración: 3 variantes</h1>
+  <p class="lead">#98 P2: hoy la ficha de <code>/plugins/:id</code> (PR #137) solo tiene descripción y dependencias. Este mockup añade el sitio donde vive <strong>toda</strong> la configuración de un plugin — hoy repartida entre Ajustes, cada vista y valores por defecto sueltos. Cada variante enseña lo mismo con <b>Virtualización</b> (mucha configuración) y <b>Check-in</b> (casi ninguna); cambia <strong>cómo se organizan las secciones dentro de la ficha</strong>. Detalle completo del reparto de campos: plan <code>~/.claude/plans/inherited-splashing-lighthouse.md</code>, Objetivo 2.</p>
+
+  <div class="tabs" role="tablist" aria-label="Variantes">
+    <button role="tab" aria-selected="true" data-v="a">A · Pestañas</button>
+    <button role="tab" aria-selected="false" data-v="b">B · Índice fijo con scroll-spy</button>
+    <button role="tab" aria-selected="false" data-v="c">C · Resumen + acordeones</button>
+  </div>
+
+  <!-- ============ VARIANTE A ============ -->
+  <section class="variant on" data-v="a">
+    <div class="vhead"><h2>A · Pestañas</h2></div>
+    <p class="idea">Resumen · Ajustes · Avisos · Tus datos, cada una en su propia pestaña (estado en <code>?tab=</code>, como hoy en <code>PlanningPage</code>). Foco total: solo se ve una sección a la vez.</p>
+
+    <div class="grid">
+      <div class="scene"><div class="cap"><b>Virtualización</b> — pestaña Ajustes</div><div class="stage">
+        <div class="fpanel">
+          <div class="fhead"><svg class="lucide back" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m15 18-6-6 6-6"/></svg>
+            <div class="ico"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="n"><b>Virtualización</b><div class="sub"><span class="cat">Ritual</span><span class="chip warn"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Elige rutina</span></div></div>
+            <div class="switch on"></div>
+          </div>
+          <div class="ftabs"><span>Resumen</span><span class="on">Ajustes</span><span>Avisos</span><span>Tus datos</span></div>
+          <div class="grp-title">Apertura</div>
+          <div class="setrow"><div class="lbl"><div class="l1"><span class="dot-mod"></span>Abrirla sola al empezar el día<span class="revert"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></span></div><div class="help">antes de esa hora, la app arranca directa en Hoy</div></div><div class="ctrl"><div class="switch on"></div></div></div>
+          <div class="setrow"><div class="lbl"><div class="l1">Hasta las</div></div><div class="ctrl"><div class="num">12<span class="muted">h</span></div></div></div>
+          <div class="grp-title">Presencia</div>
+          <div class="setrow"><div class="lbl"><div class="l1">Patrón de respiración</div></div><div class="ctrl"><div class="seg"><span class="on">Caja</span><span>4-7-8</span><span>5-5</span></div></div></div>
+          <div class="setrow"><div class="lbl"><div class="l1">Duración</div></div><div class="ctrl"><div class="num">2<span class="muted">min</span></div></div></div>
+          <div class="grp-title">Aspecto</div>
+          <div class="setrow"><div class="lbl"><div class="l1">Tema</div></div><div class="ctrl"><div class="theme-prev"><div><div class="tp a sel"></div><div class="tp-lbl">Nítido</div></div><div><div class="tp b"></div><div class="tp-lbl">Orgánico</div></div><div><div class="tp c"></div><div class="tp-lbl">Terminal</div></div></div></div></div>
+          <div class="setrow"><div class="lbl"><div class="l1">Sonido</div></div><div class="ctrl"><div class="switch on"></div><span class="saved"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5"/></svg>Guardado</span></div></div>
+        </div>
+      </div></div>
+
+      <div class="scene"><div class="cap"><b>Check-in</b> — pestaña Resumen</div><div class="stage">
+        <div class="fpanel">
+          <div class="fhead"><div class="ico"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+            <div class="n"><b>Check-in</b><div class="sub"><span class="cat">Ritual</span></div></div>
+            <div class="switch on"></div>
+          </div>
+          <div class="ftabs"><span class="on">Resumen</span><span class="disabled">Ajustes</span><span class="disabled">Avisos</span><span>Tus datos</span></div>
+          <div style="padding:14px 16px" class="muted">Cuestionario corto de energía/ánimo tras la rutina de la mañana. Se abre solo, encadenado, según la receta de Lanzadores.</div>
+          <div class="empty"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Sin ajustes propios · configúralo en <a href="#">Lanzadores →</a></div>
+        </div>
+      </div></div>
+
+      <div class="scene"><div class="cap"><b>Móvil, 375 px</b> — Virtualización</div><div class="stage">
+        <div class="phone"><div class="fpanel">
+          <div class="fhead"><svg class="lucide back" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m15 18-6-6 6-6"/></svg>
+            <div class="ico"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="n"><b>Virtualización</b></div><div class="switch on"></div>
+          </div>
+          <div class="ftabs" style="overflow-x:auto"><span>Resumen</span><span class="on">Ajustes</span><span>Avisos</span><span>Datos</span></div>
+          <div class="grp-title">Apertura</div>
+          <div class="setrow"><div class="lbl"><div class="l1">Abrirla sola</div></div><div class="ctrl"><div class="switch on"></div></div></div>
+          <div class="grp-title">Aspecto</div>
+          <div class="setrow"><div class="lbl"><div class="l1">Tema</div></div><div class="ctrl"><div class="theme-prev"><div><div class="tp a sel" style="width:36px;height:26px"></div></div><div><div class="tp b" style="width:36px;height:26px"></div></div><div><div class="tp c" style="width:36px;height:26px"></div></div></div></div></div>
+        </div></div>
+      </div></div>
+    </div>
+
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>Foco total, poca carga visual por pantalla.</li><li>Layout simple, poco componente nuevo.</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>En Check-in quedan pestañas vacías o deshabilitadas.</li><li>Buscar un ajuste o restablecerlo obliga a cambiar de pestaña primero.</li><li>El enlace profundo <code>#campo</code> tiene que además elegir la pestaña correcta.</li></ul></div>
+    </div>
+  </section>
+
+  <!-- ============ VARIANTE B ============ -->
+  <section class="variant" data-v="b">
+    <div class="vhead"><h2>B · Índice fijo con scroll-spy</h2><span class="tag">Recomendada</span></div>
+    <p class="idea">Una sola columna que se desplaza, con un índice lateral fino («Resumen · Apertura · Presencia · Aspecto · Avisos · Tus datos») que resalta la sección visible — mismo patrón que los ajustes de VS Code o macOS. Las secciones sin contenido simplemente no aparecen en el índice.</p>
+
+    <div class="grid">
+      <div class="scene"><div class="cap"><b>Virtualización</b></div><div class="stage">
+        <div class="fpanel">
+          <div class="fhead"><div class="ico"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="n"><b>Virtualización</b><div class="sub"><span class="cat">Ritual</span><span class="chip warn"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Elige rutina</span></div></div>
+            <div class="switch on"></div>
+          </div>
+          <div class="fb">
+            <nav class="idx"><a class="cur">Resumen</a><a>Apertura</a><a>Presencia</a><a>Aspecto</a><a>Rutina</a><a>Tus datos</a></nav>
+            <div class="content">
+              <div style="padding:12px 16px" class="muted faint">Sincroniza tu ritual de inicio del día: apertura, respiración guiada y la rutina matutina, todo encadenado.</div>
+              <div class="grp-title">Apertura</div>
+              <div class="setrow"><div class="lbl"><div class="l1"><span class="dot-mod"></span>Abrirla sola al empezar el día</div></div><div class="ctrl"><div class="switch on"></div></div></div>
+              <div class="setrow"><div class="lbl"><div class="l1">Hasta las</div></div><div class="ctrl"><div class="num">12<span class="muted">h</span></div></div></div>
+              <div class="grp-title">Presencia</div>
+              <div class="setrow"><div class="lbl"><div class="l1">Patrón de respiración</div></div><div class="ctrl"><div class="seg"><span class="on">Caja</span><span>4-7-8</span><span>5-5</span></div></div></div>
+              <div class="setrow"><div class="lbl"><div class="l1">Duración</div></div><div class="ctrl"><div class="num">2<span class="muted">min</span></div></div></div>
+              <div class="grp-title">Aspecto</div>
+              <div class="setrow hi"><span class="hi-note">← llegaste aquí por enlace</span><div class="lbl"><div class="l1">Tema</div></div><div class="ctrl"><div class="theme-prev"><div><div class="tp a sel"></div><div class="tp-lbl">Nítido</div></div><div><div class="tp b"></div><div class="tp-lbl">Orgánico</div></div><div><div class="tp c"></div><div class="tp-lbl">Terminal</div></div></div></div></div>
+              <div class="setrow"><div class="lbl"><div class="l1">Sonido</div></div><div class="ctrl"><div class="switch on"></div></div></div>
+              <div class="grp-title">Rutina</div>
+              <div class="setrow"><div class="lbl"><div class="l1">Rutina matutina</div><div class="help">se arranca sola al terminar Presencia</div></div><div class="ctrl"><div class="select">Mañana consciente</div></div></div>
+              <div class="grp-title">Tus datos</div>
+              <div class="stat"><span class="k">Racha actual</span><span>12 días</span></div>
+              <div class="stat"><span class="k">Mejor racha</span><span>40 días</span></div>
+              <div class="stat"><span class="k">Última vez</span><span>hoy, 07:14</span></div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+
+      <div class="scene"><div class="cap"><b>Check-in</b></div><div class="stage">
+        <div class="fpanel">
+          <div class="fhead"><div class="ico"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+            <div class="n"><b>Check-in</b><div class="sub"><span class="cat">Ritual</span></div></div>
+            <div class="switch on"></div>
+          </div>
+          <div class="fb">
+            <nav class="idx short"><a class="cur">Resumen</a><a>Tus datos</a></nav>
+            <div class="content">
+              <div style="padding:12px 16px" class="muted faint">Cuestionario corto de energía/ánimo tras tu rutina de la mañana. <a class="linkout" href="#">Se abre tras la rutina · configúralo en Lanzadores <svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a></div>
+              <div class="grp-title">Tus datos</div>
+              <div class="stat"><span class="k">Registros</span><span>58</span></div>
+              <div class="stat"><span class="k">Racha</span><span>9 días</span></div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+
+      <div class="scene"><div class="cap"><b>Móvil, 375 px</b> — Virtualización</div><div class="stage">
+        <div class="phone"><div class="fpanel">
+          <div class="fhead"><svg class="lucide back" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m15 18-6-6 6-6"/></svg>
+            <div class="ico"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="n"><b>Virtualización</b></div><div class="switch on"></div>
+          </div>
+          <div class="idx-chips" style="display:flex;gap:6px;overflow-x:auto;padding:8px 12px;border-bottom:1px solid var(--border)">
+            <span class="preset" style="border-color:var(--accent);color:var(--accent)">Resumen</span><span class="preset">Apertura</span><span class="preset">Presencia</span><span class="preset">Aspecto</span><span class="preset">Datos</span>
+          </div>
+          <div class="grp-title">Apertura</div>
+          <div class="setrow"><div class="lbl"><div class="l1">Abrirla sola</div></div><div class="ctrl"><div class="switch on"></div></div></div>
+          <div class="grp-title">Presencia</div>
+          <div class="setrow"><div class="lbl"><div class="l1">Patrón</div></div><div class="ctrl"><div class="seg"><span class="on">Caja</span><span>4-7-8</span></div></div></div>
+        </div></div>
+      </div></div>
+    </div>
+
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>Todo visible con un scroll; nada se esconde.</li><li>El buscador y el enlace profundo son solo desplazarse y resaltar — nada de cambiar de pestaña primero.</li><li>Las secciones vacías (Ajustes/Avisos de Check-in) desaparecen solas del índice: la ficha queda corta y digna, no vacía.</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>Fichas con mucha configuración (Virtualización, IA) quedan largas.</li><li>Con lista + índice + contenido son 3 columnas; hay que plegar el índice en pantallas medianas.</li></ul></div>
+    </div>
+  </section>
+
+  <!-- ============ VARIANTE C ============ -->
+  <section class="variant" data-v="c">
+    <div class="vhead"><h2>C · Resumen + acordeones</h2></div>
+    <p class="idea">Cabecera-panel con estado, chip y presets arriba; debajo, los ajustes agrupados en acordeones — «Básico» abierto por defecto, «Avanzado» y «Avisos» cerrados. Mejor primera impresión y menos densidad de golpe, pensando en TDAH.</p>
+
+    <div class="grid">
+      <div class="scene"><div class="cap"><b>Virtualización</b></div><div class="stage">
+        <div class="fpanel">
+          <div class="cpanel-head">
+            <div class="row1"><div class="ico"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></div>
+              <div class="n"><b>Virtualización</b><div class="sub"><span class="faint">racha 12 días</span><span class="chip warn"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Elige rutina</span></div></div>
+              <div class="switch on"></div>
+            </div>
+            <div class="row2"><div class="presets-row"><span class="preset">Rápida</span><span class="preset">Completa</span></div><a class="linkout" href="#" style="margin-left:auto">Ver en la app <svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a></div>
+          </div>
+          <div class="acc open"><div class="acc-head"><svg class="lucide chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"/></svg>Básico<span class="acc-sum">Abrirla sola · Tema · Sonido</span></div>
+            <div class="acc-body">
+              <div class="setrow"><div class="lbl"><div class="l1">Abrirla sola al empezar el día</div></div><div class="ctrl"><div class="switch on"></div></div></div>
+              <div class="setrow"><div class="lbl"><div class="l1">Tema</div></div><div class="ctrl"><div class="theme-prev"><div><div class="tp a sel"></div></div><div><div class="tp b"></div></div><div><div class="tp c"></div></div></div></div></div>
+              <div class="setrow"><div class="lbl"><div class="l1">Sonido</div></div><div class="ctrl"><div class="switch on"></div></div></div>
+            </div>
+          </div>
+          <div class="acc"><div class="acc-head"><svg class="lucide chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"/></svg>Avanzado<span class="acc-sum">Ventana · Patrón · Duración · Rutina</span></div><div class="acc-body"></div></div>
+          <div class="acc"><div class="acc-head"><svg class="lucide chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"/></svg>Avisos<span class="acc-sum">0</span></div><div class="acc-body"></div></div>
+          <div class="grp-title">Tus datos</div>
+          <div class="stat"><span class="k">Racha actual</span><span>12 días</span></div>
+          <div class="stat"><span class="k">Mejor racha</span><span>40 días</span></div>
+        </div>
+      </div></div>
+
+      <div class="scene"><div class="cap"><b>Check-in</b></div><div class="stage">
+        <div class="fpanel">
+          <div class="cpanel-head">
+            <div class="row1"><div class="ico"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+              <div class="n"><b>Check-in</b></div><div class="switch on"></div>
+            </div>
+          </div>
+          <div class="empty"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Sin ajustes propios · Se abre tras tu rutina, configúralo en <a href="#">Lanzadores →</a></div>
+          <div class="grp-title">Tus datos</div>
+          <div class="stat"><span class="k">Registros</span><span>58</span></div>
+        </div>
+      </div></div>
+
+      <div class="scene"><div class="cap"><b>Móvil, 375 px</b> — Virtualización</div><div class="stage">
+        <div class="phone"><div class="fpanel">
+          <div class="cpanel-head">
+            <div class="row1"><svg class="lucide back" style="display:block" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m15 18-6-6 6-6"/></svg><div class="ico"><svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></div>
+              <div class="n"><b>Virtualización</b></div><div class="switch on"></div>
+            </div>
+            <div class="row2"><div class="presets-row"><span class="preset">Rápida</span><span class="preset">Completa</span></div></div>
+          </div>
+          <div class="acc open"><div class="acc-head"><svg class="lucide chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"/></svg>Básico</div>
+            <div class="acc-body"><div class="setrow"><div class="lbl"><div class="l1">Abrirla sola</div></div><div class="ctrl"><div class="switch on"></div></div></div></div>
+          </div>
+          <div class="acc"><div class="acc-head"><svg class="lucide chev" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"/></svg>Avanzado</div><div class="acc-body"></div></div>
+        </div></div>
+      </div></div>
+    </div>
+
+    <div class="pc">
+      <div class="pro"><h3>A favor</h3><ul><li>Mejor primera impresión: estado y lo esencial arriba, sin ruido.</li><li>Revelado progresivo — menos carga cognitiva de golpe.</li></ul></div>
+      <div class="con"><h3>En contra</h3><ul><li>Qué es «Básico» frente a «Avanzado» es subjetivo por plugin.</li><li>Un acordeón cerrado esconde el campo al que apunta un enlace profundo: hay que abrirlo por código antes de resaltar.</li></ul></div>
+    </div>
+  </section>
+
+  <div class="common">
+    <h2>Igual en las tres</h2>
+    <ul>
+      <li>Punto de «modificado» junto a la etiqueta + ↺ para restablecer ese campo, al pasar por encima o enfocar.</li>
+      <li>«Guardado ✓» discreto de 1,5 s tras cada cambio — sin un toast por campo, eso sería ruido.</li>
+      <li>Enlace profundo <code>/plugins/:id#campo</code>: desplaza, abre lo que haga falta (pestaña o acordeón) y resalta el campo 1,5 s.</li>
+      <li>Vista previa real del tema de Virtualización y de <code>dayTimeView</code>, nunca solo el nombre.</li>
+      <li>Chip «Necesita configuración» en la cabecera, con salto directo al campo que falta.</li>
+      <li>«Tus datos» con recuentos reales de Dexie, nunca inventados.</li>
+      <li>Estado vacío igual en las tres cuando un plugin no tiene ajustes propios (Check-in, Proyectos, Planificación…): explica qué hace y adónde ir.</li>
+    </ul>
+  </div>
+
+  <div class="rec">
+    <h2>Recomendación</h2>
+    <p><b>B (índice fijo)</b> como base — es la que mejor resuelve el enlace profundo y el buscador, y trata bien tanto la ficha larga de Virtualización como la corta de Check-in. Se le presta de <b>C</b> la cabecera-panel (estado, chip, presets, «Ver en la app») y se pliega un grupo bajo «Avanzado» solo cuando pase de unos 5 campos (hoy ninguno lo necesita salvo quizá IA/Telegram). En móvil el índice se convierte en la fila de chips fija arriba que ya se ve en la variante B.</p>
+  </div>
+</main>
+<script>
+  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach((x) => x.setAttribute('aria-selected', String(x === b)))
+    const v = b.dataset.v
+    document.querySelectorAll('.variant').forEach((s) => s.classList.toggle('on', s.dataset.v === v))
+  }))
+</script>
+</body>
+</html>
