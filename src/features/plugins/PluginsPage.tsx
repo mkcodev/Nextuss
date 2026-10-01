@@ -18,6 +18,8 @@ import { PLUGIN_CATEGORIES } from './types'
 import type { PluginCategory, PluginId, PluginManifest } from './types'
 import { PLUGIN_SETTINGS } from './settings'
 import { PluginSettingsPanel } from './settings/PluginSettingsPanel'
+import { PLUGIN_PROFILES, type PluginProfile } from './profiles'
+import { applyProfileWithUndo, describeProfileChanges } from './profileActions'
 import type { Settings } from '../../db/types'
 
 type ConfirmState = { plugin: PluginManifest; on: boolean; cascaded: PluginId[] }
@@ -39,6 +41,7 @@ export function PluginsPage() {
   const settings = useLiveQuery(() => db.settings.get(1), [])
   const [query, setQuery] = useState('')
   const [confirm, setConfirm] = useState<ConfirmState | null>(null)
+  const [profileConfirm, setProfileConfirm] = useState<PluginProfile | null>(null)
 
   const q = query.trim().toLowerCase()
   const filtered = useMemo(
@@ -87,6 +90,15 @@ export function PluginsPage() {
                 aria-label="Buscar un plugin"
               />
             </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-text-faint">Perfiles:</span>
+            {PLUGIN_PROFILES.map((profile) => (
+              <Button key={profile.id} variant="secondary" size="sm" onClick={() => setProfileConfirm(profile)}>
+                {profile.label}
+              </Button>
+            ))}
           </div>
 
           <nav aria-label="Lista de plugins" className="space-y-4">
@@ -157,6 +169,43 @@ export function PluginsPage() {
             }}
           >
             {confirm?.on ? 'Activar' : 'Desactivar'}
+          </Button>
+        </div>
+      </Dialog>
+
+      <Dialog open={profileConfirm != null} onClose={() => setProfileConfirm(null)} title={`Aplicar el perfil «${profileConfirm?.label ?? ''}»`} size="sm">
+        {profileConfirm && (
+          <>
+            <p className="mb-3 text-sm text-text-muted">{profileConfirm.description}</p>
+            {(() => {
+              const changes = describeProfileChanges(profileConfirm, settings?.plugins)
+              return changes.length > 0 ? (
+                <ul className="space-y-1.5 text-sm">
+                  {changes.map((c) => (
+                    <li key={c.id} className="flex items-center justify-between gap-3 text-text-muted">
+                      <span>{getPlugin(c.id).name}</span>
+                      <span className="text-text">{c.on ? 'Se activa' : 'Se desactiva'}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-text-faint">Ya tienes esta combinación de plugins activa.</p>
+              )
+            })()}
+          </>
+        )}
+        <div className="mt-5 flex justify-end gap-2">
+          <Button variant="secondary" onClick={() => setProfileConfirm(null)}>
+            Cancelar
+          </Button>
+          <Button
+            onClick={async () => {
+              if (!profileConfirm) return
+              await applyProfileWithUndo(profileConfirm, settings?.plugins)
+              setProfileConfirm(null)
+            }}
+          >
+            Aplicar
           </Button>
         </div>
       </Dialog>
