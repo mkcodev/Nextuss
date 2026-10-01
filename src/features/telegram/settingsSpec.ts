@@ -1,8 +1,6 @@
 import { lazyNamed } from '../../app/lazy'
 import type { PluginSettingsSpec } from '../plugins/settings/types'
 
-/** El chip «Necesita configuración» cuando falte la conexión llega en un PR aparte (#98 P5, Tus datos +
- * configuración pendiente). */
 export const telegramSettingsSpec: PluginSettingsSpec = {
   fields: [
     {
@@ -13,4 +11,5 @@ export const telegramSettingsSpec: PluginSettingsSpec = {
       component: lazyNamed(() => import('./TelegramSettings'), 'TelegramSettings'),
     },
   ],
+  needsSetup: (s) => (!s.telegramBotToken || !s.telegramChatId ? { reason: 'Falta conectar el bot', fieldId: 'telegramConnection' } : null),
 }
