@@ -1,5 +1,6 @@
 import { db } from '../../db/schema'
 import { listRoutines } from '../../db/repositories/routines'
+import { RoutineStepStylePreview, RoutineViewPreview } from './previews'
 import type { PluginSettingsSpec } from '../plugins/settings/types'
 
 export const routinesSettingsSpec: PluginSettingsSpec = {
@@ -13,6 +14,7 @@ export const routinesSettingsSpec: PluginSettingsSpec = {
         { value: 'step', label: 'Paso' },
         { value: 'timeline', label: 'Línea' },
       ],
+      preview: RoutineViewPreview,
     },
     {
       kind: 'segmented',
@@ -24,6 +26,7 @@ export const routinesSettingsSpec: PluginSettingsSpec = {
         { value: 'card', label: 'Tarjeta' },
         { value: 'journal', label: 'Diario' },
       ],
+      preview: RoutineStepStylePreview,
     },
     {
       kind: 'switch',

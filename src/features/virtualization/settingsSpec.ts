@@ -2,6 +2,7 @@ import { lazyNamed } from '../../app/lazy'
 import { db } from '../../db/schema'
 import { getVirtualizationDays } from '../../db/repositories/virtualization'
 import { calculateVirtualizationStreak } from '../../lib/virtualizationStreak'
+import { ThemePreview } from './themes/ThemePreview'
 import type { PluginSettingsSpec } from '../plugins/settings/types'
 
 export const virtualizationSettingsSpec: PluginSettingsSpec = {
@@ -54,6 +55,7 @@ export const virtualizationSettingsSpec: PluginSettingsSpec = {
         { value: 'b', label: 'Orgánico' },
         { value: 'c', label: 'Terminal' },
       ],
+      preview: ThemePreview,
     },
     {
       kind: 'switch',
