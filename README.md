@@ -7,7 +7,7 @@
 **Centro de mando personal: hábitos, tareas, objetivos y foco en un solo sitio.**
 
 [![Estado](https://img.shields.io/badge/estado-en%20desarrollo-f59e0b?style=flat)](docs/ROADMAP.md)
-<!-- TODO: añadir badge de licencia cuando se decida la licencia (ver sección Licencia). -->
+[![Licencia](https://img.shields.io/badge/licencia-MIT-blue?style=flat)](LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/mkcodev/Nextuss/ci.yml?branch=main&style=flat&label=CI)](https://github.com/mkcodev/Nextuss/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-591%20pasan-22c55e?style=flat)](#-calidad)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=white)](https://react.dev)
@@ -273,5 +273,4 @@ Detalle completo en [`docs/ROADMAP.md`](docs/ROADMAP.md) y [`docs/CHANGELOG.md`]
 
 ## 📄 Licencia
 
-<!-- TODO: elegir licencia (por ejemplo MIT), añadir el archivo LICENSE y el badge de la cabecera. -->
-Pendiente de definir. Mientras no haya archivo `LICENSE`, todos los derechos están reservados.
+MIT. Ver [`LICENSE`](LICENSE).
