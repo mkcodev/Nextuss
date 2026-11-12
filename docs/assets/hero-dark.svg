@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="810" viewBox="0 0 1440 810" role="img" aria-label="Placeholder: captura de Nextuss en tema oscuro">
+  <rect width="1440" height="810" fill="#0f0f12"/>
+  <rect x="40" y="40" width="1360" height="730" rx="16" fill="#18181b" stroke="#3f3f46" stroke-width="2" stroke-dasharray="12 8"/>
+  <text x="720" y="395" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="36" fill="#a1a1aa">Captura pendiente: pantalla Hoy (tema oscuro)</text>
+  <text x="720" y="445" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="22" fill="#71717a">Ver docs/assets/README.md</text>
+</svg>
