@@ -273,8 +273,10 @@ Detalle completo en [`docs/ROADMAP.md`](docs/ROADMAP.md) y [`docs/CHANGELOG.md`]
 
 MIT. Ver [`LICENSE`](LICENSE).
 
----
-
 <br>
 
-<div align="center"><sub>Made with ❤️ by <a href="https://mkcodev.com">mkcodev</a> · AI-Augmented Full-Stack Developer</sub></div>
+<div align="center">
+
+Made with ❤️ by [mkcodev](https://mkcodev.com) · AI-Augmented Full-Stack Developer
+
+</div>
