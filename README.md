@@ -186,15 +186,13 @@ flowchart LR
 
 ## ✅ Calidad
 
-- **Tests:** 591 pasan, en 78 archivos.[^1] Cubren lógica pura (XP, rachas, recurrencia, fechas, periodos), los repositorios de Dexie con `fake-indexeddb`, el bus de eventos, los validadores de IA y los comandos de Telegram.
+- **Tests:** 591 pasan, en 78 archivos (`npx vitest run` sobre `main`, 2026-11-12). Cubren lógica pura (XP, rachas, recurrencia, fechas, periodos), los repositorios de Dexie con `fake-indexeddb`, el bus de eventos, los validadores de IA y los comandos de Telegram.
 - **CI:** [GitHub Actions](.github/workflows/ci.yml) ejecuta `npm run build` (incluye `tsc -b`), los tests y `npm run lint` en Node 22. Corre en cada pull request y en cada push a `main`.
 - **Flujo:** issue, rama, pull request con `Closes #N`, CI en verde y squash merge. Hay 65 pull requests fusionadas. Ver [`docs/FLUJO.md`](docs/FLUJO.md).
 - **Lint:** Oxlint termina sin errores; quedan avisos sin resolver, sobre todo en `.claude/` y `docs/design/`.
 - **Rendimiento:** Recharts y el SDK de Anthropic se cargan bajo demanda (code-splitting).
 
 <!-- TODO: añadir puntuaciones de Lighthouse cuando se midan sobre https://nextuss.vercel.app. -->
-
-[^1]: Resultado de `npx vitest run` sobre `main` el 2026-11-12.
 
 ## 🤖 Desarrollo con IA
 
