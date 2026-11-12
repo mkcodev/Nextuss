@@ -20,10 +20,9 @@
 
 </div>
 
-<!-- TODO: sustituir los placeholders de docs/assets/ por capturas reales (ver docs/assets/README.md). -->
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/hero-dark.svg">
-  <img src="docs/assets/hero-light.svg" alt="Pantalla Hoy de Nextuss con hábitos, tareas, tiempo del día y panel de progreso" width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/hero-dark.jpg">
+  <img src="docs/assets/hero-light.jpg" alt="Pantalla Hoy de Nextuss con hábitos, tareas, tiempo del día y panel de progreso (datos de ejemplo)" width="100%">
 </picture>
 
 <details>
