@@ -277,4 +277,6 @@ MIT. Ver [`LICENSE`](LICENSE).
 
 ---
 
+<br>
+
 <div align="center"><sub>Made with ❤️ by <a href="https://mkcodev.com">mkcodev</a> · AI-Augmented Full-Stack Developer</sub></div>
