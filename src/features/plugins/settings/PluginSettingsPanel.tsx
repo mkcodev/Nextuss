@@ -6,10 +6,11 @@ import { Switch } from '../../../design/primitives/Switch'
 import type { Settings } from '../../../db/types'
 import { NOTIFY_META } from '../../notifications/notifyMeta'
 import { SettingRow } from './SettingRow'
-import type { PluginSettingsSpec, SettingField } from './types'
+import type { DataStat, PluginSettingsSpec, SettingField } from './types'
 
 const DEFAULT_GROUP = 'Ajustes'
 const NOTIFY_GROUP = 'Avisos'
+const DATA_GROUP = 'Tus datos'
 
 function groupFields(fields: SettingField[]): { group: string; fields: SettingField[] }[] {
   const order: string[] = []
@@ -50,14 +51,31 @@ export function PluginSettingsPanel({
   const { hash } = useLocation()
   const [highlight, setHighlight] = useState<string | null>(null)
   const [active, setActive] = useState<string | null>(null)
+  const [dataStats, setDataStats] = useState<DataStat[] | null>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
   const groups = useMemo(() => groupFields(spec.fields), [spec.fields])
   const notify = spec.notify ?? []
 
+  useEffect(() => {
+    setDataStats(null)
+    if (!spec.dataSummary) return
+    let cancelled = false
+    void spec.dataSummary().then((stats) => {
+      if (!cancelled) setDataStats(stats)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [spec])
+
   const sections = useMemo(
-    () => [...groups.map((g) => ({ id: slug(g.group), label: g.group })), ...(notify.length > 0 ? [{ id: slug(NOTIFY_GROUP), label: NOTIFY_GROUP }] : [])],
-    [groups, notify.length],
+    () => [
+      ...groups.map((g) => ({ id: slug(g.group), label: g.group })),
+      ...(notify.length > 0 ? [{ id: slug(NOTIFY_GROUP), label: NOTIFY_GROUP }] : []),
+      ...(spec.dataSummary ? [{ id: slug(DATA_GROUP), label: DATA_GROUP }] : []),
+    ],
+    [groups, notify.length, spec.dataSummary],
   )
 
   useEffect(() => {
@@ -154,6 +172,26 @@ export function PluginSettingsPanel({
                 )
               })}
             </div>
+          </section>
+        )}
+
+        {spec.dataSummary && (
+          <section id={slug(DATA_GROUP)}>
+            <h3 className="mb-1 text-xs font-medium tracking-wide text-text-faint uppercase">{DATA_GROUP}</h3>
+            {dataStats === null ? (
+              <div className="rounded-md border border-border bg-bg-soft px-3 py-2.5">
+                <div className="h-4 w-32 animate-pulse rounded bg-border" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {dataStats.map((stat) => (
+                  <div key={stat.label} className="rounded-md border border-border bg-bg-soft px-3 py-2.5">
+                    <p className="text-lg font-semibold tabular-nums text-text">{stat.value}</p>
+                    <p className="text-xs text-text-faint">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         )}
       </div>
