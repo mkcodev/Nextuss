@@ -71,6 +71,10 @@ export const virtualizationSettingsSpec: PluginSettingsSpec = {
       component: lazyNamed(() => import('./RoutineSettings'), 'RoutineSettings'),
     },
   ],
+  presets: [
+    { id: 'quick', label: 'Rápida', values: { meditationDurationSec: 60, virtualizationSoundEnabled: false } },
+    { id: 'full', label: 'Completa', values: { meditationDurationSec: 180, virtualizationSoundEnabled: true } },
+  ],
   needsSetup: (s) => (s.virtualizationRoutineId == null ? { reason: 'Elige una rutina', fieldId: 'virtualizationRoutineId' } : null),
   dataSummary: async () => {
     const [days, completedTotal] = await Promise.all([getVirtualizationDays(400), db.virtualizationDays.filter((d) => d.completed).count()])

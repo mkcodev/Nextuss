@@ -20,10 +20,13 @@ import { PLUGIN_CATEGORIES } from './types'
 import type { PluginCategory, PluginId, PluginManifest } from './types'
 import { PLUGIN_SETTINGS } from './settings'
 import { PluginSettingsPanel } from './settings/PluginSettingsPanel'
+import { applyPresetWithUndo, describePresetChanges } from './settings/presetActions'
+import type { PluginPreset } from './settings/types'
 import { searchSettings } from './settings/searchSettings'
 import type { Settings } from '../../db/types'
 
 type ConfirmState = { plugin: PluginManifest; on: boolean; cascaded: PluginId[] }
+type PresetConfirmState = { plugin: PluginManifest; preset: PluginPreset }
 
 /** Acciones de «Ver en la app»/«Probar ahora» de tipo `action` (#98 P5): viven aquí, no en
  * `registry.ts`, para no crear un ciclo de imports con `uiStore`/paneles (ver `types.ts#appView`). */
@@ -51,6 +54,7 @@ export function PluginsPage() {
   const [query, setQuery] = useState('')
   const [includeDisabled, setIncludeDisabled] = useState(false)
   const [confirm, setConfirm] = useState<ConfirmState | null>(null)
+  const [presetConfirm, setPresetConfirm] = useState<PresetConfirmState | null>(null)
 
   const q = query.trim().toLowerCase()
   const filtered = useMemo(
@@ -175,7 +179,13 @@ export function PluginsPage() {
 
         <div className={cn(!idParam && 'hidden md:block')}>
           {selected ? (
-            <PluginDetail plugin={selected} on={enabled.has(selected.id)} onToggle={(on) => void requestToggle(selected, on)} settings={settings} />
+            <PluginDetail
+              plugin={selected}
+              on={enabled.has(selected.id)}
+              onToggle={(on) => void requestToggle(selected, on)}
+              settings={settings}
+              onPickPreset={(preset) => setPresetConfirm({ plugin: selected, preset })}
+            />
           ) : (
             <EmptyState icon={Search} title="Sin resultados" description="Ningún plugin coincide con la búsqueda." />
           )}
@@ -208,6 +218,35 @@ export function PluginsPage() {
           </Button>
         </div>
       </Dialog>
+
+      <Dialog open={presetConfirm != null} onClose={() => setPresetConfirm(null)} title={`Aplicar «${presetConfirm?.preset.label ?? ''}»`} size="sm">
+        {presetConfirm && (
+          <ul className="space-y-1.5 text-sm">
+            {describePresetChanges(PLUGIN_SETTINGS[presetConfirm.plugin.id], settings, presetConfirm.preset.values).map((c) => (
+              <li key={c.label} className="flex items-center justify-between gap-3 text-text-muted">
+                <span>{c.label}</span>
+                <span className="text-text">
+                  {c.from} <span className="text-text-faint">→</span> {c.to}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="mt-5 flex justify-end gap-2">
+          <Button variant="secondary" onClick={() => setPresetConfirm(null)}>
+            Cancelar
+          </Button>
+          <Button
+            onClick={async () => {
+              if (!presetConfirm) return
+              await applyPresetWithUndo(presetConfirm.preset.label, presetConfirm.preset.values, settings)
+              setPresetConfirm(null)
+            }}
+          >
+            Aplicar
+          </Button>
+        </div>
+      </Dialog>
     </div>
   )
 }
@@ -217,13 +256,15 @@ interface PluginDetailProps {
   on: boolean
   onToggle: (on: boolean) => void
   settings: Settings | undefined
+  onPickPreset: (preset: PluginPreset) => void
 }
 
-function PluginDetail({ plugin, on, onToggle, settings }: PluginDetailProps) {
+function PluginDetail({ plugin, on, onToggle, settings, onPickPreset }: PluginDetailProps) {
   const category = plugin.category ? PLUGIN_CATEGORIES[plugin.category] : undefined
   const spec = PLUGIN_SETTINGS[plugin.id]
   const setup = settings && spec.needsSetup ? spec.needsSetup(settings) : null
   const appView = plugin.appView
+  const presets = spec.presets
   return (
     <div className="space-y-5 rounded-lg border border-border bg-surface p-5 lg:p-6">
       <div className="flex items-start justify-between gap-4">
@@ -299,7 +340,19 @@ function PluginDetail({ plugin, on, onToggle, settings }: PluginDetailProps) {
       {!plugin.core && !on && (
         <p className="rounded-md border border-border bg-bg-soft px-3 py-2 text-sm text-text-muted">Actívalo para usar estos ajustes.</p>
       )}
-      <div className={cn(!plugin.core && !on && 'pointer-events-none opacity-60')}>
+      {/* Presets dentro del bloque atenuado: con el plugin apagado, sus ajustes se ven pero no se editan (P6). */}
+      <div className={cn('space-y-5', !plugin.core && !on && 'pointer-events-none opacity-60')}>
+        {presets && presets.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-text-faint">Presets:</span>
+            {presets.map((preset) => (
+              <Button key={preset.id} variant="secondary" size="sm" onClick={() => onPickPreset(preset)}>
+                {preset.label}
+              </Button>
+            ))}
+          </div>
+        )}
+
         <PluginSettingsPanel spec={spec} settings={settings} notificationsEnabled={settings?.notificationsEnabled === true} />
       </div>
     </div>
