@@ -1,3 +1,4 @@
+import { DayTimeViewPreview } from './DayTimeViewPreview'
 import type { PluginSettingsSpec } from '../plugins/settings/types'
 
 export const dayTimeSettingsSpec: PluginSettingsSpec = {
@@ -11,6 +12,7 @@ export const dayTimeSettingsSpec: PluginSettingsSpec = {
         { value: 'ring', label: 'Anillo' },
         { value: 'blocks', label: 'Bloques' },
       ],
+      preview: DayTimeViewPreview,
     },
   ],
   notify: ['notifyTransitions'],

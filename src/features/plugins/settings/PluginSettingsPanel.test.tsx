@@ -121,3 +121,43 @@ describe('campo custom (pieza a medida, #98 P5)', () => {
     await waitFor(() => expect(row?.className).toContain('bg-accent-soft'))
   })
 })
+
+describe('vista previa en vivo (field.preview, #98 P7)', () => {
+  function FakePreview({ value }: { value: string }) {
+    return <span>preview-{value}</span>
+  }
+
+  const PREVIEW_SPEC: PluginSettingsSpec = {
+    fields: [
+      {
+        kind: 'segmented',
+        key: 'dayTimeView',
+        label: 'Estilo',
+        options: [
+          { value: 'ruler', label: 'Regla' },
+          { value: 'ring', label: 'Anillo' },
+        ],
+        preview: FakePreview,
+      },
+    ],
+  }
+
+  it('pinta una miniatura por opción y resalta la seleccionada', async () => {
+    const settings = await db.settings.get(1)
+    renderPanel({ ...settings!, dayTimeView: 'ring' }, '/plugins/dayTime', PREVIEW_SPEC)
+
+    expect(screen.getByText('preview-ruler')).toBeTruthy()
+    expect(screen.getByText('preview-ring')).toBeTruthy()
+
+    const ringTile = screen.getByText('preview-ring').closest('div')?.parentElement
+    const rulerTile = screen.getByText('preview-ruler').closest('div')?.parentElement
+    expect(ringTile?.className).toContain('border-accent')
+    expect(rulerTile?.className).not.toContain('border-accent')
+  })
+
+  it('sin preview declarado, no pinta ninguna tira de miniaturas (ni duplica la etiqueta de la opción)', () => {
+    const spec: PluginSettingsSpec = { fields: [{ kind: 'segmented', key: 'dayTimeView', label: 'Estilo', options: [{ value: 'ruler', label: 'Regla' }] }] }
+    renderPanel({ id: 1, theme: 'system', dayStartHour: 7, dayEndHour: 22 }, '/plugins/dayTime', spec)
+    expect(screen.getAllByText('Regla').length).toBe(1) // solo el botón del SegmentedControl, sin tira de miniaturas debajo
+  })
+})

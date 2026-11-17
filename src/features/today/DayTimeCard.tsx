@@ -76,7 +76,7 @@ function NextLine({ s }: { s: DayTimeSummary }) {
   )
 }
 
-function RulerView({ s, nowMin }: { s: DayTimeSummary; nowMin: number }) {
+export function RulerView({ s, nowMin }: { s: DayTimeSummary; nowMin: number }) {
   const span = s.endMin - s.startMin
   const pct = (min: number) => `${((Math.min(Math.max(min, s.startMin), s.endMin) - s.startMin) / span) * 100}%`
   // Marcas cada 3 h (o cada hora en jornadas cortas), sin las de los extremos, que ya se rotulan.
@@ -130,7 +130,7 @@ function RulerView({ s, nowMin }: { s: DayTimeSummary; nowMin: number }) {
   )
 }
 
-function RingView({ s }: { s: DayTimeSummary }) {
+export function RingView({ s }: { s: DayTimeSummary }) {
   const leftPct = Math.round((1 - s.elapsed) * 100)
   return (
     <div className="mt-3">
@@ -156,7 +156,7 @@ function RingView({ s }: { s: DayTimeSummary }) {
   )
 }
 
-function BlocksView({ s, nowMin }: { s: DayTimeSummary; nowMin: number }) {
+export function BlocksView({ s, nowMin }: { s: DayTimeSummary; nowMin: number }) {
   const cells = dayCells(s, nowMin)
   const left = cells.filter((c) => c.status !== 'past')
   const free = left.filter((c) => c.status === 'free').length

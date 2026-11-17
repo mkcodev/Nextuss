@@ -56,6 +56,36 @@ export function SettingRow({
       </span>
       <SettingControl field={field} settings={settings} />
       {field.help && <p className="text-xs text-text-faint sm:col-span-2">{field.help}</p>}
+      {field.kind === 'segmented' && field.preview && <PreviewStrip field={field} settings={settings} />}
+    </div>
+  )
+}
+
+/** Tira de miniaturas bajo un campo `segmented` que declara `preview` (#98 P7): una por opción,
+ * resaltando la seleccionada — «vista previa en vivo» porque se actualiza con el valor real guardado,
+ * no es una ilustración fija. */
+function PreviewStrip({
+  field,
+  settings,
+}: {
+  field: Extract<SettingField, { kind: 'segmented' }>
+  settings: Settings | undefined
+}) {
+  const Preview = field.preview!
+  const current = String(readSetting(settings, field.key as DefaultableKey))
+  return (
+    <div className="flex gap-2 sm:col-span-2">
+      {field.options.map((o) => (
+        <div
+          key={o.value}
+          className={cn('flex-1 space-y-1 rounded-md border p-1', o.value === current ? 'border-accent' : 'border-border')}
+        >
+          <div className="h-12">
+            <Preview value={o.value} />
+          </div>
+          <p className="truncate text-center text-[10px] text-text-faint">{o.label}</p>
+        </div>
+      ))}
     </div>
   )
 }
