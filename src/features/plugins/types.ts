@@ -52,4 +52,10 @@ export interface PluginManifest {
   category?: PluginCategory
   /** Plugins que este mejora sin exigirlos (dependencia blanda: se ofrecen activar desde la ficha). */
   enhances?: readonly PluginId[]
+  /** «Ver en la app» en la cabecera de la ficha (#98 P5): dónde encontrar este plugin funcionando.
+   * Ausente si no tiene superficie propia todavía (Telegram, Lanzadores). `action` en vez de `route`
+   * para Virtualización/Foco/Gamificación, donde «verlo» es arrancarlo o abrir un panel, no navegar.
+   * Sin la función aquí a propósito — meterla en `registry.ts` (que se importa desde casi todas
+   * partes) crearía un ciclo con `uiStore`/paneles; el mapa `id -> acción` vive en `PluginsPage.tsx`. */
+  appView?: { kind: 'route'; path: string } | { kind: 'action'; label: string; id: string }
 }

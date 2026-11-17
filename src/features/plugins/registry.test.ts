@@ -26,4 +26,15 @@ describe('PLUGINS', () => {
     const ids = PLUGINS.map((p) => p.id)
     expect(new Set(ids).size).toBe(ids.length)
   })
+
+  it('`appView` de tipo route empieza por "/", y de tipo action usa un id con acción registrada en PluginsPage', () => {
+    // Mismo set que `APP_VIEW_ACTIONS` en `PluginsPage.tsx` — si se añade una acción nueva hay que
+    // registrarla en los dos sitios (aquí no se importa la página para no arrastrar React/uiStore).
+    const KNOWN_ACTION_IDS = new Set(['virtualization', 'focus', 'gamification'])
+    for (const p of PLUGINS) {
+      if (!p.appView) continue
+      if (p.appView.kind === 'route') expect(p.appView.path.startsWith('/'), `${p.id}: appView.path`).toBe(true)
+      else expect(KNOWN_ACTION_IDS.has(p.appView.id), `${p.id}: appView.id desconocido`).toBe(true)
+    }
+  })
 })

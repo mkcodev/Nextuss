@@ -1,3 +1,4 @@
+import { db } from '../../db/schema'
 import type { PluginSettingsSpec } from '../plugins/settings/types'
 
 export const focusSettingsSpec: PluginSettingsSpec = {
@@ -13,4 +14,12 @@ export const focusSettingsSpec: PluginSettingsSpec = {
     { id: 'deep', label: 'Profundo', values: { pomodoroWorkMin: 50, pomodoroBreakMin: 10, pomodoroLongBreakMin: 30 } },
     { id: 'adhd', label: 'TDAH', values: { pomodoroWorkMin: 15, pomodoroBreakMin: 3, pomodoroLongBreakMin: 10 } },
   ],
+  dataSummary: async () => {
+    const sessions = await db.focusSessions.toArray()
+    const totalMin = sessions.reduce((sum, s) => sum + (s.durationMin ?? 0), 0)
+    return [
+      { label: 'Sesiones', value: String(sessions.length) },
+      { label: 'Minutos de foco', value: String(Math.round(totalMin)) },
+    ]
+  },
 }

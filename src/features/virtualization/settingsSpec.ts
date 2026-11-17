@@ -1,4 +1,7 @@
 import { lazyNamed } from '../../app/lazy'
+import { db } from '../../db/schema'
+import { getVirtualizationDays } from '../../db/repositories/virtualization'
+import { calculateVirtualizationStreak } from '../../lib/virtualizationStreak'
 import type { PluginSettingsSpec } from '../plugins/settings/types'
 
 export const virtualizationSettingsSpec: PluginSettingsSpec = {
@@ -72,4 +75,13 @@ export const virtualizationSettingsSpec: PluginSettingsSpec = {
     { id: 'quick', label: 'Rápida', values: { meditationDurationSec: 60, virtualizationSoundEnabled: false } },
     { id: 'full', label: 'Completa', values: { meditationDurationSec: 180, virtualizationSoundEnabled: true } },
   ],
+  needsSetup: (s) => (s.virtualizationRoutineId == null ? { reason: 'Elige una rutina', fieldId: 'virtualizationRoutineId' } : null),
+  dataSummary: async () => {
+    const [days, completedTotal] = await Promise.all([getVirtualizationDays(400), db.virtualizationDays.filter((d) => d.completed).count()])
+    const streak = calculateVirtualizationStreak(days)
+    return [
+      { label: 'Racha actual', value: String(streak.current) },
+      { label: 'Días completados', value: String(completedTotal) },
+    ]
+  },
 }

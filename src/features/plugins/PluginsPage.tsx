@@ -4,9 +4,11 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ArrowLeft, Search } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Search, TriangleAlert } from 'lucide-react'
 import { db } from '../../db/schema'
 import { usePageTitle } from '../../app/pageTitleStore'
+import { ensurePanelVisible } from '../../app/dock/ensurePanelVisible'
+import { useVirtualizationStore } from '../virtualization/engine/useVirtualizationStore'
 import { Badge, Button, Dialog, EmptyState, Input, Switch } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { useListNav } from '../../app/shortcuts/listNavStore'
@@ -20,10 +22,19 @@ import { PLUGIN_SETTINGS } from './settings'
 import { PluginSettingsPanel } from './settings/PluginSettingsPanel'
 import { applyPresetWithUndo, describePresetChanges } from './settings/presetActions'
 import type { PluginPreset } from './settings/types'
+import { searchSettings } from './settings/searchSettings'
 import type { Settings } from '../../db/types'
 
 type ConfirmState = { plugin: PluginManifest; on: boolean; cascaded: PluginId[] }
 type PresetConfirmState = { plugin: PluginManifest; preset: PluginPreset }
+
+/** Acciones de «Ver en la app»/«Probar ahora» de tipo `action` (#98 P5): viven aquí, no en
+ * `registry.ts`, para no crear un ciclo de imports con `uiStore`/paneles (ver `types.ts#appView`). */
+const APP_VIEW_ACTIONS: Record<string, () => void> = {
+  virtualization: () => useVirtualizationStore.getState().open(),
+  focus: () => ensurePanelVisible('focus'),
+  gamification: () => ensurePanelVisible('progress'),
+}
 
 function groupPlugins(plugins: readonly PluginManifest[]): { label: string; items: PluginManifest[] }[] {
   const core = plugins.filter((p) => p.core)
@@ -41,6 +52,7 @@ export function PluginsPage() {
   const enabled = useEnabledPlugins()
   const settings = useLiveQuery(() => db.settings.get(1), [])
   const [query, setQuery] = useState('')
+  const [includeDisabled, setIncludeDisabled] = useState(false)
   const [confirm, setConfirm] = useState<ConfirmState | null>(null)
   const [presetConfirm, setPresetConfirm] = useState<PresetConfirmState | null>(null)
 
@@ -51,6 +63,16 @@ export function PluginsPage() {
   )
   const groups = useMemo(() => groupPlugins(filtered), [filtered])
   const flatList = useMemo(() => groups.flatMap((g) => g.items), [groups])
+
+  // Buscador de ajustes (#98 P6): además de filtrar plugins por nombre/descripción, busca por campo
+  // (label + keywords) y enlaza directo al campo (`/plugins/:id#anchor`). Oculta por defecto los campos
+  // de plugins apagados (no son los que el usuario probablemente busca) tras un toggle «incluir apagados».
+  const settingsMatches = useMemo(() => searchSettings(query), [query])
+  const visibleSettingsMatches = useMemo(
+    () => settingsMatches.filter((m) => includeDisabled || enabled.has(m.pluginId) || getPlugin(m.pluginId).core),
+    [settingsMatches, includeDisabled, enabled],
+  )
+  const hiddenSettingsCount = settingsMatches.length - visibleSettingsMatches.length
 
   const selectedId = (idParam as PluginId | undefined) ?? flatList.find((p) => !p.core)?.id
   const selected = selectedId ? getPlugin(selectedId) : undefined
@@ -92,6 +114,32 @@ export function PluginsPage() {
               />
             </div>
           </div>
+
+          {visibleSettingsMatches.length > 0 && (
+            <div>
+              <h2 className="mb-1.5 px-1 text-xs font-medium tracking-wide text-text-faint uppercase">Ajustes</h2>
+              <div className="space-y-0.5">
+                {visibleSettingsMatches.map((m) => (
+                  <Link
+                    key={`${m.pluginId}-${m.anchorId}`}
+                    to={{ pathname: `/plugins/${m.pluginId}`, hash: m.anchorId }}
+                    className="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-text hover:bg-surface-hover"
+                  >
+                    <m.icon size={16} strokeWidth={1.75} className="shrink-0 text-text-faint" />
+                    <span className="min-w-0 flex-1 truncate">
+                      {m.pluginName} <span className="text-text-faint">›</span> {m.label}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+              {hiddenSettingsCount > 0 && (
+                <label className="mt-1.5 flex items-center gap-2 px-1 text-xs text-text-faint">
+                  <Switch checked={includeDisabled} onChange={setIncludeDisabled} label="Incluir apagados" />
+                  Incluir apagados ({hiddenSettingsCount} oculto{hiddenSettingsCount === 1 ? '' : 's'})
+                </label>
+              )}
+            </div>
+          )}
 
           <nav aria-label="Lista de plugins" className="space-y-4">
             {groups.map((g) => (
@@ -213,7 +261,10 @@ interface PluginDetailProps {
 
 function PluginDetail({ plugin, on, onToggle, settings, onPickPreset }: PluginDetailProps) {
   const category = plugin.category ? PLUGIN_CATEGORIES[plugin.category] : undefined
-  const presets = PLUGIN_SETTINGS[plugin.id].presets
+  const spec = PLUGIN_SETTINGS[plugin.id]
+  const setup = settings && spec.needsSetup ? spec.needsSetup(settings) : null
+  const appView = plugin.appView
+  const presets = spec.presets
   return (
     <div className="space-y-5 rounded-lg border border-border bg-surface p-5 lg:p-6">
       <div className="flex items-start justify-between gap-4">
@@ -226,21 +277,45 @@ function PluginDetail({ plugin, on, onToggle, settings, onPickPreset }: PluginDe
           </span>
           <div>
             <h2 className="text-base font-semibold text-text">{plugin.name}</h2>
-            {category && (
-              <Badge tone="neutral" className="mt-1" style={{ color: category.color, background: `color-mix(in srgb, ${category.color} 14%, transparent)` }}>
-                {category.label}
-              </Badge>
-            )}
-            {plugin.core && (
-              <Badge tone="neutral" className="mt-1">
-                Núcleo · siempre activo
-              </Badge>
-            )}
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              {category && (
+                <Badge tone="neutral" style={{ color: category.color, background: `color-mix(in srgb, ${category.color} 14%, transparent)` }}>
+                  {category.label}
+                </Badge>
+              )}
+              {plugin.core && <Badge tone="neutral">Núcleo · siempre activo</Badge>}
+              {setup && (
+                <Link to={{ hash: setup.fieldId }}>
+                  <Badge tone="warning" className="cursor-pointer hover:brightness-110">
+                    <TriangleAlert size={11} strokeWidth={1.75} />
+                    {setup.reason}
+                  </Badge>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
-        {!plugin.core && (
-          <Switch checked={on} onChange={onToggle} label={`${on ? 'Desactivar' : 'Activar'} ${plugin.name}`} className="shrink-0" />
-        )}
+        <div className="flex shrink-0 items-center gap-3">
+          {appView && appView.kind === 'route' && (
+            <Link to={appView.path} className="inline-flex items-center gap-1 text-xs text-text-faint hover:text-accent">
+              Ver en la app
+              <ExternalLink size={12} strokeWidth={1.75} />
+            </Link>
+          )}
+          {appView && appView.kind === 'action' && (
+            <button
+              type="button"
+              onClick={() => APP_VIEW_ACTIONS[appView.id]?.()}
+              className="inline-flex items-center gap-1 text-xs text-text-faint hover:text-accent"
+            >
+              {appView.label}
+              <ExternalLink size={12} strokeWidth={1.75} />
+            </button>
+          )}
+          {!plugin.core && (
+            <Switch checked={on} onChange={onToggle} label={`${on ? 'Desactivar' : 'Activar'} ${plugin.name}`} />
+          )}
+        </div>
       </div>
 
       <p className="text-sm text-text-muted">{plugin.description}</p>
@@ -262,18 +337,24 @@ function PluginDetail({ plugin, on, onToggle, settings, onPickPreset }: PluginDe
         </div>
       )}
 
-      {presets && presets.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-text-faint">Presets:</span>
-          {presets.map((preset) => (
-            <Button key={preset.id} variant="secondary" size="sm" onClick={() => onPickPreset(preset)}>
-              {preset.label}
-            </Button>
-          ))}
-        </div>
+      {!plugin.core && !on && (
+        <p className="rounded-md border border-border bg-bg-soft px-3 py-2 text-sm text-text-muted">Actívalo para usar estos ajustes.</p>
       )}
+      {/* Presets dentro del bloque atenuado: con el plugin apagado, sus ajustes se ven pero no se editan (P6). */}
+      <div className={cn('space-y-5', !plugin.core && !on && 'pointer-events-none opacity-60')}>
+        {presets && presets.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-text-faint">Presets:</span>
+            {presets.map((preset) => (
+              <Button key={preset.id} variant="secondary" size="sm" onClick={() => onPickPreset(preset)}>
+                {preset.label}
+              </Button>
+            ))}
+          </div>
+        )}
 
-      <PluginSettingsPanel spec={PLUGIN_SETTINGS[plugin.id]} settings={settings} notificationsEnabled={settings?.notificationsEnabled === true} />
+        <PluginSettingsPanel spec={spec} settings={settings} notificationsEnabled={settings?.notificationsEnabled === true} />
+      </div>
     </div>
   )
 }
