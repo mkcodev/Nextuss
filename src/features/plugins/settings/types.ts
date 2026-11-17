@@ -68,6 +68,12 @@ export interface DataStat {
   value: string
 }
 
+export interface PluginPreset {
+  id: string
+  label: string
+  values: Partial<Settings>
+}
+
 export interface PluginSettingsSpec {
   fields: SettingField[]
   /** Claves `notify*` que viven en el bloque «Avisos» de esta ficha (cada una en un solo plugin). */
@@ -75,5 +81,5 @@ export interface PluginSettingsSpec {
   /** `null` = todo configurado; si no, motivo + `id` del campo al que salta el chip «Necesita configuración». */
   needsSetup?: (settings: Settings) => { reason: string; fieldId: string } | null
   dataSummary?: () => Promise<DataStat[]>
-  presets?: { id: string; label: string; values: Partial<Settings> }[]
+  presets?: PluginPreset[]
 }

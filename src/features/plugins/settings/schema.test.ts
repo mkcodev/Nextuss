@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { PLUGIN_SETTINGS } from './index'
 import { SETTINGS_DEFAULTS } from '../../../db/settingsDefaults'
 import { PLUGINS } from '../registry'
+import type { Settings } from '../../../db/types'
+
+const EMPTY_SETTINGS: Settings = { theme: 'system', dayStartHour: 7, dayEndHour: 22 }
 
 const ALL_NOTIFY_KEYS = [
   'notifyHabitReminders',
@@ -60,6 +63,29 @@ describe('PLUGIN_SETTINGS (invariantes del esquema)', () => {
       for (const field of spec.fields) {
         if (field.kind === 'custom' || !field.dependsOn) continue
         expect(field.dependsOn.key in SETTINGS_DEFAULTS).toBe(true)
+      }
+    }
+  })
+
+  it('needsSetup, cuando existe, solo lo llevan IA, Telegram y Virtualización, y su fieldId es un campo real de la ficha', () => {
+    for (const [pluginId, spec] of Object.entries(PLUGIN_SETTINGS)) {
+      if (!spec.needsSetup) continue
+      expect(['ai', 'telegram', 'virtualization'], pluginId).toContain(pluginId)
+      const ids = spec.fields.map((f) => (f.kind === 'custom' ? f.id : f.key))
+      const result = spec.needsSetup(EMPTY_SETTINGS)
+      expect(result, `${pluginId}: sin configurar, needsSetup() no debería ser null`).not.toBeNull()
+      expect(ids, `${pluginId}.needsSetup().fieldId`).toContain(result!.fieldId)
+    }
+  })
+
+  it('dataSummary, cuando existe, devuelve al menos una estadística', async () => {
+    for (const [pluginId, spec] of Object.entries(PLUGIN_SETTINGS)) {
+      if (!spec.dataSummary) continue
+      const stats = await spec.dataSummary()
+      expect(stats.length, pluginId).toBeGreaterThan(0)
+      for (const stat of stats) {
+        expect(stat.label, pluginId).toBeTruthy()
+        expect(stat.value, pluginId).toBeTruthy()
       }
     }
   })

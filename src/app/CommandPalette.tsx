@@ -20,6 +20,7 @@ import {
   Plus,
   Repeat,
   Search,
+  Settings2,
   Sun,
   Target,
   Trash2,
@@ -44,6 +45,8 @@ import { useTemplatePickerStore } from '../features/templates/templatePickerStor
 import { searchIndex, type SearchDoc } from '../features/search/searchIndex'
 import { selectNav, useNavItems } from './navItems'
 import { useEnabledPlugins } from '../features/plugins/pluginsStore'
+import { getPlugin } from '../features/plugins/registry'
+import { searchSettings } from '../features/plugins/settings/searchSettings'
 import type { PluginId } from '../features/plugins/types'
 
 const SEARCH_ICON: Record<SearchDoc['type'], typeof ListTodo> = {
@@ -93,6 +96,12 @@ export function CommandPalette() {
         const pluginId = SEARCH_PLUGIN[doc.type]
         return !pluginId || enabled.has(pluginId)
       }),
+    [query, enabled],
+  )
+  // Comandos «Ajuste: …» generados desde el esquema (#98 P6) — solo con texto, y solo de plugins activos
+  // (igual que el resto de comandos de plugin: si está apagado, desaparece de la paleta).
+  const settingsResults = useMemo(
+    () => searchSettings(query).filter((m) => enabled.has(m.pluginId) || getPlugin(m.pluginId).core),
     [query, enabled],
   )
 
@@ -164,6 +173,24 @@ export function CommandPalette() {
                 </Command.Item>
               )
             })}
+          </Command.Group>
+        )}
+
+        {settingsResults.length > 0 && (
+          <Command.Group heading="Ajustes">
+            {settingsResults.map((m) => (
+              <Command.Item
+                key={`${m.pluginId}-${m.anchorId}`}
+                value={`ajuste ${m.pluginName} ${m.label}`}
+                onSelect={() => run(() => navigate(`/plugins/${m.pluginId}#${m.anchorId}`))}
+                className={ITEM_CLASS}
+              >
+                <Settings2 size={15} strokeWidth={1.75} />
+                <span className="min-w-0 flex-1 truncate">
+                  Ajuste: {m.pluginName} › {m.label}
+                </span>
+              </Command.Item>
+            ))}
           </Command.Group>
         )}
 

@@ -88,6 +88,21 @@ describe('enlace profundo', () => {
   })
 })
 
+describe('«Tus datos» (spec.dataSummary, #98 P5)', () => {
+  it('muestra un esqueleto y luego los recuentos resueltos', async () => {
+    const settings = await db.settings.get(1)
+    const spec: PluginSettingsSpec = {
+      fields: [],
+      dataSummary: async () => [{ label: 'Activas', value: '3' }],
+    }
+    renderPanel(settings, '/plugins/tasks', spec)
+
+    expect(screen.getAllByText('Tus datos').length).toBeGreaterThan(0)
+    expect(await screen.findByText('Activas')).toBeTruthy()
+    expect(screen.getByText('3')).toBeTruthy()
+  })
+})
+
 describe('campo custom (pieza a medida, #98 P5)', () => {
   it('carga y muestra el componente lazy', async () => {
     const settings = await db.settings.get(1)
