@@ -1,14 +1,19 @@
 @import 'tailwindcss';
+@import './fonts.css';
 
 /* ---------------------------------------------------------------------- */
-/* Nextuss — Design tokens ("Herramienta precisa", fuente: DESIGN.md)     */
-/* Claro = papel blanco, bordes finos. Oscuro = casi negro. Un acento.    */
-/* Tailwind v4 reads these via @theme and emits var()-based utilities,    */
-/* so overriding the custom properties below is enough to re-theme them.  */
+/* Nextuss — tokens del rediseño v2, dirección «Línea» (ver DESIGN.md).   */
+/* Oscura primero: grises fríos, bordes de 1 px y un solo acento,         */
+/* turquesa glaciar. Los nombres --nx-* / --color-* no cambian respecto   */
+/* a la v1: solo sus valores, que salen de la escala --nx-ref-*.          */
+/* Tailwind v4 lee @theme y genera utilidades basadas en var(), así que   */
+/* basta con redefinir estas propiedades para cambiar el tema.            */
 /* ---------------------------------------------------------------------- */
 
 @theme {
-  --font-sans: 'InterVariable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: 'Instrument Sans Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* Cifras, horas, atajos de teclado y códigos: siempre en mono. */
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   --color-bg: var(--nx-bg);
   --color-bg-soft: var(--nx-bg-soft);
@@ -23,6 +28,8 @@
   --color-accent: var(--nx-accent);
   --color-accent-soft: var(--nx-accent-soft);
   --color-accent-strong: var(--nx-accent-strong);
+  /* Texto en color de acento (enlaces, «A hoy»): un punto más legible que el acento de relleno. */
+  --color-accent-text: var(--nx-accent-text);
 
   --color-success: var(--nx-success);
   --color-warning: var(--nx-warning);
@@ -30,7 +37,7 @@
 
   --color-on-accent: var(--nx-on-accent);
   /* Fondo tras diálogos y hojas. */
-  --color-scrim: rgb(0 0 0 / 0.35);
+  --color-scrim: var(--nx-scrim);
 
   /* Tamaño intermedio de controles (botones, cabeceras de tabla): entre text-xs y text-sm. */
   --text-ui: 0.8125rem;
@@ -48,10 +55,18 @@
   --radius-xl: 12px;
   --radius-2xl: 12px;
 
+  /* Motion. Toda animación responde a una acción o a un cambio real; nada en bucle.
+     Los muelles de framer-motion viven en src/design/motion.ts con los mismos nombres. */
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  /* Aproximación en CSS del muelle «ui» de Línea (rigidez 640, amortiguación 46): llega firme, sin rebote visible. */
+  --ease-spring: linear(0, 0.2 6%, 0.53 15%, 0.79 25%, 0.93 36%, 0.99 48%, 1.004 60%, 1);
   --dur-fast: 120ms;
   --dur-base: 180ms;
   --dur-slow: 280ms;
+  /* Destello al completar: la única microcelebración, siempre desactivable. */
+  --dur-celebrate: 700ms;
 
   --z-sticky: 30;
   --z-mobile-nav: 40;
@@ -89,71 +104,115 @@
   z-index: var(--z-tooltip);
 }
 
-/* Light theme (default) — "Herramienta precisa" (ver DESIGN.md) */
+/* Escala de referencia de Línea: los hex de la dirección. Los componentes no la usan nunca
+   directamente; solo los alias semánticos --nx-* de los bloques de tema. */
+:root {
+  --nx-ref-paper-0: #ffffff;
+  --nx-ref-paper-1: #fbfbfc;
+  --nx-ref-paper-2: #f4f5f7;
+  --nx-ref-paper-3: #eef0f3;
+  --nx-ref-paper-4: #e4e6ea;
+  --nx-ref-paper-5: #c9ccd3;
+  --nx-ref-ink-0: #17181b;
+  --nx-ref-ink-1: #5b5f69;
+  --nx-ref-ink-2: #767b85;
+
+  --nx-ref-night-0: #0a0b0d;
+  --nx-ref-night-1: #0d0e10;
+  --nx-ref-night-2: #131418;
+  --nx-ref-night-3: #1b1d22;
+  --nx-ref-night-4: #22252b;
+  --nx-ref-night-5: #3a3e46;
+  --nx-ref-snow-0: #eceef1;
+  --nx-ref-snow-1: #9a9ea8;
+  --nx-ref-snow-2: #6f747e;
+
+  --nx-ref-glacier-600: #0a7a70;
+  --nx-ref-glacier-500: #0d8f83;
+  --nx-ref-glacier-300: #35c9b9;
+  --nx-ref-glacier-200: #5cd8ca;
+  --nx-ref-glacier-950: #04201d;
+
+  --nx-ref-amber-600: #b86a0a;
+  --nx-ref-amber-300: #e3a447;
+  --nx-ref-ember-600: #e5592e;
+  --nx-ref-ember-300: #f07a45;
+  --nx-ref-red-600: #d0453a;
+  --nx-ref-red-300: #f0715f;
+}
+
+/* Tema claro (por defecto). */
 :root {
   color-scheme: light;
 
-  --nx-bg: #ffffff;
-  --nx-bg-soft: #f7f7f8;
-  --nx-surface: #ffffff;
-  --nx-surface-hover: #ededf0;
-  --nx-border: #e7e7eb;
-  --nx-border-strong: #d4d4db;
-  --nx-text: #1b1b20;
-  --nx-text-muted: #5c5c66;
-  --nx-text-faint: #6a6a75;
+  --nx-bg: var(--nx-ref-paper-1);
+  --nx-bg-soft: var(--nx-ref-paper-2);
+  --nx-surface: var(--nx-ref-paper-0);
+  --nx-surface-hover: var(--nx-ref-paper-3);
+  --nx-border: var(--nx-ref-paper-4);
+  --nx-border-strong: var(--nx-ref-paper-5);
+  --nx-text: var(--nx-ref-ink-0);
+  --nx-text-muted: var(--nx-ref-ink-1);
+  --nx-text-faint: var(--nx-ref-ink-2);
 
-  --nx-accent: #5058c8;
-  --nx-accent-soft: rgba(80, 88, 200, 0.1);
-  --nx-accent-strong: #4249b3;
-  --nx-on-accent: #ffffff;
+  --nx-accent: var(--nx-ref-glacier-500);
+  --nx-accent-soft: color-mix(in srgb, var(--nx-ref-glacier-500) 12%, transparent);
+  --nx-accent-strong: var(--nx-ref-glacier-600);
+  --nx-accent-text: var(--nx-ref-glacier-600);
+  --nx-on-accent: var(--nx-ref-paper-0);
 
-  --nx-success: #1b7f53;
-  --nx-warning: #a64d08;
-  --nx-danger: #c8322e;
+  --nx-success: var(--nx-ref-glacier-500);
+  --nx-warning: var(--nx-ref-amber-600);
+  --nx-danger: var(--nx-ref-red-600);
 
-  /* Prioridad: P1 rojo, P2 naranja, P3 índigo, P4 gris (texto y puntos). */
-  --nx-prio-1: #c8322e;
-  --nx-prio-2: #a64d08;
-  --nx-prio-3: #5058c8;
-  --nx-prio-4: #8a8a94;
+  /* Prioridad: P1 brasa, P2 ámbar, P3 acento, P4 gris. Nunca solo por color: siempre con forma o texto. */
+  --nx-prio-1: var(--nx-ref-ember-600);
+  --nx-prio-2: var(--nx-ref-amber-600);
+  --nx-prio-3: var(--nx-ref-glacier-500);
+  --nx-prio-4: var(--nx-ref-ink-2);
 
-  --nx-shadow-card: 0 1px 2px rgba(20, 20, 30, 0.04);
-  --nx-shadow-dialog: 0 24px 60px -12px rgba(20, 20, 30, 0.28);
+  /* Sin sombras en la página: las tarjetas se separan con su borde de 1 px. Solo flotan las capas. */
+  --nx-shadow-card: none;
+  --nx-shadow-dialog: 0 0 0 1px rgb(15 17 20 / 0.06), 0 16px 48px -12px rgb(15 17 20 / 0.22);
+  --nx-scrim: rgb(15 17 20 / 0.18);
 }
 
-/* Dark theme. `useTheme.ts` always resolves 'system' to an explicit data-theme attribute
-   (and keeps it in sync on OS preference change), so this is the only dark declaration needed —
-   no @media duplicate. An inline script in index.html sets this attribute before first paint. */
+/* Tema oscuro, el principal de Línea. `useTheme.ts` siempre resuelve 'system' a un atributo
+   data-theme explícito (y lo mantiene al día si cambia la preferencia del sistema), así que esta
+   es la única declaración oscura: sin @media duplicado. Un script en index.html pone el atributo
+   antes del primer pintado. Sin light-dark(): chartTheme.ts lee estos valores con
+   getPropertyValue y necesita colores ya resueltos. */
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --nx-bg: #131316;
-  --nx-bg-soft: #0f0f11;
-  --nx-surface: #131316;
-  --nx-surface-hover: #1f1f24;
-  --nx-border: #26262c;
-  --nx-border-strong: #34343c;
-  --nx-text: #e7e7eb;
-  --nx-text-muted: #9d9da8;
-  --nx-text-faint: #8b8b96;
+  --nx-bg: var(--nx-ref-night-1);
+  --nx-bg-soft: var(--nx-ref-night-0);
+  --nx-surface: var(--nx-ref-night-2);
+  --nx-surface-hover: var(--nx-ref-night-3);
+  --nx-border: var(--nx-ref-night-4);
+  --nx-border-strong: var(--nx-ref-night-5);
+  --nx-text: var(--nx-ref-snow-0);
+  --nx-text-muted: var(--nx-ref-snow-1);
+  --nx-text-faint: var(--nx-ref-snow-2);
 
-  --nx-accent: #7c84e8;
-  --nx-accent-soft: rgba(124, 132, 232, 0.16);
-  --nx-accent-strong: #9097ee;
-  --nx-on-accent: #0f1020;
+  --nx-accent: var(--nx-ref-glacier-300);
+  --nx-accent-soft: color-mix(in srgb, var(--nx-ref-glacier-300) 14%, transparent);
+  --nx-accent-strong: var(--nx-ref-glacier-200);
+  --nx-accent-text: var(--nx-ref-glacier-200);
+  --nx-on-accent: var(--nx-ref-glacier-950);
 
-  --nx-success: #4cc38a;
-  --nx-warning: #f0a25e;
-  --nx-danger: #f07470;
+  --nx-success: var(--nx-ref-glacier-300);
+  --nx-warning: var(--nx-ref-amber-300);
+  --nx-danger: var(--nx-ref-red-300);
 
-  --nx-prio-1: #f07470;
-  --nx-prio-2: #f0a25e;
-  --nx-prio-3: #7c84e8;
-  --nx-prio-4: #8b8b96;
+  --nx-prio-1: var(--nx-ref-ember-300);
+  --nx-prio-2: var(--nx-ref-amber-300);
+  --nx-prio-3: var(--nx-ref-glacier-300);
+  --nx-prio-4: var(--nx-ref-snow-2);
 
-  --nx-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --nx-shadow-dialog: 0 24px 60px -12px rgba(0, 0, 0, 0.6);
+  --nx-shadow-card: none;
+  --nx-shadow-dialog: 0 0 0 1px rgb(255 255 255 / 0.06), 0 24px 64px -16px rgb(0 0 0 / 0.75);
+  --nx-scrim: rgb(0 0 0 / 0.45);
 }
 
 :root[data-theme='light'] {
@@ -175,10 +234,11 @@ body {
   color: var(--color-text);
   background: var(--color-bg);
   font-family: var(--font-sans);
+  letter-spacing: -0.003em;
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 200ms ease, color 200ms ease;
+  transition: background-color var(--dur-base) var(--ease-standard), color var(--dur-base) var(--ease-standard);
 }
 
 ::selection {

@@ -28,15 +28,15 @@ const VARS: Record<keyof ChartTheme, string> = {
 }
 
 const FALLBACK: ChartTheme = {
-  accent: '#7c84e8',
-  accentStrong: '#9097ee',
-  success: '#4cc38a',
-  warning: '#f0a25e',
-  danger: '#f07470',
-  grid: '#26262c',
-  text: '#e7e7eb',
-  textFaint: '#8b8b96',
-  surface: '#131316',
+  accent: '#35c9b9',
+  accentStrong: '#5cd8ca',
+  success: '#35c9b9',
+  warning: '#e3a447',
+  danger: '#f0715f',
+  grid: '#22252b',
+  text: '#eceef1',
+  textFaint: '#6f747e',
+  surface: '#131418',
 }
 
 function readTheme(): ChartTheme {
