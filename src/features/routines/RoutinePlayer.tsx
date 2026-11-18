@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'motion/react'
 import { useStage } from '../../app/stage/stageStore'
 import { format } from 'date-fns'
 import { Check, CircleCheckBig, Minimize2, Pause, Play, Plus, SkipForward, Volume2, VolumeX, X } from 'lucide-react'
@@ -187,7 +187,7 @@ function PlayerPanel() {
     drift > 0 ? `${drift} min tarde` : drift < 0 ? `${-drift} min antes` : 'a tiempo'
 
   return (
-    <motion.div
+    <m.div
       ref={panelRef}
       role="dialog"
       aria-modal="true"
@@ -321,7 +321,7 @@ function PlayerPanel() {
       <span className="sr-only" aria-live="polite">
         {step && !s.finished ? `Paso ${s.index + 1}: ${step.title}` : s.finished ? 'Rutina terminada' : ''}
       </span>
-    </motion.div>
+    </m.div>
   )
 }
 
@@ -372,7 +372,7 @@ function StepView({
         </div>
       ) : (
         <AnimatePresence mode="wait" initial={false}>
-          <motion.div
+          <m.div
             key={s.index}
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -393,7 +393,7 @@ function StepView({
                 </span>
               </div>
             </RingProgress>
-          </motion.div>
+          </m.div>
         </AnimatePresence>
       )}
 
@@ -476,7 +476,7 @@ function FinishedView() {
   const tookMin = Math.max(1, Math.round((endedAt - s.runStartedAt) / 60_000))
   const skipped = s.steps.length - s.completedSteps
   return (
-    <motion.div
+    <m.div
       initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: reduceMotion ? 0.1 : 0.28, ease: [0.25, 1, 0.5, 1] }}
@@ -488,6 +488,6 @@ function FinishedView() {
         {s.completedSteps} de {s.steps.length} pasos · {formatMinutes(tookMin)}
         {skipped > 0 && ` · ${skipped} ${skipped === 1 ? 'saltado' : 'saltados'}`}
       </p>
-    </motion.div>
+    </m.div>
   )
 }

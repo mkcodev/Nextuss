@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import { router } from './app/router'
+import { MotionProvider } from './design/MotionProvider'
 import { ensureSingletons } from './db/init'
 import { runDailyMaintenance } from './db/maintenance'
 import './index.css'
@@ -17,7 +18,9 @@ ensureSingletons()
     await runDailyMaintenance()
     root.render(
       <StrictMode>
-        <RouterProvider router={router} />
+        <MotionProvider>
+          <RouterProvider router={router} />
+        </MotionProvider>
       </StrictMode>,
     )
   })

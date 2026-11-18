@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import type { DragEvent as ReactDragEvent, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 import { ChevronsDown, ChevronsUp, X } from 'lucide-react'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'motion/react'
 import { useUIStore, type DockZone } from '../uiStore'
 import { PANEL_REGISTRY, isPanelVisible, type PanelKey } from './panels'
 import { useEnabledPlugins } from '../../features/plugins/pluginsStore'
@@ -306,7 +306,7 @@ function MobileDockSheet() {
   return (
     <AnimatePresence>
       {open && (
-        <motion.div
+        <m.div
           className="fixed inset-0 z-dialog flex items-end bg-scrim md:hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -314,7 +314,7 @@ function MobileDockSheet() {
           transition={{ duration: reduceMotion ? 0 : 0.15 }}
           onClick={close}
         >
-          <motion.div
+          <m.div
             role="dialog"
             aria-modal="true"
             aria-label="Panel"
@@ -333,8 +333,8 @@ function MobileDockSheet() {
               </button>
             </div>
             <DockZones />
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
     </AnimatePresence>
   )

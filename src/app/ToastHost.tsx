@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'motion/react'
 import { X } from 'lucide-react'
 import { useToastStore } from '../lib/toastStore'
 import { Card, Icon } from '../design/primitives'
@@ -32,7 +32,7 @@ export function ToastHost() {
     >
       <AnimatePresence>
         {toasts.map((toast) => (
-          <motion.div
+          <m.div
             key={toast.id}
             layout
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96 }}
@@ -88,7 +88,7 @@ export function ToastHost() {
                 <X size={14} strokeWidth={1.75} />
               </button>
             </Card>
-          </motion.div>
+          </m.div>
         ))}
       </AnimatePresence>
     </div>

@@ -1,9 +1,10 @@
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'motion/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 import { Button } from './Button'
+import { EASE } from '../motion'
 
 type DialogSize = 'sm' | 'md' | 'lg'
 
@@ -123,7 +124,7 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty, hideTitle }
   }, [])
 
   return (
-    <motion.div
+    <m.div
       className="fixed inset-0 z-dialog flex items-center justify-center bg-scrim p-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -139,7 +140,7 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty, hideTitle }
         pointerDownOnBackdrop.current = false
       }}
     >
-      <motion.div
+      <m.div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
@@ -155,7 +156,7 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty, hideTitle }
         initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.98, y: 6 }}
         animate={reduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
         exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.98, y: 6 }}
-        transition={{ duration: reduceMotion ? 0 : 0.15, ease: [0.25, 1, 0.5, 1] }}
+        transition={{ duration: reduceMotion ? 0 : 0.15, ease: EASE.outQuart }}
       >
         <h2 id={titleId} className={hideTitle ? 'sr-only' : 'mb-4 pr-8 text-base font-semibold text-balance text-text'}>
           {title}
@@ -191,7 +192,7 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty, hideTitle }
         >
           <X size={16} strokeWidth={1.75} />
         </button>
-      </motion.div>
-    </motion.div>
+      </m.div>
+    </m.div>
   )
 }
