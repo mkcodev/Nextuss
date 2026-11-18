@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-18T11:18:11.000Z",
+  "generatedAt": "2026-11-18T15:04:47.000Z",
   "title": "Design System: Nextuss",
   "extensions": {
     "colorMeta": {
@@ -588,11 +588,11 @@
       },
       "body": {
         "displayName": "Cuerpo",
-        "purpose": "Títulos de fila, notas, etiquetas de FormRow, menús."
+        "purpose": "Texto de la UI a 13 px (text-ui): títulos de fila, notas, etiquetas de FormRow, menús, campos."
       },
       "button": {
         "displayName": "Botón",
-        "purpose": "Botones de 32px y navegación lateral."
+        "purpose": "Botones de 30px y navegación lateral, a 13 px."
       },
       "control": {
         "displayName": "Control",
@@ -613,6 +613,10 @@
       "mono": {
         "displayName": "Mono",
         "purpose": "Geist Mono: cifras, horas, duraciones, XP, atajos en kbd y códigos de prioridad. Nunca frases enteras."
+      },
+      "mono-kbd": {
+        "displayName": "Tecla",
+        "purpose": "Kbd: Geist Mono a 11 px sobre paper-hover."
       }
     },
     "shadows": [
@@ -630,6 +634,26 @@
         "name": "shadow-dialog (oscuro)",
         "value": "0 0 0 1px rgb(255 255 255 / 0.06), 0 24px 64px -16px rgb(0 0 0 / 0.75)",
         "purpose": "Igual en oscuro; el anillo blanco al 6 % marca el borde sobre el negro."
+      },
+      {
+        "name": "shadow-btn",
+        "value": "inset 0 1px 0 rgb(255 255 255 / 0.16), 0 1px 2px rgb(0 0 0 / 0.2)",
+        "purpose": "Botón primario: brillo superior y apoyo mínimo."
+      },
+      {
+        "name": "shadow-edge (claro)",
+        "value": "inset 0 0 0 1px var(--nx-border)",
+        "purpose": "Borde inset de Línea (--lin-edge): segmento elegido y superficies elevadas sin borde propio."
+      },
+      {
+        "name": "shadow-edge (oscuro)",
+        "value": "inset 0 0 0 1px var(--nx-border), inset 0 1px 0 rgb(255 255 255 / 0.035)",
+        "purpose": "Igual en oscuro, con el brillo superior de 1 px."
+      },
+      {
+        "name": "shadow-card (oscuro)",
+        "value": "inset 0 1px 0 rgb(255 255 255 / 0.035)",
+        "purpose": "Brillo superior de las tarjetas en oscuro; en claro sigue sin sombra."
       }
     ],
     "motion": [
@@ -674,9 +698,39 @@
         "purpose": "Destello al completar: única microcelebración, desactivable."
       },
       {
-        "name": "spring-ui / pop / soft",
-        "value": "640/46 · 900/34 · 380/40 (rigidez/amortiguación)",
-        "purpose": "Muelles de framer-motion en src/design/motion.ts; motionFor() los cambia por un fundido con movimiento reducido."
+        "name": "spring-ui / pop / soft / highlight",
+        "value": "640/46 · 900/34 · 380/40 · 700/42 (rigidez/amortiguación)",
+        "purpose": "Muelles de motion/react (LazyMotion con domMax perezoso) en src/design/motion.ts; motionFor() los cambia por un fundido con movimiento reducido."
+      },
+      {
+        "name": "preset-toast",
+        "value": "pop; opacity 0→1, y 16→0, scale .96→1; salida 200ms ease-exit",
+        "purpose": "Avisos."
+      },
+      {
+        "name": "preset-palette",
+        "value": "ui; scale .94→1, y -12→0, blur 6→0px; salida 160ms; ítems en cascada 18ms tras 40ms",
+        "purpose": "Paleta Ctrl K."
+      },
+      {
+        "name": "preset-menu / .nx-pop-in",
+        "value": "pop; opacity, scale .97→1, y -4→0 (CSS: dur-base + ease-spring)",
+        "purpose": "Menús y popovers, desde su esquina."
+      },
+      {
+        "name": "preset-scrim / dialog",
+        "value": "scrim 220ms entra, 180ms sale; panel ui, scale .98→1, y 6→0, salida 160ms",
+        "purpose": "Diálogos."
+      },
+      {
+        "name": "preset-sheet",
+        "value": "ui; y 100%→0",
+        "purpose": "Hoja del dock en móvil."
+      },
+      {
+        "name": "preset-celebrate",
+        "value": "destello opacity 0→1→0 700ms easeOut + barrido x -100%→230% 750ms cubic-bezier(.3,0,.2,1)",
+        "purpose": "Primitivo Celebration; con movimiento reducido, destello de 140ms sin barrido."
       }
     ],
     "breakpoints": [
@@ -769,7 +823,7 @@
       "refersTo": "button-primary",
       "description": "La única acción índigo de la pantalla; nombra su objeto y, en formularios, lleva su atajo.",
       "html": "<button class=\"ds-btn-primary\">Crear tarea <kbd>Ctrl&nbsp;↵</kbd></button>",
-      "css": ".ds-btn-primary{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 12px;border-radius:6px;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms cubic-bezier(.25,1,.5,1),color 120ms cubic-bezier(.25,1,.5,1);border:0;background:var(--nx-accent,#0d8f83);color:var(--nx-on-accent,#fff);}.ds-btn-primary:hover{background:var(--nx-accent-strong,#0a7a70);}.ds-btn-primary:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}.ds-btn-primary kbd{font:inherit;font-size:12px;font-weight:500;margin-left:4px;padding:0 4px;border-radius:4px;background:rgba(0,0,0,.15);}"
+      "css": ".ds-btn-primary{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:6px;height:30px;padding:0 12px;border-radius:6px;font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms cubic-bezier(.2,.8,.2,1),color 120ms cubic-bezier(.2,.8,.2,1);border:0;box-shadow:inset 0 1px 0 rgb(255 255 255 / .16),0 1px 2px rgb(0 0 0 / .2);background:var(--nx-accent,#0d8f83);color:var(--nx-on-accent,#fff);}.ds-btn-primary:hover{background:var(--nx-accent-strong,#0a7a70);}.ds-btn-primary:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}.ds-btn-primary kbd{font-family:'Geist Mono Variable',ui-monospace,monospace;font-size:11px;font-weight:500;margin-left:4px;padding:0 4px;border-radius:4px;background:rgba(0,0,0,.15);}"
     },
     {
       "name": "Botón secundario",
@@ -777,7 +831,7 @@
       "refersTo": "button-secondary",
       "description": "Acciones de apoyo: Hecha, Nueva vista, Volver a hoy, \"Nuevo\" del navbar.",
       "html": "<button class=\"ds-btn-secondary\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg> Hecha</button>",
-      "css": ".ds-btn-secondary{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 12px;border-radius:6px;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms cubic-bezier(.25,1,.5,1),color 120ms cubic-bezier(.25,1,.5,1);border:1px solid var(--nx-border,#e4e6ea);background:var(--nx-surface,#fff);color:var(--nx-text,#17181b);}.ds-btn-secondary:hover{background:var(--nx-surface-hover,#eef0f3);}.ds-btn-secondary:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}"
+      "css": ".ds-btn-secondary{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:6px;height:30px;padding:0 12px;border-radius:6px;font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms cubic-bezier(.2,.8,.2,1),color 120ms cubic-bezier(.2,.8,.2,1);border:1px solid var(--nx-border,#e4e6ea);background:var(--nx-surface,#fff);color:var(--nx-text,#17181b);}.ds-btn-secondary:hover{background:var(--nx-surface-hover,#eef0f3);}.ds-btn-secondary:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}"
     },
     {
       "name": "Botón fantasma",
@@ -785,7 +839,7 @@
       "refersTo": "button-ghost",
       "description": "Acciones terciarias sin borde: Cancelar, Pasar a mañana, Cerrar el día.",
       "html": "<button class=\"ds-btn-ghost\">Cancelar</button>",
-      "css": ".ds-btn-ghost{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 12px;border-radius:6px;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms cubic-bezier(.25,1,.5,1),color 120ms cubic-bezier(.25,1,.5,1);border:0;background:transparent;color:var(--nx-text-muted,#5b5f69);}.ds-btn-ghost:hover{background:var(--nx-surface-hover,#eef0f3);color:var(--nx-text,#17181b);}.ds-btn-ghost:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}"
+      "css": ".ds-btn-ghost{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:6px;height:30px;padding:0 12px;border-radius:6px;font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms cubic-bezier(.2,.8,.2,1),color 120ms cubic-bezier(.2,.8,.2,1);border:0;background:transparent;color:var(--nx-text-muted,#5b5f69);}.ds-btn-ghost:hover{background:var(--nx-surface-hover,#eef0f3);color:var(--nx-text,#17181b);}.ds-btn-ghost:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}"
     },
     {
       "name": "Fichas de propiedad",
@@ -801,7 +855,7 @@
       "refersTo": "input",
       "description": "Input con caja: papel, filete, 6px; foco con borde y contorno índigo.",
       "html": "<input class=\"ds-input\" placeholder=\"Nombre del proyecto\" />",
-      "css": ".ds-input{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);width:260px;padding:6px 10px;border:1px solid var(--nx-border,#e4e6ea);border-radius:6px;background:var(--nx-surface,#fff);color:var(--nx-text,#17181b);font-size:14px;line-height:20px;}.ds-input::placeholder{color:var(--nx-text-faint,#767b85);}.ds-input:focus-visible{border-color:var(--nx-accent,#0d8f83);outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}"
+      "css": ".ds-input{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);width:260px;padding:5px 10px;border:1px solid var(--nx-border-strong,#d3d6dc);border-radius:6px;background:var(--nx-surface,#fff);color:var(--nx-text,#17181b);font-size:13px;line-height:20px;}.ds-input::placeholder{color:var(--nx-text-faint,#767b85);}.ds-input:focus-visible{border-color:var(--nx-accent,#0d8f83);outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}"
     },
     {
       "name": "Navegación lateral",
@@ -817,7 +871,7 @@
       "refersTo": "segmented-control",
       "description": "tablist con marco de 8px; el segmento activo en gris de selección; flechas para cambiar.",
       "html": "<div class=\"ds-seg\" role=\"tablist\"><button role=\"tab\" aria-selected=\"true\">Semana</button><button role=\"tab\" aria-selected=\"false\" tabindex=\"-1\">Mes</button><button role=\"tab\" aria-selected=\"false\" tabindex=\"-1\">Año</button></div>",
-      "css": ".ds-seg{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;gap:2px;padding:2px;border:1px solid var(--nx-border,#e4e6ea);border-radius:8px;}.ds-seg button{height:28px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:var(--nx-text-muted,#5b5f69);font:inherit;font-size:13px;font-weight:500;cursor:pointer;}.ds-seg button:hover{color:var(--nx-text,#17181b);}.ds-seg button[aria-selected=true]{background:var(--nx-surface-hover,#eef0f3);color:var(--nx-text,#17181b);}.ds-seg button:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}"
+      "css": ".ds-seg{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;gap:2px;padding:2px;border-radius:8px;background:var(--nx-surface-hover,#eef0f3);}.ds-seg button{height:28px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:var(--nx-text-muted,#5b5f69);font:inherit;font-size:13px;font-weight:500;cursor:pointer;}.ds-seg button:hover{color:var(--nx-text,#17181b);}.ds-seg button[aria-selected=true]{background:var(--nx-surface,#fff);box-shadow:inset 0 0 0 1px var(--nx-border,#e4e6ea);color:var(--nx-text,#17181b);}.ds-seg button:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}"
     },
     {
       "name": "Fila de tarea",
@@ -842,6 +896,22 @@
       "description": "Siete círculos de solo lectura: hecho índigo con marca, pendiente con borde, descanso discontinuo, hoy con anillo de tinta.",
       "html": "<ol class=\"ds-week\" aria-label=\"Esta semana\"><li class=\"done\" aria-label=\"Lunes: hecho\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg></li><li class=\"done\" aria-label=\"Martes: hecho\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg></li><li class=\"miss\" aria-label=\"Miércoles: sin hacer\">X</li><li class=\"rest\" aria-label=\"Jueves: descanso\">J</li><li class=\"miss today\" aria-label=\"Viernes: pendiente hoy\">V</li><li class=\"miss\" aria-label=\"Sábado: por venir\">S</li><li class=\"rest\" aria-label=\"Domingo: descanso\">D</li></ol>",
       "css": ".ds-week{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:flex;gap:4px;margin:0;padding:8px;list-style:none;background:var(--nx-surface,#fff);}.ds-week li{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:1px solid var(--nx-border-strong,#c9ccd3);font-size:12px;font-weight:500;color:var(--nx-text-muted,#5b5f69);}.ds-week li.done{border-color:var(--nx-accent,#0d8f83);background:var(--nx-accent,#0d8f83);color:var(--nx-on-accent,#fff);}.ds-week li.rest{border-style:dashed;color:var(--nx-text-faint,#767b85);}.ds-week li.today{box-shadow:0 0 0 2px var(--nx-surface,#fff),0 0 0 4px var(--nx-text,#17181b);}"
+    },
+    {
+      "name": "Tecla",
+      "kind": "custom",
+      "refersTo": "kbd",
+      "description": "Atajo de teclado en menús, la barra lateral y la paleta.",
+      "html": "<span class=\"ds-kbd-row\">Buscar <kbd class=\"ds-kbd\">Ctrl</kbd><kbd class=\"ds-kbd\">K</kbd></span>",
+      "css": ".ds-kbd-row{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--nx-text,#17181b);}.ds-kbd{display:inline-block;min-width:18px;padding:0 6px;border-radius:4px;background:var(--nx-surface-hover,#eef0f3);color:var(--nx-text-muted,#5b5f69);font-family:'Geist Mono Variable',ui-monospace,monospace;font-size:11px;line-height:17px;font-weight:500;letter-spacing:-.01em;text-align:center;}"
+    },
+    {
+      "name": "Celebración",
+      "kind": "custom",
+      "refersTo": "celebration",
+      "description": "Destello de acento y barrido del borde inferior al completar (700 ms). Única microcelebración; solo visual.",
+      "html": "<div class=\"ds-cel\"><span>Llamar al dentista</span><span class=\"ds-cel-flash\" aria-hidden=\"true\"></span><span class=\"ds-cel-sweep\" aria-hidden=\"true\"></span></div>",
+      "css": ".ds-cel{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);position:relative;overflow:hidden;width:280px;height:36px;display:flex;align-items:center;padding:0 12px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--nx-border,#e4e6ea);font-size:13px;color:var(--nx-text,#17181b);}.ds-cel-flash{position:absolute;inset:0;background:var(--nx-accent-soft,rgb(13 143 131 / .1));animation:ds-cel-f 700ms ease-out infinite 1.2s;opacity:0;pointer-events:none;}.ds-cel-sweep{position:absolute;left:0;bottom:0;height:1px;width:45%;background:linear-gradient(90deg,transparent,var(--nx-accent,#0d8f83),transparent);animation:ds-cel-s 750ms cubic-bezier(.3,0,.2,1) infinite 1.2s;opacity:0;pointer-events:none;}@keyframes ds-cel-f{0%{opacity:0}50%{opacity:1}100%{opacity:0}}@keyframes ds-cel-s{0%{transform:translateX(-100%);opacity:0}33%{opacity:1}66%{opacity:1}100%{transform:translateX(230%);opacity:0}}@media (prefers-reduced-motion:reduce){.ds-cel-sweep{display:none}.ds-cel-flash{animation-duration:140ms}}"
     }
   ],
   "narrative": {
