@@ -35,7 +35,7 @@ export function ActivityPanel() {
           <span
             className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
             style={{
-              backgroundColor: item.color ? `${item.color}18` : 'var(--nx-accent-soft)',
+              backgroundColor: item.color ? `color-mix(in srgb, ${item.color} 9%, transparent)` : 'var(--nx-accent-soft)',
               color: item.color ?? 'var(--nx-accent)',
             }}
           >
