@@ -88,13 +88,13 @@ export const PRESET = {
     transition: SPRING.ui,
   },
   /** Microcelebración: destello de la fila. */
-  celebrateFlash: { animate: { opacity: [0, 1, 0] }, transition: { duration: DUR.celebrate, ease: 'easeOut' } },
+  celebrateFlash: { animate: { opacity: [0, 1, 0] }, transition: { duration: DUR.celebrate, ease: 'easeOut' as const } },
   /** Microcelebración: línea que barre el borde inferior. */
   celebrateSweep: {
     animate: { x: ['-100%', '230%'], opacity: [0, 1, 1, 0] },
     transition: { duration: 0.75, ease: EASE.sweep },
   },
-} as const
+}
 
 /** Devuelve la transición pedida o, con movimiento reducido, un fundido corto. */
 export function motionFor(reduceMotion: boolean | null, transition: Transition): Transition {

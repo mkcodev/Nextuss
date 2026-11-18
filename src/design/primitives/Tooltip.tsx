@@ -43,7 +43,7 @@ export function Tooltip({ content, children, className }: TooltipProps) {
             role="tooltip"
             id={id}
             style={{ top: coords.top, left: coords.left }}
-            className="pointer-events-none fixed z-tooltip -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-sm border border-border bg-surface px-2.5 py-1.5 text-xs text-text shadow-card"
+            className="nx-fade-in pointer-events-none fixed z-tooltip -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-sm border border-border bg-surface px-2 py-1 text-xs text-text shadow-dialog"
           >
             {content}
           </div>,

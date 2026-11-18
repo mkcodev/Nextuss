@@ -14,7 +14,7 @@ interface FormRowProps {
 /** Fila etiqueta + control de la sección "Más opciones" de los formularios (DESIGN.md: etiqueta
  *  a la izquierda en tinta atenuada, control a la derecha). */
 export function FormRow({ label, htmlFor, top, hint, children }: FormRowProps) {
-  const labelClass = cn('text-sm text-text-muted', top && 'pt-1')
+  const labelClass = cn('text-ui text-text-muted', top && 'pt-1')
   return (
     // En pantallas estrechas la etiqueta va encima; a partir de sm, a la izquierda.
     <div className={cn('grid grid-cols-1 gap-1.5 py-2 sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:gap-3', top ? 'items-start' : 'sm:items-center')}>

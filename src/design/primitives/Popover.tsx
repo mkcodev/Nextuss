@@ -62,8 +62,8 @@ export function Popover({ trigger, children, label, align = 'left', className }:
           role="group"
           aria-label={label}
           className={cn(
-            'absolute top-[calc(100%+0.375rem)] z-dialog w-64 rounded-md border border-border bg-surface p-3 shadow-dialog',
-            align === 'right' ? 'right-0' : 'left-0',
+            'nx-pop-in absolute top-[calc(100%+0.375rem)] z-dialog w-64 rounded-md border border-border bg-surface p-3 shadow-dialog',
+            align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left',
           )}
         >
           {children(close)}

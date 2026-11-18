@@ -44,11 +44,11 @@ export function ToggleGroup<T extends string | number>({
             onClick={() => onChange(on && allowDeselect ? undefined : o.value)}
             style={on ? o.activeStyle : undefined}
             className={cn(
-              'inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border px-2.5 text-ui font-medium transition-colors',
+              'inline-flex h-7 items-center justify-center gap-1.5 rounded-sm border px-2.5 text-ui font-medium transition-colors duration-(--dur-fast) ease-(--ease-standard)',
               on
                 ? o.activeStyle
                   ? 'font-semibold'
-                  : 'border-accent bg-accent-soft text-accent'
+                  : 'border-accent bg-accent-soft text-accent-text'
                 : 'border-border text-text-muted hover:bg-surface-hover hover:text-text',
             )}
           >

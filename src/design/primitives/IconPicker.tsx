@@ -30,7 +30,7 @@ export function IconPicker({ options, value, onChange, label = 'Icono', classNam
             onClick={() => onChange(key)}
             className={cn(
               'grid size-8 place-items-center rounded-sm border transition-colors',
-              on ? 'border-accent bg-accent-soft text-accent' : 'border-transparent text-text-muted hover:bg-surface-hover hover:text-text',
+              on ? 'border-accent bg-accent-soft text-accent-text' : 'border-transparent text-text-muted hover:bg-surface-hover hover:text-text',
             )}
           >
             <Icon name={key} size={16} strokeWidth={1.75} />

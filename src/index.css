@@ -42,9 +42,23 @@
   /* Tamaño intermedio de controles (botones, cabeceras de tabla): entre text-xs y text-sm. */
   --text-ui: 0.8125rem;
   --text-ui--line-height: 1.25rem;
+  /* Atajos de teclado, contadores y etiquetas de miniatura (11 px, en mono casi siempre). */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1.0625rem;
+
+  /* Altura de fila de Línea (36 px). Botones (h-7.5, 30 px) y campos (h-8, 32 px) usan la escala
+     numérica: así cualquier h-9/h-10 que pase un componente sigue ganando en el orden del CSS. */
+  --spacing-row: 2.25rem;
 
   --shadow-card: var(--nx-shadow-card);
   --shadow-dialog: var(--nx-shadow-dialog);
+  /* Borde de 1 px dibujado por dentro (Línea: --lin-edge); en oscuro suma un brillo superior. */
+  --shadow-edge: var(--nx-shadow-edge);
+  /* Botón principal: brillo interior y una sombra mínima, como una tecla. */
+  --shadow-btn: inset 0 1px 0 rgb(255 255 255 / 0.16), 0 1px 2px rgb(0 0 0 / 0.2);
+
+  /* Pomo de los interruptores: blanco en los dos temas, sobre acento o sobre gris. */
+  --color-knob: var(--nx-ref-paper-0);
 
   /* Radios de DESIGN.md: 4 / 6 / 8 / 12. xl y 2xl se quedan en 12px para que ningún
      `rounded-xl`/`rounded-2xl` heredado vuelva a las esquinas blandas del tema anterior. */
@@ -173,6 +187,7 @@
 
   /* Sin sombras en la página: las tarjetas se separan con su borde de 1 px. Solo flotan las capas. */
   --nx-shadow-card: none;
+  --nx-shadow-edge: inset 0 0 0 1px var(--nx-border);
   --nx-shadow-dialog: 0 0 0 1px rgb(15 17 20 / 0.06), 0 16px 48px -12px rgb(15 17 20 / 0.22);
   --nx-scrim: rgb(15 17 20 / 0.18);
 }
@@ -210,7 +225,9 @@
   --nx-prio-3: var(--nx-ref-glacier-300);
   --nx-prio-4: var(--nx-ref-snow-2);
 
-  --nx-shadow-card: none;
+  /* En oscuro, las tarjetas llevan el brillo superior de Línea (sobre su borde de 1 px). */
+  --nx-shadow-card: inset 0 1px 0 rgb(255 255 255 / 0.035);
+  --nx-shadow-edge: inset 0 0 0 1px var(--nx-border), inset 0 1px 0 rgb(255 255 255 / 0.035);
   --nx-shadow-dialog: 0 0 0 1px rgb(255 255 255 / 0.06), 0 24px 64px -16px rgb(0 0 0 / 0.75);
   --nx-scrim: rgb(0 0 0 / 0.45);
 }
@@ -234,6 +251,9 @@ body {
   color: var(--color-text);
   background: var(--color-bg);
   font-family: var(--font-sans);
+  /* UI a 13 px (Línea). Las pantallas que aún fijan text-sm cambian en su fase. */
+  font-size: var(--text-ui);
+  line-height: var(--text-ui--line-height);
   letter-spacing: -0.003em;
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
@@ -266,6 +286,27 @@ body {
    porque el `:focus-visible` global de arriba ganaría a cualquier utilidad `outline-none`. */
 .field-bare:focus-visible {
   outline: none;
+}
+
+/* Entrada de capas pequeñas (menús, popovers, tooltips): aparecen con el muelle «pop» aproximado en
+   CSS. Sin salida animada: se desmontan al cerrar. Con reduced-motion, el bloque global la anula. */
+@keyframes nx-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+}
+@keyframes nx-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+.nx-pop-in {
+  animation: nx-pop-in var(--dur-base) var(--ease-spring) both;
+  transform-origin: top;
+}
+.nx-fade-in {
+  animation: nx-fade-in var(--dur-fast) var(--ease-standard) both;
 }
 
 /* Al tabular por un formulario largo, el campo enfocado no queda escondido bajo el pie fijo. */

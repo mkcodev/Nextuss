@@ -45,7 +45,7 @@ export function SegmentedControl<T extends string>({
   }
 
   return (
-    <div role={tabs ? 'tablist' : 'radiogroup'} aria-label={label} className={cn('inline-flex gap-0.5 rounded-md border border-border p-0.5', className)}>
+    <div role={tabs ? 'tablist' : 'radiogroup'} aria-label={label} className={cn('inline-flex gap-0.5 rounded-md bg-surface-hover p-0.5', className)}>
       {options.map((o, i) => {
         const selected = value === o.value
         return (
@@ -62,9 +62,9 @@ export function SegmentedControl<T extends string>({
             onClick={() => onChange(o.value)}
             onKeyDown={(e) => onKeyDown(e, i)}
             className={cn(
-              'flex items-center gap-1.5 rounded-sm font-medium whitespace-nowrap transition-colors',
+              'flex items-center gap-1.5 rounded-sm font-medium whitespace-nowrap transition-colors duration-(--dur-fast) ease-(--ease-standard)',
               size === 'sm' ? 'h-6 px-2.5 text-xs' : 'h-7 px-3 text-ui',
-              selected ? 'bg-surface-hover text-text' : 'text-text-muted hover:text-text',
+              selected ? 'bg-surface text-text shadow-edge' : 'text-text-muted hover:text-text',
             )}
           >
             {o.icon}
