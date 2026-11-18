@@ -1,3 +1,4 @@
+import { db } from '../../db/schema'
 import { lazyNamed } from '../../app/lazy'
 import type { PluginSettingsSpec } from '../plugins/settings/types'
 
@@ -15,4 +16,9 @@ export const weeklyReviewSettingsSpec: PluginSettingsSpec = {
     },
   ],
   notify: ['notifyWeeklyReviewNudge'],
+  /** Última revisión semanal hecha (#98 P7). */
+  lastActivityAt: async () => {
+    const reviews = await db.reviews.toArray()
+    return reviews.length ? Math.max(...reviews.map((r) => r.createdAt)) : null
+  },
 }

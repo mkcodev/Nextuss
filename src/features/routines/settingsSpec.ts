@@ -42,4 +42,6 @@ export const routinesSettingsSpec: PluginSettingsSpec = {
       { label: 'Veces completadas', value: String(runs.filter((r) => r.finished).length) },
     ]
   },
+  /** Última rutina empezada (#98 P7). */
+  lastActivityAt: async () => (await db.routineRuns.orderBy('date').last())?.startedAt ?? null,
 }

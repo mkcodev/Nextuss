@@ -17,6 +17,7 @@ const EXCLUDED = {
   aiUsageCount: 'interno: contador, no una preferencia',
   onboardingCompleted: 'interno: estado de la bienvenida',
   virtualizationRoutineId: 'referencia a una fila de esta base de datos',
+  pluginIdleDismissedAt: 'interno: sugerencias descartadas en este dispositivo',
 } as const satisfies Partial<Record<keyof Settings, string>>
 
 type ExcludedKey = keyof typeof EXCLUDED

@@ -4,7 +4,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ArrowLeft, ExternalLink, Search, TriangleAlert } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Hourglass, Search, TriangleAlert } from 'lucide-react'
 import { db } from '../../db/schema'
 import { usePageTitle } from '../../app/pageTitleStore'
 import { ensurePanelVisible } from '../../app/dock/ensurePanelVisible'
@@ -13,6 +13,7 @@ import { Badge, Button, Dialog, EmptyState, Input, Switch } from '../../design/p
 import { cn } from '../../lib/cn'
 import { useListNav } from '../../app/shortcuts/listNavStore'
 import { togglePluginWithUndo } from './actions'
+import { dismissIdleSuggestion, useIdlePlugins, type IdleSuggestion } from './idle'
 import { useEnabledPlugins } from './pluginsStore'
 import { getPlugin, PLUGINS } from './registry'
 import { planToggle } from './resolve'
@@ -53,6 +54,7 @@ export function PluginsPage() {
   const navigate = useNavigate()
   const enabled = useEnabledPlugins()
   const settings = useLiveQuery(() => db.settings.get(1), [])
+  const idle = useIdlePlugins(enabled, settings)
   const [query, setQuery] = useState('')
   const [includeDisabled, setIncludeDisabled] = useState(false)
   const [confirm, setConfirm] = useState<ConfirmState | null>(null)
@@ -169,6 +171,11 @@ export function PluginsPage() {
                       <Link to={`/plugins/${p.id}`} className="flex min-w-0 flex-1 items-center gap-2.5 px-2.5 py-2">
                         <p.icon size={16} strokeWidth={1.75} className="shrink-0" />
                         <span className="min-w-0 flex-1 truncate">{p.name}</span>
+                        {idle?.has(p.id) && (
+                          <span className="shrink-0 text-xs text-text-faint" title={`${idle.get(p.id)?.days} días sin uso`}>
+                            Sin uso
+                          </span>
+                        )}
                       </Link>
                       {p.core ? (
                         <Badge tone="neutral" className="shrink-0">Núcleo</Badge>
@@ -197,6 +204,8 @@ export function PluginsPage() {
               onToggle={(on) => void requestToggle(selected, on)}
               settings={settings}
               onPickPreset={(preset) => setPresetConfirm({ plugin: selected, preset })}
+              idle={idle?.get(selected.id)}
+              onDismissIdle={() => void dismissIdleSuggestion(selected.id, settings)}
             />
           ) : (
             <EmptyState icon={Search} title="Sin resultados" description="Ningún plugin coincide con la búsqueda." />
@@ -306,9 +315,12 @@ interface PluginDetailProps {
   onToggle: (on: boolean) => void
   settings: Settings | undefined
   onPickPreset: (preset: PluginPreset) => void
+  /** Sugerencia «¿Lo apagas?» si lleva 30 días sin uso (#98 P7). */
+  idle?: IdleSuggestion
+  onDismissIdle: () => void
 }
 
-function PluginDetail({ plugin, on, onToggle, settings, onPickPreset }: PluginDetailProps) {
+function PluginDetail({ plugin, on, onToggle, settings, onPickPreset, idle, onDismissIdle }: PluginDetailProps) {
   const category = plugin.category ? PLUGIN_CATEGORIES[plugin.category] : undefined
   const spec = PLUGIN_SETTINGS[plugin.id]
   const setup = settings && spec.needsSetup ? spec.needsSetup(settings) : null
@@ -368,6 +380,30 @@ function PluginDetail({ plugin, on, onToggle, settings, onPickPreset }: PluginDe
       </div>
 
       <p className="text-sm text-text-muted">{plugin.description}</p>
+
+      {on && idle && (
+        <div role="status" className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-bg-soft px-3 py-2.5">
+          <div className="flex min-w-0 flex-[1_1_14rem] items-start gap-2.5">
+            <Hourglass size={15} strokeWidth={1.75} className="mt-0.5 shrink-0 text-text-faint" />
+            <p className="min-w-0 text-sm text-text-muted">
+            {idle.neverUsed ? (
+              <>Sin usar desde que empezaste (<span className="tabular-nums">{idle.days}</span> días).</>
+            ) : (
+              <><span className="tabular-nums">{idle.days}</span> días sin usarlo.</>
+            )}{' '}
+            <span className="text-text">¿Lo apagas?</span> Tus datos se quedan.
+            </p>
+          </div>
+          <div className="flex shrink-0 gap-2">
+            <Button variant="secondary" size="sm" onClick={() => onToggle(false)}>
+              Apagar
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onDismissIdle}>
+              Mantener
+            </Button>
+          </div>
+        </div>
+      )}
 
       {(plugin.requires?.length || plugin.enhances?.length) && (
         <div className="flex flex-wrap gap-4 text-sm">

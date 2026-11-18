@@ -449,6 +449,9 @@ export interface Settings {
   /** Plugins que el usuario ha activado o desactivado (clave = `PluginId`). Sin definir = valor por
    * defecto del registro (`features/plugins/registry.ts`). Desactivar nunca borra datos. */
   plugins?: Partial<Record<string, boolean>>
+  /** Cuándo se descartó «¿Lo apagas?» por plugin (#98 P7, clave = `PluginId`). Solo vuelve a sugerirse
+   * si el plugin se usa después del descarte y luego pasa otros 30 días sin uso. */
+  pluginIdleDismissedAt?: Partial<Record<string, number>>
   /** Estilo visual de la Virtualización (#97), elegible desde la Cabina y desde Ajustes. Sin definir = 'a'. */
   virtualizationTheme?: VirtualizationTheme
   /** Patrón de respiración de la fase Presencia. Sin definir = 'box4444' (caja 4-4-4-4). */

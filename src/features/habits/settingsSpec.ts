@@ -12,4 +12,6 @@ export const habitsSettingsSpec: PluginSettingsSpec = {
       { label: 'Registros completados', value: String(completedLogs) },
     ]
   },
+  /** Último registro de un hábito (#98 P7). */
+  lastActivityAt: async () => (await db.habitLogs.orderBy('loggedAt').last())?.loggedAt ?? null,
 }

@@ -81,5 +81,8 @@ export interface PluginSettingsSpec {
   /** `null` = todo configurado; si no, motivo + `id` del campo al que salta el chip «Necesita configuración». */
   needsSetup?: (settings: Settings) => { reason: string; fieldId: string } | null
   dataSummary?: () => Promise<DataStat[]>
+  /** Último uso real del plugin (ms), o `null` si nunca se ha usado. Solo en plugins con un evento
+   * medible; sin esto no hay sugerencia «¿Lo apagas?» (#98 P7). */
+  lastActivityAt?: () => Promise<number | null>
   presets?: PluginPreset[]
 }

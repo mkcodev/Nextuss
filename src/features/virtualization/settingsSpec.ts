@@ -86,4 +86,6 @@ export const virtualizationSettingsSpec: PluginSettingsSpec = {
       { label: 'Días completados', value: String(completedTotal) },
     ]
   },
+  /** Último día de Virtualización empezado (#98 P7). */
+  lastActivityAt: async () => (await db.virtualizationDays.orderBy('date').last())?.startedAt ?? null,
 }
