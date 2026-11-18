@@ -56,6 +56,15 @@ describe('viewTransition', () => {
     expect(update).toHaveBeenCalledTimes(1)
   })
 
+  it('con `kind`, publica data-vt mientras dura la transición y lo quita al terminar', async () => {
+    installStart()
+    withViewTransition(() => {}, 'layout')
+    expect(document.documentElement.dataset.vt).toBe('layout')
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(document.documentElement.dataset.vt).toBeUndefined()
+  })
+
   it('el círculo marca data-vt=theme mientras dura y lo quita al terminar', async () => {
     const start = installStart()
     const update = vi.fn()
