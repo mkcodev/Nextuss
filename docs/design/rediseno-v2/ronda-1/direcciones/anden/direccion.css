@@ -1,0 +1,363 @@
+/* Andén — señalética de estación. Contenida: densidad de herramienta, carácter en la letra
+   estrecha de los rótulos, el verde de vía para actuar y el amarillo señal solo para «Ahora». */
+
+:root {
+  --font-body: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+  --font-display: 'Archivo Variable', 'Atkinson Hyperlegible Next Variable', sans-serif;
+  --font-section: var(--font-display);
+  --fst-display: 78%;
+  --fst-section: 88%;
+  --fs-body: 14px;
+  --fs-page: 26px;
+  --fw-page: 700;
+  --ls-page: -0.01em;
+  --fs-now: 24px;
+  --fw-now: 700;
+  --fs-section: 15px;
+
+  --bg: #f3f4f1;
+  --bg-side: #e9ebe6;
+  --surface: #ffffff;
+  --hover: #e3e6e0;
+  --border: #d5d9d2;
+  --border-strong: #868e84;
+  --text: #14181b;
+  --muted: #4b5358;
+  --faint: #5c6469;
+  --accent: #0e6b57;
+  --accent-strong: #0a5545;
+  --on-accent: #ffffff;
+  --accent-soft: color-mix(in srgb, #0e6b57 10%, transparent);
+  --signal: #f2c230;
+  --on-signal: #14181b;
+  --warning: #9a4a0b;
+  --success: #1d7a3e;
+  --danger: #b4301f;
+  --prio-1: #b4301f;
+  --focus: #0e6b57;
+  --selection: color-mix(in srgb, #f2c230 45%, transparent);
+
+  --side-bg: var(--bg-side);
+  --search-bg: var(--bg);
+  --level-bg: var(--hover);
+
+  --radius-xs: 3px;
+  --radius-ctl: 4px;
+  --radius-box: 6px;
+  --radius-dialog: 10px;
+  --shadow-card: none;
+  --shadow-pop: 0 18px 40px -18px rgb(14 19 22 / 0.35);
+
+  --dur-1: 150ms;
+  --dur-2: 200ms;
+  --dur-3: 240ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-celebrate: 420ms;
+
+  --row-h: 40px;
+  --gap: 20px;
+  --pad-box: 16px;
+  --pad-now: 0;
+}
+
+:root[data-theme='dark'] {
+  --bg: #0e1316;
+  --bg-side: #0a0e10;
+  --surface: #141b1f;
+  --hover: #1d262b;
+  --border: #263238;
+  --border-strong: #6b7a80;
+  --text: #e6ece8;
+  --muted: #a3afaa;
+  --faint: #8d9994;
+  --accent: #43c4a0;
+  --accent-strong: #63d3b2;
+  --on-accent: #06221a;
+  --accent-soft: color-mix(in srgb, #43c4a0 16%, transparent);
+  --signal: #f2c230;
+  --on-signal: #14181b;
+  --warning: #f0a25e;
+  --success: #5ccb86;
+  --danger: #f07462;
+  --prio-1: #f07462;
+  --focus: #43c4a0;
+  --shadow-pop: 0 18px 40px -18px rgb(0 0 0 / 0.7);
+}
+
+/* marca: un rótulo de andén */
+.anden-mark {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--signal);
+  box-shadow: inset 0 -4px 0 var(--accent);
+}
+.brand {
+  font-size: 17px;
+}
+
+.side-item {
+  font-size: 14px;
+}
+.side-item.is-active {
+  font-weight: 700;
+}
+
+/* rótulos en letra estrecha: títulos de sección, horas, cifras */
+.h-section,
+.kpi-value,
+.xp-level,
+.goal-title {
+  letter-spacing: 0;
+}
+.row-time,
+.line-now,
+.board dd.num,
+.measure-dur,
+.now-left {
+  font-family: var(--font-display);
+  font-stretch: 85%;
+  font-weight: 600;
+}
+
+/* prioridad con código visible */
+.prio-code {
+  font-family: var(--font-display);
+  font-stretch: 85%;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--muted);
+  min-width: 18px;
+}
+.prio-1 .prio-code {
+  color: var(--prio-1);
+}
+
+/* ---------------------------------------------------- firma: línea del día */
+.daycard .card-head {
+  margin-bottom: 18px;
+}
+.line {
+  position: relative;
+  height: 4px;
+  margin: 26px 8px 0;
+  background: var(--border);
+  border-radius: 2px;
+}
+.line-done {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.line-now {
+  position: absolute;
+  left: var(--x);
+  bottom: 10px;
+  translate: -50% 0;
+  font-size: 13px;
+  color: var(--text);
+  padding: 0 4px;
+}
+.line-now::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1px;
+  height: 8px;
+  background: var(--text);
+}
+.stations {
+  position: absolute;
+  inset: 0;
+}
+.st {
+  position: absolute;
+  left: var(--x);
+  top: 50%;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--border-strong);
+}
+.st-hecha {
+  width: 16px;
+  height: 16px;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+.st-ahora {
+  width: 20px;
+  height: 20px;
+  background: var(--signal);
+  border: 3px solid var(--text);
+  z-index: 1;
+}
+.st-siguiente {
+  border-color: var(--text);
+}
+/* siguiente lleva punto interior: no depende solo del color del borde */
+.st-siguiente::after {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text);
+}
+.line-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+.board {
+  margin-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.board-row {
+  display: grid;
+  grid-template-columns: 84px 52px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.board-row dt {
+  font-family: var(--font-display);
+  font-stretch: 85%;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--muted);
+}
+.board-row.is-now dt {
+  color: var(--text);
+}
+.board-row.is-now dt::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: 0 0 0 1.5px var(--text);
+}
+.board-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------- bloque Ahora: banda señal */
+.now {
+  overflow: hidden;
+  border-color: var(--border-strong);
+}
+.now-band {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: var(--signal);
+  color: var(--on-signal);
+}
+.now-band .now-kicker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-stretch: 85%;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--on-signal);
+}
+.now-band .now-left {
+  color: var(--on-signal);
+  font-size: 15px;
+}
+.now-in {
+  padding: 16px 20px 20px;
+}
+.measure-line {
+  height: 3px;
+}
+.measure-line::before,
+.measure-line::after {
+  width: 2px;
+  top: -6px;
+  height: 15px;
+  background: var(--text);
+}
+
+.row.is-cursor .row-time {
+  color: var(--text);
+}
+.wd-hecho {
+  border-radius: 50%;
+}
+.kpi-value {
+  font-size: 26px;
+  font-weight: 700;
+}
+.goal .bar-track,
+.xp .bar-track {
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* microcelebración: una vía que recorre la fila */
+.row,
+.now {
+  isolation: isolate;
+}
+.cel-rail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--accent);
+  transform-origin: left;
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .fs-page,
+  .h-page {
+    font-size: 22px;
+  }
+  .now-title {
+    font-size: 21px;
+  }
+  .line {
+    margin-inline: 10px;
+  }
+  .line-now {
+    bottom: 14px;
+  }
+  .st {
+    width: 12px;
+    height: 12px;
+  }
+  .st-hecha {
+    width: 14px;
+    height: 14px;
+  }
+  .st-ahora {
+    width: 18px;
+    height: 18px;
+  }
+  .board-row {
+    grid-template-columns: 76px 44px minmax(0, 1fr);
+  }
+  .now-band,
+  .now-in {
+    padding-inline: 16px;
+  }
+}
