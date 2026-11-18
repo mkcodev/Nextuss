@@ -22,4 +22,6 @@ export const focusSettingsSpec: PluginSettingsSpec = {
       { label: 'Minutos de foco', value: String(Math.round(totalMin)) },
     ]
   },
+  /** Última sesión de foco (#98 P7). */
+  lastActivityAt: async () => (await db.focusSessions.orderBy('start').last())?.start ?? null,
 }

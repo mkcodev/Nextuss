@@ -1,3 +1,5 @@
+import { parseDateKey } from '../../lib/dates'
+import { db } from '../../db/schema'
 import { getCheckInsForRange } from '../../db/repositories/checkins'
 import { subDaysKey, todayKey } from '../../lib/dates'
 import type { PluginSettingsSpec } from '../plugins/settings/types'
@@ -16,5 +18,10 @@ export const checkinSettingsSpec: PluginSettingsSpec = {
       { label: 'Últimos 7 días', value: String(last7.filter(answered).length) },
       { label: 'Últimos 30 días', value: String(last30.filter(answered).length) },
     ]
+  },
+  /** Último check-in respondido (#98 P7). */
+  lastActivityAt: async () => {
+    const last = await db.checkins.orderBy('date').reverse().filter(answered).first()
+    return last ? parseDateKey(last.date).getTime() : null
   },
 }
