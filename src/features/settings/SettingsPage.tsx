@@ -3,6 +3,8 @@ import { useLocation } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { Card, Input } from '../../design/primitives'
+import { SettingRow } from '../plugins/settings/SettingRow'
+import type { SwitchField } from '../plugins/settings/types'
 import { cn } from '../../lib/cn'
 import { useTheme } from '../../design/useTheme'
 import { centerOf } from '../../lib/viewTransition'
@@ -23,6 +25,16 @@ const THEME_OPTIONS: { value: ThemePreference; label: string; icon: typeof Sun }
   { value: 'system', label: 'Sistema', icon: Monitor },
   { value: 'light', label: 'Claro', icon: Sun },
   { value: 'dark', label: 'Oscuro', icon: Moon },
+]
+
+/** Ajustes globales de movimiento. Fuera de `PLUGIN_SETTINGS`: no pertenecen a ningún plugin. */
+const movementFields: SwitchField[] = [
+  {
+    kind: 'switch',
+    key: 'celebrationEnabled',
+    label: 'Microcelebración al completar',
+    help: 'Un destello breve al terminar una tarea o un bloque. Con movimiento reducido, solo un fundido.',
+  },
 ]
 
 export function SettingsPage() {
@@ -85,6 +97,13 @@ export function SettingsPage() {
             </button>
           ))}
         </div>
+      </Card>
+
+      <Card className="p-4" id="movimiento">
+        <h2 className="mb-1 text-sm font-semibold text-text">Movimiento</h2>
+        {movementFields.map((field) => (
+          <SettingRow key={field.key} field={field} settings={settings} />
+        ))}
       </Card>
 
       <InstallPrompt />

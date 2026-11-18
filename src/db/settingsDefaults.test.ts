@@ -14,6 +14,7 @@ describe('SETTINGS_DEFAULTS (fijación)', () => {
       pomodoroBreakMin: 5,
       pomodoroLongBreakMin: 15,
       pomodoroSoundEnabled: false,
+      celebrationEnabled: true,
       dayTimeView: 'ruler',
       routineView: 'step',
       routineStepStyle: 'direct',
@@ -71,5 +72,14 @@ describe('isModified', () => {
     expect(isModified(s, 'pomodoroBreakMin')).toBe(true)
     expect(isModified(s, 'routineView')).toBe(false) // sin definir
     expect(isModified(undefined, 'routineView')).toBe(false)
+  })
+
+  it('celebrationEnabled: solo cuenta como modificado con `false`', () => {
+    const base = { id: 1, theme: 'system', dayStartHour: 7, dayEndHour: 22 } as Settings
+    expect(isModified(base, 'celebrationEnabled')).toBe(false)
+    expect(isModified({ ...base, celebrationEnabled: true }, 'celebrationEnabled')).toBe(false)
+    expect(isModified({ ...base, celebrationEnabled: false }, 'celebrationEnabled')).toBe(true)
+    expect(readSetting({ ...base, celebrationEnabled: false }, 'celebrationEnabled')).toBe(false)
+    expect(readSetting(base, 'celebrationEnabled')).toBe(true)
   })
 })

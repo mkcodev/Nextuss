@@ -72,6 +72,8 @@ const RULES: Record<ExportableKey, Rule> = {
   pomodoroLongBreakMin: { type: 'number', min: 1, max: 120, integer: true },
   pomodoroSoundEnabled: BOOL,
 
+  celebrationEnabled: BOOL,
+
   virtualizationEnabled: BOOL,
   virtualizationWindowEndHour: hour(0, 24),
   virtualizationTheme: oneOf(['a', 'b', 'c']),
