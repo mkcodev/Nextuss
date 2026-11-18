@@ -32,6 +32,21 @@ const BREADCRUMB: Record<string, string> = Object.fromEntries(
   NAV_ITEMS.map((n) => [n.to, n.label]),
 )
 
+/** Marca de Línea: cuadrado de 16 px partido en diagonal, acento y texto (corte duro, sin degradado). */
+function LinMark() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" className="shrink-0">
+      <clipPath id="lin-mark-clip">
+        <rect width="16" height="16" rx="4" />
+      </clipPath>
+      <g clipPath="url(#lin-mark-clip)">
+        <path d="M0 0H16L0 16Z" className="fill-accent" />
+        <path d="M16 0V16H0Z" className="fill-text" />
+      </g>
+    </svg>
+  )
+}
+
 function AvatarMenu() {
   const settings = useLiveQuery(() => db.settings.get(1), [])
   const { openHelp } = useOverlayStore()
@@ -108,7 +123,7 @@ export function Navbar() {
       </button>
 
       <div className="flex items-center gap-1.5">
-        <span className="lin-mark" aria-hidden="true" />
+        <LinMark />
         <span className="hidden text-sm font-[650] tracking-[-0.01em] text-text sm:inline">Nextuss</span>
       </div>
 
