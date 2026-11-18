@@ -2,7 +2,8 @@
 //
 // Uso (con la app servida, p. ej. `npm run build && npx vite preview --port 4173`):
 //   node docs/design/rediseno-v2/fase-1/capturar-app.mjs <carpeta-salida> [url-base] [pantallas]
-//   pantallas: lista separada por comas (hoy,ajustes,plugin,dialogo,menu,celebracion). Por defecto, las cinco primeras.
+//   pantallas: lista separada por comas (hoy,ajustes,plugin,dialogo,menu,paleta,dock,aviso,plegado).
+//   Por defecto, las cinco primeras (1a). Las cuatro últimas son del 1b (navegación).
 //
 // Arranca con un perfil de Chrome nuevo (base de datos vacía), salta la bienvenida, cierra
 // «Empezar el día» y genera los datos de ejemplo desde Ajustes. Solo datos de demo: el repo es público.
@@ -79,10 +80,47 @@ try {
         await guardar(`menu-${sufijo}`, false)
         await p.key('Escape')
       }
-      if (PANTALLAS.includes('celebracion')) {
-        // Página de demo de Celebration (solo existe tras el 1a): `?nx-demo=celebration`.
-        await ir('/ajustes?nx-demo=celebration')
-        await guardar(`celebracion-${sufijo}`, false)
+      if (PANTALLAS.includes('paleta')) {
+        await ir('/')
+        await p.key('k', { ctrl: true })
+        await sleep(900)
+        await guardar(`paleta-${sufijo}`, false)
+        await p.key('Escape')
+        await sleep(400)
+      }
+      if (PANTALLAS.includes('dock')) {
+        await ir('/')
+        // Escritorio: el dock ya está a la vista. Móvil: se abre la hoja con «Panel».
+        if (w < 768) {
+          await clickText('Panel')
+          await sleep(700)
+        }
+        await guardar(`dock-${sufijo}`, false)
+        if (w < 768) {
+          await p.key('Escape')
+          await sleep(400)
+        }
+      }
+      if (PANTALLAS.includes('aviso')) {
+        // Un aviso real: crear una tarea con el atajo `n` lanza el toast de confirmación.
+        await ir('/')
+        await p.key('n')
+        await sleep(600)
+        await p.send('Input.insertText', { text: 'Revisar el presupuesto' })
+        await sleep(200)
+        await clickText('Crear tarea')
+        await sleep(450)
+        await guardar(`aviso-${sufijo}`, false)
+        await esperarSinAvisos()
+        await cerrarDialogos()
+      }
+      if (PANTALLAS.includes('plegado') && w >= 768) {
+        await ir('/')
+        await p.eval(`document.querySelector('header button[aria-label="Colapsar navegación"]')?.click()`)
+        await sleep(500)
+        await guardar(`plegado-${sufijo}`, false)
+        await p.eval(`document.querySelector('header button[aria-label="Mostrar navegación"]')?.click()`)
+        await sleep(300)
       }
     }
   }
