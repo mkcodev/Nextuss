@@ -19,7 +19,7 @@ export function LeftSidebar() {
       aria-label="Navegación principal"
       onPointerLeave={() => setHovered(null)}
       className={cn(
-        'hidden shrink-0 flex-col gap-0.5 border-r border-border bg-bg-soft px-2 py-2.5 transition-[width] duration-(--dur-base) ease-(--ease-standard) md:flex',
+        'vt-sidebar hidden shrink-0 flex-col gap-0.5 border-r border-border bg-bg-soft px-2 py-2.5 transition-[width] duration-(--dur-base) ease-(--ease-standard) md:flex',
         collapsed ? 'w-[60px]' : 'w-56',
       )}
     >

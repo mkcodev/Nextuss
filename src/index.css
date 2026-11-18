@@ -434,18 +434,33 @@ body {
 html[data-vt='theme'] #main-content {
   view-transition-name: none;
 }
-/* Abrir o cerrar el dock: solo esta pieza se anima. <main> pasa a la raíz (sin grupo propio) para
-   que su contenido no se estire mientras cambia de ancho; se recoloca de golpe y el dock se funde
-   sobre él. Las imágenes no se escalan: se recortan. */
+/* Plegar el sidebar y abrir o cerrar el dock: solo estas dos piezas se animan. <main> pasa a la
+   raíz (sin grupo propio) para que su contenido no se estire mientras cambia de ancho; se recoloca
+   de golpe y la pieza animada se desliza sobre él. Las imágenes no se escalan: se recortan. */
+.vt-sidebar {
+  view-transition-name: sidebar;
+}
 .vt-dock {
   view-transition-name: dock;
 }
 html[data-vt='layout'] #main-content {
   view-transition-name: none;
 }
+/* La transición de ancho en CSS se apaga mientras dura la View Transition: si no, la captura del estado
+   nuevo vería el ancho antiguo. */
+html[data-vt='layout'] .vt-sidebar {
+  transition: none;
+}
+::view-transition-group(sidebar),
 ::view-transition-group(dock) {
   animation-duration: var(--dur-slow);
   animation-timing-function: var(--ease-standard);
+}
+::view-transition-old(sidebar),
+::view-transition-new(sidebar) {
+  height: 100%;
+  object-fit: none;
+  object-position: left top;
 }
 ::view-transition-old(dock),
 ::view-transition-new(dock) {
