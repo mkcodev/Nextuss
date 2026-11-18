@@ -1,535 +1,576 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-26T21:41:56.727Z",
+  "generatedAt": "2026-11-18T11:18:11.000Z",
   "title": "Design System: Nextuss",
   "extensions": {
     "colorMeta": {
-      "indigo-accent": {
+      "glacier-accent": {
         "role": "primary",
-        "displayName": "Índigo de acción",
-        "canonical": "oklch(51.7% 0.172 275.5)",
-        "tonalRamp": [
-          "#060031",
-          "#1a0072",
-          "#2f2c9a",
-          "#4a51c0",
-          "#6874e7",
-          "#8c9cfe",
-          "#bac5ff",
-          "#eaeeff"
-        ],
+        "displayName": "Turquesa glaciar",
         "theme": "light",
-        "cssVar": "--nx-accent"
-      },
-      "indigo-accent-strong": {
-        "role": "primary",
-        "displayName": "Índigo firme",
-        "canonical": "oklch(46.3% 0.166 275.0)",
+        "cssVar": "--nx-accent",
+        "canonical": "oklch(58.5% 0.101 184.4)",
         "tonalRamp": [
-          "#060031",
-          "#190072",
-          "#2e2f97",
-          "#4952bd",
-          "#6875e4",
-          "#8b9cfe",
-          "#b9c6ff",
-          "#e9eeff"
-        ],
+          "#001510",
+          "#00322a",
+          "#005046",
+          "#006f64",
+          "#119084",
+          "#45b3a6",
+          "#6fdacc",
+          "#9bfff7"
+        ]
+      },
+      "glacier-accent-strong": {
+        "role": "primary",
+        "displayName": "Glaciar firme",
         "theme": "light",
-        "cssVar": "--nx-accent-strong"
-      },
-      "indigo-accent-soft": {
-        "role": "primary",
-        "displayName": "Velo índigo",
-        "canonical": "oklch(51.7% 0.172 275.5 / 0.1)",
+        "cssVar": "--nx-accent-strong",
+        "canonical": "oklch(52.2% 0.090 184.8)",
         "tonalRamp": [
-          "#060031",
-          "#1a0072",
-          "#2f2c9a",
-          "#4a51c0",
-          "#6874e7",
-          "#8c9cfe",
-          "#bac5ff",
-          "#eaeeff"
-        ],
+          "#001510",
+          "#00302a",
+          "#004e46",
+          "#006e64",
+          "#2d8f84",
+          "#54b1a5",
+          "#7cd7cb",
+          "#a7fff6"
+        ]
+      },
+      "glacier-text": {
+        "role": "primary",
+        "displayName": "Texto glaciar",
+        "theme": "light",
+        "cssVar": "--nx-accent-text",
+        "canonical": "oklch(52.2% 0.090 184.8)",
+        "tonalRamp": [
+          "#001510",
+          "#00302a",
+          "#004e46",
+          "#006e64",
+          "#2d8f84",
+          "#54b1a5",
+          "#7cd7cb",
+          "#a7fff6"
+        ]
+      },
+      "glacier-soft": {
+        "role": "primary",
+        "displayName": "Velo glaciar",
         "theme": "light",
         "cssVar": "--nx-accent-soft"
       },
       "on-accent": {
         "role": "primary",
-        "displayName": "Texto sobre índigo",
+        "displayName": "Texto sobre acento",
+        "theme": "light",
+        "cssVar": "--nx-on-accent",
         "canonical": "oklch(100.0% 0.000 89.9)",
         "tonalRamp": [
           "#0b0b0b",
-          "#252525",
-          "#424242",
-          "#616161",
-          "#828282",
-          "#a5a5a5",
-          "#c9c9c9",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#7d7d7d",
+          "#9e9e9e",
+          "#c4c4c4",
           "#eeeeee"
-        ],
-        "theme": "light",
-        "cssVar": "--nx-on-accent"
+        ]
       },
       "paper": {
         "role": "neutral",
-        "displayName": "Papel",
-        "canonical": "oklch(100.0% 0.000 89.9)",
-        "tonalRamp": [
-          "#0b0b0b",
-          "#252525",
-          "#424242",
-          "#616161",
-          "#828282",
-          "#a5a5a5",
-          "#c9c9c9",
-          "#eeeeee"
-        ],
+        "displayName": "Papel frío",
         "theme": "light",
-        "cssVar": "--nx-bg / --nx-surface"
+        "cssVar": "--nx-bg",
+        "canonical": "oklch(98.8% 0.001 286.4)",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#242425",
+          "#404040",
+          "#5d5d5e",
+          "#7d7d7e",
+          "#9e9e9f",
+          "#c4c4c5",
+          "#eeeeef"
+        ]
       },
       "paper-side": {
         "role": "neutral",
         "displayName": "Lateral",
-        "canonical": "oklch(97.6% 0.001 286.4)",
+        "theme": "light",
+        "cssVar": "--nx-bg-soft",
+        "canonical": "oklch(97.0% 0.003 264.5)",
         "tonalRamp": [
           "#0b0b0c",
-          "#252526",
-          "#424243",
-          "#616162",
-          "#828283",
-          "#a5a5a6",
-          "#c9c9ca",
-          "#eeeeef"
-        ],
+          "#232425",
+          "#3f4041",
+          "#5d5e5f",
+          "#7c7d7f",
+          "#9d9ea0",
+          "#c3c4c6",
+          "#edeef0"
+        ]
+      },
+      "paper-surface": {
+        "role": "neutral",
+        "displayName": "Superficie",
         "theme": "light",
-        "cssVar": "--nx-bg-soft"
+        "cssVar": "--nx-surface",
+        "canonical": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#7d7d7d",
+          "#9e9e9e",
+          "#c4c4c4",
+          "#eeeeee"
+        ]
       },
       "paper-hover": {
         "role": "neutral",
         "displayName": "Gris de selección",
-        "canonical": "oklch(94.7% 0.004 286.3)",
-        "tonalRamp": [
-          "#0b0b0d",
-          "#252527",
-          "#424244",
-          "#616163",
-          "#828285",
-          "#a5a5a7",
-          "#c9c9cc",
-          "#eeeef1"
-        ],
         "theme": "light",
-        "cssVar": "--nx-surface-hover"
+        "cssVar": "--nx-surface-hover",
+        "canonical": "oklch(95.4% 0.005 258.3)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#232426",
+          "#3e4042",
+          "#5c5e60",
+          "#7c7d80",
+          "#9d9ea1",
+          "#c2c4c7",
+          "#edeff2"
+        ]
       },
       "hairline": {
         "role": "neutral",
         "displayName": "Filete",
-        "canonical": "oklch(92.9% 0.005 286.3)",
-        "tonalRamp": [
-          "#0b0b0d",
-          "#252528",
-          "#424245",
-          "#616164",
-          "#828285",
-          "#a4a4a8",
-          "#c9c9cc",
-          "#eeeef2"
-        ],
         "theme": "light",
-        "cssVar": "--nx-border"
+        "cssVar": "--nx-border",
+        "canonical": "oklch(92.5% 0.006 264.5)",
+        "tonalRamp": [
+          "#0a0b0e",
+          "#232427",
+          "#3e4043",
+          "#5c5e61",
+          "#7b7d81",
+          "#9c9ea2",
+          "#c2c4c8",
+          "#eceef2"
+        ]
       },
       "hairline-strong": {
         "role": "neutral",
         "displayName": "Filete marcado",
-        "canonical": "oklch(87.2% 0.010 286.2)",
-        "tonalRamp": [
-          "#0b0b0f",
-          "#24242a",
-          "#414147",
-          "#606067",
-          "#828288",
-          "#a4a4ab",
-          "#c8c8cf",
-          "#eeeef5"
-        ],
         "theme": "light",
-        "cssVar": "--nx-border-strong"
+        "cssVar": "--nx-border-strong",
+        "canonical": "oklch(84.5% 0.010 267.3)",
+        "tonalRamp": [
+          "#090b10",
+          "#222429",
+          "#3d4045",
+          "#5b5e64",
+          "#7a7d84",
+          "#9b9ea5",
+          "#c1c4cb",
+          "#ebeef6"
+        ]
       },
       "ink": {
         "role": "neutral",
         "displayName": "Tinta",
-        "canonical": "oklch(22.4% 0.010 285.6)",
-        "tonalRamp": [
-          "#0b0b0f",
-          "#24242a",
-          "#414147",
-          "#606067",
-          "#818288",
-          "#a4a4ab",
-          "#c8c8cf",
-          "#eeeef5"
-        ],
         "theme": "light",
-        "cssVar": "--nx-text"
+        "cssVar": "--nx-text",
+        "canonical": "oklch(20.9% 0.006 271.1)",
+        "tonalRamp": [
+          "#0a0b0e",
+          "#232427",
+          "#3e4043",
+          "#5c5d61",
+          "#7c7d81",
+          "#9d9ea2",
+          "#c2c4c8",
+          "#edeef3"
+        ]
       },
       "ink-dim": {
         "role": "neutral",
         "displayName": "Tinta atenuada",
-        "canonical": "oklch(47.8% 0.016 285.8)",
-        "tonalRamp": [
-          "#0a0a12",
-          "#24242d",
-          "#41414a",
-          "#60606a",
-          "#81818c",
-          "#a4a4af",
-          "#c8c8d3",
-          "#ededf9"
-        ],
         "theme": "light",
-        "cssVar": "--nx-text-muted"
+        "cssVar": "--nx-text-muted",
+        "canonical": "oklch(48.6% 0.017 268.3)",
+        "tonalRamp": [
+          "#080b12",
+          "#20242c",
+          "#3c4049",
+          "#595d67",
+          "#797d88",
+          "#9a9ea9",
+          "#bfc4cf",
+          "#eaeefa"
+        ]
       },
       "ink-faint": {
         "role": "neutral",
         "displayName": "Tinta tenue",
-        "canonical": "oklch(52.8% 0.017 285.8)",
-        "tonalRamp": [
-          "#0a0a12",
-          "#24242d",
-          "#41414b",
-          "#60606b",
-          "#81818c",
-          "#a4a4b0",
-          "#c8c8d4",
-          "#ededfa"
-        ],
         "theme": "light",
-        "cssVar": "--nx-text-faint"
+        "cssVar": "--nx-text-faint",
+        "canonical": "oklch(58.2% 0.016 264.4)",
+        "tonalRamp": [
+          "#080b12",
+          "#20242c",
+          "#3b4049",
+          "#595e67",
+          "#787d87",
+          "#999fa9",
+          "#bfc4cf",
+          "#e9effa"
+        ]
       },
-      "overdue-orange": {
+      "amber": {
         "role": "tertiary",
-        "displayName": "Naranja de atraso",
-        "canonical": "oklch(52.5% 0.136 49.5)",
-        "tonalRamp": [
-          "#180600",
-          "#3f1800",
-          "#6a2e01",
-          "#994502",
-          "#c1662c",
-          "#e88952",
-          "#ffb68e",
-          "#feeadf"
-        ],
+        "displayName": "Ámbar de atraso",
         "theme": "light",
-        "cssVar": "--nx-warning (= --nx-prio-2)"
+        "cssVar": "--nx-warning",
+        "canonical": "oklch(59.9% 0.135 61.8)",
+        "tonalRamp": [
+          "#2c0000",
+          "#4d0000",
+          "#6f2600",
+          "#914700",
+          "#b56702",
+          "#da8939",
+          "#ffaf62",
+          "#ffd98c"
+        ]
       },
-      "success-green": {
-        "role": "neutral",
-        "displayName": "Verde de éxito",
-        "canonical": "oklch(53.0% 0.113 158.8)",
-        "tonalRamp": [
-          "#000f06",
-          "#002e1a",
-          "#014f30",
-          "#037449",
-          "#3a9769",
-          "#60bb8b",
-          "#85e0ae",
-          "#c3ffdc"
-        ],
+      "ember": {
+        "role": "tertiary",
+        "displayName": "Brasa (P1)",
         "theme": "light",
-        "cssVar": "--nx-success"
+        "cssVar": "--nx-prio-1",
+        "canonical": "oklch(64.1% 0.183 37.1)",
+        "tonalRamp": [
+          "#360000",
+          "#5a0000",
+          "#7f0000",
+          "#a42f01",
+          "#ca522f",
+          "#f07551",
+          "#ff9c77",
+          "#ffc6a0"
+        ]
       },
-      "danger-red": {
-        "role": "neutral",
-        "displayName": "Rojo de peligro",
-        "canonical": "oklch(55.1% 0.187 27.1)",
-        "tonalRamp": [
-          "#1f0001",
-          "#4d0003",
-          "#800109",
-          "#b3181b",
-          "#dc463f",
-          "#fe7468",
-          "#feb3aa",
-          "#fee9e6"
-        ],
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Peligro",
         "theme": "light",
-        "cssVar": "--nx-danger (= --nx-prio-1)"
+        "cssVar": "--nx-danger",
+        "canonical": "oklch(58.5% 0.177 28.3)",
+        "tonalRamp": [
+          "#360000",
+          "#5b0000",
+          "#800000",
+          "#a52b23",
+          "#cb4f43",
+          "#f17264",
+          "#ff9888",
+          "#ffc3b1"
+        ]
+      },
+      "scrim": {
+        "role": "neutral",
+        "displayName": "Velo de capas",
+        "theme": "light",
+        "cssVar": "--color-scrim"
       },
       "night": {
         "role": "neutral",
-        "displayName": "Papel (oscuro)",
-        "canonical": "oklch(18.8% 0.006 285.8)",
-        "tonalRamp": [
-          "#0b0b0e",
-          "#252528",
-          "#414245",
-          "#616165",
-          "#828286",
-          "#a4a4a9",
-          "#c8c9cd",
-          "#eeeef2"
-        ],
+        "displayName": "Papel frío (oscuro)",
         "theme": "dark",
-        "cssVar": "--nx-bg / --nx-surface"
+        "cssVar": "--nx-bg",
+        "canonical": "oklch(16.4% 0.005 264.4)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#232426",
+          "#3e4042",
+          "#5c5e60",
+          "#7c7d80",
+          "#9d9ea1",
+          "#c2c4c7",
+          "#edeef2"
+        ]
       },
       "night-side": {
         "role": "neutral",
         "displayName": "Lateral (oscuro)",
-        "canonical": "oklch(16.9% 0.004 286.0)",
-        "tonalRamp": [
-          "#0b0b0d",
-          "#252527",
-          "#424244",
-          "#616163",
-          "#828285",
-          "#a5a5a7",
-          "#c9c9cc",
-          "#eeeef1"
-        ],
         "theme": "dark",
-        "cssVar": "--nx-bg-soft"
+        "cssVar": "--nx-bg-soft",
+        "canonical": "oklch(14.9% 0.005 264.5)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#232426",
+          "#3e4042",
+          "#5c5e60",
+          "#7c7d80",
+          "#9d9ea1",
+          "#c2c4c7",
+          "#edeef2"
+        ]
+      },
+      "night-surface": {
+        "role": "neutral",
+        "displayName": "Superficie (oscuro)",
+        "theme": "dark",
+        "cssVar": "--nx-surface",
+        "canonical": "oklch(19.2% 0.008 274.5)",
+        "tonalRamp": [
+          "#0a0b0f",
+          "#232428",
+          "#3e3f44",
+          "#5c5d62",
+          "#7c7d82",
+          "#9d9ea4",
+          "#c2c4ca",
+          "#edeef4"
+        ]
       },
       "night-hover": {
         "role": "neutral",
         "displayName": "Gris de selección (oscuro)",
-        "canonical": "oklch(24.1% 0.009 285.7)",
-        "tonalRamp": [
-          "#0b0b0f",
-          "#24242a",
-          "#414147",
-          "#606166",
-          "#828288",
-          "#a4a4ab",
-          "#c8c8cf",
-          "#eeeef5"
-        ],
         "theme": "dark",
-        "cssVar": "--nx-surface-hover"
+        "cssVar": "--nx-surface-hover",
+        "canonical": "oklch(23.1% 0.010 268.2)",
+        "tonalRamp": [
+          "#090b10",
+          "#222429",
+          "#3d4045",
+          "#5b5d64",
+          "#7b7d83",
+          "#9c9ea5",
+          "#c1c4cb",
+          "#ebeef6"
+        ]
       },
       "night-hairline": {
         "role": "neutral",
         "displayName": "Filete (oscuro)",
-        "canonical": "oklch(27.1% 0.011 285.6)",
-        "tonalRamp": [
-          "#0b0b10",
-          "#24242a",
-          "#414148",
-          "#606067",
-          "#818189",
-          "#a4a4ac",
-          "#c8c8d0",
-          "#edeef6"
-        ],
         "theme": "dark",
-        "cssVar": "--nx-border"
+        "cssVar": "--nx-border",
+        "canonical": "oklch(26.4% 0.012 264.3)",
+        "tonalRamp": [
+          "#090b10",
+          "#21242a",
+          "#3c4046",
+          "#5a5e65",
+          "#7a7d85",
+          "#9b9ea6",
+          "#c0c4cc",
+          "#eaeff7"
+        ]
       },
       "night-hairline-strong": {
         "role": "neutral",
         "displayName": "Filete marcado (oscuro)",
-        "canonical": "oklch(32.8% 0.014 285.6)",
-        "tonalRamp": [
-          "#0a0a11",
-          "#24242c",
-          "#414149",
-          "#606069",
-          "#81818b",
-          "#a4a4ae",
-          "#c8c8d2",
-          "#ededf8"
-        ],
         "theme": "dark",
-        "cssVar": "--nx-border-strong"
+        "cssVar": "--nx-border-strong",
+        "canonical": "oklch(36.3% 0.015 264.4)",
+        "tonalRamp": [
+          "#080b12",
+          "#20242b",
+          "#3c4048",
+          "#595e66",
+          "#797d86",
+          "#9a9ea8",
+          "#bfc4ce",
+          "#e9eff9"
+        ]
       },
       "night-ink": {
         "role": "neutral",
         "displayName": "Tinta (oscuro)",
-        "canonical": "oklch(92.9% 0.005 286.3)",
-        "tonalRamp": [
-          "#0b0b0d",
-          "#252528",
-          "#424245",
-          "#616164",
-          "#828285",
-          "#a4a4a8",
-          "#c9c9cc",
-          "#eeeef2"
-        ],
         "theme": "dark",
-        "cssVar": "--nx-text"
+        "cssVar": "--nx-text",
+        "canonical": "oklch(94.8% 0.005 258.3)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#232426",
+          "#3e4042",
+          "#5c5e60",
+          "#7c7d80",
+          "#9d9ea1",
+          "#c2c4c7",
+          "#edeff2"
+        ]
       },
       "night-ink-dim": {
         "role": "neutral",
         "displayName": "Tinta atenuada (oscuro)",
-        "canonical": "oklch(69.9% 0.016 286.0)",
-        "tonalRamp": [
-          "#0a0a12",
-          "#24242d",
-          "#41414a",
-          "#60606a",
-          "#81818c",
-          "#a4a4af",
-          "#c8c8d3",
-          "#ededf9"
-        ],
         "theme": "dark",
-        "cssVar": "--nx-text-muted"
+        "cssVar": "--nx-text-muted",
+        "canonical": "oklch(69.9% 0.015 268.4)",
+        "tonalRamp": [
+          "#080b12",
+          "#21242c",
+          "#3c4048",
+          "#5a5d67",
+          "#797d87",
+          "#9a9ea8",
+          "#c0c4ce",
+          "#eaeef9"
+        ]
       },
       "night-ink-faint": {
         "role": "neutral",
         "displayName": "Tinta tenue (oscuro)",
-        "canonical": "oklch(64.0% 0.016 285.9)",
-        "tonalRamp": [
-          "#0a0a12",
-          "#24242d",
-          "#41414a",
-          "#60606a",
-          "#81818c",
-          "#a4a4af",
-          "#c8c8d4",
-          "#ededf9"
-        ],
         "theme": "dark",
-        "cssVar": "--nx-text-faint"
-      },
-      "indigo-accent-night": {
-        "role": "primary",
-        "displayName": "Índigo de acción (oscuro)",
-        "canonical": "oklch(65.2% 0.148 278.0)",
+        "cssVar": "--nx-text-faint",
+        "canonical": "oklch(55.8% 0.017 264.4)",
         "tonalRamp": [
-          "#080030",
-          "#1d0a6a",
-          "#34318e",
-          "#5054b3",
-          "#6f76d9",
-          "#919aff",
-          "#bcc5ff",
-          "#eaedff"
-        ],
+          "#080b12",
+          "#20242c",
+          "#3b4049",
+          "#595e67",
+          "#787d87",
+          "#999fa9",
+          "#bfc4cf",
+          "#e9effa"
+        ]
+      },
+      "glacier-accent-night": {
+        "role": "primary",
+        "displayName": "Turquesa glaciar (oscuro)",
         "theme": "dark",
-        "cssVar": "--nx-accent"
-      },
-      "indigo-accent-strong-night": {
-        "role": "primary",
-        "displayName": "Índigo firme (oscuro)",
-        "canonical": "oklch(70.7% 0.127 279.1)",
+        "cssVar": "--nx-accent",
+        "canonical": "oklch(75.7% 0.122 184.2)",
         "tonalRamp": [
-          "#080030",
-          "#1d1360",
-          "#373583",
-          "#5356a7",
-          "#7378cd",
-          "#949cf3",
-          "#bdc4fe",
-          "#ebedfe"
-        ],
+          "#001711",
+          "#00342b",
+          "#005247",
+          "#007266",
+          "#009486",
+          "#0db7a7",
+          "#51decd",
+          "#82fff8"
+        ]
+      },
+      "glacier-accent-strong-night": {
+        "role": "primary",
+        "displayName": "Glaciar firme (oscuro)",
         "theme": "dark",
-        "cssVar": "--nx-accent-strong"
-      },
-      "indigo-accent-soft-night": {
-        "role": "primary",
-        "displayName": "Velo índigo (oscuro)",
-        "canonical": "oklch(65.2% 0.148 278.0 / 0.16)",
+        "cssVar": "--nx-accent-strong",
+        "canonical": "oklch(80.9% 0.112 185.1)",
         "tonalRamp": [
-          "#080030",
-          "#1d0a6a",
-          "#34318e",
-          "#5054b3",
-          "#6f76d9",
-          "#919aff",
-          "#bcc5ff",
-          "#eaedff"
-        ],
+          "#001611",
+          "#00332b",
+          "#005148",
+          "#007166",
+          "#009286",
+          "#30b5a8",
+          "#60dcce",
+          "#8efff8"
+        ]
+      },
+      "glacier-text-night": {
+        "role": "primary",
+        "displayName": "Texto glaciar (oscuro)",
+        "theme": "dark",
+        "cssVar": "--nx-accent-text",
+        "canonical": "oklch(80.9% 0.112 185.1)",
+        "tonalRamp": [
+          "#001611",
+          "#00332b",
+          "#005148",
+          "#007166",
+          "#009286",
+          "#30b5a8",
+          "#60dcce",
+          "#8efff8"
+        ]
+      },
+      "glacier-soft-night": {
+        "role": "primary",
+        "displayName": "Velo glaciar (oscuro)",
         "theme": "dark",
         "cssVar": "--nx-accent-soft"
       },
       "on-accent-night": {
         "role": "primary",
-        "displayName": "Texto sobre índigo (oscuro)",
-        "canonical": "oklch(18.1% 0.033 279.9)",
-        "tonalRamp": [
-          "#090919",
-          "#222335",
-          "#3e4053",
-          "#5d6074",
-          "#7e8196",
-          "#a0a3ba",
-          "#c4c7df",
-          "#ebedfe"
-        ],
+        "displayName": "Texto sobre acento (oscuro)",
         "theme": "dark",
-        "cssVar": "--nx-on-accent"
+        "cssVar": "--nx-on-accent",
+        "canonical": "oklch(22.1% 0.034 185.2)",
+        "tonalRamp": [
+          "#00100d",
+          "#0d2926",
+          "#2a4642",
+          "#486460",
+          "#678480",
+          "#87a6a1",
+          "#acccc7",
+          "#d6f7f1"
+        ]
       },
-      "overdue-orange-night": {
+      "amber-night": {
         "role": "tertiary",
-        "displayName": "Naranja de atraso (oscuro)",
-        "canonical": "oklch(77.6% 0.125 60.4)",
-        "tonalRamp": [
-          "#160700",
-          "#3a1d00",
-          "#633502",
-          "#8e4f04",
-          "#b86e25",
-          "#de914d",
-          "#feb87d",
-          "#ffeada"
-        ],
+        "displayName": "Ámbar de atraso (oscuro)",
         "theme": "dark",
-        "cssVar": "--nx-warning (= --nx-prio-2)"
-      },
-      "success-green-night": {
-        "role": "neutral",
-        "displayName": "Verde de éxito (oscuro)",
-        "canonical": "oklch(73.5% 0.136 159.3)",
+        "cssVar": "--nx-warning",
+        "canonical": "oklch(76.2% 0.131 73.9)",
         "tonalRamp": [
-          "#000f06",
-          "#002e1a",
-          "#014f31",
-          "#02744a",
-          "#0e9a64",
-          "#47bf86",
-          "#70e4a9",
-          "#c3ffdc"
-        ],
+          "#270000",
+          "#460f00",
+          "#662f00",
+          "#884f00",
+          "#ab6f00",
+          "#ce9130",
+          "#f7b65b",
+          "#ffe186"
+        ]
+      },
+      "ember-night": {
+        "role": "tertiary",
+        "displayName": "Brasa (P1) (oscuro)",
         "theme": "dark",
-        "cssVar": "--nx-success"
-      },
-      "danger-red-night": {
-        "role": "neutral",
-        "displayName": "Rojo de peligro (oscuro)",
-        "canonical": "oklch(70.3% 0.154 23.7)",
+        "cssVar": "--nx-prio-1",
+        "canonical": "oklch(70.6% 0.160 43.4)",
         "tonalRamp": [
-          "#1f0001",
-          "#4c0108",
-          "#800215",
-          "#a73134",
-          "#ce5654",
-          "#f67a75",
-          "#ffb2ad",
-          "#fee9e7"
-        ],
+          "#350000",
+          "#590000",
+          "#7d0400",
+          "#a23200",
+          "#c8561b",
+          "#ee7843",
+          "#ff9f6a",
+          "#ffc994"
+        ]
+      },
+      "danger-night": {
+        "role": "tertiary",
+        "displayName": "Peligro (oscuro)",
         "theme": "dark",
-        "cssVar": "--nx-danger (= --nx-prio-1)"
-      },
-      "scrim": {
-        "role": "neutral",
-        "displayName": "Velo",
-        "canonical": "oklch(0.0% 0.000 0.0 / 0.35)",
+        "cssVar": "--nx-danger",
+        "canonical": "oklch(69.6% 0.160 29.9)",
         "tonalRamp": [
-          "#0b0b0b",
-          "#252525",
-          "#424242",
-          "#616161",
-          "#828282",
-          "#a5a5a5",
-          "#c9c9c9",
-          "#eeeeee"
-        ],
-        "theme": "both",
-        "cssVar": "bg-black/35 (Dialog)"
+          "#360000",
+          "#5b0000",
+          "#800000",
+          "#a52b1f",
+          "#cb5040",
+          "#f17260",
+          "#ff9985",
+          "#ffc3ae"
+        ]
+      },
+      "scrim-night": {
+        "role": "neutral",
+        "displayName": "Velo de capas (oscuro)",
+        "theme": "dark",
+        "cssVar": "--color-scrim"
       }
     },
     "typographyMeta": {
@@ -568,74 +609,74 @@
       "label": {
         "displayName": "Etiqueta",
         "purpose": "kbd, segmentos pequeños, barra móvil, iniciales de día. Suelo de 12px."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Geist Mono: cifras, horas, duraciones, XP, atajos en kbd y códigos de prioridad. Nunca frases enteras."
       }
     },
     "shadows": [
       {
-        "name": "card",
-        "value": "0 1px 2px rgba(20, 20, 30, 0.04)",
-        "dark": "0 1px 2px rgba(0, 0, 0, 0.3)",
-        "cssVar": "--nx-shadow-card",
-        "purpose": "Card y tooltip; casi invisible, solo asienta el borde."
+        "name": "shadow-card",
+        "value": "none",
+        "purpose": "La página es plana: las tarjetas se separan por su filete de 1 px."
       },
       {
-        "name": "dialog",
-        "value": "0 24px 60px -12px rgba(20, 20, 30, 0.28)",
-        "dark": "0 24px 60px -12px rgba(0, 0, 0, 0.6)",
-        "cssVar": "--nx-shadow-dialog",
-        "purpose": "Lo que flota: diálogos, menús, popovers."
+        "name": "shadow-dialog (claro)",
+        "value": "0 0 0 1px rgb(15 17 20 / 0.06), 0 16px 48px -12px rgb(15 17 20 / 0.22)",
+        "purpose": "Solo capas flotantes: diálogos, menús, avisos, paleta."
       },
       {
-        "name": "active-row",
-        "value": "inset 2px 0 0 var(--color-accent)",
-        "purpose": "Fila con el cursor de teclado en la tabla de Tareas."
-      },
-      {
-        "name": "focus-outline",
-        "value": "outline: 2px solid var(--color-accent); outline-offset: 2px",
-        "purpose": "Foco global de teclado (:focus-visible). Los campos sin caja lo sustituyen por una línea inferior índigo."
-      },
-      {
-        "name": "today-ring",
-        "value": "0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-text)",
-        "purpose": "Día actual en la semana de un hábito."
+        "name": "shadow-dialog (oscuro)",
+        "value": "0 0 0 1px rgb(255 255 255 / 0.06), 0 24px 64px -16px rgb(0 0 0 / 0.75)",
+        "purpose": "Igual en oscuro; el anillo blanco al 6 % marca el borde sobre el negro."
       }
     ],
     "motion": [
       {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "Entradas y cambios de estado."
+      },
+      {
+        "name": "ease-exit",
+        "value": "cubic-bezier(0.4, 0, 1, 1)",
+        "purpose": "Salidas: acelera al irse."
+      },
+      {
         "name": "ease-out-quart",
         "value": "cubic-bezier(0.25, 1, 0.5, 1)",
-        "purpose": "Curva de entradas y transiciones."
+        "purpose": "Heredada de la v1 mientras haya componentes que la usen."
+      },
+      {
+        "name": "ease-spring",
+        "value": "linear(0, 0.2 6%, 0.53 15%, 0.79 25%, 0.93 36%, 0.99 48%, 1.004 60%, 1)",
+        "purpose": "Aproximación CSS del muelle «ui» (640/46)."
       },
       {
         "name": "dur-fast",
         "value": "120ms",
-        "purpose": "Hover, skip-link; listas con movimiento reducido."
+        "purpose": "Hover y cambios pequeños; fundido con movimiento reducido."
       },
       {
         "name": "dur-base",
         "value": "180ms",
-        "purpose": "listItemMotion: entrada con y -4px y salida plegando altura."
+        "purpose": "Entradas."
       },
       {
         "name": "dur-slow",
         "value": "280ms",
-        "purpose": "Transiciones largas."
+        "purpose": "Paneles."
       },
       {
-        "name": "dialog",
-        "value": "150ms, opacity + scale 0.98 + y 6px",
-        "purpose": "Entrada y salida de diálogos y su velo."
+        "name": "dur-celebrate",
+        "value": "700ms",
+        "purpose": "Destello al completar: única microcelebración, desactivable."
       },
       {
-        "name": "now-block-enter",
-        "value": "220ms, opacity + y 4px",
-        "purpose": "Cambio de tarea en el bloque Ahora."
-      },
-      {
-        "name": "reduced-motion",
-        "value": "solo opacidad (120ms en listas, 0 en diálogos); CSS global a 0.01ms",
-        "purpose": "prefers-reduced-motion: nada se desplaza, escala ni pliega."
+        "name": "spring-ui / pop / soft",
+        "value": "640/46 · 900/34 · 380/40 (rigidez/amortiguación)",
+        "purpose": "Muelles de framer-motion en src/design/motion.ts; motionFor() los cambia por un fundido con movimiento reducido."
       }
     ],
     "breakpoints": [
@@ -659,21 +700,24 @@
       "light": {
         "selector": ":root",
         "tokens": [
+          "glacier-accent",
+          "glacier-accent-strong",
+          "glacier-text",
+          "glacier-soft",
+          "on-accent",
           "paper",
           "paper-side",
+          "paper-surface",
           "paper-hover",
           "hairline",
           "hairline-strong",
           "ink",
           "ink-dim",
           "ink-faint",
-          "indigo-accent",
-          "indigo-accent-strong",
-          "indigo-accent-soft",
-          "on-accent",
-          "overdue-orange",
-          "success-green",
-          "danger-red"
+          "amber",
+          "ember",
+          "danger",
+          "scrim"
         ]
       },
       "dark": {
@@ -681,42 +725,41 @@
         "tokens": [
           "night",
           "night-side",
+          "night-surface",
           "night-hover",
           "night-hairline",
           "night-hairline-strong",
           "night-ink",
           "night-ink-dim",
           "night-ink-faint",
-          "indigo-accent-night",
-          "indigo-accent-strong-night",
-          "indigo-accent-soft-night",
+          "glacier-accent-night",
+          "glacier-accent-strong-night",
+          "glacier-text-night",
+          "glacier-soft-night",
           "on-accent-night",
-          "overdue-orange-night",
-          "success-green-night",
-          "danger-red-night"
-        ]
+          "amber-night",
+          "ember-night",
+          "danger-night",
+          "scrim-night"
+        ],
+        "primary": true
       }
     },
     "contrast": {
-      "ink-dim sobre paper / side / hover (claro)": "6.61 / 6.17 / 5.66",
-      "ink-faint sobre paper / side / hover (claro)": "5.34 / 4.99 / 4.57 (AA)",
-      "night-ink-dim sobre night / side / hover": "6.91 / 7.13 / 6.11",
-      "night-ink-faint sobre night / side / hover": "5.50 / 5.68 / 4.87 (AA)",
-      "on-accent sobre indigo-accent": "5.88",
-      "on-accent-night sobre indigo-accent-night": "5.67",
-      "indigo-accent sobre indigo-accent-soft": "5.11 (claro) / 4.53 (oscuro)",
-      "overdue-orange sobre paper / hover": "5.70 / 4.88",
-      "overdue-orange-night sobre night": "8.86",
-      "danger-red sobre danger 10%": "4.59 (claro) / 5.77 (oscuro)",
-      "PENDIENTE success-green sobre paper-hover (claro)": "4.27, no llega a AA",
-      "PENDIENTE on-accent-night sobre índigo + velo negro 15% (kbd del primario, oscuro)": "4.24, no llega a AA",
-      "PENDIENTE hairline-strong sobre paper (no textual)": "1.47, por debajo de 3:1 (interruptor apagado, borde de días pendientes)"
+      "ink / ink-dim / ink-faint sobre paper (claro)": "17.17 / 6.18 / 4.11",
+      "ink-faint sobre paper-side / paper-hover (claro)": "3.90 / 3.72",
+      "night-ink / ink-dim / ink-faint sobre night": "16.61 / 7.20 / 4.12",
+      "on-accent sobre glacier-accent (claro / oscuro)": "3.98 / 8.30",
+      "glacier-text sobre paper (claro) / night (oscuro)": "5.04 / 11.16",
+      "amber sobre paper / night": "3.98 / 8.89",
+      "nota": "AA no es requisito en la v2; el texto principal tiene que leerse a simple vista."
     },
     "source": {
-      "artifact": "src/ (app construida)",
-      "stylesheet": "src/index.css (:root y :root[data-theme='dark'])",
-      "primitives": "src/design/primitives/*",
-      "status": "Derivado del código construido tras el rediseño; sustituye a la versión sacada del mock."
+      "artifact": "src/ (app construida) + mockup docs/design/rediseno-v2/ronda-2/direcciones/linea/",
+      "stylesheet": "src/index.css (--nx-ref-*, :root y :root[data-theme='dark']) + src/fonts.css",
+      "motion": "src/design/motion.ts",
+      "primitives": "src/design/primitives/* (sin cambios hasta la fase 1)",
+      "status": "Rediseño v2, fase 0 (#176): tokens de Línea cerrados; los componentes conservan la forma de la v1 con los colores y fuentes nuevos."
     }
   },
   "components": [
@@ -726,7 +769,7 @@
       "refersTo": "button-primary",
       "description": "La única acción índigo de la pantalla; nombra su objeto y, en formularios, lleva su atajo.",
       "html": "<button class=\"ds-btn-primary\">Crear tarea <kbd>Ctrl&nbsp;↵</kbd></button>",
-      "css": ".ds-btn-primary{font-family:var(--font-sans,'InterVariable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 12px;border-radius:6px;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms cubic-bezier(.25,1,.5,1),color 120ms cubic-bezier(.25,1,.5,1);border:0;background:var(--nx-accent,#5058c8);color:var(--nx-on-accent,#fff);}.ds-btn-primary:hover{background:var(--nx-accent-strong,#4249b3);}.ds-btn-primary:focus-visible{outline:2px solid var(--nx-accent,#5058c8);outline-offset:2px;}.ds-btn-primary kbd{font:inherit;font-size:12px;font-weight:500;margin-left:4px;padding:0 4px;border-radius:4px;background:rgba(0,0,0,.15);}"
+      "css": ".ds-btn-primary{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 12px;border-radius:6px;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms cubic-bezier(.25,1,.5,1),color 120ms cubic-bezier(.25,1,.5,1);border:0;background:var(--nx-accent,#0d8f83);color:var(--nx-on-accent,#fff);}.ds-btn-primary:hover{background:var(--nx-accent-strong,#0a7a70);}.ds-btn-primary:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}.ds-btn-primary kbd{font:inherit;font-size:12px;font-weight:500;margin-left:4px;padding:0 4px;border-radius:4px;background:rgba(0,0,0,.15);}"
     },
     {
       "name": "Botón secundario",
@@ -734,7 +777,7 @@
       "refersTo": "button-secondary",
       "description": "Acciones de apoyo: Hecha, Nueva vista, Volver a hoy, \"Nuevo\" del navbar.",
       "html": "<button class=\"ds-btn-secondary\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg> Hecha</button>",
-      "css": ".ds-btn-secondary{font-family:var(--font-sans,'InterVariable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 12px;border-radius:6px;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms cubic-bezier(.25,1,.5,1),color 120ms cubic-bezier(.25,1,.5,1);border:1px solid var(--nx-border,#e7e7eb);background:var(--nx-surface,#fff);color:var(--nx-text,#1b1b20);}.ds-btn-secondary:hover{background:var(--nx-surface-hover,#ededf0);}.ds-btn-secondary:focus-visible{outline:2px solid var(--nx-accent,#5058c8);outline-offset:2px;}"
+      "css": ".ds-btn-secondary{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 12px;border-radius:6px;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms cubic-bezier(.25,1,.5,1),color 120ms cubic-bezier(.25,1,.5,1);border:1px solid var(--nx-border,#e4e6ea);background:var(--nx-surface,#fff);color:var(--nx-text,#17181b);}.ds-btn-secondary:hover{background:var(--nx-surface-hover,#eef0f3);}.ds-btn-secondary:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}"
     },
     {
       "name": "Botón fantasma",
@@ -742,7 +785,7 @@
       "refersTo": "button-ghost",
       "description": "Acciones terciarias sin borde: Cancelar, Pasar a mañana, Cerrar el día.",
       "html": "<button class=\"ds-btn-ghost\">Cancelar</button>",
-      "css": ".ds-btn-ghost{font-family:var(--font-sans,'InterVariable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 12px;border-radius:6px;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms cubic-bezier(.25,1,.5,1),color 120ms cubic-bezier(.25,1,.5,1);border:0;background:transparent;color:var(--nx-text-muted,#5c5c66);}.ds-btn-ghost:hover{background:var(--nx-surface-hover,#ededf0);color:var(--nx-text,#1b1b20);}.ds-btn-ghost:focus-visible{outline:2px solid var(--nx-accent,#5058c8);outline-offset:2px;}"
+      "css": ".ds-btn-ghost{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 12px;border-radius:6px;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms cubic-bezier(.25,1,.5,1),color 120ms cubic-bezier(.25,1,.5,1);border:0;background:transparent;color:var(--nx-text-muted,#5b5f69);}.ds-btn-ghost:hover{background:var(--nx-surface-hover,#eef0f3);color:var(--nx-text,#17181b);}.ds-btn-ghost:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}"
     },
     {
       "name": "Fichas de propiedad",
@@ -750,7 +793,7 @@
       "refersTo": "property-chip",
       "description": "Fila de propiedades del formulario de tarea; vacía muestra el nombre en tinta atenuada.",
       "html": "<div class=\"ds-chips\"><button class=\"ds-chip\"><span class=\"ds-prio\"><i style=\"height:5px\"></i><i style=\"height:8px\"></i><i style=\"height:11px\"></i></span>Alta</button><button class=\"ds-chip\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8 2v4\"/><path d=\"M16 2v4\"/><rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M3 10h18\"/></svg>Lun 28 · 10:00</button><button class=\"ds-chip empty\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><line x1=\"10\" x2=\"14\" y1=\"2\" y2=\"2\"/><line x1=\"12\" x2=\"15\" y1=\"14\" y2=\"11\"/><circle cx=\"12\" cy=\"14\" r=\"8\"/></svg>Estimación</button></div>",
-      "css": ".ds-chips{display:flex;flex-wrap:wrap;gap:6px;}.ds-chip{font-family:var(--font-sans,'InterVariable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;gap:6px;height:28px;max-width:14rem;padding:0 10px;border:1px solid var(--nx-border,#e7e7eb);border-radius:6px;background:transparent;color:var(--nx-text,#1b1b20);font-size:13px;font-weight:500;cursor:pointer;transition:background-color 120ms;}.ds-chip.empty{color:var(--nx-text-muted,#5c5c66);}.ds-chip:hover,.ds-chip[aria-expanded=true]{background:var(--nx-surface-hover,#ededf0);}.ds-chip:focus-visible{outline:2px solid var(--nx-accent,#5058c8);outline-offset:2px;}.ds-prio{display:inline-flex;align-items:flex-end;gap:1px;height:12px;width:14px;flex:none;}.ds-prio i{width:3px;border-radius:1px;background:var(--nx-text-muted,#5c5c66);}"
+      "css": ".ds-chips{display:flex;flex-wrap:wrap;gap:6px;}.ds-chip{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;gap:6px;height:28px;max-width:14rem;padding:0 10px;border:1px solid var(--nx-border,#e4e6ea);border-radius:6px;background:transparent;color:var(--nx-text,#17181b);font-size:13px;font-weight:500;cursor:pointer;transition:background-color 120ms;}.ds-chip.empty{color:var(--nx-text-muted,#5b5f69);}.ds-chip:hover,.ds-chip[aria-expanded=true]{background:var(--nx-surface-hover,#eef0f3);}.ds-chip:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}.ds-prio{display:inline-flex;align-items:flex-end;gap:1px;height:12px;width:14px;flex:none;}.ds-prio i{width:3px;border-radius:1px;background:var(--nx-text-muted,#5b5f69);}"
     },
     {
       "name": "Campo de texto",
@@ -758,7 +801,7 @@
       "refersTo": "input",
       "description": "Input con caja: papel, filete, 6px; foco con borde y contorno índigo.",
       "html": "<input class=\"ds-input\" placeholder=\"Nombre del proyecto\" />",
-      "css": ".ds-input{font-family:var(--font-sans,'InterVariable',ui-sans-serif,system-ui,sans-serif);width:260px;padding:6px 10px;border:1px solid var(--nx-border,#e7e7eb);border-radius:6px;background:var(--nx-surface,#fff);color:var(--nx-text,#1b1b20);font-size:14px;line-height:20px;}.ds-input::placeholder{color:var(--nx-text-faint,#6a6a75);}.ds-input:focus-visible{border-color:var(--nx-accent,#5058c8);outline:2px solid var(--nx-accent,#5058c8);outline-offset:2px;}"
+      "css": ".ds-input{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);width:260px;padding:6px 10px;border:1px solid var(--nx-border,#e4e6ea);border-radius:6px;background:var(--nx-surface,#fff);color:var(--nx-text,#17181b);font-size:14px;line-height:20px;}.ds-input::placeholder{color:var(--nx-text-faint,#767b85);}.ds-input:focus-visible{border-color:var(--nx-accent,#0d8f83);outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}"
     },
     {
       "name": "Navegación lateral",
@@ -766,7 +809,7 @@
       "refersTo": "nav-item",
       "description": "Secciones con icono Lucide y atajo \"g x\"; la activa en gris de selección con icono índigo.",
       "html": "<nav class=\"ds-nav\"><a class=\"on\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\"/><rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\"/></svg><span>Hoy</span><small>g h</small></a><a href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"5\" width=\"6\" height=\"6\" rx=\"1\"/><path d=\"m3 17 2 2 4-4\"/><path d=\"M13 6h8\"/><path d=\"M13 12h8\"/><path d=\"M13 18h8\"/></svg><span>Tareas</span><small>g t</small></a></nav>",
-      "css": ".ds-nav{font-family:var(--font-sans,'InterVariable',ui-sans-serif,system-ui,sans-serif);width:224px;padding:12px;background:var(--nx-bg-soft,#f7f7f8);border-right:1px solid var(--nx-border,#e7e7eb);display:flex;flex-direction:column;gap:2px;}.ds-nav a{display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:6px;color:var(--nx-text-muted,#5c5c66);text-decoration:none;font-size:14px;font-weight:500;transition:background-color 120ms;}.ds-nav a:hover{background:var(--nx-surface-hover,#ededf0);color:var(--nx-text,#1b1b20);}.ds-nav a.on{background:var(--nx-surface-hover,#ededf0);color:var(--nx-text,#1b1b20);}.ds-nav a.on svg{color:var(--nx-accent,#5058c8);}.ds-nav a:focus-visible{outline:2px solid var(--nx-accent,#5058c8);outline-offset:2px;}.ds-nav small{margin-left:auto;font-size:12px;color:var(--nx-text-faint,#6a6a75);font-variant-numeric:tabular-nums;}"
+      "css": ".ds-nav{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);width:224px;padding:12px;background:var(--nx-bg-soft,#f4f5f7);border-right:1px solid var(--nx-border,#e4e6ea);display:flex;flex-direction:column;gap:2px;}.ds-nav a{display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:6px;color:var(--nx-text-muted,#5b5f69);text-decoration:none;font-size:14px;font-weight:500;transition:background-color 120ms;}.ds-nav a:hover{background:var(--nx-surface-hover,#eef0f3);color:var(--nx-text,#17181b);}.ds-nav a.on{background:var(--nx-surface-hover,#eef0f3);color:var(--nx-text,#17181b);}.ds-nav a.on svg{color:var(--nx-accent,#0d8f83);}.ds-nav a:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}.ds-nav small{margin-left:auto;font-size:12px;color:var(--nx-text-faint,#767b85);font-variant-numeric:tabular-nums;}"
     },
     {
       "name": "Segmentado / Pestañas",
@@ -774,15 +817,15 @@
       "refersTo": "segmented-control",
       "description": "tablist con marco de 8px; el segmento activo en gris de selección; flechas para cambiar.",
       "html": "<div class=\"ds-seg\" role=\"tablist\"><button role=\"tab\" aria-selected=\"true\">Semana</button><button role=\"tab\" aria-selected=\"false\" tabindex=\"-1\">Mes</button><button role=\"tab\" aria-selected=\"false\" tabindex=\"-1\">Año</button></div>",
-      "css": ".ds-seg{font-family:var(--font-sans,'InterVariable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;gap:2px;padding:2px;border:1px solid var(--nx-border,#e7e7eb);border-radius:8px;}.ds-seg button{height:28px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:var(--nx-text-muted,#5c5c66);font:inherit;font-size:13px;font-weight:500;cursor:pointer;}.ds-seg button:hover{color:var(--nx-text,#1b1b20);}.ds-seg button[aria-selected=true]{background:var(--nx-surface-hover,#ededf0);color:var(--nx-text,#1b1b20);}.ds-seg button:focus-visible{outline:2px solid var(--nx-accent,#5058c8);outline-offset:2px;}"
+      "css": ".ds-seg{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;gap:2px;padding:2px;border:1px solid var(--nx-border,#e4e6ea);border-radius:8px;}.ds-seg button{height:28px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:var(--nx-text-muted,#5b5f69);font:inherit;font-size:13px;font-weight:500;cursor:pointer;}.ds-seg button:hover{color:var(--nx-text,#17181b);}.ds-seg button[aria-selected=true]{background:var(--nx-surface-hover,#eef0f3);color:var(--nx-text,#17181b);}.ds-seg button:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}"
     },
     {
       "name": "Fila de tarea",
       "kind": "custom",
       "refersTo": "list-row",
       "description": "Filas de 40px: estado por forma, prioridad en barras (solo P1 roja), atraso solo en la fecha naranja; fila activa con barra índigo.",
-      "html": "<div class=\"ds-rows\"><div class=\"ds-row on\"><span class=\"ds-circ\"></span><span class=\"t\">Revisar la propuesta del cliente</span><span class=\"ds-prio\"><i style=\"height:5px;background:var(--nx-prio-1,#c8322e)\"></i><i style=\"height:8px;background:var(--nx-prio-1,#c8322e)\"></i><i style=\"height:11px;background:var(--nx-prio-1,#c8322e)\"></i></span><span class=\"m\">hoy</span></div><div class=\"ds-row\"><span class=\"ds-circ\"></span><span class=\"t\">Llamar al dentista</span><span class=\"ds-prio\"><i style=\"height:5px\"></i><i style=\"height:8px\"></i><i style=\"height:11px;background:var(--nx-border-strong,#d4d4db)\"></i></span><span class=\"m late\">hace 12 días</span></div><div class=\"ds-row\"><span class=\"ds-circ done\"><svg width=\"10\" height=\"10\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg></span><span class=\"t done\">Meditar</span><span class=\"ds-prio\"><i style=\"height:5px\"></i><i style=\"height:8px;background:var(--nx-border-strong,#d4d4db)\"></i><i style=\"height:11px;background:var(--nx-border-strong,#d4d4db)\"></i></span><span class=\"m\">ayer</span></div></div>",
-      "css": ".ds-rows{font-family:var(--font-sans,'InterVariable',ui-sans-serif,system-ui,sans-serif);width:560px;border:1px solid var(--nx-border,#e7e7eb);border-radius:8px;overflow:hidden;background:var(--nx-surface,#fff);box-shadow:var(--nx-shadow-card,0 1px 2px rgba(20,20,30,.04));}.ds-row{display:flex;align-items:center;gap:10px;height:40px;padding:0 12px;border-bottom:1px solid var(--nx-border,#e7e7eb);font-size:14px;color:var(--nx-text,#1b1b20);}.ds-row:last-child{border-bottom:0;}.ds-row:hover{background:var(--nx-surface-hover,#ededf0);}.ds-row.on{background:var(--nx-surface-hover,#ededf0);box-shadow:inset 2px 0 0 var(--nx-accent,#5058c8);}.ds-row .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.ds-row .t.done{color:var(--nx-text-muted,#5c5c66);text-decoration:line-through;}.ds-row .m{width:92px;text-align:right;font-size:13px;color:var(--nx-text-muted,#5c5c66);font-variant-numeric:tabular-nums;}.ds-row .m.late{color:var(--nx-warning,#a64d08);}.ds-circ{display:grid;place-items:center;width:16px;height:16px;flex:none;border-radius:50%;border:1.5px solid var(--nx-text-muted,#5c5c66);}.ds-circ.done{border-color:var(--nx-accent,#5058c8);background:var(--nx-accent,#5058c8);color:var(--nx-on-accent,#fff);}.ds-prio{display:inline-flex;align-items:flex-end;gap:1px;height:12px;width:14px;flex:none;}.ds-prio i{width:3px;border-radius:1px;background:var(--nx-text-muted,#5c5c66);}"
+      "html": "<div class=\"ds-rows\"><div class=\"ds-row on\"><span class=\"ds-circ\"></span><span class=\"t\">Revisar la propuesta del cliente</span><span class=\"ds-prio\"><i style=\"height:5px;background:var(--nx-prio-1,#e5592e)\"></i><i style=\"height:8px;background:var(--nx-prio-1,#e5592e)\"></i><i style=\"height:11px;background:var(--nx-prio-1,#e5592e)\"></i></span><span class=\"m\">hoy</span></div><div class=\"ds-row\"><span class=\"ds-circ\"></span><span class=\"t\">Llamar al dentista</span><span class=\"ds-prio\"><i style=\"height:5px\"></i><i style=\"height:8px\"></i><i style=\"height:11px;background:var(--nx-border-strong,#c9ccd3)\"></i></span><span class=\"m late\">hace 12 días</span></div><div class=\"ds-row\"><span class=\"ds-circ done\"><svg width=\"10\" height=\"10\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg></span><span class=\"t done\">Meditar</span><span class=\"ds-prio\"><i style=\"height:5px\"></i><i style=\"height:8px;background:var(--nx-border-strong,#c9ccd3)\"></i><i style=\"height:11px;background:var(--nx-border-strong,#c9ccd3)\"></i></span><span class=\"m\">ayer</span></div></div>",
+      "css": ".ds-rows{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);width:560px;border:1px solid var(--nx-border,#e4e6ea);border-radius:8px;overflow:hidden;background:var(--nx-surface,#fff);box-shadow:var(--nx-shadow-card,0 1px 2px rgba(20,20,30,.04));}.ds-row{display:flex;align-items:center;gap:10px;height:40px;padding:0 12px;border-bottom:1px solid var(--nx-border,#e4e6ea);font-size:14px;color:var(--nx-text,#17181b);}.ds-row:last-child{border-bottom:0;}.ds-row:hover{background:var(--nx-surface-hover,#eef0f3);}.ds-row.on{background:var(--nx-surface-hover,#eef0f3);box-shadow:inset 2px 0 0 var(--nx-accent,#0d8f83);}.ds-row .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.ds-row .t.done{color:var(--nx-text-muted,#5b5f69);text-decoration:line-through;}.ds-row .m{width:92px;text-align:right;font-size:13px;color:var(--nx-text-muted,#5b5f69);font-variant-numeric:tabular-nums;}.ds-row .m.late{color:var(--nx-warning,#b86a0a);}.ds-circ{display:grid;place-items:center;width:16px;height:16px;flex:none;border-radius:50%;border:1.5px solid var(--nx-text-muted,#5b5f69);}.ds-circ.done{border-color:var(--nx-accent,#0d8f83);background:var(--nx-accent,#0d8f83);color:var(--nx-on-accent,#fff);}.ds-prio{display:inline-flex;align-items:flex-end;gap:1px;height:12px;width:14px;flex:none;}.ds-prio i{width:3px;border-radius:1px;background:var(--nx-text-muted,#5b5f69);}"
     },
     {
       "name": "Bloque Ahora",
@@ -790,7 +833,7 @@
       "refersTo": "now-block",
       "description": "Componente firma: la tarea que toca como ficha medida, con línea de medida, cuatro casillas y tres acciones.",
       "html": "<section class=\"ds-now\"><div class=\"h\"><span class=\"c\"></span><b>Ahora</b><span class=\"r\">quedan 13 min</span></div><h2>Revisar la propuesta del cliente</h2><div class=\"ds-meter\" role=\"meter\" aria-label=\"Tiempo de la tarea\" aria-valuenow=\"32\" aria-valuemin=\"0\" aria-valuemax=\"45\"><span class=\"f\" style=\"width:71%\"></span><span class=\"tl\"></span><span class=\"tr\"></span><span class=\"d\">45 min</span><span class=\"s\">10:30</span><span class=\"e\">11:15</span></div><dl class=\"ds-cells\"><div><dt>Proyecto</dt><dd><i></i>Lanzamiento web</dd></div><div><dt>Prioridad</dt><dd>Alta</dd></div><div><dt>Energía</dt><dd>Media</dd></div><div><dt>Objetivo</dt><dd>Publicar la nueva web</dd></div></dl><div class=\"a\"><button class=\"p\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polygon points=\"6 3 20 12 6 21 6 3\"/></svg> Empezar foco</button><button class=\"s2\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg> Hecha</button><button class=\"g\">Pasar a mañana</button></div></section>",
-      "css": ".ds-now{font-family:var(--font-sans,'InterVariable',ui-sans-serif,system-ui,sans-serif);width:600px;padding:20px;border:1px solid var(--nx-border,#e7e7eb);border-radius:8px;background:var(--nx-surface,#fff);color:var(--nx-text,#1b1b20);}.ds-now .h{display:flex;align-items:center;gap:8px;font-size:14px;}.ds-now .h b{font-weight:600;color:var(--nx-text-muted,#5c5c66);}.ds-now .h .r{margin-left:auto;color:var(--nx-text-muted,#5c5c66);font-variant-numeric:tabular-nums;}.ds-now .c{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--nx-accent,#5058c8);background:conic-gradient(var(--nx-accent,#5058c8) 0 50%,transparent 0);}.ds-now h2{margin:8px 0 0;font-size:20px;font-weight:600;letter-spacing:-.025em;line-height:1.4;}.ds-meter{position:relative;height:2px;margin:20px 0 32px;border-radius:9999px;background:var(--nx-border,#e7e7eb);}.ds-meter .f{position:absolute;top:0;bottom:0;left:0;border-radius:9999px;background:var(--nx-accent,#5058c8);}.ds-meter .tl,.ds-meter .tr{position:absolute;top:-5px;width:1.5px;height:12px;border-radius:9999px;background:var(--nx-text-faint,#6a6a75);}.ds-meter .tl{left:0;}.ds-meter .tr{right:0;}.ds-meter .d{position:absolute;left:50%;top:-10px;transform:translateX(-50%);padding:0 8px;background:var(--nx-surface,#fff);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;}.ds-meter .s,.ds-meter .e{position:absolute;top:10px;font-size:12px;color:var(--nx-text-muted,#5c5c66);font-variant-numeric:tabular-nums;}.ds-meter .s{left:0;}.ds-meter .e{right:0;}.ds-cells{display:grid;grid-template-columns:repeat(4,1fr);margin:0;border:1px solid var(--nx-border,#e7e7eb);border-radius:8px;overflow:hidden;}.ds-cells>div{min-width:0;padding:8px 12px;border-left:1px solid var(--nx-border,#e7e7eb);}.ds-cells>div:first-child{border-left:0;}.ds-cells dt{font-size:12px;color:var(--nx-text-muted,#5c5c66);}.ds-cells dd{margin:2px 0 0;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.ds-cells dd i{width:8px;height:8px;border-radius:50%;flex:none;background:#5058c8;}.ds-now .a{display:flex;gap:8px;margin-top:16px;}.ds-now .a button{font-family:var(--font-sans,'InterVariable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 12px;border-radius:6px;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms cubic-bezier(.25,1,.5,1),color 120ms cubic-bezier(.25,1,.5,1);border:0;}.ds-now .a .p{background:var(--nx-accent,#5058c8);color:var(--nx-on-accent,#fff);}.ds-now .a .p:hover{background:var(--nx-accent-strong,#4249b3);}.ds-now .a .s2{border:1px solid var(--nx-border,#e7e7eb);background:var(--nx-surface,#fff);color:var(--nx-text,#1b1b20);}.ds-now .a .s2:hover,.ds-now .a .g:hover{background:var(--nx-surface-hover,#ededf0);color:var(--nx-text,#1b1b20);}.ds-now .a .g{background:transparent;color:var(--nx-text-muted,#5c5c66);}.ds-now .a button:focus-visible{outline:2px solid var(--nx-accent,#5058c8);outline-offset:2px;}"
+      "css": ".ds-now{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);width:600px;padding:20px;border:1px solid var(--nx-border,#e4e6ea);border-radius:8px;background:var(--nx-surface,#fff);color:var(--nx-text,#17181b);}.ds-now .h{display:flex;align-items:center;gap:8px;font-size:14px;}.ds-now .h b{font-weight:600;color:var(--nx-text-muted,#5b5f69);}.ds-now .h .r{margin-left:auto;color:var(--nx-text-muted,#5b5f69);font-variant-numeric:tabular-nums;}.ds-now .c{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--nx-accent,#0d8f83);background:conic-gradient(var(--nx-accent,#0d8f83) 0 50%,transparent 0);}.ds-now h2{margin:8px 0 0;font-size:20px;font-weight:600;letter-spacing:-.025em;line-height:1.4;}.ds-meter{position:relative;height:2px;margin:20px 0 32px;border-radius:9999px;background:var(--nx-border,#e4e6ea);}.ds-meter .f{position:absolute;top:0;bottom:0;left:0;border-radius:9999px;background:var(--nx-accent,#0d8f83);}.ds-meter .tl,.ds-meter .tr{position:absolute;top:-5px;width:1.5px;height:12px;border-radius:9999px;background:var(--nx-text-faint,#767b85);}.ds-meter .tl{left:0;}.ds-meter .tr{right:0;}.ds-meter .d{position:absolute;left:50%;top:-10px;transform:translateX(-50%);padding:0 8px;background:var(--nx-surface,#fff);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;}.ds-meter .s,.ds-meter .e{position:absolute;top:10px;font-size:12px;color:var(--nx-text-muted,#5b5f69);font-variant-numeric:tabular-nums;}.ds-meter .s{left:0;}.ds-meter .e{right:0;}.ds-cells{display:grid;grid-template-columns:repeat(4,1fr);margin:0;border:1px solid var(--nx-border,#e4e6ea);border-radius:8px;overflow:hidden;}.ds-cells>div{min-width:0;padding:8px 12px;border-left:1px solid var(--nx-border,#e4e6ea);}.ds-cells>div:first-child{border-left:0;}.ds-cells dt{font-size:12px;color:var(--nx-text-muted,#5b5f69);}.ds-cells dd{margin:2px 0 0;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.ds-cells dd i{width:8px;height:8px;border-radius:50%;flex:none;background:#0d8f83;}.ds-now .a{display:flex;gap:8px;margin-top:16px;}.ds-now .a button{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:8px;height:32px;padding:0 12px;border-radius:6px;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;transition:background-color 120ms cubic-bezier(.25,1,.5,1),color 120ms cubic-bezier(.25,1,.5,1);border:0;}.ds-now .a .p{background:var(--nx-accent,#0d8f83);color:var(--nx-on-accent,#fff);}.ds-now .a .p:hover{background:var(--nx-accent-strong,#0a7a70);}.ds-now .a .s2{border:1px solid var(--nx-border,#e4e6ea);background:var(--nx-surface,#fff);color:var(--nx-text,#17181b);}.ds-now .a .s2:hover,.ds-now .a .g:hover{background:var(--nx-surface-hover,#eef0f3);color:var(--nx-text,#17181b);}.ds-now .a .g{background:transparent;color:var(--nx-text-muted,#5b5f69);}.ds-now .a button:focus-visible{outline:2px solid var(--nx-accent,#0d8f83);outline-offset:2px;}"
     },
     {
       "name": "Semana del hábito",
@@ -798,75 +841,69 @@
       "refersTo": "week-day",
       "description": "Siete círculos de solo lectura: hecho índigo con marca, pendiente con borde, descanso discontinuo, hoy con anillo de tinta.",
       "html": "<ol class=\"ds-week\" aria-label=\"Esta semana\"><li class=\"done\" aria-label=\"Lunes: hecho\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg></li><li class=\"done\" aria-label=\"Martes: hecho\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg></li><li class=\"miss\" aria-label=\"Miércoles: sin hacer\">X</li><li class=\"rest\" aria-label=\"Jueves: descanso\">J</li><li class=\"miss today\" aria-label=\"Viernes: pendiente hoy\">V</li><li class=\"miss\" aria-label=\"Sábado: por venir\">S</li><li class=\"rest\" aria-label=\"Domingo: descanso\">D</li></ol>",
-      "css": ".ds-week{font-family:var(--font-sans,'InterVariable',ui-sans-serif,system-ui,sans-serif);display:flex;gap:4px;margin:0;padding:8px;list-style:none;background:var(--nx-surface,#fff);}.ds-week li{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:1px solid var(--nx-border-strong,#d4d4db);font-size:12px;font-weight:500;color:var(--nx-text-muted,#5c5c66);}.ds-week li.done{border-color:var(--nx-accent,#5058c8);background:var(--nx-accent,#5058c8);color:var(--nx-on-accent,#fff);}.ds-week li.rest{border-style:dashed;color:var(--nx-text-faint,#6a6a75);}.ds-week li.today{box-shadow:0 0 0 2px var(--nx-surface,#fff),0 0 0 4px var(--nx-text,#1b1b20);}"
+      "css": ".ds-week{font-family:var(--font-sans,'Instrument Sans Variable',ui-sans-serif,system-ui,sans-serif);display:flex;gap:4px;margin:0;padding:8px;list-style:none;background:var(--nx-surface,#fff);}.ds-week li{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:1px solid var(--nx-border-strong,#c9ccd3);font-size:12px;font-weight:500;color:var(--nx-text-muted,#5b5f69);}.ds-week li.done{border-color:var(--nx-accent,#0d8f83);background:var(--nx-accent,#0d8f83);color:var(--nx-on-accent,#fff);}.ds-week li.rest{border-style:dashed;color:var(--nx-text-faint,#767b85);}.ds-week li.today{box-shadow:0 0 0 2px var(--nx-surface,#fff),0 0 0 4px var(--nx-text,#17181b);}"
     }
   ],
   "narrative": {
-    "northStar": "La herramienta precisa",
-    "overview": "Nextuss se ve como una herramienta profesional sobria, del tipo Linear: listas en filas de 40px separadas por filetes de 1px, una sola familia tipográfica (Inter), radios pequeños y un único acento índigo reservado para acción, selección y progreso. Nada brilla ni flota sin motivo: solo los diálogos, menús y paneles emergentes proyectan sombra. La densidad es alta pero ordenada; la información se lee por posición y por forma, no por manchas de color.\n\nLa firma del sistema es la **ficha medida**: en Hoy, la tarea que toca no es una fila más sino el bloque \"Ahora\", con su título a 20px, una línea de medida (inicio, fin, duración y tramo transcurrido) y cuatro casillas de propiedades. Los estados se dicen por forma: círculo vacío, medio lleno o lleno con marca; prioridad como tres barras en tinta atenuada; la semana de un hábito como siete círculos. El teclado es ciudadano de primera: atajos visibles en `kbd`, flechas dentro de cada grupo de opciones, Esc que cierra solo la capa de arriba y un foco que nunca se escapa de un diálogo.\n\nAnti-referencia confirmada: la estética anterior de la app (tablero SaaS oscuro con brillo cian `#5EC8FF` y sombras de resplandor). Este documento se deriva del código construido (`src/index.css`, `src/design/primitives/*` y las vistas de Hoy, Tareas y Hábitos) y sustituye a la versión anterior sacada del mock.",
+    "northStar": "«Línea», precisión tranquila",
+    "overview": "Nextuss es una herramienta de trabajo diario para alguien con TDAH: todo se hace a mano desde el teclado y no hay nada que sobre. La identidad v2 nace de la fase A del rediseño (issue #174; mockups en `docs/design/rediseno-v2/ronda-2/direcciones/linea/`). Se basa en tres ideas:\n- **Oscura primero:** el tema oscuro es el principal, con grises fríos. El claro tiene sus propios valores y se cuida igual.\n- **Filetes de 1 px:** separan tarjetas y filas. No hay sombras en la página.\n- **Un único acento:** turquesa glaciar, reservado para acción, selección y progreso.\n\nLa personalidad está en el movimiento, firme y preciso, con un solo destello al completar.\n\nEste documento sustituye a la v1 («La herramienta precisa», Inter e índigo), que se conserva en `docs/design-history/DESIGN-v1.md`. **Estado: fase 0** (issue #176). Aquí están cerrados los tokens: color, tipografía, radios, elevación y motion. Los componentes siguen como en la v1 hasta que la fase 1 los rehaga, así que la sección Components remite a ese documento.",
     "keyCharacteristics": [
-      "Claro: blanco con laterales gris 1%; oscuro: casi negro, cuidado igual que el claro y con sus propios valores de acento y naranja.",
-      "Un solo acento índigo y un solo botón primario por pantalla; naranja solo como texto de atraso.",
-      "Filetes de 1px y radios de 6 / 8 / 12px; sombra solo en lo que flota.",
-      "Inter en todo; jerarquía por peso (400/500/600) y tinta, con un único tamaño grande (20px).",
-      "Estados y prioridad por forma; cifras con dígitos tabulares.",
-      "Teclado visible y completo; movimiento breve que se reduce a opacidad si el usuario lo pide."
+      "**Temas:** el oscuro es casi negro azulado (`#0d0e10`) con un lateral aún más hundido. El claro es papel frío (`#fbfbfc`) con lateral gris al 4 %.",
+      "**Color:** un solo acento turquesa. El ámbar dice «esto va tarde» y la brasa, «urgente».",
+      "**Superficies:** se separan por filete de 1 px. Solo flota lo que flota (diálogos, menús y avisos).",
+      "**Tipografía:** Instrument Sans para todo el texto y Geist Mono para cifras, horas, atajos y códigos.",
+      "**Formas antes que color:** los estados y la prioridad se dicen por forma o por texto, nunca solo por color.",
+      "**Movimiento:** cada animación responde a una acción o a un cambio real, y nada va en bucle. Con movimiento reducido, solo hay fundidos."
     ],
     "rules": [
       {
         "name": "La Regla de la Voz Única",
-        "body": "El índigo marca acción, selección y progreso, y nada más. Cada pantalla tiene un solo botón primario índigo: \"Nueva tarea\" en Tareas, \"Nuevo hábito\" en Hábitos, \"Empezar foco\" en el bloque Ahora de Hoy. \"Nuevo\" del navbar es secundario (papel con filete), porque está en todas las pantallas.",
+        "body": "El turquesa marca acción, selección y progreso, y nada más. Hay un solo botón primario por pantalla.",
         "section": "colors"
       },
       {
-        "name": "La Regla del Atraso sin Culpa",
-        "body": "Lo atrasado se dice con texto naranja y se resume: 3 visibles, \"Ver las N restantes\" y acciones en bloque (\"Mover todas a mañana\", \"Aparcar todas\") como botones fantasma. Ni fondos rojos, ni insignias, ni iconos de alarma.",
+        "name": "La Regla sin Halo",
+        "body": "No hay sombras de color ni brillos alrededor del acento. Las barras de progreso son lisas.",
         "section": "colors"
       },
       {
-        "name": "La Regla de la Prioridad Callada",
-        "body": "La prioridad son tres barras en tinta atenuada; solo Urgente (P1) se pinta en rojo. El nombre de la prioridad siempre acompaña en texto o en la etiqueta accesible.",
+        "name": "La Regla de la Forma",
+        "body": "Prioridad, estado y atraso se distinguen en escala de grises: por forma, por texto o por posición.",
         "section": "colors"
       },
       {
-        "name": "La Regla del Suelo de 12px",
-        "body": "Ningún texto baja de 12px (ni `text-[10px]` ni `text-[11px]`), tampoco atajos, iniciales de día ni etiquetas de la barra móvil. Hoy no hay ninguna excepción en `src/`.",
+        "name": "La Regla de las Cifras en Mono",
+        "body": "Horas, duraciones, contadores, atajos en `kbd` y códigos de prioridad usan `font-mono`. Las frases que contienen un número no la usan.",
         "section": "typography"
       },
       {
-        "name": "La Regla de las Cifras Quietas",
-        "body": "Horas, duraciones, contadores y fechas que cambian usan dígitos tabulares (`tabular-nums`) para que no bailen.",
+        "name": "La Regla del Suelo de 12 px",
+        "body": "Se mantiene de la v1.",
         "section": "typography"
       },
       {
-        "name": "La Regla del Plano por Defecto",
-        "body": "Superficies planas en reposo; solo lo que flota sobre otra capa lleva la sombra de diálogo. Sin resplandores, sin escalar elementos para destacarlos.",
+        "name": "La Regla de lo que Flota",
+        "body": "Hay sombra si algo está por encima de la página (diálogo, menú, aviso, paleta) y en ningún otro caso.",
         "section": "elevation"
+      },
+      {
+        "name": "La Regla sin Bucle",
+        "body": "Nada se mueve solo, salvo el progreso real (el temporizador del foco o el tramo transcurrido del bloque Ahora).",
+        "section": "motion"
       }
     ],
     "dos": [
-      "Do usar solo iconos lineales Lucide: 16px con trazo de 1,75 en navegación, 14px en botones y fichas, 18px en la barra móvil.",
-      "Do reservar el índigo para acción, selección y progreso, con un solo botón primario por pantalla; \"Nuevo\" del navbar es secundario.",
-      "Do comprobar AA (4,5:1) en los dos temas para todo texto, también sobre lateral y gris de selección; en oscuro el texto sobre índigo es on-accent-night (#0f1020), no blanco.",
-      "Do nombrar el objeto en las acciones primarias: \"Crear tarea\", \"Guardar tarea\", \"Nuevo hábito\".",
-      "Do mostrar el atajo en `kbd` junto a la acción y en el pie de las listas navegables.",
-      "Do marcar el atraso solo con texto naranja en la fecha y resumirlo (3 visibles + acciones en bloque).",
-      "Do expresar prioridad con tres barras en tinta atenuada (solo P1 en rojo) y estado con círculo vacío / medio / lleno con marca.",
-      "Do construir formularios con TitleField + NotesField + fichas de propiedad + \"Más opciones\" en FormRows + pie fijo con `Ctrl+Enter`.",
-      "Do usar `listItemMotion` para listas que ganan o pierden elementos, y reducir a solo opacidad con movimiento reducido.",
-      "Do dar a cada grupo de opciones su patrón de teclado: radiogroup y tablist con flechas, menús con flechas y Esc, diálogos que retienen el foco.",
-      "Do sugerir cerrar el día en línea, con \"Ahora no\", en vez de abrir un diálogo."
+      "Usar siempre los alias `--color-*` / `--nx-*`, nunca hex en componentes. La deuda actual está en el inventario del PR de la fase 0.",
+      "Poner forma o texto junto a cualquier color con significado.",
+      "Usar `font-mono` para cifras y atajos.",
+      "Usar los tokens de motion y `motionFor`."
     ],
     "donts": [
-      "Don't usar emoji en la interfaz.",
-      "Don't usar sombras de resplandor (`shadow-glow`) ni el cian antiguo `#5EC8FF`.",
-      "Don't bajar de 12px (`text-[10px]`, `text-[11px]`) en ningún texto.",
-      "Don't poner fondos de alarma (rojos, naranjas o rellenos) en tareas atrasadas.",
-      "Don't pintar la prioridad en cuatro colores ni como insignia de color; solo Urgente lleva rojo.",
-      "Don't añadir sombras a filas, fichas o elementos en reposo, ni escalar un elemento para destacarlo.",
-      "Don't usar botones genéricos sin objeto (\"Guardar\", \"Aceptar\", \"Enviar\") como acción primaria.",
-      "Don't abrir diálogos que el usuario no ha pedido.",
-      "Don't usar radios de 12px en controles; 12px es solo para diálogos y estados vacíos."
+      "Usar sombras de color o halos.",
+      "Usar más de un botón primario por pantalla.",
+      "Usar la escala `--nx-ref-*` directamente en componentes.",
+      "Poner animaciones en bucle.",
+      "Usar `light-dark()` en los tokens: `chartTheme.ts` los lee con `getPropertyValue` y necesita colores ya resueltos."
     ]
   }
 }
