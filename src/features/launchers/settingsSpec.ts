@@ -1,3 +1,4 @@
+import { db } from '../../db/schema'
 import { listLaunchers, listRecentLauncherRuns } from '../../db/repositories/launchers'
 import type { PluginSettingsSpec } from '../plugins/settings/types'
 
@@ -11,4 +12,6 @@ export const launchersSettingsSpec: PluginSettingsSpec = {
       { label: 'Ejecuciones recientes', value: String(runs.length) },
     ]
   },
+  /** Último lanzador disparado (#98 P7). */
+  lastActivityAt: async () => (await db.launcherRuns.orderBy('firedAt').last())?.firedAt ?? null,
 }
