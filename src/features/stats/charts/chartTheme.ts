@@ -35,7 +35,7 @@ const FALLBACK: ChartTheme = {
   danger: '#f0715f',
   grid: '#22252b',
   text: '#eceef1',
-  textFaint: '#6f747e',
+  textFaint: '#797e88',
   surface: '#131418',
 }
 

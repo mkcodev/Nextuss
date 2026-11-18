@@ -2,10 +2,10 @@
 name: Nextuss
 description: Centro de mando personal (hábitos, tareas, objetivos y foco). Dirección v2 «Línea»; oscura primero, precisa y tranquila.
 colors:
-  glacier-accent: "#0d8f83"
+  glacier-accent: "#13857a"
   glacier-accent-strong: "#0a7a70"
   glacier-text: "#0a7a70"
-  glacier-soft: "color-mix(in srgb, #0d8f83 12%, transparent)"
+  glacier-soft: "color-mix(in srgb, #13857a 12%, transparent)"
   on-accent: "#ffffff"
   paper: "#fbfbfc"
   paper-side: "#f4f5f7"
@@ -15,7 +15,7 @@ colors:
   hairline-strong: "#c9ccd3"
   ink: "#17181b"
   ink-dim: "#5b5f69"
-  ink-faint: "#767b85"
+  ink-faint: "#6b707a"
   amber: "#b86a0a"
   ember: "#e5592e"
   danger: "#d0453a"
@@ -28,7 +28,7 @@ colors:
   night-hairline-strong: "#3a3e46"
   night-ink: "#eceef1"
   night-ink-dim: "#9a9ea8"
-  night-ink-faint: "#6f747e"
+  night-ink-faint: "#797e88"
   glacier-accent-night: "#35c9b9"
   glacier-accent-strong-night: "#5cd8ca"
   glacier-text-night: "#5cd8ca"
@@ -295,7 +295,7 @@ Este documento sustituye a la v1 («La herramienta precisa», Inter e índigo), 
 
 ## Colors
 
-La paleta es casi monocroma y fría, con una sola voz de color. AA ya no es requisito de la v2, pero el texto principal tiene que leerse a simple vista en los dos temas. Los tokens viven en `src/index.css` en dos capas:
+La paleta es casi monocroma y fría, con una sola voz de color. AA ya no es requisito de la v2, pero el texto principal tiene que leerse a simple vista en los dos temas. Aun así, el texto blanco del primario sobre el acento y `text-faint` sobre el fondo, `bg-soft` y `surface` cumplen 4,5:1 en los dos temas (ajuste de la fase 1a: solo baja o sube la luminosidad, mismo matiz). Los tokens viven en `src/index.css` en dos capas:
 1. **Escala de referencia `--nx-ref-*`:** los hex de Línea. Ningún componente la usa directamente.
 2. **Alias semánticos `--nx-*`:** se mapean a `--color-*` en `@theme`. Los nombres son los mismos que en la v1, así que ningún componente cambia en la fase 0.
 

@@ -129,7 +129,7 @@
   --nx-ref-paper-5: #c9ccd3;
   --nx-ref-ink-0: #17181b;
   --nx-ref-ink-1: #5b5f69;
-  --nx-ref-ink-2: #767b85;
+  --nx-ref-ink-2: #6b707a; /* text-faint claro: 4,8:1 sobre bg, 4,6:1 sobre bg-soft; antes #767b85 */
 
   --nx-ref-night-0: #0a0b0d;
   --nx-ref-night-1: #0d0e10;
@@ -139,10 +139,10 @@
   --nx-ref-night-5: #3a3e46;
   --nx-ref-snow-0: #eceef1;
   --nx-ref-snow-1: #9a9ea8;
-  --nx-ref-snow-2: #6f747e;
+  --nx-ref-snow-2: #797e88; /* text-faint oscuro: 4,7:1 sobre bg, 4,5:1 sobre surface; antes #6f747e */
 
   --nx-ref-glacier-600: #0a7a70;
-  --nx-ref-glacier-500: #0d8f83;
+  --nx-ref-glacier-500: #13857a; /* 4,5:1 con texto blanco; antes #0d8f83 (4,0:1) */
   --nx-ref-glacier-300: #35c9b9;
   --nx-ref-glacier-200: #5cd8ca;
   --nx-ref-glacier-950: #04201d;
