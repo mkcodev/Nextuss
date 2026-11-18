@@ -1,0 +1,463 @@
+/* Subrayado — apuntes marcados con fluorescente. Intermedia: grafito sobre papel blanco, una sola
+   familia (Recursive) que se vuelve casual en los títulos, y el fluorescente con cuatro trabajos. */
+
+:root {
+  --font-body: 'Recursive Variable', system-ui, sans-serif;
+  --font-display: 'Recursive Variable', system-ui, sans-serif;
+  --fvs-body: 'CASL' 0;
+  --fvs-display: 'CASL' 0.85;
+  --fvs-section: 'CASL' 0.5;
+  --fs-body: 14px;
+  --fs-page: 24px;
+  --fw-page: 750;
+  --ls-page: -0.015em;
+  --fs-now: 23px;
+  --fw-now: 720;
+  --fs-section: 15px;
+  --fw-btn: 560;
+
+  --bg: #fafaf7;
+  --bg-side: #f2f2ec;
+  --surface: #ffffff;
+  --hover: #efefe7;
+  --border: #e4e4da;
+  --border-strong: #8c8c80;
+  --text: #23262b;
+  --muted: #555a61;
+  --faint: #62676e;
+  --accent: #23262b;
+  --accent-strong: #3a3e45;
+  --on-accent: #ffffff;
+  --accent-text: #23262b;
+  --hl-yellow: #ffe45c;
+  --hl-green: #a6e8b0;
+  --hl-pink: #ffb3d1;
+  --on-hl: #23262b;
+  --accent-soft: color-mix(in srgb, var(--hl-yellow) 60%, transparent);
+  --warning: #9a4a0b;
+  --success: #2f7d45;
+  --danger: #b42a3c;
+  --prio-1: #b42a3c;
+  --focus: #23262b;
+  --link: #23262b;
+  --selection: color-mix(in srgb, var(--hl-yellow) 70%, transparent);
+  --progress: var(--hl-green);
+  --track: var(--hover);
+  --chart-1: var(--hl-green);
+  --chart-muted: #d9d9cf;
+  --status-fill: var(--hl-green);
+  --status-check: var(--on-hl);
+  --status-ring: var(--text);
+
+  --side-bg: var(--bg);
+  --nav-bg: var(--bg);
+  --dock-bg: var(--bg);
+  --search-bg: var(--surface);
+  --level-bg: color-mix(in srgb, var(--hl-green) 55%, transparent);
+  --level-text: var(--on-hl);
+
+  --radius-xs: 4px;
+  --radius-ctl: 6px;
+  --radius-box: 10px;
+  --radius-dialog: 14px;
+  --shadow-card: 0 1px 2px rgb(35 38 43 / 0.05);
+  --shadow-pop: 0 20px 50px -20px rgb(35 38 43 / 0.3);
+
+  --dur-1: 160ms;
+  --dur-2: 200ms;
+  --dur-3: 250ms;
+  --ease: cubic-bezier(0.3, 0.7, 0.1, 1);
+  --dur-celebrate: 480ms;
+
+  --row-h: 44px;
+  --gap: 24px;
+  --pad-box: 18px;
+  --pad-now: 22px;
+}
+
+:root[data-theme='dark'] {
+  --bg: #17181b;
+  --bg-side: #131416;
+  --surface: #1d1f23;
+  --hover: #272a2f;
+  --border: #2e3137;
+  --border-strong: #6e727a;
+  --text: #eceae4;
+  --muted: #aaa9a2;
+  --faint: #93928b;
+  --accent: #eceae4;
+  --accent-strong: #ffffff;
+  --on-accent: #17181b;
+  --accent-text: #eceae4;
+  --hl-yellow: #e6cf4e;
+  --hl-green: #7fd192;
+  --hl-pink: #f29bbf;
+  --on-hl: #17181b;
+  --warning: #f0a866;
+  --success: #7fd192;
+  --danger: #f2787f;
+  --prio-1: #f2787f;
+  --focus: #eceae4;
+  --link: #eceae4;
+  --chart-muted: #3a3d43;
+  --shadow-card: none;
+  --shadow-pop: 0 20px 50px -20px rgb(0 0 0 / 0.7);
+}
+
+body {
+  font-variation-settings: var(--fvs-body);
+}
+
+/* fluorescente: trazo irregular, sin efectos */
+.hl {
+  color: var(--on-hl);
+  padding: 0.05em 0.25em;
+  margin: 0 -0.1em;
+  border-radius: 0.5em 0.18em 0.45em 0.22em / 0.32em 0.55em 0.28em 0.5em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.hl-yellow {
+  background: var(--hl-yellow);
+}
+.hl-green {
+  background: var(--hl-green);
+}
+.hl-pink {
+  background: var(--hl-pink);
+}
+.sub-mark {
+  width: 18px;
+  height: 10px;
+  background: var(--hl-yellow);
+  border-radius: 5px 2px 5px 2px;
+  rotate: -8deg;
+}
+.brand {
+  font-size: 17px;
+}
+
+/* navegación: lápiz y papel */
+.side {
+  border-right-color: var(--border);
+}
+.side-item.is-active {
+  background: transparent;
+  font-weight: 650;
+}
+.side-item.is-active span:not(.side-kbd) {
+  text-decoration: underline 2px var(--text);
+  text-underline-offset: 4px;
+}
+.side-item.is-active .ic {
+  color: var(--text);
+}
+.dock-tab.is-on {
+  box-shadow: 0 0 0 1px var(--border-strong);
+}
+
+/* prioridad en texto */
+.ptag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.ptag.hl {
+  color: var(--on-hl);
+}
+.props .ptag {
+  font-size: 14px;
+}
+
+/* tiempo de hoy: tira con bloques marcados */
+.strip {
+  position: relative;
+  height: 28px;
+  margin-top: 26px;
+  border-bottom: 1.5px solid var(--text);
+}
+.strip-blocks {
+  position: absolute;
+  inset: 0;
+}
+.seg-b {
+  position: absolute;
+  left: var(--x);
+  width: max(var(--w), 6px);
+  bottom: 3px;
+  height: 18px;
+  border-radius: 4px 2px 4px 2px;
+  border: 1.5px solid var(--text);
+  background: var(--surface);
+}
+.seg-hecha {
+  background: var(--hl-green);
+}
+.seg-hecha::after {
+  content: '';
+  position: absolute;
+  inset: 50% 2px auto;
+  height: 1.5px;
+  background: var(--on-hl);
+}
+.seg-ahora {
+  background: var(--hl-yellow);
+  border-width: 2.5px;
+}
+.seg-siguiente {
+  background: repeating-linear-gradient(135deg, var(--surface) 0 3px, var(--border) 3px 4.5px);
+}
+.seg-pendiente {
+  border-style: dashed;
+}
+.strip-now {
+  position: absolute;
+  left: var(--x);
+  bottom: -6px;
+  top: -22px;
+  width: 0;
+  border-left: 2px solid var(--text);
+}
+.strip-now span {
+  position: absolute;
+  top: -2px;
+  left: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.strip-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+.legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+}
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.lg {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 10px;
+  border: 1.5px solid var(--text);
+  border-radius: 3px 1px 3px 1px;
+  color: var(--on-hl);
+}
+.lg .ic {
+  width: 8px;
+  height: 8px;
+}
+.lg-done {
+  background: var(--hl-green);
+}
+.lg-now {
+  background: var(--hl-yellow);
+  border-width: 2.5px;
+}
+.lg-next {
+  background: repeating-linear-gradient(135deg, var(--surface) 0 3px, var(--border) 3px 4.5px);
+}
+.lg-todo {
+  border-style: dashed;
+}
+
+/* Ahora: el título va marcado */
+.now {
+  border-color: var(--border-strong);
+}
+.now-kicker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  font-variation-settings: 'CASL' 0.5;
+}
+.now-title {
+  line-height: 1.35;
+  margin-top: 4px;
+}
+.measure-line {
+  height: 1.5px;
+  background: var(--text);
+}
+.measure-line::before,
+.measure-line::after {
+  background: var(--text);
+  width: 1.5px;
+}
+.measure-done {
+  inset: -4px auto auto 0;
+  height: 10px;
+  background: var(--hl-green);
+  border-radius: 5px 2px 5px 2px;
+  z-index: -1;
+}
+.measure-line {
+  isolation: isolate;
+}
+.measure-ends {
+  align-items: baseline;
+}
+.measure-dur-txt {
+  font-weight: 600;
+  color: var(--text);
+}
+.props {
+  border-style: dashed;
+  border-color: var(--border-strong);
+}
+.props > div {
+  border-left-style: dashed;
+  border-color: var(--border-strong);
+}
+
+/* filas: cursor de teclado = fila marcada */
+.row.is-cursor {
+  box-shadow: none;
+  background: color-mix(in srgb, var(--hl-yellow) 30%, var(--surface));
+}
+.row.is-cursor .row-time {
+  color: var(--text);
+}
+.row-hecha .row-title {
+  text-decoration-color: var(--text);
+  text-decoration-thickness: 1.5px;
+}
+.row-time {
+  font-weight: 600;
+}
+.status .st-ring {
+  stroke-width: 1.5;
+}
+.status-en-curso .st-half {
+  fill: var(--hl-yellow);
+}
+.status-en-curso .st-ring,
+.status-hecha .st-fill {
+  stroke: var(--text);
+  stroke-width: 1.5;
+}
+.link-act {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+/* hábitos y check-in */
+.habit-check.is-done,
+.wd-hecho {
+  background: var(--hl-green);
+  border-color: var(--text);
+  color: var(--on-hl);
+}
+.wd {
+  border-color: var(--border-strong);
+}
+.ck.is-on {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--surface);
+  font-weight: 700;
+}
+.bar-track {
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.bar-fill {
+  border-radius: 4px 2px 4px 2px;
+  /* el verde fluorescente no llega a 3:1 sobre blanco: el borde de grafito marca el avance */
+  box-shadow: inset 0 0 0 1.5px var(--text);
+}
+.kpi-value {
+  font-size: 24px;
+  font-weight: 720;
+}
+.spark .sb {
+  border-radius: 3px 1px 3px 1px;
+}
+.spark .is-today .sb {
+  box-shadow: 0 0 0 1.5px var(--text);
+}
+.title-field {
+  border-bottom-color: var(--hl-yellow);
+  border-bottom-width: 4px;
+}
+.switch[aria-checked='true'] {
+  background: var(--text);
+}
+.switch[aria-checked='true'] span {
+  background: var(--hl-green);
+}
+.seg .is-on {
+  background: var(--text);
+  color: var(--surface);
+}
+.menu li.is-hover {
+  background: var(--hover);
+}
+.count {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+}
+
+/* microcelebración: trazo de fluorescente verde */
+.cel-stroke {
+  position: absolute;
+  background: var(--hl-green);
+  border-radius: 0.5em 0.18em 0.45em 0.22em / 0.32em 0.55em 0.28em 0.5em;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+:root[data-theme='dark'] .cel-stroke {
+  mix-blend-mode: screen;
+  opacity: 0.6;
+}
+
+@media (max-width: 767px) {
+  .h-page {
+    font-size: 21px;
+  }
+  .now-title {
+    font-size: 20px;
+  }
+  .legend {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .strip-ends span:nth-child(2),
+  .strip-ends span:nth-child(3) {
+    display: none;
+  }
+  .strip {
+    height: 36px;
+  }
+  .seg-b {
+    height: 26px;
+    min-width: 12px;
+  }
+}
+
+.lg-done {
+  position: relative;
+}
+.lg-done::after {
+  content: '';
+  position: absolute;
+  inset: 50% 2px auto;
+  height: 1.5px;
+  background: var(--on-hl);
+}
+
+/* En oscuro, la insignia de nivel en verde sólido (con el velo al 55 % el texto bajaba de 4,5:1). */
+:root[data-theme='dark'] {
+  --level-bg: var(--hl-green);
+}

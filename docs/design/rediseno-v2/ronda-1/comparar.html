@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Comparar direcciones · Rediseño v2</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f4f4f2;
+        --fg: #1c1d1f;
+        --muted: #55585c;
+        --line: #d6d6d1;
+        --on: #1c1d1f;
+        --on-fg: #ffffff;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #161718;
+          --fg: #e9e9e6;
+          --muted: #a4a6a8;
+          --line: #34363a;
+          --on: #e9e9e6;
+          --on-fg: #161718;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font: 14px/1.45 system-ui, sans-serif;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px 24px;
+        padding: 12px 16px;
+        background: var(--bg);
+        border-bottom: 1px solid var(--line);
+      }
+      h1 {
+        font-size: 16px;
+        margin: 0;
+      }
+      fieldset {
+        display: inline-flex;
+        gap: 2px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 2px;
+        margin: 0;
+      }
+      legend {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+      label {
+        position: relative;
+        padding: 4px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: var(--muted);
+      }
+      input {
+        position: absolute;
+        opacity: 0;
+      }
+      label:has(input:checked) {
+        background: var(--on);
+        color: var(--on-fg);
+      }
+      label:has(input:focus-visible) {
+        outline: 2px solid var(--fg);
+        outline-offset: 2px;
+      }
+      .note {
+        color: var(--muted);
+        margin: 0;
+      }
+      main {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        padding: 16px;
+      }
+      figure {
+        margin: 0;
+        min-width: 0;
+      }
+      figcaption {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      figcaption a {
+        color: inherit;
+      }
+      .frame {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+      iframe {
+        border: 0;
+        display: block;
+        transform-origin: 0 0;
+      }
+      @media (max-width: 900px) {
+        main {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Rediseño v2: tres direcciones sobre Hoy</h1>
+      <fieldset>
+        <legend>Tema</legend>
+        <label><input type="radio" name="theme" value="light" checked />Claro</label>
+        <label><input type="radio" name="theme" value="dark" />Oscuro</label>
+      </fieldset>
+      <fieldset>
+        <legend>Ancho</legend>
+        <label><input type="radio" name="width" value="1440" checked />Escritorio 1440</label>
+        <label><input type="radio" name="width" value="375" />Móvil 375</label>
+      </fieldset>
+      <p class="note">Orden alfabético. Mismos datos de ejemplo en las tres.</p>
+    </header>
+    <main id="cols"></main>
+    <script>
+      const DIRS = [
+        ['anden', 'Andén', 'contenida'],
+        ['subrayado', 'Subrayado', 'intermedia'],
+        ['tablero', 'Tablero', 'atrevida'],
+      ]
+      const cols = document.getElementById('cols')
+      cols.innerHTML = DIRS.map(
+        ([id, name, lvl]) => `<figure><figcaption><strong>${name}</strong><span>${lvl} · <a href="direcciones/${id}/index.html" target="_blank" rel="noopener">abrir</a></span></figcaption>
+        <div class="frame"><iframe title="${name}" data-id="${id}" loading="lazy"></iframe></div></figure>`,
+      ).join('')
+      const state = () => ({
+        theme: document.querySelector('input[name=theme]:checked').value,
+        width: Number(document.querySelector('input[name=width]:checked').value),
+      })
+      function layout() {
+        const { theme, width } = state()
+        const height = width === 375 ? 2400 : 1800
+        document.querySelectorAll('iframe').forEach((f) => {
+          const box = f.parentElement
+          const scale = Math.min(1, box.clientWidth / width)
+          f.style.width = width + 'px'
+          f.style.height = height + 'px'
+          f.style.transform = `scale(${scale})`
+          box.style.height = height * scale + 'px'
+          const src = `direcciones/${f.dataset.id}/index.html?theme=${theme}`
+          if (f.getAttribute('src') !== src) f.setAttribute('src', src)
+        })
+      }
+      document.addEventListener('change', layout)
+      addEventListener('resize', layout)
+      layout()
+    </script>
+  </body>
+</html>
