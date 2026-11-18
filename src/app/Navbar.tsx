@@ -45,20 +45,20 @@ function AvatarMenu() {
       trigger={(props) => (
         <button
           {...props}
-          className="flex h-8 w-8 items-center justify-center rounded-full transition-opacity hover:opacity-80"
+          className="flex h-7.5 w-7.5 items-center justify-center rounded-full transition-opacity duration-(--dur-fast) hover:opacity-80"
         >
-          <Avatar name={name} initials={name ? initials(name) : undefined} size={32} />
+          <Avatar name={name} initials={name ? initials(name) : undefined} size={30} />
         </button>
       )}
     >
       {name && <MenuLabel>{name}</MenuLabel>}
       {/* Destinos que no caben en la barra móvil: aquí siguen a un toque. */}
       {avatarNav.map(({ to, label, icon: NavIcon }) => (
-        <MenuItem key={to} onSelect={() => navigate(to)} icon={<NavIcon size={15} strokeWidth={1.75} />}>
+        <MenuItem key={to} onSelect={() => navigate(to, { viewTransition: true })} icon={<NavIcon size={15} strokeWidth={1.75} />}>
           {label}
         </MenuItem>
       ))}
-      <MenuItem onSelect={() => navigate('/ajustes')} icon={<SettingsIcon size={15} strokeWidth={1.75} />}>
+      <MenuItem onSelect={() => navigate('/ajustes', { viewTransition: true })} icon={<SettingsIcon size={15} strokeWidth={1.75} />}>
         Ajustes
       </MenuItem>
       <MenuItem onSelect={openHelp} icon={<Keyboard size={15} strokeWidth={1.75} />}>
@@ -93,27 +93,27 @@ export function Navbar() {
     NAV_ITEMS.find((item) => location.pathname.startsWith(item.to) && item.to !== '/')?.label
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border px-3">
+    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-border px-3">
       <button
         onClick={toggleLeft}
         title="Colapsar navegación (Alt+H)"
         aria-label={leftCollapsed ? 'Mostrar navegación' : 'Colapsar navegación'}
-        className="hidden rounded-md p-1.5 text-text-faint transition-colors hover:bg-surface-hover hover:text-text md:flex"
+        className="hidden h-7.5 w-7.5 items-center justify-center rounded-sm text-text-faint transition-colors duration-(--dur-fast) hover:bg-surface-hover hover:text-text md:flex"
       >
         {leftCollapsed ? (
-          <PanelLeftOpen size={17} strokeWidth={1.75} />
+          <PanelLeftOpen size={16} strokeWidth={1.75} />
         ) : (
-          <PanelLeftClose size={17} strokeWidth={1.75} />
+          <PanelLeftClose size={16} strokeWidth={1.75} />
         )}
       </button>
 
       <div className="flex items-center gap-1.5">
-        <span className="h-2 w-2 rounded-full bg-accent" />
-        <span className="hidden text-sm font-semibold tracking-tight text-text sm:inline">Nextuss</span>
+        <span className="lin-mark" aria-hidden="true" />
+        <span className="hidden text-sm font-[650] tracking-[-0.01em] text-text sm:inline">Nextuss</span>
       </div>
 
       {currentLabel && (
-        <div className="hidden items-center gap-1.5 text-sm text-text-faint sm:flex">
+        <div className="hidden items-center gap-1.5 text-ui text-text-faint sm:flex">
           <ChevronRight size={14} strokeWidth={1.75} />
           <span className="text-text-muted">{currentLabel}</span>
         </div>
@@ -121,10 +121,10 @@ export function Navbar() {
 
       <button
         onClick={openPalette}
-        className="ml-2 flex flex-1 max-w-sm items-center gap-2 rounded-sm border border-border bg-surface px-3 py-1.5 text-left text-text-muted transition-colors hover:border-border-strong"
+        className="ml-2 flex h-7.5 min-w-0 flex-1 items-center gap-2 rounded-[7px] bg-surface px-3 text-left text-text-muted shadow-edge transition-colors duration-(--dur-fast) hover:bg-surface-hover md:w-[min(384px,32vw)] md:flex-none"
       >
         <Search size={14} strokeWidth={1.75} />
-        <span className="flex-1 text-xs">Buscar o ejecutar un comando…</span>
+        <span className="flex-1 truncate text-ui">Buscar o ejecutar un comando…</span>
         <Kbd>{IS_MAC ? '⌘K' : 'Ctrl K'}</Kbd>
       </button>
 
@@ -148,7 +148,7 @@ export function Navbar() {
           onClick={() => openQuickAdd()}
           aria-label="Nueva tarea"
           title="Nueva tarea (n)"
-          className="flex h-8 items-center gap-1.5 rounded-sm border border-border bg-surface px-2.5 text-ui font-medium text-text transition-colors hover:bg-surface-hover"
+          className="flex h-7.5 items-center gap-1.5 rounded-sm border border-border bg-surface px-2.5 text-ui font-medium text-text shadow-card transition-colors duration-(--dur-fast) hover:bg-surface-hover"
         >
           <Plus size={14} strokeWidth={2} />
           <span className="hidden sm:inline">Nuevo</span>
@@ -157,10 +157,10 @@ export function Navbar() {
 
         {gamificationOn && (
           <div
-            className="hidden items-center gap-1 rounded-sm border border-border px-2 py-1.5 text-text-muted sm:flex"
+            className="hidden h-7.5 items-center gap-1 rounded-sm px-2 text-text-muted shadow-edge sm:flex"
             title="Tu nivel"
           >
-            <span className="text-xs font-semibold tabular-nums text-accent">Nv. {level}</span>
+            <span className="text-xs font-semibold tabular-nums text-accent-text">Nv. {level}</span>
           </div>
         )}
 
@@ -170,9 +170,9 @@ export function Navbar() {
           onClick={toggleRight}
           title="Mostrar/ocultar panel (Alt+L)"
           aria-label={rightOpen ? 'Ocultar panel lateral' : 'Mostrar panel lateral'}
-          className="hidden rounded-md p-1.5 text-text-faint transition-colors hover:bg-surface-hover hover:text-text md:flex"
+          className="hidden h-7.5 w-7.5 items-center justify-center rounded-sm text-text-faint transition-colors duration-(--dur-fast) hover:bg-surface-hover hover:text-text md:flex"
         >
-          <PanelRightOpen size={17} strokeWidth={1.75} className={rightOpen ? 'text-accent' : ''} />
+          <PanelRightOpen size={16} strokeWidth={1.75} className={rightOpen ? 'text-accent-text' : ''} />
         </button>
       </div>
     </header>
