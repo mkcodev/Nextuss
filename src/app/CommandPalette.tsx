@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Command } from 'cmdk'
+import { m, useReducedMotion } from 'motion/react'
+import type { ReactNode } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -29,11 +31,13 @@ import { useOverlayStore } from './shortcuts/overlayStore'
 import { useUIStore } from './uiStore'
 import { useHabitFormStore } from '../features/habits/habitFormStore'
 import { useQuickAddStore } from '../features/tasks/quickAddStore'
-import { updateSettings } from '../db/repositories/settings'
+import { PRESET, motionFor } from '../design/motion'
+import { setThemePreference } from '../design/useTheme'
 import { getTask } from '../db/repositories/tasks'
 import { getHabit } from '../db/repositories/habits'
 import { getGoal } from '../db/repositories/goals'
 import { weekKey } from '../lib/dates'
+import { cn } from '../lib/cn'
 import { useTaskFormStore } from '../features/tasks/taskFormStore'
 import { useGoalFormStore } from '../features/planner/goalFormStore'
 import { useWeeklyReviewStore } from '../features/planner/weeklyReviewStore'
@@ -65,13 +69,27 @@ const EXTRA_NAV_ITEMS: { to: string; label: string; icon: typeof Compass; plugin
 const SEARCH_PLUGIN: Partial<Record<SearchDoc['type'], PluginId>> = { habit: 'habits' }
 
 const ITEM_CLASS =
-  'flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent'
+  'flex h-9 cursor-pointer items-center gap-2.5 rounded-sm px-2.5 text-ui text-text transition-colors duration-(--dur-fast) data-[selected=true]:bg-surface-hover data-[selected=true]:shadow-edge [&>svg]:shrink-0 [&>svg]:text-text-faint data-[selected=true]:[&>svg]:text-accent-text'
+
+/** Origen del círculo del cambio de tema: bajo el campo de la paleta. */
+const themeOrigin = () => ({ x: window.innerWidth / 2, y: window.innerHeight * 0.16 })
+
+/** Cada grupo entra en cascada (PRESET.paletteItems): un `m.div` por grupo bajo el contenedor con `stagger`. */
+const GROUP_VARIANTS = {
+  hidden: { opacity: 0, y: -4 },
+  show: { opacity: 1, y: 0, transition: PRESET.menu.transition },
+}
+function Cascade({ children }: { children: ReactNode }) {
+  return <m.div variants={GROUP_VARIANTS}>{children}</m.div>
+}
 
 export function CommandPalette() {
   const paletteOpen = useOverlayStore((s) => s.paletteOpen)
   const closePalette = useOverlayStore((s) => s.closePalette)
   const openHelp = useOverlayStore((s) => s.openHelp)
   const navigate = useNavigate()
+  const go = (to: string) => navigate(to, { viewTransition: true })
+  const reduceMotion = useReducedMotion()
   const navItems = useNavItems()
   const enabled = useEnabledPlugins()
   const on = (id: PluginId) => enabled.has(id)
@@ -125,7 +143,7 @@ export function CommandPalette() {
       const goal = await getGoal(doc.id)
       if (goal) openGoalEdit(goal)
     } else {
-      navigate(`/proyectos/${doc.id}`)
+      go(`/proyectos/${doc.id}`)
     }
   }
 
@@ -136,204 +154,219 @@ export function CommandPalette() {
         if (!next) closePalette()
       }}
       label="Paleta de comandos"
-      overlayClassName="fixed inset-0 z-palette bg-scrim"
-      contentClassName="fixed left-1/2 top-[18%] z-palette-content w-full max-w-lg -translate-x-1/2 px-4"
-      className="overflow-hidden rounded-lg border border-border bg-bg-soft shadow-card"
+      overlayClassName="nx-pal-overlay fixed inset-0 z-palette bg-scrim backdrop-blur-[2px]"
+      contentClassName="nx-pal-content fixed left-1/2 top-[16vh] z-palette-content w-[min(640px,calc(100vw-2rem))] -translate-x-1/2"
     >
-      <div className="flex items-center gap-2 border-b border-border px-3.5">
-        <Search size={15} strokeWidth={1.75} className="shrink-0 text-text-faint" />
-        <Command.Input
-          autoFocus
-          value={query}
-          onValueChange={setQuery}
-          placeholder="Escribe un comando o busca…"
-          className="w-full bg-transparent py-3.5 text-sm text-text outline-none placeholder:text-text-faint"
-        />
-      </div>
+      <m.div
+        className={cn(
+          'relative overflow-hidden rounded-lg bg-pop shadow-dialog backdrop-blur-[18px] backdrop-saturate-[1.4]',
+          !reduceMotion && 'nx-pal-sweep',
+        )}
+        initial={reduceMotion ? { opacity: 0 } : PRESET.palette.initial}
+        animate={reduceMotion ? { opacity: 1 } : PRESET.palette.animate}
+        transition={motionFor(reduceMotion, PRESET.palette.transition)}
+      >
+        <div className="flex h-[50px] items-center gap-2 border-b border-border px-3.5">
+          <Search size={15} strokeWidth={1.75} className="shrink-0 text-text-faint" />
+          <Command.Input
+            autoFocus
+            value={query}
+            onValueChange={setQuery}
+            placeholder="Escribe un comando o busca…"
+            className="field-bare w-full bg-transparent text-[15px] text-text outline-none placeholder:text-text-faint"
+          />
+        </div>
 
-      <Command.List className="max-h-80 overflow-y-auto p-2 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-text-faint">
-        <Command.Empty className="px-3 py-6 text-center text-sm text-text-faint">
-          Sin resultados.
-        </Command.Empty>
+        <Command.List className="max-h-96 overflow-y-auto p-2 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-2xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-text-faint">
+          <Command.Empty className="px-3 py-6 text-center text-ui text-text-faint">
+            Sin resultados.
+          </Command.Empty>
+          <m.div
+            initial={reduceMotion ? false : 'hidden'}
+            animate="show"
+            variants={{ show: { transition: { staggerChildren: PRESET.paletteItems.stagger, delayChildren: PRESET.paletteItems.delay } } }}
+          >
 
-        {results.length > 0 && (
-          <Command.Group heading="Resultados">
-            {results.map((doc) => {
-              const Icon = SEARCH_ICON[doc.type]
-              return (
+            {results.length > 0 && (
+              <Cascade><Command.Group heading="Resultados">
+                {results.map((doc) => {
+                  const Icon = SEARCH_ICON[doc.type]
+                  return (
+                    <Command.Item
+                      key={`${doc.type}:${doc.id}`}
+                      value={`resultado ${doc.title}`}
+                      onSelect={() => run(() => void openResult(doc))}
+                      className={ITEM_CLASS}
+                    >
+                      <Icon size={15} strokeWidth={1.75} />
+                      <span className="min-w-0 flex-1 truncate">{doc.title}</span>
+                      {doc.subtitle && <span className="shrink-0 text-xs text-text-faint">{doc.subtitle}</span>}
+                    </Command.Item>
+                  )
+                })}
+              </Command.Group></Cascade>
+            )}
+
+            {settingsResults.length > 0 && (
+              <Cascade><Command.Group heading="Ajustes">
+                {settingsResults.map((m) => (
+                  <Command.Item
+                    key={`${m.pluginId}-${m.anchorId}`}
+                    value={`ajuste ${m.pluginName} ${m.label}`}
+                    onSelect={() => run(() => go(`/plugins/${m.pluginId}#${m.anchorId}`))}
+                    className={ITEM_CLASS}
+                  >
+                    <Settings2 size={15} strokeWidth={1.75} />
+                    <span className="min-w-0 flex-1 truncate">
+                      Ajuste: {m.pluginName} › {m.label}
+                    </span>
+                  </Command.Item>
+                ))}
+              </Command.Group></Cascade>
+            )}
+
+            <Cascade><Command.Group heading="Navegación">
+              {navItems.map(({ to, label, icon: Icon, paletteLabel }) => (
                 <Command.Item
-                  key={`${doc.type}:${doc.id}`}
-                  value={`resultado ${doc.title}`}
-                  onSelect={() => run(() => void openResult(doc))}
+                  key={to}
+                  onSelect={() => run(() => go(to))}
                   className={ITEM_CLASS}
                 >
-                  <Icon size={15} strokeWidth={1.75} />
-                  <span className="min-w-0 flex-1 truncate">{doc.title}</span>
-                  {doc.subtitle && <span className="shrink-0 text-xs text-text-faint">{doc.subtitle}</span>}
+                  <Icon size={15} strokeWidth={1.75} /> {paletteLabel ?? `Ir a ${label}`}
                 </Command.Item>
-              )
-            })}
-          </Command.Group>
-        )}
+              ))}
+              {selectNav(EXTRA_NAV_ITEMS, enabled).map(({ to, label, icon: Icon }) => (
+                <Command.Item
+                  key={to}
+                  onSelect={() => run(() => go(to))}
+                  className={ITEM_CLASS}
+                >
+                  <Icon size={15} strokeWidth={1.75} /> {label}
+                </Command.Item>
+              ))}
+            </Command.Group></Cascade>
 
-        {settingsResults.length > 0 && (
-          <Command.Group heading="Ajustes">
-            {settingsResults.map((m) => (
+            <Cascade><Command.Group heading="Acciones">
+              <Command.Item onSelect={() => run(openQuickAdd)} className={ITEM_CLASS}>
+                <Plus size={15} strokeWidth={1.75} /> Crear tarea
+              </Command.Item>
+              {on('habits') && (
+                <Command.Item onSelect={() => run(openCreate)} className={ITEM_CLASS}>
+                  <Plus size={15} strokeWidth={1.75} /> Crear hábito
+                </Command.Item>
+              )}
               <Command.Item
-                key={`${m.pluginId}-${m.anchorId}`}
-                value={`ajuste ${m.pluginName} ${m.label}`}
-                onSelect={() => run(() => navigate(`/plugins/${m.pluginId}#${m.anchorId}`))}
+                onSelect={() => run(() => openGoalCreate({ period: 'week', periodKey: weekKey() }))}
                 className={ITEM_CLASS}
               >
-                <Settings2 size={15} strokeWidth={1.75} />
-                <span className="min-w-0 flex-1 truncate">
-                  Ajuste: {m.pluginName} › {m.label}
-                </span>
+                <Target size={15} strokeWidth={1.75} /> Crear objetivo
               </Command.Item>
-            ))}
-          </Command.Group>
-        )}
-
-        <Command.Group heading="Navegación">
-          {navItems.map(({ to, label, icon: Icon, paletteLabel }) => (
-            <Command.Item
-              key={to}
-              onSelect={() => run(() => navigate(to))}
-              className={ITEM_CLASS}
-            >
-              <Icon size={15} strokeWidth={1.75} /> {paletteLabel ?? `Ir a ${label}`}
-            </Command.Item>
-          ))}
-          {selectNav(EXTRA_NAV_ITEMS, enabled).map(({ to, label, icon: Icon }) => (
-            <Command.Item
-              key={to}
-              onSelect={() => run(() => navigate(to))}
-              className={ITEM_CLASS}
-            >
-              <Icon size={15} strokeWidth={1.75} /> {label}
-            </Command.Item>
-          ))}
-        </Command.Group>
-
-        <Command.Group heading="Acciones">
-          <Command.Item onSelect={() => run(openQuickAdd)} className={ITEM_CLASS}>
-            <Plus size={15} strokeWidth={1.75} /> Crear tarea
-          </Command.Item>
-          {on('habits') && (
-            <Command.Item onSelect={() => run(openCreate)} className={ITEM_CLASS}>
-              <Plus size={15} strokeWidth={1.75} /> Crear hábito
-            </Command.Item>
-          )}
-          <Command.Item
-            onSelect={() => run(() => openGoalCreate({ period: 'week', periodKey: weekKey() }))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
-          >
-            <Target size={15} strokeWidth={1.75} /> Crear objetivo
-          </Command.Item>
-          <Command.Item
-            onSelect={() => run(openProjectCreate)}
-            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
-          >
-            <FolderKanban size={15} strokeWidth={1.75} /> Crear proyecto
-          </Command.Item>
-          {on('routines') && (
-            <Command.Item onSelect={() => run(openRoutineCreate)} className={ITEM_CLASS}>
-              <Repeat size={15} strokeWidth={1.75} /> Crear rutina
-            </Command.Item>
-          )}
-          {on('routines') && routines.map((r) => (
-            <Command.Item
-              key={`routine-${r.id}`}
-              value={`Empezar rutina ${r.name}`}
-              onSelect={() => run(() => void startRoutine(r))}
-              className={ITEM_CLASS}
-            >
-              <Play size={15} strokeWidth={1.75} /> Empezar rutina: {r.name}
-            </Command.Item>
-          ))}
-          <Command.Item onSelect={() => run(() => openTemplatePicker('task'))} className={ITEM_CLASS}>
-            <LayoutTemplate size={15} strokeWidth={1.75} /> Tarea desde plantilla
-          </Command.Item>
-          <Command.Item onSelect={() => run(() => openTemplatePicker('project'))} className={ITEM_CLASS}>
-            <LayoutTemplate size={15} strokeWidth={1.75} /> Proyecto desde plantilla
-          </Command.Item>
-          {on('weeklyReview') && (
-            <Command.Item onSelect={() => run(() => openWeeklyReview(weekKey()))} className={ITEM_CLASS}>
-              <ClipboardCheck size={15} strokeWidth={1.75} /> Revisión semanal
-            </Command.Item>
-          )}
-        </Command.Group>
-
-        <Command.Group heading="Informes">
-          {on('stats') && (
-            <>
-              <Command.Item onSelect={() => run(() => navigate('/estadisticas?tab=informes'))} className={ITEM_CLASS}>
-                <FileText size={15} strokeWidth={1.75} /> Informe semanal
+              <Command.Item
+                onSelect={() => run(openProjectCreate)}
+                className={ITEM_CLASS}
+              >
+                <FolderKanban size={15} strokeWidth={1.75} /> Crear proyecto
               </Command.Item>
-              <Command.Item onSelect={() => run(() => navigate('/estadisticas?tab=informes'))} className={ITEM_CLASS}>
-                <Download size={15} strokeWidth={1.75} /> Exportar datos
+              {on('routines') && (
+                <Command.Item onSelect={() => run(openRoutineCreate)} className={ITEM_CLASS}>
+                  <Repeat size={15} strokeWidth={1.75} /> Crear rutina
+                </Command.Item>
+              )}
+              {on('routines') && routines.map((r) => (
+                <Command.Item
+                  key={`routine-${r.id}`}
+                  value={`Empezar rutina ${r.name}`}
+                  onSelect={() => run(() => void startRoutine(r))}
+                  className={ITEM_CLASS}
+                >
+                  <Play size={15} strokeWidth={1.75} /> Empezar rutina: {r.name}
+                </Command.Item>
+              ))}
+              <Command.Item onSelect={() => run(() => openTemplatePicker('task'))} className={ITEM_CLASS}>
+                <LayoutTemplate size={15} strokeWidth={1.75} /> Tarea desde plantilla
               </Command.Item>
-            </>
-          )}
-          <Command.Item
-            onSelect={() => run(() => navigate('/ajustes#backup'))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
-          >
-            <Database size={15} strokeWidth={1.75} /> Backup
-          </Command.Item>
-          <Command.Item
-            onSelect={() => run(() => navigate('/ajustes#papelera'))}
-            className={ITEM_CLASS}
-          >
-            <Trash2 size={15} strokeWidth={1.75} /> Papelera
-          </Command.Item>
-        </Command.Group>
+              <Command.Item onSelect={() => run(() => openTemplatePicker('project'))} className={ITEM_CLASS}>
+                <LayoutTemplate size={15} strokeWidth={1.75} /> Proyecto desde plantilla
+              </Command.Item>
+              {on('weeklyReview') && (
+                <Command.Item onSelect={() => run(() => openWeeklyReview(weekKey()))} className={ITEM_CLASS}>
+                  <ClipboardCheck size={15} strokeWidth={1.75} /> Revisión semanal
+                </Command.Item>
+              )}
+            </Command.Group></Cascade>
 
-        <Command.Group heading="Vista">
-          <Command.Item
-            onSelect={() => run(toggleLeft)}
-            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
-          >
-            <PanelLeft size={15} strokeWidth={1.75} /> Colapsar/expandir navegación
-          </Command.Item>
-          <Command.Item
-            onSelect={() => run(toggleRight)}
-            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
-          >
-            <PanelRight size={15} strokeWidth={1.75} /> Mostrar/ocultar panel
-          </Command.Item>
-        </Command.Group>
+            <Cascade><Command.Group heading="Informes">
+              {on('stats') && (
+                <>
+                  <Command.Item onSelect={() => run(() => go('/estadisticas?tab=informes'))} className={ITEM_CLASS}>
+                    <FileText size={15} strokeWidth={1.75} /> Informe semanal
+                  </Command.Item>
+                  <Command.Item onSelect={() => run(() => go('/estadisticas?tab=informes'))} className={ITEM_CLASS}>
+                    <Download size={15} strokeWidth={1.75} /> Exportar datos
+                  </Command.Item>
+                </>
+              )}
+              <Command.Item
+                onSelect={() => run(() => go('/ajustes#backup'))}
+                className={ITEM_CLASS}
+              >
+                <Database size={15} strokeWidth={1.75} /> Backup
+              </Command.Item>
+              <Command.Item
+                onSelect={() => run(() => go('/ajustes#papelera'))}
+                className={ITEM_CLASS}
+              >
+                <Trash2 size={15} strokeWidth={1.75} /> Papelera
+              </Command.Item>
+            </Command.Group></Cascade>
 
-        <Command.Group heading="Tema">
-          <Command.Item
-            onSelect={() => run(() => updateSettings({ theme: 'light' }))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
-          >
-            <Sun size={15} strokeWidth={1.75} /> Tema claro
-          </Command.Item>
-          <Command.Item
-            onSelect={() => run(() => updateSettings({ theme: 'dark' }))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
-          >
-            <Moon size={15} strokeWidth={1.75} /> Tema oscuro
-          </Command.Item>
-          <Command.Item
-            onSelect={() => run(() => updateSettings({ theme: 'system' }))}
-            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
-          >
-            <Monitor size={15} strokeWidth={1.75} /> Tema del sistema
-          </Command.Item>
-        </Command.Group>
+            <Cascade><Command.Group heading="Vista">
+              <Command.Item
+                onSelect={() => run(toggleLeft)}
+                className={ITEM_CLASS}
+              >
+                <PanelLeft size={15} strokeWidth={1.75} /> Colapsar/expandir navegación
+              </Command.Item>
+              <Command.Item
+                onSelect={() => run(toggleRight)}
+                className={ITEM_CLASS}
+              >
+                <PanelRight size={15} strokeWidth={1.75} /> Mostrar/ocultar panel
+              </Command.Item>
+            </Command.Group></Cascade>
 
-        <Command.Group heading="Ayuda">
-          <Command.Item
-            onSelect={() => run(openHelp)}
-            className="flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-text data-[selected=true]:bg-accent-soft data-[selected=true]:text-accent"
-          >
-            <Keyboard size={15} strokeWidth={1.75} /> Ver atajos de teclado
-          </Command.Item>
-        </Command.Group>
-      </Command.List>
+            <Cascade><Command.Group heading="Tema">
+              <Command.Item
+                onSelect={() => run(() => void setThemePreference('light', themeOrigin()))}
+                className={ITEM_CLASS}
+              >
+                <Sun size={15} strokeWidth={1.75} /> Tema claro
+              </Command.Item>
+              <Command.Item
+                onSelect={() => run(() => void setThemePreference('dark', themeOrigin()))}
+                className={ITEM_CLASS}
+              >
+                <Moon size={15} strokeWidth={1.75} /> Tema oscuro
+              </Command.Item>
+              <Command.Item
+                onSelect={() => run(() => void setThemePreference('system', themeOrigin()))}
+                className={ITEM_CLASS}
+              >
+                <Monitor size={15} strokeWidth={1.75} /> Tema del sistema
+              </Command.Item>
+            </Command.Group></Cascade>
+
+            <Cascade><Command.Group heading="Ayuda">
+              <Command.Item
+                onSelect={() => run(openHelp)}
+                className={ITEM_CLASS}
+              >
+                <Keyboard size={15} strokeWidth={1.75} /> Ver atajos de teclado
+              </Command.Item>
+            </Command.Group></Cascade>
+          </m.div>
+        </Command.List>
+      </m.div>
     </Command.Dialog>
   )
 }
