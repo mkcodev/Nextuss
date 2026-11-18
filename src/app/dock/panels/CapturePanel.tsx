@@ -86,7 +86,7 @@ export function CapturePanel() {
           }}
           placeholder="Apunta cualquier cosa…"
           rows={3}
-          className="resize-none"
+          className="field-bare resize-none focus:shadow-[inset_0_0_0_1px_var(--color-accent)]"
         />
         <div className="mt-1.5 flex items-center justify-between">
           <span className="text-xs text-text-faint">Enter para guardar</span>

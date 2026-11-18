@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import type { DragEvent as ReactDragEvent, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 import { ChevronsDown, ChevronsUp, X } from 'lucide-react'
-import { AnimatePresence, m, useReducedMotion } from 'motion/react'
+import { AnimatePresence, LayoutGroup, m, useReducedMotion } from 'motion/react'
 import { useUIStore, type DockZone } from '../uiStore'
 import { PANEL_REGISTRY, isPanelVisible, type PanelKey } from './panels'
 import { useEnabledPlugins } from '../../features/plugins/pluginsStore'
 import { SectionErrorBoundary } from '../../design/primitives'
 import { cn } from '../../lib/cn'
+import { PRESET, SPRING, motionFor } from '../../design/motion'
 
 const DRAG_MIME = 'application/x-nextuss-panel-order'
 const SPLIT_MIN = 8
@@ -35,6 +36,7 @@ function PanelTabs({
   const movePanel = useUIStore((s) => s.movePanel)
   const [draggedKey, setDraggedKey] = useState<PanelKey | null>(null)
   const [dropTarget, setDropTarget] = useState<DropTarget | null>(null)
+  const reduceMotion = useReducedMotion()
 
   const handleDragStart = (e: ReactDragEvent<HTMLButtonElement>, key: PanelKey) => {
     e.dataTransfer.setData(DRAG_MIME, key)
@@ -123,14 +125,21 @@ function PanelTabs({
               title={p.label}
               aria-label={p.label}
               className={cn(
-                'flex h-9 w-9 md:h-6 md:w-6 cursor-grab items-center justify-center rounded-md transition-colors active:cursor-grabbing',
+                'relative isolate flex h-9 w-9 cursor-grab items-center justify-center rounded-sm transition-colors duration-(--dur-fast) ease-(--ease-standard) active:cursor-grabbing md:h-7 md:w-7',
                 draggedKey === key && 'opacity-30',
-                activeKey === key
-                  ? 'bg-accent-soft text-accent'
-                  : 'text-text-faint hover:bg-surface-hover hover:text-text',
+                activeKey === key ? 'text-text' : 'text-text-faint hover:bg-surface-hover hover:text-text',
               )}
             >
-              <p.icon size={13} strokeWidth={1.75} />
+              {/* Indicador de la pestaña activa: un solo fondo que se desliza entre pestañas de la zona. */}
+              {activeKey === key && (
+                <m.span
+                  aria-hidden="true"
+                  layoutId={`dock-tab-${zone}`}
+                  className="absolute inset-0 -z-10 rounded-sm bg-surface shadow-edge"
+                  transition={motionFor(reduceMotion, SPRING.ui)}
+                />
+              )}
+              <p.icon size={14} strokeWidth={1.75} className={cn(activeKey === key && 'text-accent-text')} />
             </button>
             {dropTarget?.key === key && dropTarget.side === 'after' && (
               <span className="absolute -right-[3px] top-0.5 bottom-0.5 w-0.5 rounded-full bg-accent" />
@@ -179,6 +188,7 @@ function DockZones() {
   const topId = useId()
   const bottomId = useId()
   const enabled = useEnabledPlugins()
+  const layoutGroupId = useId() // aísla los layoutId del escritorio y de la hoja móvil
   // Un panel de un plugin desactivado no se pinta: la zona queda en «Elige un panel arriba».
   const visible = (key: PanelKey | null) => (key && isPanelVisible(key, enabled) ? key : null)
 
@@ -225,6 +235,7 @@ function DockZones() {
   }
 
   return (
+    <LayoutGroup id={layoutGroupId}>
     <div ref={bodyRef} className="flex min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-col" style={{ height: `${livePct ?? dock.splitPct}%` }}>
         <PanelTabs zone="top" idBase={topId} activeKey={visible(dock.top)} onSelect={(k) => assignPanel('top', k)} />
@@ -274,6 +285,7 @@ function DockZones() {
         <DockZoneBody idBase={bottomId} panelKey={visible(dock.bottom)} />
       </div>
     </div>
+    </LayoutGroup>
   )
 }
 
@@ -308,21 +320,20 @@ function MobileDockSheet() {
       {open && (
         <m.div
           className="fixed inset-0 z-dialog flex items-end bg-scrim md:hidden"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: reduceMotion ? 0 : 0.15 }}
+          initial={PRESET.scrim.initial}
+          animate={reduceMotion ? { opacity: 1, transition: motionFor(true, {}) } : PRESET.scrim.animate}
+          exit={reduceMotion ? { opacity: 0, transition: motionFor(true, {}) } : PRESET.scrim.exit}
           onClick={close}
         >
           <m.div
             role="dialog"
             aria-modal="true"
             aria-label="Panel"
-            initial={reduceMotion ? { opacity: 0 } : { y: '100%' }}
-            animate={reduceMotion ? { opacity: 1 } : { y: 0 }}
-            exit={reduceMotion ? { opacity: 0 } : { y: '100%' }}
-            transition={{ duration: reduceMotion ? 0 : 0.2, ease: [0.25, 1, 0.5, 1] }}
-            className="flex h-[85vh] w-full flex-col rounded-t-2xl border-t border-border bg-bg-soft"
+            initial={reduceMotion ? { opacity: 0 } : PRESET.sheet.initial}
+            animate={reduceMotion ? { opacity: 1 } : PRESET.sheet.animate}
+            exit={reduceMotion ? { opacity: 0 } : PRESET.sheet.exit}
+            transition={motionFor(reduceMotion, PRESET.sheet.transition)}
+            className="flex h-[85vh] w-full flex-col rounded-t-2xl border-t border-border bg-bg-soft shadow-dialog"
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -346,8 +357,8 @@ export function RightDock() {
   return (
     <>
       {rightOpen && (
-        <aside className="hidden w-80 shrink-0 flex-col border-l border-border bg-bg-soft md:flex">
-          <div className="flex h-14 shrink-0 items-center border-b border-border px-3">
+        <aside className="vt-dock hidden w-80 shrink-0 flex-col border-l border-border bg-bg-soft md:flex">
+          <div className="flex h-12 shrink-0 items-center border-b border-border px-3">
             <span className="text-xs font-semibold uppercase tracking-wide text-text-faint">Panel</span>
           </div>
           <DockZones />

@@ -1,21 +1,13 @@
 import { AnimatePresence, m, useReducedMotion } from 'motion/react'
 import { X } from 'lucide-react'
 import { useToastStore } from '../lib/toastStore'
-import { Card, Icon } from '../design/primitives'
+import { Icon } from '../design/primitives'
+import { PRESET, motionFor } from '../design/motion'
 import { cn } from '../lib/cn'
 
-const VARIANT_CARD_CLASSES: Record<string, string> = {
-  celebrate: 'border-accent/40 bg-accent-soft/40 p-5',
-  success: 'border-success/40 bg-success/10',
-  warning: 'border-warning/40 bg-warning/10',
-  error: 'border-danger/40 bg-danger/10',
-}
-
-const VARIANT_ICON_CLASSES: Record<string, string> = {
-  success: 'bg-success/15 text-success',
-  warning: 'bg-warning/15 text-warning',
-  error: 'bg-danger/15 text-danger',
-}
+// Los avisos de Línea llevan los colores invertidos (claro sobre oscuro y al revés), así que la
+// variante ya no pinta el fondo: se nota por el icono, por el rol (alert/status) y, en celebrate,
+// por el tamaño y un anillo de acento.
 
 export function ToastHost() {
   const toasts = useToastStore((s) => s.toasts)
@@ -28,44 +20,41 @@ export function ToastHost() {
       aria-live="polite"
       aria-relevant="additions"
       // En móvil se apila por encima de la barra de navegación inferior (y del indicador de inicio de iOS).
-      className="pointer-events-none fixed inset-x-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-toast flex flex-col gap-2 md:inset-x-auto md:right-4 md:bottom-4 md:w-full md:max-w-sm"
+      className="pointer-events-none fixed inset-x-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-toast flex flex-col gap-2 md:inset-x-auto md:bottom-6 md:left-1/2 md:w-max md:max-w-[min(28rem,calc(100vw-2rem))] md:-translate-x-1/2 md:items-center"
     >
       <AnimatePresence>
         {toasts.map((toast) => (
           <m.div
             key={toast.id}
-            layout
-            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 24 }}
-            transition={{ duration: reduceMotion ? 0 : 0.2 }}
-            className="pointer-events-auto"
+            layout="position"
+            initial={reduceMotion ? { opacity: 0 } : PRESET.toast.initial}
+            animate={PRESET.toast.animate}
+            exit={reduceMotion ? { opacity: 0 } : PRESET.toast.exit}
+            transition={motionFor(reduceMotion, PRESET.toast.transition)}
+            className="pointer-events-auto w-full md:w-auto"
           >
-            <Card
+            <div
               className={cn(
-                'flex items-start gap-3 p-4 shadow-dialog',
-                toast.variant && VARIANT_CARD_CLASSES[toast.variant],
+                'flex items-center gap-3 rounded-md bg-toast px-3.5 py-2.5 text-ui font-medium text-on-toast shadow-dialog',
+                toast.variant === 'celebrate' && 'p-5 ring-1 ring-accent/60',
               )}
               role={toast.variant === 'error' || toast.variant === 'warning' ? 'alert' : 'status'}
             >
               {toast.icon && (
                 <span
                   className={cn(
-                    'flex shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent',
-                    toast.variant === 'celebrate' ? 'h-11 w-11' : 'h-9 w-9',
-                    toast.variant && VARIANT_ICON_CLASSES[toast.variant],
+                    'flex shrink-0 items-center justify-center rounded-md bg-[color-mix(in_srgb,currentColor_12%,transparent)]',
+                    toast.variant === 'celebrate' ? 'h-11 w-11' : 'h-8 w-8',
                   )}
                 >
-                  <Icon name={toast.icon} size={toast.variant === 'celebrate' ? 21 : 17} strokeWidth={2} />
+                  <Icon name={toast.icon} size={toast.variant === 'celebrate' ? 21 : 16} strokeWidth={2} />
                 </span>
               )}
               <div className="min-w-0 flex-1">
-                <p className={cn('font-semibold text-text', toast.variant === 'celebrate' ? 'text-base' : 'text-sm')}>
+                <p className={cn('text-pretty', toast.variant === 'celebrate' ? 'text-base font-semibold' : 'font-medium')}>
                   {toast.title}
                 </p>
-                {toast.description && (
-                  <p className="text-xs text-text-muted">{toast.description}</p>
-                )}
+                {toast.description && <p className="text-xs font-normal opacity-70">{toast.description}</p>}
               </div>
               {toast.action && (
                 <button
@@ -74,7 +63,7 @@ export function ToastHost() {
                     toast.action!.onClick()
                     dismiss(toast.id)
                   }}
-                  className="shrink-0 self-center rounded-sm px-2 py-1 text-sm font-semibold text-accent transition-colors hover:bg-accent-soft"
+                  className="shrink-0 rounded-sm bg-[color-mix(in_srgb,currentColor_14%,transparent)] px-2 py-1 text-ui font-semibold transition-colors duration-(--dur-fast) hover:bg-[color-mix(in_srgb,currentColor_22%,transparent)]"
                 >
                   {toast.action.label}
                 </button>
@@ -83,11 +72,11 @@ export function ToastHost() {
                 type="button"
                 onClick={() => dismiss(toast.id)}
                 aria-label="Cerrar aviso"
-                className="-mr-1 -mt-1 shrink-0 rounded-sm p-1 text-text-faint transition-colors hover:bg-surface-hover hover:text-text"
+                className="-mr-1 shrink-0 rounded-sm p-1 opacity-60 transition-opacity duration-(--dur-fast) hover:opacity-100"
               >
                 <X size={14} strokeWidth={1.75} />
               </button>
-            </Card>
+            </div>
           </m.div>
         ))}
       </AnimatePresence>

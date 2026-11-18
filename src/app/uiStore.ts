@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { DEFAULT_PANEL_ORDER, type PanelKey } from './dock/panels'
+import { withViewTransition } from '../lib/viewTransition'
 
 export type DockZone = 'top' | 'bottom'
 
@@ -40,8 +41,10 @@ export const useUIStore = create<UIState>()(
       mobileDockOpen: false,
       dock: { top: 'progress', bottom: 'activity', splitPct: 55 },
       panelOrder: { top: [...DEFAULT_PANEL_ORDER], bottom: [...DEFAULT_PANEL_ORDER] },
-      toggleLeft: () => set((s) => ({ leftCollapsed: !s.leftCollapsed })),
-      toggleRight: () => set((s) => ({ rightOpen: !s.rightOpen })),
+      // Plegar el sidebar y abrir o cerrar el dock se animan con View Transitions (respaldo: corte
+      // directo). Pasan por aquí el botón, Alt+H / Alt+L y la paleta.
+      toggleLeft: () => withViewTransition(() => set((s) => ({ leftCollapsed: !s.leftCollapsed })), 'layout'),
+      toggleRight: () => withViewTransition(() => set((s) => ({ rightOpen: !s.rightOpen })), 'layout'),
       openMobileDock: () => set({ mobileDockOpen: true }),
       closeMobileDock: () => set({ mobileDockOpen: false }),
       assignPanel: (zone, panel) =>

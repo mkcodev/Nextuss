@@ -283,7 +283,7 @@ Nextuss es una herramienta de trabajo diario para alguien con TDAH: todo se hace
 
 La personalidad está en el movimiento, firme y preciso, con un solo destello al completar.
 
-Este documento sustituye a la v1 («La herramienta precisa», Inter e índigo), que se conserva en `docs/design-history/DESIGN-v1.md`. **Estado: fase 1a** (issue #183). Están cerrados los tokens (fase 0) y los primitivos de `src/design/primitives/` (fase 1a). La navegación llega en la fase 1b y las pantallas en las fases 2 a 6.
+Este documento sustituye a la v1 («La herramienta precisa», Inter e índigo), que se conserva en `docs/design-history/DESIGN-v1.md`. **Estado: fase 1b** (issue #183). Están cerrados los tokens (fase 0), los primitivos de `src/design/primitives/` (fase 1a) y la navegación (fase 1b). Las pantallas llegan en las fases 2 a 6.
 
 **Key Characteristics:**
 - **Temas:** el oscuro es casi negro azulado (`#0d0e10`) con un lateral aún más hundido. El claro es papel frío (`#fbfbfc`) con lateral gris al 4 %.
@@ -418,7 +418,20 @@ Los primitivos (`src/design/primitives/`) siguen Línea desde la fase 1a:
 - **EmptyState:** alineado a la izquierda, sin centrar.
 - **Celebration:** `<Celebration play={clave} onDone?>` dentro de un padre `relative`. Solo visual, oculto a lectores de pantalla y sin capturar clics. Se lanza cuando cambia `play` (no al montar).
 
-La navegación (fase 1b) y las pantallas siguen con la v1 (`docs/design-history/DESIGN-v1.md`) hasta su fase. La referencia de comportamiento para las fases 1b y 2 es el mockup de Línea:
+**Navegación (fase 1b)**
+- **Barra superior:** 48 px con filete inferior. Marca de 16 px (cuadrado partido en diagonal, acento y texto) y «Nextuss» en 14 px/650. El buscador mide 30 px con `shadow-edge` y `min(384px, 32vw)` de ancho en escritorio. El chip de nivel va en `accent-text`.
+- **Sidebar:** 224 px (60 plegado). Ítems de 30 px a 13 px con iconos de 15 px. El ítem activo lleva `surface-hover` y `shadow-edge`. Un único resaltado magnético (`layoutId` con el muelle `highlight`) sigue al puntero o al foco de teclado. El atajo `g x` en Geist Mono se ve solo en hover, foco o activo.
+- **Barra móvil:** el destino activo va en `accent-text` y una píldora de 48×2 px se desliza entre destinos (`layoutId` con el muelle `ui`).
+- **Paleta `Ctrl K`:** `top: 16vh`, `min(640px, 100vw − 32px)`, radio 12, fondo `--nx-pop-bg` con `backdrop-filter`. Campo de 50 px e ítems de 36 px. Entra con el preset `palette` (motion) y sus grupos en cascada; sale con la misma curva en CSS (Radix espera al final de la animación). Al abrirse, un barrido cónico de 900 ms recorre el borde, una sola vez y solo con movimiento completo.
+- **Avisos:** abajo y centrados, colores invertidos (`--nx-toast-bg` y `--nx-toast-text`), radio 8, preset `toast`. La variante se nota por el icono y el rol; `celebrate` conserva su tamaño y añade un anillo de acento.
+- **Dock:** cabecera de 48 px. Pestañas de 28 px con un indicador (`surface` y `shadow-edge`) que se desliza entre ellas, un `LayoutGroup` por instancia. En el móvil, la hoja usa los presets `scrim` y `sheet`. El campo de captura enfoca con un filete interior de acento.
+
+**View Transitions** (`src/lib/viewTransition.ts`; sin soporte o con movimiento reducido, el cambio es directo):
+- **Tema:** un círculo crece desde el botón en 560 ms (`cubic-bezier(.22,1,.36,1)`). Va por `setThemePreference`, que usan Ajustes y la paleta.
+- **Página:** solo `<main>` (`view-transition-name: page`) se funde, 120 ms al salir y 180 ms al entrar. El shell no se mueve. Va con `viewTransition` en los `NavLink`, en el menú del avatar y en la paleta.
+- **Dock y sidebar:** abrir o cerrar el dock y plegar el sidebar se animan con grupos propios (`dock` y `sidebar`), mientras `<main>` pasa a la raíz. Los dos pasan por `toggleRight` y `toggleLeft` de `uiStore`.
+
+La referencia de comportamiento para la fase 2 en adelante es el mockup de Línea:
 - **Cursor:** un único resaltado que se desliza entre filas.
 - **Estado:** el icono «en curso» se llena hasta quedar hecho.
 - **Celebración:** un destello recorre el borde de la fila al completarla.

@@ -38,6 +38,10 @@
   --color-on-accent: var(--nx-on-accent);
   /* Fondo tras diálogos y hojas. */
   --color-scrim: var(--nx-scrim);
+  /* Capas flotantes de Línea: paleta translúcida y aviso con los colores invertidos. */
+  --color-pop: var(--nx-pop-bg);
+  --color-toast: var(--nx-toast-bg);
+  --color-on-toast: var(--nx-toast-text);
 
   /* Tamaño intermedio de controles (botones, cabeceras de tabla): entre text-xs y text-sm. */
   --text-ui: 0.8125rem;
@@ -190,6 +194,9 @@
   --nx-shadow-edge: inset 0 0 0 1px var(--nx-border);
   --nx-shadow-dialog: 0 0 0 1px rgb(15 17 20 / 0.06), 0 16px 48px -12px rgb(15 17 20 / 0.22);
   --nx-scrim: rgb(15 17 20 / 0.18);
+  --nx-pop-bg: color-mix(in srgb, var(--nx-surface) 92%, transparent);
+  --nx-toast-bg: #17181b;
+  --nx-toast-text: #f3f4f6;
 }
 
 /* Tema oscuro, el principal de Línea. `useTheme.ts` siempre resuelve 'system' a un atributo
@@ -230,6 +237,9 @@
   --nx-shadow-edge: inset 0 0 0 1px var(--nx-border), inset 0 1px 0 rgb(255 255 255 / 0.035);
   --nx-shadow-dialog: 0 0 0 1px rgb(255 255 255 / 0.06), 0 24px 64px -16px rgb(0 0 0 / 0.75);
   --nx-scrim: rgb(0 0 0 / 0.45);
+  --nx-pop-bg: color-mix(in srgb, var(--nx-surface) 92%, transparent);
+  --nx-toast-bg: #eceef1;
+  --nx-toast-text: #0d0e10;
 }
 
 :root[data-theme='light'] {
@@ -307,6 +317,154 @@ body {
 }
 .nx-fade-in {
   animation: nx-fade-in var(--dur-fast) var(--ease-standard) both;
+}
+
+/* Paleta Ctrl K. Entra con motion (muelle `ui`, ver CommandPalette); la salida es CSS porque Radix
+   espera al final de la animación de `data-state=closed` antes de desmontar. Mismos valores que
+   PRESET.palette y PRESET.scrim (src/design/motion.ts). */
+@keyframes nx-pal-scrim-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes nx-pal-scrim-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes nx-pal-out {
+  to {
+    opacity: 0;
+    translate: -50% -6px;
+    scale: 0.97;
+  }
+}
+.nx-pal-overlay[data-state='open'] {
+  animation: nx-pal-scrim-in 220ms var(--ease-standard) both;
+}
+.nx-pal-overlay[data-state='closed'] {
+  animation: nx-pal-scrim-out 180ms var(--ease-exit) both;
+}
+.nx-pal-content[data-state='closed'] {
+  animation: nx-pal-out 160ms var(--ease-exit) both;
+}
+
+/* Barrido del borde al abrir la paleta: un destello cónico de 900 ms, una sola vez y solo con
+   movimiento completo (`@property` permite animar el ángulo; sin soporte, solo parpadea el borde). */
+@property --lin-ang {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes nx-pal-sweep {
+  0% {
+    --lin-ang: -60deg;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    --lin-ang: 300deg;
+    opacity: 0;
+  }
+}
+.nx-pal-sweep::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--lin-ang), transparent 0deg, var(--color-accent) 40deg, transparent 90deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
+  animation: nx-pal-sweep 900ms cubic-bezier(0.3, 0, 0.2, 1) 1 both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nx-pal-sweep::before {
+    display: none;
+  }
+}
+
+/* View Transitions (ver src/lib/viewTransition.ts). Solo hay animación cuando el navegador las
+   soporta y el usuario no pidió menos movimiento; si no, el cambio es directo.
+   · Cambio de página: solo `<main>` (view-transition-name: page) se funde; el shell no se mueve.
+   · Tema: círculo que crece desde el botón (la animación del clip-path la lanza el helper). */
+#main-content {
+  view-transition-name: page;
+}
+::view-transition-group(root) {
+  animation: none;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(page) {
+  animation: nx-vt-out 120ms var(--ease-exit) both;
+}
+::view-transition-new(page) {
+  animation: nx-vt-in 180ms var(--ease-standard) both;
+}
+@keyframes nx-vt-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes nx-vt-in {
+  from {
+    opacity: 0;
+  }
+}
+/* En la transición de tema, <main> va dentro del mismo círculo que el resto: sin grupo propio. */
+html[data-vt='theme'] #main-content {
+  view-transition-name: none;
+}
+/* Plegar el sidebar y abrir o cerrar el dock: solo estas dos piezas se animan. <main> pasa a la
+   raíz (sin grupo propio) para que su contenido no se estire mientras cambia de ancho; se recoloca
+   de golpe y la pieza animada se desliza sobre él. Las imágenes no se escalan: se recortan. */
+.vt-sidebar {
+  view-transition-name: sidebar;
+}
+.vt-dock {
+  view-transition-name: dock;
+}
+html[data-vt='layout'] #main-content {
+  view-transition-name: none;
+}
+/* La transición de ancho en CSS se apaga mientras dura la View Transition: si no, la captura del estado
+   nuevo vería el ancho antiguo. */
+html[data-vt='layout'] .vt-sidebar {
+  transition: none;
+}
+::view-transition-group(sidebar),
+::view-transition-group(dock) {
+  animation-duration: var(--dur-slow);
+  animation-timing-function: var(--ease-standard);
+}
+::view-transition-old(sidebar),
+::view-transition-new(sidebar) {
+  height: 100%;
+  object-fit: none;
+  object-position: left top;
+}
+::view-transition-old(dock),
+::view-transition-new(dock) {
+  height: 100%;
+  object-fit: none;
+  object-position: right top;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
 
 /* Al tabular por un formulario largo, el campo enfocado no queda escondido bajo el pie fijo. */
