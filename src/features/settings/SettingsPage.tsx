@@ -5,6 +5,7 @@ import { Monitor, Moon, Sun } from 'lucide-react'
 import { Card, Input } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { useTheme } from '../../design/useTheme'
+import { centerOf } from '../../lib/viewTransition'
 import { db } from '../../db/schema'
 import { updateSettings } from '../../db/repositories/settings'
 import { initials } from '../../lib/text'
@@ -71,7 +72,7 @@ export function SettingsPage() {
           {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
             <button
               key={value}
-              onClick={() => setTheme(value)}
+              onClick={(e) => setTheme(value, centerOf(e.currentTarget))}
               className={cn(
                 'flex flex-col items-center gap-1.5 rounded-lg border p-3 text-xs font-medium transition-colors',
                 theme === value
