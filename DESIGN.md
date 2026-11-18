@@ -2,10 +2,10 @@
 name: Nextuss
 description: Centro de mando personal (hábitos, tareas, objetivos y foco). Dirección v2 «Línea»; oscura primero, precisa y tranquila.
 colors:
-  glacier-accent: "#0d8f83"
+  glacier-accent: "#13857a"
   glacier-accent-strong: "#0a7a70"
   glacier-text: "#0a7a70"
-  glacier-soft: "color-mix(in srgb, #0d8f83 12%, transparent)"
+  glacier-soft: "color-mix(in srgb, #13857a 12%, transparent)"
   on-accent: "#ffffff"
   paper: "#fbfbfc"
   paper-side: "#f4f5f7"
@@ -15,7 +15,7 @@ colors:
   hairline-strong: "#c9ccd3"
   ink: "#17181b"
   ink-dim: "#5b5f69"
-  ink-faint: "#767b85"
+  ink-faint: "#6b707a"
   amber: "#b86a0a"
   ember: "#e5592e"
   danger: "#d0453a"
@@ -28,7 +28,7 @@ colors:
   night-hairline-strong: "#3a3e46"
   night-ink: "#eceef1"
   night-ink-dim: "#9a9ea8"
-  night-ink-faint: "#6f747e"
+  night-ink-faint: "#797e88"
   glacier-accent-night: "#35c9b9"
   glacier-accent-strong-night: "#5cd8ca"
   glacier-text-night: "#5cd8ca"
@@ -57,14 +57,14 @@ typography:
     lineHeight: 1.43
   body:
     fontFamily: "'Instrument Sans Variable', ui-sans-serif, system-ui, -apple-system, sans-serif"
-    fontSize: "14px"
+    fontSize: "13px"
     fontWeight: 400
-    lineHeight: 1.43
+    lineHeight: 1.54
   button:
     fontFamily: "'Instrument Sans Variable', ui-sans-serif, system-ui, -apple-system, sans-serif"
-    fontSize: "14px"
+    fontSize: "13px"
     fontWeight: 500
-    lineHeight: 1.43
+    lineHeight: 1.54
   control:
     fontFamily: "'Instrument Sans Variable', ui-sans-serif, system-ui, -apple-system, sans-serif"
     fontSize: "13px"
@@ -89,6 +89,12 @@ typography:
     fontSize: "12px"
     fontWeight: 500
     lineHeight: 1.33
+  mono-kbd:
+    fontFamily: "'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace"
+    fontSize: "11px"
+    fontWeight: 500
+    lineHeight: 1.55
+    letterSpacing: "-0.01em"
 rounded:
   xs: "4px"
   sm: "6px"
@@ -110,7 +116,7 @@ components:
     typography: "{typography.button}"
     rounded: "{rounded.sm}"
     padding: "0 12px"
-    height: "32px"
+    height: "30px"
   button-primary-hover:
     backgroundColor: "{colors.glacier-accent-strong}"
   button-secondary:
@@ -119,7 +125,7 @@ components:
     typography: "{typography.button}"
     rounded: "{rounded.sm}"
     padding: "0 12px"
-    height: "32px"
+    height: "30px"
   button-secondary-hover:
     backgroundColor: "{colors.paper-hover}"
   button-ghost:
@@ -128,7 +134,7 @@ components:
     typography: "{typography.button}"
     rounded: "{rounded.sm}"
     padding: "0 12px"
-    height: "32px"
+    height: "30px"
   button-ghost-hover:
     backgroundColor: "{colors.paper-hover}"
     textColor: "{colors.ink}"
@@ -138,7 +144,7 @@ components:
     typography: "{typography.button}"
     rounded: "{rounded.sm}"
     padding: "0 12px"
-    height: "32px"
+    height: "30px"
   button-sm:
     typography: "{typography.control}"
     rounded: "{rounded.sm}"
@@ -179,7 +185,8 @@ components:
     textColor: "{colors.ink}"
     typography: "{typography.body}"
     rounded: "{rounded.sm}"
-    padding: "6px 10px"
+    padding: "5px 10px"
+    height: "32px"
   title-field:
     backgroundColor: "transparent"
     textColor: "{colors.ink}"
@@ -190,18 +197,18 @@ components:
     rounded: "{rounded.md}"
     padding: "4px 16px"
   kbd:
-    backgroundColor: "transparent"
+    backgroundColor: "{colors.paper-hover}"
     textColor: "{colors.ink-dim}"
-    typography: "{typography.label}"
+    typography: "{typography.mono-kbd}"
     rounded: "{rounded.xs}"
-    padding: "2px 6px"
+    padding: "0 6px"
   nav-item:
     backgroundColor: "transparent"
     textColor: "{colors.ink-dim}"
     typography: "{typography.button}"
     rounded: "{rounded.sm}"
     padding: "0 10px"
-    height: "32px"
+    height: "30px"
   nav-item-active:
     backgroundColor: "{colors.paper-hover}"
     textColor: "{colors.ink}"
@@ -276,7 +283,7 @@ Nextuss es una herramienta de trabajo diario para alguien con TDAH: todo se hace
 
 La personalidad está en el movimiento, firme y preciso, con un solo destello al completar.
 
-Este documento sustituye a la v1 («La herramienta precisa», Inter e índigo), que se conserva en `docs/design-history/DESIGN-v1.md`. **Estado: fase 0** (issue #176). Aquí están cerrados los tokens: color, tipografía, radios, elevación y motion. Los componentes siguen como en la v1 hasta que la fase 1 los rehaga, así que la sección Components remite a ese documento.
+Este documento sustituye a la v1 («La herramienta precisa», Inter e índigo), que se conserva en `docs/design-history/DESIGN-v1.md`. **Estado: fase 1a** (issue #183). Están cerrados los tokens (fase 0) y los primitivos de `src/design/primitives/` (fase 1a). La navegación llega en la fase 1b y las pantallas en las fases 2 a 6.
 
 **Key Characteristics:**
 - **Temas:** el oscuro es casi negro azulado (`#0d0e10`) con un lateral aún más hundido. El claro es papel frío (`#fbfbfc`) con lateral gris al 4 %.
@@ -288,7 +295,7 @@ Este documento sustituye a la v1 («La herramienta precisa», Inter e índigo), 
 
 ## Colors
 
-La paleta es casi monocroma y fría, con una sola voz de color. AA ya no es requisito de la v2, pero el texto principal tiene que leerse a simple vista en los dos temas. Los tokens viven en `src/index.css` en dos capas:
+La paleta es casi monocroma y fría, con una sola voz de color. AA ya no es requisito de la v2, pero el texto principal tiene que leerse a simple vista en los dos temas. Aun así, el texto blanco del primario sobre el acento y `text-faint` sobre el fondo, `bg-soft` y `surface` cumplen 4,5:1 en los dos temas (ajuste de la fase 1a: solo baja o sube la luminosidad, mismo matiz). Los tokens viven en `src/index.css` en dos capas:
 1. **Escala de referencia `--nx-ref-*`:** los hex de Línea. Ningún componente la usa directamente.
 2. **Alias semánticos `--nx-*`:** se mapean a `--color-*` en `@theme`. Los nombres son los mismos que en la v1, así que ningún componente cambia en la fase 0.
 
@@ -373,20 +380,45 @@ Los tokens están en CSS (`--ease-*` y `--dur-*` en `@theme`) y en TS (`src/desi
   - exit `cubic-bezier(.4,0,1,1)`;
   - outQuart, heredada de la v1;
   - spring: aproximación en CSS (`linear()`) del muelle «ui».
-- **Muelles (framer-motion):**
+- **Muelles (`motion/react`, cargado con `LazyMotion`):**
   - ui (640/46), para resaltados que se deslizan, indicadores y reordenar;
   - pop (900/34), para avisos, chips y menús;
-  - soft (380/40), para paneles grandes como la ficha lateral o el foco.
+  - soft (380/40), para paneles grandes como la ficha lateral o el foco;
+  - highlight (700/42), para el resaltado magnético de la barra lateral.
 
   Todos son firmes y sin rebote visible.
-- **Movimiento reducido:** `motionFor(reduceMotion, t)` cambia cualquier muelle por un fundido de 120 ms. El bloque de `prefers-reduced-motion` de `index.css` corta las transiciones CSS.
+- **Movimiento reducido:** `motionFor(reduceMotion, t)` cambia cualquier muelle por un fundido de 120 ms. El bloque de `prefers-reduced-motion` de `index.css` corta las transiciones CSS. La celebración se queda en un destello de opacidad de 140 ms, sin barrido.
+- **Presets (`PRESET` en `motion.ts`, sacados de los mockups de Línea):**
+
+| Preset | Qué anima | Valores |
+|---|---|---|
+| `toast` | aviso que entra desde abajo | pop; opacidad 0→1, y 16→0, scale .96→1; sale en 200 ms con exit |
+| `palette` | paleta `Ctrl K` | ui; scale .94→1, y −12→0, blur 6→0 px; sale en 160 ms |
+| `paletteItems` | ítems de la paleta | cascada de 18 ms tras 40 ms |
+| `menu` | menús y popovers (en CSS: `.nx-pop-in`) | pop; opacidad, scale .97→1, y −4→0 |
+| `scrim` | fondo del diálogo | entra en 220 ms (standard), sale en 180 ms (exit) |
+| `dialog` | panel del diálogo | ui; scale .98→1, y 6→0; sale en 160 ms |
+| `sheet` | hoja inferior del dock en móvil | ui; y 100 %→0 |
+| `celebrateFlash` | destello de la fila al completar | opacidad 0→1→0, 700 ms, easeOut |
+| `celebrateSweep` | línea que barre el borde inferior | x −100 %→230 %, 750 ms, `cubic-bezier(.3,0,.2,1)` |
+
 
 ### Named Rules
 **La Regla sin Bucle.** Nada se mueve solo, salvo el progreso real (el temporizador del foco o el tramo transcurrido del bloque Ahora).
 
 ## Components
 
-Sin cambios en la fase 0. Hasta la fase 1 (primitivos y navegación), la referencia de componentes es `docs/design-history/DESIGN-v1.md`, leída con los colores y fuentes de arriba. La referencia de comportamiento para las fases 1 y 2 es el mockup de Línea:
+Los primitivos (`src/design/primitives/`) siguen Línea desde la fase 1a:
+- **Tamaños:** la UI va a 13 px (`text-ui`). Los botones miden 30 px (`h-7.5`; `sm`, 28 px), los campos 32 px (`h-8`, o `py-[5px]` en Input y Textarea) y las filas 36 px (`h-row`). Las alturas usan la escala numérica para que un `h-9` o `h-10` que pase un componente siga ganando.
+- **Acento como texto:** `text-accent-text` siempre que el acento colorea texto o iconos (IconButton activo, check del Menu, Alert info, Badge, Avatar, ToggleGroup, IconPicker). Los rellenos y bordes siguen en `accent`.
+- **Bordes y sombras:** campos con `border-strong`. El primario lleva `shadow-btn` (brillo superior); el secundario, `shadow-card`. El segmento elegido del SegmentedControl usa `shadow-edge` (borde inset más el brillo superior en oscuro).
+- **Entradas:** Menu y Popover con `.nx-pop-in` desde su esquina; Tooltip con `.nx-fade-in` y `shadow-dialog`; Dialog con los presets `scrim` y `dialog`.
+- **Kbd:** Geist Mono a 11 px sobre `paper-hover`, sin borde.
+- **Switch:** apagado en `border-strong`, pomo en `--color-knob`.
+- **EmptyState:** alineado a la izquierda, sin centrar.
+- **Celebration:** `<Celebration play={clave} onDone?>` dentro de un padre `relative`. Solo visual, oculto a lectores de pantalla y sin capturar clics. Se lanza cuando cambia `play` (no al montar).
+
+La navegación (fase 1b) y las pantallas siguen con la v1 (`docs/design-history/DESIGN-v1.md`) hasta su fase. La referencia de comportamiento para las fases 1b y 2 es el mockup de Línea:
 - **Cursor:** un único resaltado que se desliza entre filas.
 - **Estado:** el icono «en curso» se llena hasta quedar hecho.
 - **Celebración:** un destello recorre el borde de la fila al completarla.

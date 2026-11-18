@@ -34,10 +34,10 @@ export function SettingRow({
       id={id}
       className={cn(
         'grid grid-cols-1 gap-1.5 py-2.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-3',
-        highlighted && 'bg-accent-soft transition-colors',
+        highlighted && 'bg-accent-soft transition-colors duration-(--dur-base) ease-(--ease-standard)',
       )}
     >
-      <span className="inline-flex items-center gap-1.5 text-sm text-text-muted">
+      <span className="inline-flex items-center gap-1.5 text-ui text-text-muted">
         {field.label}
         {modified && (
           <>
@@ -45,7 +45,7 @@ export function SettingRow({
             <button
               type="button"
               onClick={restore}
-              className="text-text-faint hover:text-accent"
+              className="text-text-faint transition-colors duration-(--dur-fast) hover:text-accent-text"
               aria-label={`Restablecer «${field.label}» a su valor por defecto`}
               title="Restablecer al valor por defecto"
             >
@@ -78,12 +78,12 @@ function PreviewStrip({
       {field.options.map((o) => (
         <div
           key={o.value}
-          className={cn('flex-1 space-y-1 rounded-md border p-1', o.value === current ? 'border-accent' : 'border-border')}
+          className={cn('flex-1 space-y-1 rounded-md border p-1 transition-colors duration-(--dur-fast)', o.value === current ? 'border-accent' : 'border-border')}
         >
           <div className="h-12">
             <Preview value={o.value} />
           </div>
-          <p className="truncate text-center text-[10px] text-text-faint">{o.label}</p>
+          <p className={cn('truncate text-center text-2xs', o.value === current ? 'text-accent-text' : 'text-text-faint')}>{o.label}</p>
         </div>
       ))}
     </div>

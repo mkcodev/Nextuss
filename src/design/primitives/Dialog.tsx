@@ -4,7 +4,7 @@ import { X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 import { Button } from './Button'
-import { EASE } from '../motion'
+import { PRESET, motionFor } from '../motion'
 
 type DialogSize = 'sm' | 'md' | 'lg'
 
@@ -126,10 +126,9 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty, hideTitle }
   return (
     <m.div
       className="fixed inset-0 z-dialog flex items-center justify-center bg-scrim p-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: reduceMotion ? 0 : 0.15 }}
+      initial={PRESET.scrim.initial}
+      animate={reduceMotion ? { opacity: 1, transition: motionFor(true, {}) } : PRESET.scrim.animate}
+      exit={reduceMotion ? { opacity: 0, transition: motionFor(true, {}) } : PRESET.scrim.exit}
       // Solo cierra si el clic empezó Y terminó en el fondo: seleccionar texto arrastrando desde un
       // campo y soltar fuera del panel ya no cierra el diálogo.
       onPointerDown={(e) => {
@@ -153,10 +152,10 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty, hideTitle }
           'dialog-panel relative max-h-[85dvh] w-full overflow-y-auto overscroll-contain rounded-lg border border-border bg-surface p-6 shadow-dialog',
           SIZE_CLASSES[size],
         )}
-        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.98, y: 6 }}
-        animate={reduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
-        exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.98, y: 6 }}
-        transition={{ duration: reduceMotion ? 0 : 0.15, ease: EASE.outQuart }}
+        initial={reduceMotion ? { opacity: 0 } : PRESET.dialog.initial}
+        animate={reduceMotion ? { opacity: 1 } : PRESET.dialog.animate}
+        exit={reduceMotion ? { opacity: 0 } : PRESET.dialog.exit}
+        transition={motionFor(reduceMotion, PRESET.dialog.transition)}
       >
         <h2 id={titleId} className={hideTitle ? 'sr-only' : 'mb-4 pr-8 text-base font-semibold text-balance text-text'}>
           {title}
@@ -167,7 +166,7 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty, hideTitle }
             role="alert"
             className="sticky -bottom-6 z-10 -mx-6 -mb-6 mt-4 flex flex-wrap items-center gap-3 border-t border-border bg-surface px-6 py-3"
           >
-            <p className="flex-1 text-sm text-text">Tienes cambios sin guardar. ¿Descartarlos?</p>
+            <p className="flex-1 text-ui text-text">Tienes cambios sin guardar. ¿Descartarlos?</p>
             <Button type="button" variant="secondary" autoFocus onClick={() => setConfirming(false)}>
               Seguir editando
             </Button>

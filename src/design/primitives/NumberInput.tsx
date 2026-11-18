@@ -36,7 +36,7 @@ export function NumberInput({ value, onChange, min = 1, max, className, onBlur, 
         onBlur?.(e)
       }}
       className={cn(
-        'h-8 w-16 rounded-sm border border-border bg-surface px-2 text-sm tabular-nums text-text focus:border-accent',
+        'h-8 w-16 rounded-sm border border-border-strong bg-surface px-2 text-ui tabular-nums text-text transition-colors duration-(--dur-fast) ease-(--ease-standard) focus:border-accent',
         className,
       )}
     />

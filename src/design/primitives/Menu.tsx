@@ -98,8 +98,8 @@ export function Menu({ trigger, children, align = 'right', className }: MenuProp
           role="menu"
           aria-labelledby={triggerId}
           className={cn(
-            'absolute top-[calc(100%+0.375rem)] z-dialog max-h-72 w-52 overflow-y-auto overscroll-contain rounded-md border border-border bg-surface py-1 shadow-dialog',
-            align === 'right' ? 'right-0' : 'left-0',
+            'nx-pop-in absolute top-[calc(100%+0.375rem)] z-dialog max-h-72 w-52 overflow-y-auto overscroll-contain rounded-md border border-border bg-surface py-1 shadow-dialog',
+            align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left',
           )}
         >
           <MenuContext.Provider value={{ close, registerItem }}>{children}</MenuContext.Provider>
@@ -133,13 +133,13 @@ export function MenuItem({ onSelect, children, icon, destructive, checked }: Men
         ctx.close()
       }}
       className={cn(
-        'flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-sm transition-colors hover:bg-surface-hover focus-visible:bg-surface-hover',
+        'flex w-full items-center gap-2 px-3 py-1.5 text-left text-ui transition-colors duration-(--dur-fast) hover:bg-surface-hover focus-visible:bg-surface-hover',
         destructive ? 'text-danger' : checked ? 'text-text' : 'text-text-muted hover:text-text',
       )}
     >
       {icon}
       <span className="min-w-0 flex-1 truncate">{children}</span>
-      {checked && <Check size={14} strokeWidth={2} className="shrink-0 text-accent" aria-hidden="true" />}
+      {checked && <Check size={14} strokeWidth={2} className="shrink-0 text-accent-text" aria-hidden="true" />}
     </button>
   )
 }
@@ -149,5 +149,5 @@ export function MenuSeparator() {
 }
 
 export function MenuLabel({ children }: { children: ReactNode }) {
-  return <div className="border-b border-border px-3 py-2.5 text-sm font-medium text-text">{children}</div>
+  return <div className="border-b border-border px-3 py-2.5 text-ui font-medium text-text">{children}</div>
 }
