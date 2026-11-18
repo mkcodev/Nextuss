@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'motion/react'
 import { listItemMotion } from '../../../design/primitives'
 import { Check, Plus, X } from 'lucide-react'
 import { cn } from '../../../lib/cn'
@@ -49,7 +49,7 @@ export function SubtasksSection({ taskId, pending, onPendingChange, onOpen, open
         {stored.map((s) => {
           const done = s.status === 'done'
           return (
-            <motion.li key={s.id} {...listItemMotion(reduceMotion)} className="group flex h-8 items-center gap-2.5">
+            <m.li key={s.id} {...listItemMotion(reduceMotion)} className="group flex h-8 items-center gap-2.5">
               <button
                 type="button"
                 role="checkbox"
@@ -75,11 +75,11 @@ export function SubtasksSection({ taskId, pending, onPendingChange, onOpen, open
               >
                 <X size={14} />
               </button>
-            </motion.li>
+            </m.li>
           )
         })}
         {pending.map((title, i) => (
-          <motion.li key={`${title}-${i}`} {...listItemMotion(reduceMotion)} className="group flex h-8 items-center gap-2.5">
+          <m.li key={`${title}-${i}`} {...listItemMotion(reduceMotion)} className="group flex h-8 items-center gap-2.5">
             <span aria-hidden="true" className={circle(false)} />
             <span className="min-w-0 flex-1 truncate text-sm text-text">{title}</span>
             <button
@@ -90,7 +90,7 @@ export function SubtasksSection({ taskId, pending, onPendingChange, onOpen, open
             >
               <X size={14} />
             </button>
-          </motion.li>
+          </m.li>
         ))}
         </AnimatePresence>
       </ul>

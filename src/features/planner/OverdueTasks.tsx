@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'motion/react'
 import { listItemMotion } from '../../design/primitives'
 import { differenceInCalendarDays } from 'date-fns'
 import { ArrowRight, Target } from 'lucide-react'
@@ -78,7 +78,7 @@ export function OverdueTasks({ date }: { date: string }) {
         {visible.map((t) => {
           const isZombie = t.postponedCount >= ZOMBIE_THRESHOLD
           return (
-            <motion.li key={t.id} {...listItemMotion(reduceMotion)} className="flex h-10 items-center gap-2 px-3">
+            <m.li key={t.id} {...listItemMotion(reduceMotion)} className="flex h-10 items-center gap-2 px-3">
               <button
                 type="button"
                 onClick={() => openEdit(t)}
@@ -111,7 +111,7 @@ export function OverdueTasks({ date }: { date: string }) {
                 A hoy <ArrowRight size={12} strokeWidth={2} />
               </button>
               <TaskQuickMenu task={t} />
-            </motion.li>
+            </m.li>
           )
         })}
         </AnimatePresence>

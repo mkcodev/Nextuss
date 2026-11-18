@@ -1,6 +1,6 @@
 import { useId } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'motion/react'
 import { CalendarClock, Check, CheckCheck, Play, Plus } from 'lucide-react'
 import { Button } from '../../design/primitives'
 import { getTasksForDate, moveTasksToDateBulk } from '../../db/repositories/tasks'
@@ -72,7 +72,7 @@ export function NowBlock({ date }: { date: string }) {
   ]
 
   return (
-    <motion.section
+    <m.section
       key={task.id}
       initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
@@ -156,7 +156,7 @@ export function NowBlock({ date }: { date: string }) {
           <CalendarClock size={14} strokeWidth={1.75} /> Pasar a mañana
         </Button>
       </div>
-    </motion.section>
+    </m.section>
   )
 }
 
