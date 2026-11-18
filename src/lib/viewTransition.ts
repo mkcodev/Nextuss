@@ -28,13 +28,19 @@ export function centerOf(el: Element): Origin {
 }
 
 /** Ejecuta `update` dentro de una View Transition. `update` cambia estado de React, así que se
- *  fuerza el render síncrono (`flushSync`) para que el navegador capture el estado nuevo. */
-export function withViewTransition(update: () => void): void {
+ *  fuerza el render síncrono (`flushSync`) para que el navegador capture el estado nuevo.
+ *  `kind` se publica en `html[data-vt]` mientras dura, para que el CSS ajuste qué se anima. */
+export function withViewTransition(update: () => void, kind?: string): void {
   if (!canAnimate()) {
     update()
     return
   }
-  document.startViewTransition(() => flushSync(update))
+  const root = document.documentElement
+  if (kind) root.dataset.vt = kind
+  const transition = document.startViewTransition(() => flushSync(update))
+  void transition.finished.finally(() => {
+    if (kind) delete root.dataset.vt
+  })
 }
 
 const REVEAL_MS = 560

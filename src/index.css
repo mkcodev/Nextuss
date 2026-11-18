@@ -434,6 +434,25 @@ body {
 html[data-vt='theme'] #main-content {
   view-transition-name: none;
 }
+/* Abrir o cerrar el dock: solo esta pieza se anima. <main> pasa a la raíz (sin grupo propio) para
+   que su contenido no se estire mientras cambia de ancho; se recoloca de golpe y el dock se funde
+   sobre él. Las imágenes no se escalan: se recortan. */
+.vt-dock {
+  view-transition-name: dock;
+}
+html[data-vt='layout'] #main-content {
+  view-transition-name: none;
+}
+::view-transition-group(dock) {
+  animation-duration: var(--dur-slow);
+  animation-timing-function: var(--ease-standard);
+}
+::view-transition-old(dock),
+::view-transition-new(dock) {
+  height: 100%;
+  object-fit: none;
+  object-position: right top;
+}
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),

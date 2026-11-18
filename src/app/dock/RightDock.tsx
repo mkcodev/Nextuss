@@ -357,7 +357,7 @@ export function RightDock() {
   return (
     <>
       {rightOpen && (
-        <aside className="hidden w-80 shrink-0 flex-col border-l border-border bg-bg-soft md:flex">
+        <aside className="vt-dock hidden w-80 shrink-0 flex-col border-l border-border bg-bg-soft md:flex">
           <div className="flex h-12 shrink-0 items-center border-b border-border px-3">
             <span className="text-xs font-semibold uppercase tracking-wide text-text-faint">Panel</span>
           </div>
