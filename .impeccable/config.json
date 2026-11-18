@@ -134,6 +134,12 @@
         ],
         "createdAt": "2026-09-30T12:00:18.915Z",
         "reason": "Claude: mismo patrón ya aceptado en docs/design/plugins/index.html — chips/badges/pills compactos intencionales de estas páginas de comparación estáticas, no UI real"
+      },
+      {
+        "rule": "overused-font",
+        "value": "geist mono",
+        "createdAt": "2026-11-18T11:16:18.429Z",
+        "reason": "user confirmed: el usuario eligió la dirección Línea (Instrument Sans + Geist Mono) y aprobó esta excepción el 2026-11-18"
       }
     ]
   }
