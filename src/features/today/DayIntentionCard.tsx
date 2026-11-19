@@ -1,10 +1,10 @@
 import { useId, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Compass, Pencil } from 'lucide-react'
-import { Button, Card, Checkbox, Input, Select } from '../../design/primitives'
+import { Button, Card, Celebration, Checkbox, Input, Select } from '../../design/primitives'
 import { getDailyEntry, upsertDailyEntry } from '../../db/repositories/dailyEntries'
 import { getOverdueTasks, getTask, getTasksForDate } from '../../db/repositories/tasks'
-import { toggleTaskDoneWithFeedback } from '../tasks/actions'
+import { useCelebratedToggle } from '../tasks/useCelebratedToggle'
 
 /** Intención del día y tarea del día en Hoy (#97 PR5b): lee/escribe `dailyEntries`, la misma tabla
  * que siembran los pasos «Intención del día»/«Tarea del día» de la rutina matutina — se fije desde
@@ -14,6 +14,7 @@ export function DayIntentionCard({ date }: { date: string }) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
   const inputId = useId()
+  const { play, toggle } = useCelebratedToggle()
 
   const focusTask = useLiveQuery(
     async () => (entry?.focusTaskId ? ((await getTask(entry.focusTaskId)) ?? null) : null),
@@ -43,7 +44,7 @@ export function DayIntentionCard({ date }: { date: string }) {
   }
 
   return (
-    <Card className="p-4">
+    <Card className="relative p-4">
       <div className="flex items-start gap-2.5">
         <Compass size={16} strokeWidth={1.75} className="mt-0.5 shrink-0 text-text-muted" aria-hidden="true" />
         <div className="min-w-0 flex-1">
@@ -86,7 +87,7 @@ export function DayIntentionCard({ date }: { date: string }) {
         {focusTask ? (
           <Checkbox
             checked={focusTask.status === 'done'}
-            onChange={() => void toggleTaskDoneWithFeedback(focusTask.id!, focusTask.title)}
+            onChange={() => void toggle(focusTask)}
             label={focusTask.title}
           />
         ) : candidateTasks && candidateTasks.length > 0 ? (
@@ -104,6 +105,7 @@ export function DayIntentionCard({ date }: { date: string }) {
           <p className="text-xs text-text-faint">Sin tareas para elegir hoy.</p>
         )}
       </div>
+      <Celebration play={play} />
     </Card>
   )
 }

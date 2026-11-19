@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ChevronRight, HeartPulse } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { Card } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { getCheckInForDate } from '../../db/repositories/checkins'
@@ -21,15 +21,14 @@ export function CheckInCard({ date }: { date: string }) {
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-2 px-3.5 py-3 text-left text-sm"
+        className="flex w-full items-center gap-2 rounded-[inherit] px-4 py-3 text-left text-sm"
       >
-        <HeartPulse size={15} strokeWidth={1.75} className="shrink-0 text-text-muted" aria-hidden="true" />
         <span className="font-semibold text-text">Check-in</span>
-        <span className="flex-1 text-text-muted">{done ? '· hecho' : '· sin hacer'}</span>
+        <span className={cn('ml-auto text-xs', done ? 'text-success' : 'text-text-muted')}>{done ? 'Hecho' : 'Sin hacer'}</span>
         <ChevronRight size={15} strokeWidth={2} className={cn('shrink-0 text-text-muted transition-transform', open && 'rotate-90')} aria-hidden="true" />
       </button>
       {open && (
-        <div id={panelId} className="border-t border-border px-3.5 pt-3 pb-3.5">
+        <div id={panelId} className="border-t border-border px-4 pt-3 pb-4">
           <CheckInFields date={date} />
         </div>
       )}

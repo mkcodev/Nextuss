@@ -5,7 +5,8 @@ import { cn } from '../../lib/cn'
 import { minutesToTime, timeToMinutes } from '../../lib/dates'
 import { PRIORITY_NAMES } from '../../lib/priority'
 import { PriorityBars } from '../tasks/PriorityBars'
-import { toggleTaskDoneWithFeedback } from '../tasks/actions'
+import { useCelebratedToggle } from '../tasks/useCelebratedToggle'
+import { Celebration } from '../../design/primitives'
 import { useTaskFormStore } from '../tasks/taskFormStore'
 import { startFocusOnTask } from '../focus/startFocusOnTask'
 import { SNAP_MIN, HOUR_HEIGHT, DRAG_THRESHOLD_PX } from './constants'
@@ -52,6 +53,7 @@ export function TaskBlock({
   onCommit,
 }: TaskBlockProps) {
   const openEdit = useTaskFormStore((s) => s.openEdit)
+  const { play, toggle } = useCelebratedToggle()
   const [dragDeltaMin, setDragDeltaMin] = useState(0)
   const [dragDayDelta, setDragDayDelta] = useState(0)
   const [resizeDeltaMin, setResizeDeltaMin] = useState(0)
@@ -191,8 +193,9 @@ export function TaskBlock({
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation()
-            toggleTaskDoneWithFeedback(task.id!, task.title)
+            void toggle(task)
           }}
+          aria-label={done ? `Marcar como pendiente: ${task.title}` : `Marcar como hecha: ${task.title}`}
           className={cn(
             'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border',
             done ? 'border-accent bg-accent text-on-accent' : 'border-text-faint',
@@ -239,6 +242,8 @@ export function TaskBlock({
         onLostPointerCapture={onResizePointerCancel}
         className="absolute inset-x-0 bottom-0 h-2 cursor-row-resize"
       />
+      {/* El bloque ya es `absolute` y `overflow-hidden`: el destello y el barrido quedan dentro. */}
+      <Celebration play={play} />
     </div>
   )
 }

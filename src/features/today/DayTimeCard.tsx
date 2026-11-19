@@ -1,6 +1,5 @@
 import { useId } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Clock3 } from 'lucide-react'
 import { RingProgress, SegmentedControl } from '../../design/primitives'
 import { getTasksForDate } from '../../db/repositories/tasks'
 import { getOrCreateSettings, updateSettings } from '../../db/repositories/settings'
@@ -32,10 +31,10 @@ export function DayTimeCard({ date }: { date: string }) {
   const view: DayTimeView = readSetting(settings, 'dayTimeView')
 
   return (
-    <section aria-labelledby={titleId} className="rounded-md border border-border bg-surface px-4 py-3">
+    <section aria-labelledby={titleId} className="rounded-md border border-border bg-surface p-4 shadow-card">
       <div className="flex items-center justify-between gap-3">
-        <h2 id={titleId} className="flex items-center gap-1.5 text-sm font-semibold text-text">
-          <Clock3 size={14} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" /> Tiempo de hoy
+        <h2 id={titleId} className="text-sm font-semibold text-text">
+          Tiempo de hoy
         </h2>
         <SegmentedControl
           options={VIEW_OPTIONS}
@@ -101,8 +100,8 @@ export function RulerView({ s, nowMin }: { s: DayTimeSummary; nowMin: number }) 
         aria-valuetext={`Pasado el ${Math.round(s.elapsed * 100)} % de la jornada, de ${formatClock(s.startMin)} a ${formatClock(s.endMin)}`}
         className="relative mt-3 h-5"
       >
-        <span className="absolute inset-x-0 top-2 h-1 rounded-full bg-surface-hover" />
-        <span className="absolute left-0 top-2 h-1 rounded-full bg-border-strong" style={{ width: pct(nowMin) }} />
+        <span className="absolute inset-x-0 top-[9px] h-0.5 rounded-full bg-border" />
+        <span className="absolute left-0 top-[9px] h-0.5 rounded-full bg-text-faint" style={{ width: pct(nowMin) }} />
         {s.blocks.map((b) => (
           <span
             key={b.taskId}
@@ -112,12 +111,12 @@ export function RulerView({ s, nowMin }: { s: DayTimeSummary; nowMin: number }) 
           />
         ))}
         {s.phase === 'during' && (
-          <span aria-hidden="true" className="absolute top-0 h-5 w-0.5 -translate-x-1/2 rounded-full bg-danger" style={{ left: pct(nowMin) }}>
-            <span className="absolute -top-1 left-1/2 size-2 -translate-x-1/2 rounded-full bg-danger" />
+          <span aria-hidden="true" className="absolute top-0 h-5 w-[1.5px] -translate-x-1/2 rounded-full bg-text" style={{ left: pct(nowMin) }}>
+            <span className="absolute -top-1 left-1/2 size-[7px] -translate-x-1/2 rounded-full bg-text" />
           </span>
         )}
       </div>
-      <div aria-hidden="true" className="relative mt-1 h-4 text-xs tabular-nums text-text-faint">
+      <div aria-hidden="true" className="relative mt-1 h-4 font-mono text-2xs text-text-faint">
         <span className="absolute left-0">{formatClock(s.startMin)}</span>
         {ticks.map((m) => (
           <span key={m} className="absolute hidden -translate-x-1/2 sm:inline" style={{ left: pct(m) }}>
@@ -136,10 +135,10 @@ export function RingView({ s }: { s: DayTimeSummary }) {
     <div className="mt-3">
       <div className="flex items-center gap-4">
         <RingProgress value={1 - s.elapsed} size={68} strokeWidth={6}>
-          <span className="text-xs font-semibold tabular-nums text-text">{leftPct}%</span>
+          <span className="font-mono text-xs font-semibold text-text">{leftPct}%</span>
         </RingProgress>
         <div className="min-w-0">
-          <p className="text-2xl font-semibold tracking-tight tabular-nums text-text">
+          <p className="font-mono text-2xl font-semibold tracking-[-0.02em] text-text">
             {s.phase === 'before' ? formatClock(s.startMin) : formatMinutes(s.leftMin)}
           </p>
           <p className="text-xs tabular-nums text-text-muted">
