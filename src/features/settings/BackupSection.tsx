@@ -189,7 +189,7 @@ export function BackupSection() {
                 checked={restoreState?.mode === 'replace'}
                 onChange={() => setRestoreState((s) => (s ? { ...s, mode: 'replace' } : s))}
               />
-              Reemplazar — borra todo y deja la base de datos exactamente como en la copia
+              Reemplazar — borra todos los datos actuales, también los que la copia no trae (retos, por ejemplo), y deja la app exactamente como en la copia
             </label>
           </div>
           <div className="flex justify-end gap-2 pt-2">
