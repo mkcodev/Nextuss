@@ -37,7 +37,9 @@ export class BackupVersionMismatchError extends Error {
 }
 
 /**
- * `replace` vacía cada tabla presente en la copia antes de escribir — restaura un estado exacto.
+ * `replace` vacía todas las tablas antes de escribir, también las que no vienen en la copia (las
+ * que nacieron después de su versión, como los retos frente a una copia v17) — restaura un estado
+ * exacto, sin mezclar datos actuales con los de la copia.
  * `merge` hace upsert por id sin borrar nada — combina con lo que ya tengas (si restauras sobre
  * una base de datos distinta a la que generó la copia, entidades con el mismo id se sobrescriben).
  *
@@ -64,8 +66,8 @@ export async function importDatabase(payload: BackupPayload, mode: ImportMode): 
 
     for (const table of db.tables) {
       const rows = tables[table.name]
-      if (!rows) continue
       if (mode === 'replace') await table.clear()
+      if (!rows) continue
       await table.bulkPut(rows as never[])
     }
   })

@@ -58,6 +58,25 @@ describe('exportDatabase / importDatabase round trip', () => {
     expect(await db.attributes.count()).toBe(1) // replace vuelve exactamente al estado del backup
   })
 
+  it('"replace" también vacía las tablas que no vienen en la copia (p. ej. retos frente a una v17); "merge" no', async () => {
+    await createCustomChallenge({ title: 'Reto actual', durationDays: 7 }, '2026-11-19')
+    await db.attributes.add({ name: 'Actual', icon: 'x', color: '#000', xp: 0, order: 0 })
+    const v17 = {
+      version: 17,
+      exportedAt: 1000,
+      tables: { attributes: [{ id: 50, name: 'De la copia', icon: 'y', color: '#fff', xp: 0, order: 0 }] },
+    }
+
+    await importDatabase(v17, 'merge')
+    expect(await db.challenges.count()).toBe(1)
+    expect(await db.attributes.count()).toBe(2)
+
+    await importDatabase(v17, 'replace')
+    expect(await db.challenges.count()).toBe(0)
+    expect(await db.tasks.count()).toBe(0)
+    expect((await db.attributes.toArray()).map((a) => a.name)).toEqual(['De la copia'])
+  })
+
   it('rejects restoring a backup newer than the app', async () => {
     const backup = await exportDatabase()
     const mismatched = { ...backup, version: backup.version + 1 }
