@@ -1,4 +1,4 @@
-import { formatDayMonth } from '../../lib/challenges/calendar'
+import { daysText, formatDayMonth } from '../../lib/challenges/calendar'
 import type { ChallengeItem } from './challengesData'
 
 /** Qué enseña la celda «Hoy» de un reto. Siempre es una forma (el icono que elige la vista) y un texto. */
@@ -28,7 +28,7 @@ export function rowStatus(item: ChallengeItem, today: string): RowStatus {
 /** «Día 22 de 30», o «30 días» si aún no empezó o ya terminó. */
 export function progressText(item: ChallengeItem): string {
   const { dayIndex, totalDays } = item.summary
-  return !item.finished && dayIndex > 0 ? `Día ${dayIndex} de ${totalDays}` : `${totalDays} días`
+  return !item.finished && dayIndex > 0 ? `Día ${dayIndex} de ${totalDays}` : daysText(totalDays)
 }
 
 /** ¿Es el último día del reto (en marcha)? */

@@ -1,7 +1,7 @@
-import { useId, useState, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { Archive, Check, MoreHorizontal, Pause, Play, ShieldOff, Trash2, X } from 'lucide-react'
 import { Button, Celebration, IconButton, Kbd, Menu, MenuItem, MenuSeparator, Sheet } from '../../design/primitives'
-import { DAY_LABEL, formatDayMonth, formatWeekdayDay, logEntries } from '../../lib/challenges/calendar'
+import { DAY_LABEL, daysText, formatDayMonth, formatWeekdayDay, logEntries } from '../../lib/challenges/calendar'
 import { cn } from '../../lib/cn'
 import { dateKey } from '../../lib/dates'
 import { XP_PER_CHALLENGE_DAY, challengePerfectBonus } from '../../lib/xp'
@@ -65,6 +65,13 @@ function SheetBody({
   // «Reanudar» también cancela una pausa que empieza mañana.
   const isPaused = challenge.status === 'paused'
   const log = logEntries(days, today)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+
+  // Al marcar el último día el reto se cierra y el botón de marcar desaparece con el foco encima: sin
+  // esto el foco caería en <body> y quien usa teclado o lector de pantalla perdería el sitio.
+  useEffect(() => {
+    if (item.finished && (document.activeElement === document.body || document.activeElement === null)) headingRef.current?.focus()
+  }, [item.finished])
 
   useMarkShortcut(() => {
     if (canMark) onToggleToday(item)
@@ -83,7 +90,7 @@ function SheetBody({
         </IconButton>
       </div>
 
-      <h2 id={titleId} className="text-lg font-semibold tracking-tight text-balance text-text">
+      <h2 ref={headingRef} id={titleId} tabIndex={-1} className="text-lg font-semibold tracking-tight text-balance text-text outline-none">
         {title}
       </h2>
 
@@ -181,7 +188,7 @@ function SheetBody({
 
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-ui">
         <Prop label="Progreso">
-          {!item.finished && summary.dayIndex > 0 ? `Día ${summary.dayIndex} de ${summary.totalDays}` : `${summary.totalDays} días`}
+          {!item.finished && summary.dayIndex > 0 ? `Día ${summary.dayIndex} de ${summary.totalDays}` : daysText(summary.totalDays)}
         </Prop>
         <Prop label="Fechas">
           {formatDayMonth(challenge.startDate)} – {formatDayMonth(challenge.endDate)}

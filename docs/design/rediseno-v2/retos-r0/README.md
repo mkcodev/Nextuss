@@ -137,6 +137,8 @@ Cada parte se puede revisar y fusionar por separado. Si el tiempo aprieta, R2b s
 
 **Móvil (decidido en R2a).** Retos entra en el menú del avatar, no en la barra inferior (que se queda con 4 destinos). Revisar tras R3, cuando el resumen de Hoy enlace a `/retos`; si se echa en falta, reconsiderar la barra.
 
+**Revisado tras R3 (R2b+R3): se mantiene.** A 375 px el resumen «Retos» de Hoy ya enlaza a `/retos` (la cabecera de la celda, con zona de toque de 44 px) y deja marcar el día sin salir de Hoy, así que quien usa los retos a diario no necesita un quinto destino en la barra. Retos sigue en el menú del avatar, la barra se queda con 4 destinos y no se reconsidera salvo que el uso real diga lo contrario.
+
 ### Estimación de crecimiento (orientativa)
 
 Se calcula a partir de las líneas del mockup (la parte propia de cada vista es pequeña porque la base es común) y de un factor de 1,3 a 1,8 al pasar a React y TypeScript con tipos, hooks y pruebas.

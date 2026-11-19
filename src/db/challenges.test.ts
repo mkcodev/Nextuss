@@ -17,6 +17,11 @@ import {
 } from './repositories/challenges'
 import { purgeTrashEntry } from './trash'
 import { parseCustomParams, shieldsLeft } from '../lib/challenges/custom'
+import { addDaysKey, eachDayKey } from '../lib/challenges/dayRange'
+import { challengePerfectBonus } from '../lib/xp'
+import { getOrCreateProgress } from './repositories/gamification'
+import { reconcileChallenges } from './repositories/challenges'
+import { usePluginsStore } from '../features/plugins/pluginsStore'
 
 const TODAY = '2026-11-19'
 
@@ -24,6 +29,7 @@ beforeEach(async () => {
   await db.transaction('rw', db.tables, async () => {
     for (const table of db.tables) await table.clear()
   })
+  usePluginsStore.getState().setStored(undefined)
 })
 
 async function left(id: number): Promise<number> {
@@ -177,5 +183,98 @@ describe('papelera', () => {
     await purgeTrashEntry(entry.id!)
     expect(await db.challenges.count()).toBe(0)
     expect(await db.challengeDays.count()).toBe(0)
+  })
+})
+
+describe('cierre al marcar el último día', () => {
+  const total = async () => (await getOrCreateProgress()).totalXp
+  const unlocked = async () => (await db.achievements.toArray()).map((a) => a.key).sort()
+  /** Un reto de 7 días que empieza en TODAY; su último día es `last`. */
+  async function week(shields = 0) {
+    const id = await createCustomChallenge({ title: 'Leer', durationDays: 7, shields }, TODAY)
+    return { id, days: eachDayKey(TODAY, addDaysKey(TODAY, 6)), last: addDaysKey(TODAY, 6) }
+  }
+
+  it('un día que no es el último no cierra nada', async () => {
+    const { id } = await week()
+    const result = await markChallengeDay(id, TODAY)
+    expect(result).toEqual({ unlockedAchievements: [] })
+    expect((await getChallenge(id))?.status).toBe('active')
+  })
+
+  it('al marcar el último día cierra el reto en el momento: perfecto, con bonus y logros', async () => {
+    const { id, days, last } = await week()
+    for (const d of days.slice(0, -1)) await markChallengeDay(id, d)
+    const result = await markChallengeDay(id, last)
+
+    const bonus = challengePerfectBonus(7)
+    expect(result.finished).toEqual({ perfect: true, bonus, durationDays: 7 })
+    expect(result.unlockedAchievements.sort()).toEqual(['challenge_perfect', 'first_challenge'])
+    expect(await getChallenge(id)).toMatchObject({ status: 'done', xpAwarded: bonus })
+    expect((await getChallenge(id))?.completedAt).toBeGreaterThan(0)
+    expect(await total()).toBe(7 * 5 + bonus)
+    expect(await unlocked()).toEqual(['challenge_perfect', 'first_challenge'])
+  })
+
+  it('cierra rellenando los días pasados sin marcar: escudo primero y después fallo, sin bonus', async () => {
+    const { id, days, last } = await week(1)
+    for (const d of [days[0], days[1], days[4], days[5]]) await markChallengeDay(id, d)
+    const result = await markChallengeDay(id, last)
+
+    expect(result.finished).toEqual({ perfect: false, bonus: 0, durationDays: 7 })
+    expect(result.unlockedAchievements).toEqual(['first_challenge'])
+    const rows = await getChallengeDays(id)
+    expect(rows.map((r) => r.state)).toEqual(['done', 'done', 'shield', 'fail', 'done', 'done', 'done'])
+    expect(await total()).toBe(5 * 5)
+  })
+
+  it('deshacer la marca del último día reabre el reto y devuelve el bonus; marcar de nuevo lo cierra otra vez', async () => {
+    const { id, days, last } = await week()
+    for (const d of days) await markChallengeDay(id, d)
+    expect((await getChallenge(id))?.status).toBe('done')
+
+    await unmarkChallengeDay(id, last)
+    expect(await getChallenge(id)).toMatchObject({ status: 'active', xpAwarded: 0 })
+    expect((await getChallenge(id))?.completedAt).toBeUndefined()
+    expect(await total()).toBe(6 * 5)
+
+    const again = await markChallengeDay(id, last)
+    expect(again.finished?.perfect).toBe(true)
+    expect(await total()).toBe(7 * 5 + challengePerfectBonus(7))
+  })
+
+  it('con la gamificación apagada cierra sin XP pero desbloquea los logros', async () => {
+    usePluginsStore.getState().setStored({ gamification: false })
+    const { id, days, last } = await week()
+    for (const d of days.slice(0, -1)) await markChallengeDay(id, d)
+    const result = await markChallengeDay(id, last)
+    expect(result.finished).toEqual({ perfect: true, bonus: 0, durationDays: 7 })
+    expect(await getChallenge(id)).toMatchObject({ status: 'done', xpAwarded: 0 })
+    expect(await total()).toBe(0)
+    expect(await unlocked()).toEqual(['challenge_perfect', 'first_challenge'])
+  })
+
+  it('un reto pausado no se cierra al marcar', async () => {
+    const { id } = await week()
+    await pauseChallenge(id, TODAY)
+    await markChallengeDay(id, TODAY)
+    expect((await getChallenge(id))?.status).toBe('paused')
+  })
+
+  it('el quinto reto cumplido desbloquea «challenges_5»', async () => {
+    const ids: number[] = []
+    for (let i = 0; i < 5; i++) ids.push(await createCustomChallenge({ title: `R${i}`, durationDays: 1 }, TODAY))
+    for (const id of ids.slice(0, 4)) await markChallengeDay(id, TODAY)
+    expect(await unlocked()).not.toContain('challenges_5')
+    const last = await markChallengeDay(ids[4], TODAY)
+    expect(last.unlockedAchievements).toEqual(['challenges_5'])
+  })
+
+  it('la reconciliación del día siguiente también desbloquea los logros', async () => {
+    const id = await createCustomChallenge({ title: 'A', durationDays: 1, shields: 0 }, TODAY)
+    await db.challengeDays.add({ challengeId: id, date: TODAY, state: 'done', xp: 5, at: 1 })
+    await reconcileChallenges(addDaysKey(TODAY, 1))
+    expect((await getChallenge(id))?.status).toBe('done')
+    expect(await unlocked()).toEqual(['challenge_perfect', 'first_challenge'])
   })
 })

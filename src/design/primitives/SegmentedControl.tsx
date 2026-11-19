@@ -17,6 +17,8 @@ interface SegmentedControlProps<T extends string> {
   className?: string
   /** `radio` (por defecto) para filtros y modos; `tabs` solo cuando cada opción muestra un panel. */
   semantics?: 'radio' | 'tabs'
+  /** Zona de toque de 44 px en móvil (por debajo de `md`); en escritorio mide lo de `size`. */
+  touch?: boolean
 }
 
 /** Selector de una opción entre varias: grupo de radio (filtros, modos) o `tablist` (secciones).
@@ -30,6 +32,7 @@ export function SegmentedControl<T extends string>({
   size = 'sm',
   className,
   semantics = 'radio',
+  touch = false,
 }: SegmentedControlProps<T>) {
   const tabs = semantics === 'tabs'
   const refs = useRef<(HTMLButtonElement | null)[]>([])
@@ -63,7 +66,13 @@ export function SegmentedControl<T extends string>({
             onKeyDown={(e) => onKeyDown(e, i)}
             className={cn(
               'flex items-center gap-1.5 rounded-sm font-medium whitespace-nowrap transition-colors duration-(--dur-fast) ease-(--ease-standard)',
-              size === 'sm' ? 'h-6 px-2.5 text-xs' : 'h-7 px-3 text-ui',
+              touch
+                ? size === 'sm'
+                  ? 'h-11 px-3 text-ui md:h-6 md:px-2.5 md:text-xs'
+                  : 'h-11 px-3.5 text-ui md:h-7 md:px-3'
+                : size === 'sm'
+                  ? 'h-6 px-2.5 text-xs'
+                  : 'h-7 px-3 text-ui',
               selected ? 'bg-surface text-text shadow-edge' : 'text-text-muted hover:text-text',
             )}
           >

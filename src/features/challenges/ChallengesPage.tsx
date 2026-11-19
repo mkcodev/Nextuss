@@ -8,7 +8,7 @@ import { useListNav } from '../../app/shortcuts/listNavStore'
 import { usePluginEnabled } from '../plugins/pluginsStore'
 import { abandonNow } from './challengeActions'
 import { useChallengeFormStore } from './challengeFormStore'
-import { ChallengeList } from './ChallengeList'
+import { ChallengeList, ChallengeViewSelector } from './ChallengeList'
 import { ChallengeSheet } from './ChallengeSheet'
 import { ChallengesEmpty } from './ChallengesEmpty'
 import { MissionsToday } from './MissionsToday'
@@ -107,9 +107,13 @@ export function ChallengesPage() {
       <MissionsToday data={data} gamified={gamified} />
 
       <section aria-labelledby="retos-propios" className="space-y-2.5">
-        <h2 id="retos-propios" className="text-sm font-semibold text-text">
-          Retos propios
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <h2 id="retos-propios" className="text-sm font-semibold text-text">
+            Retos propios
+          </h2>
+          {/* Con el vacío no hay lista que cambiar, así que tampoco selector. */}
+          {data !== undefined && data.active.length > 0 && <ChallengeViewSelector className="max-md:w-full max-md:[&>button]:flex-1 max-md:[&>button]:justify-center" />}
+        </div>
         {data === undefined ? (
           <div aria-hidden="true" className="space-y-2">
             <Skeleton className="h-[110px] w-full" />

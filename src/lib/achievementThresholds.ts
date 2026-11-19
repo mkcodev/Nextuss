@@ -32,3 +32,9 @@ export const TASK_COUNT_ACHIEVEMENT_THRESHOLDS: ReadonlyArray<{ count: number; k
   { count: 50, key: 'tasks_50' },
   { count: 200, key: 'tasks_200' },
 ]
+
+/** Retos propios cumplidos en total (#191). Además de estos escalones hay dos logros sueltos:
+ * `first_challenge` (el primero) y `challenge_perfect` (uno sin ningún fallo). */
+export const CHALLENGE_COUNT_ACHIEVEMENT_THRESHOLDS: ReadonlyArray<{ count: number; key: string }> = [
+  { count: 5, key: 'challenges_5' },
+]
