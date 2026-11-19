@@ -1,0 +1,113 @@
+/* Retos R0 · copia literal de los tokens de la app en la integración (src/index.css, tras la fase 2,
+   5003a20), con los ajustes de contraste de la fase 1a. Así los mockups usan los colores reales y no
+   los de la ronda 2. Si src/index.css cambia, esto se queda como foto de ese momento. */
+:root {
+  --font-sans: 'Instrument Sans Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-ui: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-xl: 1.25rem;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: linear(0, 0.2 6%, 0.53 15%, 0.79 25%, 0.93 36%, 0.99 48%, 1.004 60%, 1);
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-slow: 280ms;
+  --dur-celebrate: 700ms;
+
+  --nx-ref-paper-0: #ffffff;
+  --nx-ref-paper-1: #fbfbfc;
+  --nx-ref-paper-2: #f4f5f7;
+  --nx-ref-paper-3: #eef0f3;
+  --nx-ref-paper-4: #e4e6ea;
+  --nx-ref-paper-5: #c9ccd3;
+  --nx-ref-ink-0: #17181b;
+  --nx-ref-ink-1: #5b5f69;
+  --nx-ref-ink-2: #6b707a;
+  --nx-ref-night-0: #0a0b0d;
+  --nx-ref-night-1: #0d0e10;
+  --nx-ref-night-2: #131418;
+  --nx-ref-night-3: #1b1d22;
+  --nx-ref-night-4: #22252b;
+  --nx-ref-night-5: #3a3e46;
+  --nx-ref-snow-0: #eceef1;
+  --nx-ref-snow-1: #9a9ea8;
+  --nx-ref-snow-2: #797e88;
+  --nx-ref-glacier-600: #0a7a70;
+  --nx-ref-glacier-500: #13857a;
+  --nx-ref-glacier-300: #35c9b9;
+  --nx-ref-glacier-200: #5cd8ca;
+  --nx-ref-glacier-950: #04201d;
+  --nx-ref-amber-600: #b86a0a;
+  --nx-ref-amber-300: #e3a447;
+  --nx-ref-ember-600: #e5592e;
+  --nx-ref-ember-300: #f07a45;
+  --nx-ref-red-600: #d0453a;
+  --nx-ref-red-300: #f0715f;
+}
+
+:root {
+  color-scheme: light;
+  --nx-bg: var(--nx-ref-paper-1);
+  --nx-bg-soft: var(--nx-ref-paper-2);
+  --nx-surface: var(--nx-ref-paper-0);
+  --nx-surface-hover: var(--nx-ref-paper-3);
+  --nx-border: var(--nx-ref-paper-4);
+  --nx-border-strong: var(--nx-ref-paper-5);
+  --nx-text: var(--nx-ref-ink-0);
+  --nx-text-muted: var(--nx-ref-ink-1);
+  --nx-text-faint: var(--nx-ref-ink-2);
+  --nx-accent: var(--nx-ref-glacier-500);
+  --nx-accent-soft: color-mix(in srgb, var(--nx-ref-glacier-500) 12%, transparent);
+  --nx-accent-strong: var(--nx-ref-glacier-600);
+  --nx-accent-text: var(--nx-ref-glacier-600);
+  --nx-on-accent: var(--nx-ref-paper-0);
+  --nx-success: var(--nx-ref-glacier-500);
+  --nx-warning: var(--nx-ref-amber-600);
+  --nx-danger: var(--nx-ref-red-600);
+  --nx-shadow-card: none;
+  --nx-shadow-edge: inset 0 0 0 1px var(--nx-border);
+  --nx-shadow-dialog: 0 0 0 1px rgb(15 17 20 / 0.06), 0 16px 48px -12px rgb(15 17 20 / 0.22);
+  --nx-shadow-btn: inset 0 1px 0 rgb(255 255 255 / 0.16), 0 1px 2px rgb(0 0 0 / 0.2);
+  --nx-scrim: rgb(15 17 20 / 0.18);
+  --nx-pop-bg: color-mix(in srgb, var(--nx-surface) 92%, transparent);
+  --nx-toast-bg: #17181b;
+  --nx-toast-text: #f3f4f6;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --nx-bg: var(--nx-ref-night-1);
+  --nx-bg-soft: var(--nx-ref-night-0);
+  --nx-surface: var(--nx-ref-night-2);
+  --nx-surface-hover: var(--nx-ref-night-3);
+  --nx-border: var(--nx-ref-night-4);
+  --nx-border-strong: var(--nx-ref-night-5);
+  --nx-text: var(--nx-ref-snow-0);
+  --nx-text-muted: var(--nx-ref-snow-1);
+  --nx-text-faint: var(--nx-ref-snow-2);
+  --nx-accent: var(--nx-ref-glacier-300);
+  --nx-accent-soft: color-mix(in srgb, var(--nx-ref-glacier-300) 14%, transparent);
+  --nx-accent-strong: var(--nx-ref-glacier-200);
+  --nx-accent-text: var(--nx-ref-glacier-200);
+  --nx-on-accent: var(--nx-ref-glacier-950);
+  --nx-success: var(--nx-ref-glacier-300);
+  --nx-warning: var(--nx-ref-amber-300);
+  --nx-danger: var(--nx-ref-red-300);
+  --nx-shadow-card: inset 0 1px 0 rgb(255 255 255 / 0.035);
+  --nx-shadow-edge: inset 0 0 0 1px var(--nx-border), inset 0 1px 0 rgb(255 255 255 / 0.035);
+  --nx-shadow-dialog: 0 0 0 1px rgb(255 255 255 / 0.06), 0 24px 64px -16px rgb(0 0 0 / 0.75);
+  --nx-scrim: rgb(0 0 0 / 0.45);
+  --nx-toast-bg: #eceef1;
+  --nx-toast-text: #0d0e10;
+}
