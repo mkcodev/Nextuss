@@ -13,6 +13,7 @@ export const PLUGIN_IDS = [
   'habits',
   'focus',
   'gamification',
+  'challenges',
   'weeklyReview',
   'stats',
   'ai',

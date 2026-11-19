@@ -8,6 +8,7 @@ import { todaySettingsSpec } from '../../today/todaySettingsSpec'
 import { habitsSettingsSpec } from '../../habits/settingsSpec'
 import { focusSettingsSpec } from '../../focus/settingsSpec'
 import { gamificationSettingsSpec } from '../../gamification/settingsSpec'
+import { challengesSettingsSpec } from '../../challenges/settingsSpec'
 import { weeklyReviewSettingsSpec } from '../../planner/weeklyReviewSettingsSpec'
 import { planningSettingsSpec } from '../../planner/planningSettingsSpec'
 import { statsSettingsSpec } from '../../stats/settingsSpec'
@@ -31,6 +32,7 @@ export const PLUGIN_SETTINGS: Record<PluginId, PluginSettingsSpec> = {
   habits: habitsSettingsSpec,
   focus: focusSettingsSpec,
   gamification: gamificationSettingsSpec,
+  challenges: challengesSettingsSpec,
   weeklyReview: weeklyReviewSettingsSpec,
   stats: statsSettingsSpec,
   ai: aiSettingsSpec,

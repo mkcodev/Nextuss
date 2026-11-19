@@ -74,6 +74,8 @@ const RULES: Record<ExportableKey, Rule> = {
 
   celebrationEnabled: BOOL,
 
+  missionsPerDay: hour(1, 3),
+
   virtualizationEnabled: BOOL,
   virtualizationWindowEndHour: hour(0, 24),
   virtualizationTheme: oneOf(['a', 'b', 'c']),

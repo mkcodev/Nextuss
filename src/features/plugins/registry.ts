@@ -5,6 +5,7 @@ import {
   CalendarRange,
   ClipboardCheck,
   Clock,
+  Flag,
   FolderKanban,
   LayoutGrid,
   ListChecks,
@@ -56,6 +57,17 @@ export const PLUGINS: readonly PluginManifest[] = [
     defaultEnabled: true,
     category: 'motivacion',
     appView: { kind: 'action', label: 'Ver en la app', id: 'gamification' },
+  },
+  {
+    id: 'challenges',
+    name: 'Retos',
+    description: 'Misiones diarias y retos propios con racha y escudos.',
+    icon: Flag,
+    // Apagado hasta que exista la página `/retos` (R2a): sin ella, encenderlo generaría misiones y
+    // XP que nadie puede ver. R2a lo pasa a `true`.
+    defaultEnabled: false,
+    category: 'motivacion',
+    enhances: ['gamification'],
   },
   {
     id: 'weeklyReview',
