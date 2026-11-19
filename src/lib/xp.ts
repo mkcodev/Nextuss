@@ -71,3 +71,14 @@ export function levelUpsInCurve(curve: { date: string; xp: number }[], startXp: 
   }
   return out
 }
+
+/** Retos (#191): cada día hecho de un reto propio. */
+export const XP_PER_CHALLENGE_DAY = 5
+export const CHALLENGE_PERFECT_BONUS_PER_DAY = 2
+export const CHALLENGE_PERFECT_BONUS_CAP = 150
+
+/** Bonus por terminar un reto propio sin ningún fallo (los escudos sí se permiten): el doble de los
+ * días del reto, con un tope. */
+export function challengePerfectBonus(durationDays: number): number {
+  return Math.min(CHALLENGE_PERFECT_BONUS_CAP, CHALLENGE_PERFECT_BONUS_PER_DAY * Math.max(0, durationDays))
+}
