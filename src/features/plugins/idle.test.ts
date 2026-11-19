@@ -32,6 +32,6 @@ describe('idleSuggestion', () => {
 
 it('solo los plugins no núcleo declaran actividad medible', () => {
   const withActivity = PLUGINS.filter((p) => PLUGIN_SETTINGS[p.id].lastActivityAt).map((p) => p.id)
-  expect(withActivity.sort()).toEqual(['checkin', 'focus', 'habits', 'launchers', 'routines', 'virtualization', 'weeklyReview'])
+  expect(withActivity.sort()).toEqual(['challenges', 'checkin', 'focus', 'habits', 'launchers', 'routines', 'virtualization', 'weeklyReview'])
   for (const p of PLUGINS.filter((p) => p.core)) expect(PLUGIN_SETTINGS[p.id].lastActivityAt).toBeUndefined()
 })

@@ -7,6 +7,7 @@ import { useTelegramPoller } from '../telegram/useTelegramPoller'
 import { useTelegramWorkerSync } from '../telegram/useTelegramWorkerSync'
 import { useLauncherEngine } from '../launchers/engine'
 import { VirtualizationEngine } from '../virtualization/VirtualizationEngine'
+import { ChallengesEngine } from '../challenges/ChallengesEngine'
 import { usePluginEnabled } from './pluginsStore'
 
 function FocusEngine() {
@@ -36,6 +37,7 @@ export function PluginEngines() {
   const telegram = usePluginEnabled('telegram')
   const launchers = usePluginEnabled('launchers')
   const virtualization = usePluginEnabled('virtualization')
+  const challenges = usePluginEnabled('challenges')
   return (
     <>
       {focus && <FocusEngine />}
@@ -43,6 +45,7 @@ export function PluginEngines() {
       {telegram && <TelegramEngine />}
       {launchers && <LaunchersEngine />}
       {virtualization && <VirtualizationEngine />}
+      {challenges && <ChallengesEngine />}
     </>
   )
 }

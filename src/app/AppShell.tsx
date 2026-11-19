@@ -39,6 +39,7 @@ import { DayStartFlow } from '../features/rituals/DayStartFlow'
 import { DayCloseFlow } from '../features/rituals/DayCloseFlow'
 import { useBackupGuard } from '../features/backup/useBackupGuard'
 import { usePluginsSync } from '../features/plugins/pluginsStore'
+import { useChallengesPluginWatch } from '../features/challenges/pluginWatch'
 import { PluginEngines } from '../features/plugins/PluginEngines'
 
 const CommandPalette = lazyNamed(() => import('./CommandPalette'), 'CommandPalette')
@@ -57,6 +58,7 @@ function RouteFallback() {
 
 export function AppShell() {
   usePluginsSync()
+  useChallengesPluginWatch()
   useGlobalShortcuts()
   usePwaShortcutActions()
   useServiceWorker()

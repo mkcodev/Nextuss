@@ -29,6 +29,7 @@ const FULL: Settings = {
   virtualizationRoutineId: 3,
   pomodoroWorkMin: 50,
   celebrationEnabled: false,
+  missionsPerDay: 2,
   morningSummaryTime: '07:30',
   dayTimeView: 'ring',
   plugins: { habits: false, ai: true },
@@ -43,7 +44,7 @@ describe('buildSettingsExport', () => {
     for (const s of SECRETS) expect(json).not.toContain(s)
     for (const key of EXCLUDED_KEYS) expect(file.settings).not.toHaveProperty(key)
     expect(file).toMatchObject({ kind: SETTINGS_FILE_KIND, version: 1, exportedAt: '2026-11-18T10:00:00.000Z' })
-    expect(file.settings).toMatchObject({ theme: 'dark', celebrationEnabled: false, pomodoroWorkMin: 50, aiModel: 'claude-opus-5', plugins: { habits: false, ai: true } })
+    expect(file.settings).toMatchObject({ theme: 'dark', celebrationEnabled: false, missionsPerDay: 2, pomodoroWorkMin: 50, aiModel: 'claude-opus-5', plugins: { habits: false, ai: true } })
   })
 
   it('omite lo que no está definido', () => {
@@ -82,6 +83,13 @@ describe('parseSettingsImport', () => {
     const { changes, ignored } = parseSettingsImport(text)
     expect(changes).toEqual({ dayStartHour: 6, plugins: { habits: true } })
     expect(ignored.sort()).toEqual(['claudeApiKey', 'inventado', 'morningSummaryTime', 'notifyTaskStart', 'pomodoroWorkMin', 'theme'])
+  })
+
+  it('missionsPerDay solo admite 1, 2 o 3', () => {
+    const parse = (value: unknown) => parseSettingsImport(JSON.stringify({ kind: SETTINGS_FILE_KIND, version: 1, settings: { missionsPerDay: value } }))
+    expect(parse(1).changes).toEqual({ missionsPerDay: 1 })
+    expect(parse(3).changes).toEqual({ missionsPerDay: 3 })
+    for (const bad of [0, 4, 2.5, '2', null]) expect(parse(bad)).toEqual({ changes: {}, ignored: ['missionsPerDay'] })
   })
 
   it('rechaza lo que no es un archivo de ajustes de Nextuss', () => {

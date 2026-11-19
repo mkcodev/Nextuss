@@ -486,6 +486,8 @@ export interface Settings {
   pomodoroSoundEnabled?: boolean
   /** Microcelebración de 700 ms al completar una tarea o bloque (rediseño v2). Ausente = activa. */
   celebrationEnabled?: boolean
+  /** Misiones diarias que genera el plugin Retos (1 a 3). Ausente = 3. */
+  missionsPerDay?: 1 | 2 | 3
   /** Primer día de la semana en los calendarios (Semana/Mes) — no afecta a `weekKey`/las claves ISO
    * de objetivos, que son siempre lunes-inicio; esto es puramente de visualización. */
   weekStartsOn?: 0 | 1

@@ -36,8 +36,8 @@ describe('resolveEnabled', () => {
     expect(enabled.has('weeklyReview')).toBe(false)
   })
 
-  it('en el registro real todo está activo por defecto (nada cambia para el usuario actual)', () => {
-    expect(resolveEnabled(undefined).size).toBe(PLUGINS.length)
+  it('en el registro real está activo por defecto todo menos Retos, que espera a su página (R2a)', () => {
+    expect(resolveEnabled(undefined).size).toBe(PLUGINS.filter((p) => p.defaultEnabled).length)
   })
 })
 

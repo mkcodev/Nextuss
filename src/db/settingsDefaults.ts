@@ -31,6 +31,8 @@ export const SETTINGS_DEFAULTS = {
 
   celebrationEnabled: true,
 
+  missionsPerDay: 3,
+
   dayTimeView: 'ruler',
   notifyTransitions: true,
 
