@@ -15,10 +15,17 @@ import {
 } from './repositories/challenges'
 import { closeMissions, ensureDailyMissions, syncMissionProgress } from './repositories/challengeMissions'
 import { getOrCreateProgress } from './repositories/gamification'
+import * as gamification from './repositories/gamification'
 import { getOrCreateSettings, updateSettings } from './repositories/settings'
 import { usePluginsStore } from '../features/plugins/pluginsStore'
 import { watchChallengesPlugin } from '../features/challenges/pluginWatch'
 import { DAILY_MISSION_KIND, parseMissionParams } from '../lib/challenges/missionCatalog'
+
+// Envuelve `applyXpDelta` sin cambiar su comportamiento, para poder comprobar que NO se llama.
+vi.mock('./repositories/gamification', async (importOriginal) => {
+  const original = await importOriginal<typeof import('./repositories/gamification')>()
+  return { ...original, applyXpDelta: vi.fn(original.applyXpDelta) }
+})
 
 const TODAY = '2026-11-19'
 const local = (y: number, m: number, d: number, h = 10) => new Date(y, m - 1, d, h).getTime()
@@ -28,6 +35,7 @@ beforeEach(async () => {
     for (const table of db.tables) await table.clear()
   })
   usePluginsStore.getState().setStored(undefined)
+  vi.mocked(gamification.applyXpDelta).mockClear()
 })
 
 let nextSort = 1
@@ -181,7 +189,8 @@ describe('retos propios: XP por día', () => {
     const id = await createCustomChallenge({ title: 'A', durationDays: 7 }, TODAY)
     usePluginsStore.getState().setStored({ gamification: false })
     await markChallengeDay(id, TODAY)
-    expect(await getChallengeDays(id)).toMatchObject([{ xp: 0 }])
+    expect(await getChallengeDays(id)).toMatchObject([{ state: 'done', xp: 0 }])
+    expect(gamification.applyXpDelta).not.toHaveBeenCalled()
     expect(await totalXp()).toBe(0)
     usePluginsStore.getState().setStored(undefined)
     await unmarkChallengeDay(id, TODAY)
