@@ -440,6 +440,8 @@ export interface Settings {
   pomodoroBreakMin?: number
   pomodoroLongBreakMin?: number
   pomodoroSoundEnabled?: boolean
+  /** Microcelebración de 700 ms al completar una tarea o bloque (rediseño v2). Ausente = activa. */
+  celebrationEnabled?: boolean
   /** Primer día de la semana en los calendarios (Semana/Mes) — no afecta a `weekKey`/las claves ISO
    * de objetivos, que son siempre lunes-inicio; esto es puramente de visualización. */
   weekStartsOn?: 0 | 1

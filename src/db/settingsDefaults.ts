@@ -29,6 +29,8 @@ export const SETTINGS_DEFAULTS = {
   pomodoroSoundEnabled: false,
   notifyPomodoroEnd: true,
 
+  celebrationEnabled: true,
+
   dayTimeView: 'ruler',
   notifyTransitions: true,
 

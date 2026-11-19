@@ -23,6 +23,7 @@ import {
   Repeat,
   Search,
   Settings2,
+  Sparkles,
   Sun,
   Target,
   Trash2,
@@ -311,6 +312,12 @@ export function CommandPalette() {
                 className={ITEM_CLASS}
               >
                 <Database size={15} strokeWidth={1.75} /> Backup
+              </Command.Item>
+              <Command.Item
+                onSelect={() => run(() => go('/ajustes#movimiento'))}
+                className={ITEM_CLASS}
+              >
+                <Sparkles size={15} strokeWidth={1.75} /> Ajustes de movimiento
               </Command.Item>
               <Command.Item
                 onSelect={() => run(() => go('/ajustes#papelera'))}

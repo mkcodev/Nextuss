@@ -28,6 +28,7 @@ const FULL: Settings = {
   onboardingCompleted: true,
   virtualizationRoutineId: 3,
   pomodoroWorkMin: 50,
+  celebrationEnabled: false,
   morningSummaryTime: '07:30',
   dayTimeView: 'ring',
   plugins: { habits: false, ai: true },
@@ -42,7 +43,7 @@ describe('buildSettingsExport', () => {
     for (const s of SECRETS) expect(json).not.toContain(s)
     for (const key of EXCLUDED_KEYS) expect(file.settings).not.toHaveProperty(key)
     expect(file).toMatchObject({ kind: SETTINGS_FILE_KIND, version: 1, exportedAt: '2026-11-18T10:00:00.000Z' })
-    expect(file.settings).toMatchObject({ theme: 'dark', pomodoroWorkMin: 50, aiModel: 'claude-opus-5', plugins: { habits: false, ai: true } })
+    expect(file.settings).toMatchObject({ theme: 'dark', celebrationEnabled: false, pomodoroWorkMin: 50, aiModel: 'claude-opus-5', plugins: { habits: false, ai: true } })
   })
 
   it('omite lo que no está definido', () => {
