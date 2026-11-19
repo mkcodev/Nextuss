@@ -13,6 +13,15 @@ interface DockState {
 
 type PanelOrderState = Record<DockZone, PanelKey[]>
 
+/** Vista de la lista de retos propios en `/retos` (#191): Mezcla (por defecto), Cadena u Horizonte. */
+export const CHALLENGES_VIEWS = ['mix', 'chain', 'horizon'] as const
+export type ChallengesView = (typeof CHALLENGES_VIEWS)[number]
+
+/** Un valor guardado que ya no existe (o basura) cae en la vista por defecto. */
+export function normalizeChallengesView(value: unknown): ChallengesView {
+  return (CHALLENGES_VIEWS as readonly unknown[]).includes(value) ? (value as ChallengesView) : 'mix'
+}
+
 interface UIState {
   leftCollapsed: boolean
   rightOpen: boolean
@@ -22,6 +31,9 @@ interface UIState {
   dock: DockState
   /** Tab strip order — independent per zone. */
   panelOrder: PanelOrderState
+  /** Por dispositivo, a propósito: no va a `Settings` ni a la exportación (decisión de R0). */
+  challengesView: ChallengesView
+  setChallengesView: (view: ChallengesView) => void
   toggleLeft: () => void
   toggleRight: () => void
   openMobileDock: () => void
@@ -41,6 +53,8 @@ export const useUIStore = create<UIState>()(
       mobileDockOpen: false,
       dock: { top: 'progress', bottom: 'activity', splitPct: 55 },
       panelOrder: { top: [...DEFAULT_PANEL_ORDER], bottom: [...DEFAULT_PANEL_ORDER] },
+      challengesView: 'mix',
+      setChallengesView: (view) => set({ challengesView: normalizeChallengesView(view) }),
       // Plegar el sidebar y abrir o cerrar el dock se animan con View Transitions (respaldo: corte
       // directo). Pasan por aquí el botón, Alt+H / Alt+L y la paleta.
       toggleLeft: () => withViewTransition(() => set((s) => ({ leftCollapsed: !s.leftCollapsed })), 'layout'),
@@ -69,7 +83,7 @@ export const useUIStore = create<UIState>()(
     }),
     {
       name: 'nextuss-ui-layout',
-      version: 5,
+      version: 6,
       partialize: (state) => {
         const { mobileDockOpen: _mobileDockOpen, ...rest } = state
         return rest
@@ -81,6 +95,7 @@ export const useUIStore = create<UIState>()(
       // v5: removed the 'checkin' panel (Fase 12, promoted to a card in Hoy) — bumping forces
       // `migrate` to run again so it's dropped from any already-persisted `panelOrder`, and any
       // zone that had it assigned falls back to a real panel instead of pointing at nothing.
+      // v6: `challengesView` (retos, #191). `merge` lo normaliza en cada carga, no solo al migrar.
       migrate: (persisted) => {
         const state = persisted as UIState
         if (!state.panelOrder || Array.isArray(state.panelOrder)) {
@@ -96,6 +111,12 @@ export const useUIStore = create<UIState>()(
           if (state.dock.top && !known.has(state.dock.top)) state.dock.top = 'progress'
           if (state.dock.bottom && !known.has(state.dock.bottom)) state.dock.bottom = 'activity'
         }
+        state.challengesView = normalizeChallengesView(state.challengesView)
+        return state
+      },
+      merge: (persisted, current) => {
+        const state = { ...current, ...(persisted as Partial<UIState>) }
+        state.challengesView = normalizeChallengesView(state.challengesView)
         return state
       },
     },
