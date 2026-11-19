@@ -10,7 +10,7 @@ export interface PluginProfile {
   plugins: PluginId[]
 }
 
-const ADHD_FOCUS: PluginId[] = ['virtualization', 'checkin', 'routines', 'dayTime', 'habits', 'focus', 'gamification']
+const ADHD_FOCUS: PluginId[] = ['virtualization', 'checkin', 'routines', 'dayTime', 'habits', 'focus', 'gamification', 'challenges']
 const ALL_NON_CORE: PluginId[] = PLUGINS.filter((p) => !p.core).map((p) => p.id)
 
 /** 4 perfiles del Objetivo 4 (#98 P7) — aplican/quitan un conjunto de plugins de golpe, no campos de
@@ -22,7 +22,7 @@ export const PLUGIN_PROFILES: PluginProfile[] = [
   {
     id: 'adhd',
     label: 'Enfoque TDAH',
-    description: 'Ritual de mañana, rutinas, hábitos, foco y gamificación — sin análisis ni integraciones.',
+    description: 'Ritual de mañana, rutinas, hábitos, foco, gamificación y retos — sin análisis ni integraciones.',
     plugins: ADHD_FOCUS,
   },
   { id: 'full', label: 'Completo', description: 'Todos los plugins activos.', plugins: ALL_NON_CORE },

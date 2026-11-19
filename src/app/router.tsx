@@ -16,6 +16,7 @@ const ProjectDetailPage = lazyNamed(() => import('../features/projects/ProjectDe
 const TasksPage = lazyNamed(() => import('../features/tasks/TasksPage'), 'TasksPage')
 const RoutinesPage = lazyNamed(() => import('../features/routines/RoutinesPage'), 'RoutinesPage')
 const PluginsPage = lazyNamed(() => import('../features/plugins/PluginsPage'), 'PluginsPage')
+const ChallengesPage = lazyNamed(() => import('../features/challenges/ChallengesPage'), 'ChallengesPage')
 
 export const router = createBrowserRouter([
   {
@@ -27,6 +28,8 @@ export const router = createBrowserRouter([
       { path: '/habitos', element: <PluginGate id="habits"><HabitsPage /></PluginGate> },
       { path: '/rutinas', element: <PluginGate id="routines"><RoutinesPage /></PluginGate> },
       { path: '/estadisticas', element: <PluginGate id="stats"><StatsPage /></PluginGate> },
+      // `:id?` opcional: abrir o cerrar la ficha de un reto no desmonta la página.
+      { path: '/retos/:id?', element: <PluginGate id="challenges"><ChallengesPage /></PluginGate> },
       { path: '/proyectos', element: <ProjectsPage /> },
       { path: '/proyectos/:id', element: <ProjectDetailPage /> },
       { path: '/tareas', element: <TasksPage /> },

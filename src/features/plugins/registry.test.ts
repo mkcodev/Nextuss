@@ -37,4 +37,10 @@ describe('PLUGINS', () => {
       else expect(KNOWN_ACTION_IDS.has(p.appView.id), `${p.id}: appView.id desconocido`).toBe(true)
     }
   })
+
+  it('Retos (R2a): ya tiene página `/retos` y viene encendido por defecto', () => {
+    const challenges = PLUGINS.find((p) => p.id === 'challenges')
+    expect(challenges?.appView).toEqual({ kind: 'route', path: '/retos' })
+    expect(challenges?.defaultEnabled).toBe(true)
+  })
 })

@@ -63,11 +63,10 @@ export const PLUGINS: readonly PluginManifest[] = [
     name: 'Retos',
     description: 'Misiones diarias y retos propios con racha y escudos.',
     icon: Flag,
-    // Apagado hasta que exista la página `/retos` (R2a): sin ella, encenderlo generaría misiones y
-    // XP que nadie puede ver. R2a lo pasa a `true`.
-    defaultEnabled: false,
+    defaultEnabled: true,
     category: 'motivacion',
     enhances: ['gamification'],
+    appView: { kind: 'route', path: '/retos' },
   },
   {
     id: 'weeklyReview',

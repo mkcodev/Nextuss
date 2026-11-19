@@ -64,8 +64,12 @@ export function Menu({ trigger, children, align = 'right', className }: MenuProp
     const items = itemsRef.current.filter((el): el is HTMLButtonElement => el != null)
     const currentIndex = items.findIndex((el) => el === document.activeElement)
     if (e.key === 'Escape') {
-      e.stopPropagation()
-      setOpen(false)
+      // Solo frena el Esc si hay un menú que cerrar: con el menú cerrado y el foco en su botón, el Esc
+      // tiene que llegar al diálogo o la hoja que lo contiene (si no, no se podían cerrar con Esc).
+      if (open) {
+        e.stopPropagation()
+        setOpen(false)
+      }
     } else if (e.key === 'Tab') {
       // Salir con Tab cierra el menú (antes el foco se iba y el menú quedaba abierto).
       setOpen(false)

@@ -1,9 +1,10 @@
 import { AnimatePresence, m, useReducedMotion } from 'motion/react'
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 import { Button } from './Button'
+import { useModalFocus } from './useModalFocus'
 import { PRESET, motionFor } from '../motion'
 
 type DialogSize = 'sm' | 'md' | 'lg'
@@ -28,16 +29,6 @@ const SIZE_CLASSES: Record<DialogSize, string> = {
   lg: 'max-w-2xl',
 }
 
-let openDialogCount = 0
-
-function getFocusable(container: HTMLElement): HTMLElement[] {
-  return Array.from(
-    container.querySelectorAll<HTMLElement>(
-      'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
-    ),
-  )
-}
-
 export function Dialog({ open, ...props }: DialogProps) {
   // El panel solo existe mientras está abierto: su estado (cambios, confirmación) empieza limpio cada vez.
   return <AnimatePresence>{open && <DialogPanel {...props} />}</AnimatePresence>
@@ -45,7 +36,6 @@ export function Dialog({ open, ...props }: DialogProps) {
 
 function DialogPanel({ onClose, title, children, size = 'sm', dirty, hideTitle }: Omit<DialogProps, 'open'>) {
   const panelRef = useRef<HTMLDivElement>(null)
-  const isTopmost = useRef(false)
   const pointerDownOnBackdrop = useRef(false)
   const titleId = useId()
   const reduceMotion = useReducedMotion()
@@ -60,68 +50,13 @@ function DialogPanel({ onClose, title, children, size = 'sm', dirty, hideTitle }
     if (isDirty) setConfirming(true)
     else onClose()
   }
-  const requestCloseRef = useRef(requestClose)
-  const confirmingRef = useRef(confirming)
-  useEffect(() => {
-    requestCloseRef.current = requestClose
-    confirmingRef.current = confirming
+  // Foco atrapado, Esc y foco devuelto al cerrar: lo comparte con `Sheet` (ver useModalFocus).
+  useModalFocus(panelRef, {
+    onEscape: () => {
+      if (confirming) setConfirming(false)
+      else requestClose()
+    },
   })
-
-  useEffect(() => {
-    const previouslyFocused = document.activeElement as HTMLElement | null
-    openDialogCount += 1
-    isTopmost.current = true
-    document.body.style.overflow = 'hidden'
-
-    // Foco inicial: si un hijo ya lo tomó con `autoFocus`, se respeta; si no, el primer control.
-    const panel = panelRef.current
-    if (panel && !panel.contains(document.activeElement)) {
-      const focusable = getFocusable(panel)
-      ;(focusable[0] ?? panel).focus()
-    }
-
-    // Fase de burbuja (no de captura): los controles de dentro que usan Esc para lo suyo (un menú,
-    // el campo de "nuevo proyecto"…) llaman a stopPropagation y el diálogo ya no se entera.
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (!isTopmost.current) return
-      if (e.key === 'Escape') {
-        if (e.defaultPrevented) return
-        e.stopPropagation()
-        if (confirmingRef.current) setConfirming(false)
-        else requestCloseRef.current()
-        return
-      }
-      if (e.key === 'Tab' && panelRef.current) {
-        const items = getFocusable(panelRef.current)
-        if (items.length === 0) return
-        // Si el foco se perdió (un campo que se desmontó lo dejó en <body>), vuelve al panel en vez de
-        // escaparse a la página de detrás.
-        if (!panelRef.current.contains(document.activeElement)) {
-          e.preventDefault()
-          ;(e.shiftKey ? items[items.length - 1] : items[0]).focus()
-          return
-        }
-        const first = items[0]
-        const last = items[items.length - 1]
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault()
-          last.focus()
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault()
-          first.focus()
-        }
-      }
-    }
-    window.addEventListener('keydown', onKeyDown)
-
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-      openDialogCount -= 1
-      isTopmost.current = false
-      if (openDialogCount === 0) document.body.style.overflow = ''
-      previouslyFocused?.focus()
-    }
-  }, [])
 
   return (
     <m.div
