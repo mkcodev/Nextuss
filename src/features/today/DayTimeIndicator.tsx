@@ -53,7 +53,7 @@ export function DayTimeIndicator() {
       onClick={() => navigate('/')}
       aria-label={`${label}. Ir a Hoy`}
       title={label}
-      className="hidden h-8 max-w-60 items-center gap-1.5 rounded-sm border border-border bg-surface px-2.5 text-ui font-medium tabular-nums text-text-muted transition-colors hover:border-border-strong hover:text-text md:flex"
+      className="hidden h-7.5 max-w-60 items-center gap-1.5 rounded-sm bg-surface px-2.5 text-ui font-medium tabular-nums text-text-muted shadow-edge transition-colors duration-(--dur-fast) hover:bg-surface-hover hover:text-text md:flex"
     >
       {icon}
       <span className="truncate">{text}</span>

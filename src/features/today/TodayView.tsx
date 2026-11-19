@@ -33,6 +33,7 @@ import { DayIntentionCard } from './DayIntentionCard'
 import { NowBlock } from './NowBlock'
 import { RoutineNowCard } from '../routines/RoutineNowCard'
 import { DayTimeCard } from './DayTimeCard'
+import { TodayNumbers } from './TodayNumbers'
 import { IfPlugin } from '../plugins/PluginGate'
 import { usePluginEnabled } from '../plugins/pluginsStore'
 import { db } from '../../db/schema'
@@ -173,7 +174,7 @@ export function TodayView() {
 
   return (
     <div className="mx-auto max-w-6xl p-6 lg:p-8">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -184,7 +185,7 @@ export function TodayView() {
           >
             <ChevronLeft size={16} strokeWidth={2} />
           </button>
-          <h1 className="text-xl font-semibold tracking-tight text-text">{label}</h1>
+          <h1 className="text-xl leading-tight font-semibold tracking-[-0.02em] text-text">{label}</h1>
           <button
             type="button"
             onClick={() => goToDate(dateKey(addDays(parseDateKey(date), 1)))}
@@ -202,8 +203,8 @@ export function TodayView() {
         </div>
         <div className="flex items-center gap-2">
           {totalCount > 0 && (
-            <span className="flex items-center gap-1.5 text-sm text-text-muted">
-              <CheckCheck size={15} strokeWidth={2} className="text-accent" />
+            <span className="flex items-center gap-1.5 text-ui text-text-muted">
+              <CheckCheck size={14} strokeWidth={2} className="text-success" aria-hidden="true" />
               <span className="tabular-nums">
                 {doneCount} de {totalCount} hábitos
               </span>
@@ -217,10 +218,10 @@ export function TodayView() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
-        <div className="space-y-6 lg:order-1">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_272px]">
+        <div className="min-w-0 space-y-6 lg:order-1">
           {suggestClose && (
-            <div role="status" className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-bg-soft px-4 py-3 text-sm">
+            <div role="status" className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-bg-soft px-4 py-3 text-ui">
               <Moon size={16} strokeWidth={1.75} className="text-text-muted" aria-hidden="true" />
               <span className="min-w-[12rem] flex-1 text-text">Buen momento para cerrar el día.</span>
               <Button size="sm" variant="secondary" onClick={() => openDayClose(date)}>
@@ -245,9 +246,10 @@ export function TodayView() {
           {isToday && <OverdueTasks date={date} />}
           <CapacityBanner date={date} onlyWarn={isToday} />
           <Timeline date={date} />
+          {isToday && <TodayNumbers date={date} />}
         </div>
 
-        <div className="space-y-6 lg:order-2">
+        <div className="min-w-0 space-y-6 lg:order-2">
           <NorthStarCallout period="week" periodKey={currentWeekKey} />
           <IfPlugin id="checkin">
             <CheckInCard date={date} />
