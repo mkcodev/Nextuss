@@ -1,9 +1,11 @@
-// Retos (#191): lectura y operaciones de los retos propios. El XP, la reconciliación de días pasados
-// y las misiones llegan con el plugin `challenges` (R1b); aquí solo hay datos y reglas de estado.
+// Retos (#191): lectura y operaciones de los retos propios, con su XP y la reconciliación de días pasados.
 import { db } from '../schema'
 import { trashRows } from '../trash'
 import type { Challenge, ChallengeDay } from '../types'
 import { todayKey } from '../../lib/dates'
+import { XP_PER_CHALLENGE_DAY } from '../../lib/xp'
+import { isPluginEnabled } from '../../features/plugins/pluginsStore'
+import { applyXpDelta } from './gamification'
 import {
   CUSTOM_KIND,
   MAX_DURATION_DAYS,
@@ -17,6 +19,13 @@ import {
   type CustomChallengeParams,
 } from '../../lib/challenges/custom'
 import { addDaysKey, eachDayKey, endDateFor } from '../../lib/challenges/dayRange'
+import { reconcileCustom } from '../../lib/challenges/customStreak'
+
+/** XP de retos solo con la gamificación activa EN ESE MOMENTO: apagada, se guarda 0 y no se reparte
+ * con efecto retroactivo al encenderla. */
+export function gamifiedXp(amount: number): number {
+  return isPluginEnabled('gamification') ? amount : 0
+}
 
 /** Una operación no permitida por el estado del reto. El mensaje va tal cual a la interfaz. */
 export class ChallengeActionError extends Error {
@@ -120,20 +129,24 @@ async function touch(id: number, changes: Partial<Challenge> = {}): Promise<void
 
 /** Marca hoy como hecho. Si hoy era «Hoy no», pasa a hecho y el escudo vuelve al presupuesto. */
 export async function markChallengeDay(id: number, today: string = todayKey()): Promise<void> {
-  await db.transaction('rw', db.challenges, db.challengeDays, async () => {
+  await db.transaction('rw', db.challenges, db.challengeDays, db.progress, async () => {
     const { todayRow } = await loadMarkable(id, today)
     if (todayRow?.state === 'done') return
-    if (todayRow) await db.challengeDays.update(todayRow.id!, { state: 'done', xp: 0, at: Date.now() })
-    else await db.challengeDays.add({ challengeId: id, date: today, state: 'done', xp: 0, at: Date.now() })
+    const xp = gamifiedXp(XP_PER_CHALLENGE_DAY)
+    if (todayRow) await db.challengeDays.update(todayRow.id!, { state: 'done', xp, at: Date.now() })
+    else await db.challengeDays.add({ challengeId: id, date: today, state: 'done', xp, at: Date.now() })
+    if (xp > 0) await applyXpDelta(xp)
     await touch(id)
   })
 }
 
 /** Deshace el «hecho» de hoy. Solo hoy: los días pasados ya están cerrados. */
 export async function unmarkChallengeDay(id: number, today: string = todayKey()): Promise<void> {
-  await db.transaction('rw', db.challenges, db.challengeDays, async () => {
+  await db.transaction('rw', db.challenges, db.challengeDays, db.progress, async () => {
     const { todayRow } = await loadMarkable(id, today)
     if (todayRow?.state !== 'done') return
+    // Resta exactamente lo que dio ese día, aunque ahora la gamificación esté apagada.
+    if (todayRow.xp > 0) await applyXpDelta(-todayRow.xp)
     await db.challengeDays.delete(todayRow.id!)
     await touch(id)
   })
@@ -216,4 +229,59 @@ export async function trashChallenge(id: number): Promise<void> {
   const challenge = await db.challenges.get(id)
   if (!challenge) return
   await trashRows('challenges', [id], `Reto «${challenge.title}»`)
+}
+
+function isLiveCustom(c: Challenge): boolean {
+  return c.kind === CUSTOM_KIND && c.deletedAt === 0
+}
+
+async function reconcileOne(id: number, today: string): Promise<void> {
+  await db.transaction('rw', db.challenges, db.challengeDays, db.progress, async () => {
+    const challenge = await db.challenges.get(id)
+    if (!challenge || !isLiveCustom(challenge)) return
+    if (challenge.status !== 'active' && challenge.status !== 'paused') return
+    const params = parseCustomParams(challenge.params)
+    if (!params) return // fila de otra versión o dañada: se conserva sin tocar
+    const days = await db.challengeDays.where('challengeId').equals(id).toArray()
+    const result = reconcileCustom(challenge, params, days, today)
+    if (result.add.length === 0 && result.endDate === challenge.endDate && !result.finish) return
+
+    const now = Date.now()
+    if (result.add.length > 0) {
+      await db.challengeDays.bulkAdd(result.add.map((a) => ({ challengeId: id, date: a.date, state: a.state, xp: 0, at: now })))
+    }
+    const changes: Partial<Challenge> = { endDate: result.endDate }
+    if (result.finish) {
+      const bonus = gamifiedXp(result.finish.bonus)
+      if (bonus > 0) await applyXpDelta(bonus)
+      Object.assign(changes, { status: 'done', xpAwarded: bonus, completedAt: now })
+    }
+    await touch(id, changes)
+  })
+}
+
+/** Cierra los días pasados de cada reto propio vivo (escudo, fallo o pausa) y termina los que ya
+ * pasaron su `endDate`. Idempotente: se puede llamar al abrir la app y en cada cambio de día. */
+export async function reconcileChallenges(today: string = todayKey()): Promise<void> {
+  const rows = await db.challenges.where('kind').equals(CUSTOM_KIND).toArray()
+  for (const c of rows) {
+    if (c.id !== undefined && c.deletedAt === 0 && (c.status === 'active' || c.status === 'paused')) await reconcileOne(c.id, today)
+  }
+}
+
+/** El plugin se apaga: pausa los retos propios activos (desde mañana) para que no cuenten fallos
+ * mientras no hay motor. Los datos se conservan. */
+export async function pauseChallengesForPlugin(today: string = todayKey()): Promise<void> {
+  const rows = await db.challenges.where('kind').equals(CUSTOM_KIND).toArray()
+  for (const c of rows) {
+    if (c.id !== undefined && c.deletedAt === 0 && c.status === 'active') await pauseChallenge(c.id, today, 'plugin')
+  }
+}
+
+/** El plugin se enciende: reanuda solo los retos que pausó el propio plugin, no los que pausó el usuario. */
+export async function resumeChallengesForPlugin(today: string = todayKey()): Promise<void> {
+  const rows = await db.challenges.where('kind').equals(CUSTOM_KIND).toArray()
+  for (const c of rows) {
+    if (c.id !== undefined && c.deletedAt === 0 && c.status === 'paused' && c.pausedBy === 'plugin') await resumeChallenge(c.id, today)
+  }
 }

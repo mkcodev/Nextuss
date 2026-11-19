@@ -75,7 +75,7 @@ describe('marcar el día', () => {
     const id = await createCustomChallenge({ title: 'A', durationDays: 7 }, TODAY)
     await markChallengeDay(id, TODAY)
     await markChallengeDay(id, TODAY)
-    expect(await getChallengeDays(id)).toMatchObject([{ date: TODAY, state: 'done', xp: 0 }])
+    expect(await getChallengeDays(id)).toMatchObject([{ date: TODAY, state: 'done', xp: 5 }])
     await unmarkChallengeDay(id, TODAY)
     expect(await getChallengeDays(id)).toEqual([])
   })
