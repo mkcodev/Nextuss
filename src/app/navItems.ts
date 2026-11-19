@@ -1,6 +1,7 @@
 import {
   BarChart3,
   CalendarRange,
+  Flag,
   FolderKanban,
   LayoutGrid,
   ListChecks,
@@ -31,6 +32,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/estadisticas', label: 'Estadísticas', icon: BarChart3, end: false, goKey: 's', pluginId: 'stats' },
   { to: '/tareas', label: 'Tareas', icon: ListTodo, end: false, goKey: 't', pluginId: 'tasks' },
   { to: '/proyectos', label: 'Proyectos', icon: FolderKanban, end: false, goKey: 'r', pluginId: 'projects' },
+  { to: '/retos', label: 'Retos', icon: Flag, end: false, goKey: 'e', pluginId: 'challenges' },
   { to: '/plugins', label: 'Plugins', icon: Puzzle, end: false, goKey: 'x' },
   { to: '/ajustes', label: 'Ajustes', icon: SettingsIcon, end: false, goKey: 'a' },
 ]

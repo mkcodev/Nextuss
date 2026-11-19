@@ -5,7 +5,7 @@
 import { addDays, subDays } from 'date-fns'
 import { db } from './schema'
 import type { CheckIn, EnergyLevel, FocusSession, Goal, Habit, HabitLog, Project, Task, WeeklyReview } from './types'
-import { dateKey, isHabitScheduledOn, minutesToTime, monthKey, weekKey, weekdayOf } from '../lib/dates'
+import { dateKey, isHabitScheduledOn, minutesToTime, monthKey, todayKey, weekKey, weekdayOf } from '../lib/dates'
 import { levelForXp, XP_PER_COMPLETION, XP_PER_GOAL_MONTH, XP_PER_GOAL_WEEK } from '../lib/xp'
 import { nextPeriodKey, parsePeriodKey as parsePeriodStart } from '../lib/periods'
 import {
@@ -14,6 +14,9 @@ import {
   STREAK_ACHIEVEMENT_THRESHOLDS,
 } from '../lib/achievementThresholds'
 import { getOrCreateProgress, unlockAchievement } from './repositories/gamification'
+import { buildDemoChallenges } from './demoChallenges'
+import { DAILY_MISSION_KIND } from '../lib/challenges/missionCatalog'
+import { isPluginEnabled } from '../features/plugins/pluginsStore'
 
 const DEMO_RANGE_DAYS = 182 // ~6 meses, hasta ayer — hoy se deja limpio para que el usuario interactúe con él
 const DEMO_SEED = 20260921
@@ -175,6 +178,8 @@ const SEEDABLE_TABLES = [
   'reviews',
   'achievements',
   'projects',
+  'challenges',
+  'challengeDays',
 ] as const
 
 export async function isDemoDataPresent(): Promise<boolean> {
@@ -202,6 +207,8 @@ export async function generateDemoData(): Promise<DemoSeedResult> {
     reviews: [],
     achievements: [],
     projects: [],
+    challenges: [],
+    challengeDays: [],
   }
 
   try {
@@ -555,6 +562,18 @@ export async function generateDemoData(): Promise<DemoSeedResult> {
     const reviewIds = (await db.reviews.bulkAdd(reviewsToAdd, { allKeys: true })) as number[]
     createdIds.reviews.push(...reviewIds)
 
+    // --- Retos propios y misiones de días pasados (patrones fijos: no consumen el PRNG) ---
+    // El XP solo se reparte si la gamificación está activa ahora, como al jugar de verdad.
+    const demoChallenges = buildDemoChallenges(dateKey(today), isPluginEnabled('gamification'))
+    const challengeIds = (await db.challenges.bulkAdd(demoChallenges.challenges, { allKeys: true })) as number[]
+    createdIds.challenges.push(...challengeIds)
+    const challengeDayIds = (await db.challengeDays.bulkAdd(
+      demoChallenges.days.map(({ index, ...day }) => ({ ...day, challengeId: challengeIds[index] })),
+      { allKeys: true },
+    )) as number[]
+    createdIds.challengeDays.push(...challengeDayIds)
+    totalXpDelta += demoChallenges.xp
+
     // --- XP y nivel ---
     const progress = await getOrCreateProgress()
     const newTotalXp = Math.max(0, progress.totalXp + totalXpDelta)
@@ -644,6 +663,18 @@ export async function clearDemoData(): Promise<void> {
         continue
       }
       if (row.ids.length) await db.table(row.table).bulkDelete(row.ids)
+    }
+    // Las misiones de HOY no están en `demoSeeds`: las genera el motor a partir de la historia demo. Se
+    // borran también (y se devuelve su XP si ya estaban cumplidas); el motor generará otras con los datos
+    // reales, o ninguna si no los hay.
+    const todayMissions = await db.challenges
+      .where('kind')
+      .equals(DAILY_MISSION_KIND)
+      .filter((c) => c.startDate === todayKey())
+      .toArray()
+    if (todayMissions.length) {
+      await db.challenges.bulkDelete(todayMissions.map((c) => c.id!))
+      xpDelta += todayMissions.reduce((sum, c) => sum + c.xpAwarded, 0)
     }
     if (xpDelta !== 0) {
       const progress = await db.progress.get(1)

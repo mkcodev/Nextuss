@@ -26,7 +26,7 @@ import { NAV_ITEMS, useNavItems } from './navItems'
 import { usePluginEnabled } from '../features/plugins/pluginsStore'
 import { Avatar, Kbd, Menu, MenuItem, MenuLabel } from '../design/primitives'
 
-const AVATAR_NAV_ROUTES = new Set(['/estadisticas', '/proyectos', '/rutinas'])
+const AVATAR_NAV_ROUTES = new Set(['/estadisticas', '/proyectos', '/rutinas', '/retos'])
 
 const BREADCRUMB: Record<string, string> = Object.fromEntries(
   NAV_ITEMS.map((n) => [n.to, n.label]),

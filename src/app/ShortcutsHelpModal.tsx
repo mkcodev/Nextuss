@@ -33,6 +33,20 @@ function groups(enabled: ReadonlySet<PluginId>): { title: string; items: [string
         ['t', 'Volver a hoy'],
       ],
     },
+    ...(enabled.has('challenges')
+      ? [
+          {
+            title: 'Retos',
+            items: [
+              ['j / k', 'Moverse entre retos'],
+              ['x', 'Marcar o desmarcar hoy'],
+              ['Enter', 'Abrir la ficha del reto'],
+              ['c', 'Nuevo reto'],
+              ['Esc', 'Cerrar la ficha'],
+            ] as [string, string][],
+          },
+        ]
+      : []),
     {
       title: 'Listas',
       items: [

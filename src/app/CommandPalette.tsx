@@ -10,6 +10,7 @@ import {
   Database,
   Download,
   FileText,
+  Flag,
   FolderKanban,
   Keyboard,
   LayoutTemplate,
@@ -32,6 +33,7 @@ import { useOverlayStore } from './shortcuts/overlayStore'
 import { useUIStore } from './uiStore'
 import { useHabitFormStore } from '../features/habits/habitFormStore'
 import { useQuickAddStore } from '../features/tasks/quickAddStore'
+import { useChallengeFormStore } from '../features/challenges/challengeFormStore'
 import { PRESET, motionFor } from '../design/motion'
 import { setThemePreference } from '../design/useTheme'
 import { getTask } from '../db/repositories/tasks'
@@ -99,6 +101,7 @@ export function CommandPalette() {
   const openCreate = useHabitFormStore((s) => s.openCreate)
   const openHabitEdit = useHabitFormStore((s) => s.openEdit)
   const openQuickAdd = useQuickAddStore((s) => s.openQuickAdd)
+  const openChallengeCreate = useChallengeFormStore((s) => s.openCreate)
   const openTaskEdit = useTaskFormStore((s) => s.openEdit)
   const openGoalCreate = useGoalFormStore((s) => s.openCreate)
   const openGoalEdit = useGoalFormStore((s) => s.openEdit)
@@ -254,6 +257,11 @@ export function CommandPalette() {
               {on('habits') && (
                 <Command.Item onSelect={() => run(openCreate)} className={ITEM_CLASS}>
                   <Plus size={15} strokeWidth={1.75} /> Crear hábito
+                </Command.Item>
+              )}
+              {on('challenges') && (
+                <Command.Item onSelect={() => run(() => openChallengeCreate())} className={ITEM_CLASS}>
+                  <Flag size={15} strokeWidth={1.75} /> Nuevo reto
                 </Command.Item>
               )}
               <Command.Item

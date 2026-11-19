@@ -40,11 +40,13 @@ import { DayCloseFlow } from '../features/rituals/DayCloseFlow'
 import { useBackupGuard } from '../features/backup/useBackupGuard'
 import { usePluginsSync } from '../features/plugins/pluginsStore'
 import { useChallengesPluginWatch } from '../features/challenges/pluginWatch'
+import { useChallengeFormStore } from '../features/challenges/challengeFormStore'
 import { PluginEngines } from '../features/plugins/PluginEngines'
 
 const CommandPalette = lazyNamed(() => import('./CommandPalette'), 'CommandPalette')
 const TaskBreakdownDialog = lazyNamed(() => import('../features/ai/TaskBreakdownDialog'), 'TaskBreakdownDialog')
 const AiSuggestDialog = lazyNamed(() => import('../features/ai/AiSuggestDialog'), 'AiSuggestDialog')
+const ChallengeForm = lazyNamed(() => import('../features/challenges/ChallengeForm'), 'ChallengeForm')
 
 function RouteFallback() {
   return (
@@ -76,6 +78,8 @@ export function AppShell() {
   const paletteOpen = useOverlayStore((s) => s.paletteOpen)
   const breakdownOpen = useTaskBreakdownStore((s) => s.open)
   const aiSuggestOpen = useAiSuggestStore((s) => s.open)
+  const challengeFormOpen = useChallengeFormStore((s) => s.open)
+  const challengeFormNonce = useChallengeFormStore((s) => s.nonce)
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
@@ -122,6 +126,11 @@ export function AppShell() {
       <MountOnFirstOpen open={aiSuggestOpen}>
         <Suspense fallback={null}>
           <AiSuggestDialog />
+        </Suspense>
+      </MountOnFirstOpen>
+      <MountOnFirstOpen open={challengeFormOpen}>
+        <Suspense fallback={null}>
+          <ChallengeForm key={`challenge-${challengeFormNonce}`} />
         </Suspense>
       </MountOnFirstOpen>
       <OnboardingFlow />
