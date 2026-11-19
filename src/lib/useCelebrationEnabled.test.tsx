@@ -12,9 +12,17 @@ beforeEach(async () => {
 })
 
 describe('useCelebrationEnabled', () => {
-  it('devuelve false mientras carga y luego true (por defecto)', async () => {
+  it('sin fila de ajustes: false solo mientras carga y luego true (valor por defecto)', async () => {
+    expect(await db.settings.get(1)).toBeUndefined()
     const { result } = renderHook(() => useCelebrationEnabled())
     expect(result.current).toBe(false)
+    await waitFor(() => expect(result.current).toBe(true))
+    expect(await db.settings.get(1)).toBeUndefined() // el hook no escribe: sigue sin fila
+  })
+
+  it('con fila sin el campo: true (valor por defecto)', async () => {
+    await db.settings.put({ id: 1, theme: 'system', dayStartHour: 7, dayEndHour: 22 })
+    const { result } = renderHook(() => useCelebrationEnabled())
     await waitFor(() => expect(result.current).toBe(true))
   })
 
