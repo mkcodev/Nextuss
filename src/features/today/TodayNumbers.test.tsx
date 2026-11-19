@@ -32,7 +32,7 @@ describe('TodayNumbers', () => {
     expect(await screen.findByText('Foco')).toBeTruthy()
     expect(screen.getByText('Tareas')).toBeTruthy()
     expect(screen.getByText('Progreso')).toBeTruthy()
-    expect(screen.getByText('hechas hoy').previousElementSibling?.textContent).toBe('1 de 2')
+    expect(screen.getByText('hechas hoy').previousElementSibling?.textContent).toMatch(/1 de 2$/)
   })
 
   it('sin sesiones: «Aún sin foco hoy» y 7 barras accesibles', async () => {

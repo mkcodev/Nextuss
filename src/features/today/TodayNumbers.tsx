@@ -8,12 +8,14 @@ import { cn } from '../../lib/cn'
 import { progressForXp } from '../../lib/xp'
 import { formatMinutes } from '../routines/schedule'
 import { usePluginEnabled } from '../plugins/pluginsStore'
+import { CountUp } from './CountUp'
 import { countTasks, focusComparison, focusRangeFor, summarizeFocus, xpEarnedToday, type FocusSummary } from './todayNumbersData'
 
 const CELL = 'flex min-w-0 flex-col gap-0.5 rounded-md border border-border bg-surface px-4 py-3.5 shadow-card'
 const LABEL = 'text-xs font-medium text-text-muted'
 const VALUE = 'text-xl font-semibold tracking-[-0.02em] tabular-nums text-text'
 const META = 'text-xs text-text-muted'
+const plus = (n: number) => `+${n}`
 
 /** «Tu día en números» (Hoy, mockup de Línea): foco con barras de 7 días, tareas hechas y XP.
  *  Las celdas de Foco y Progreso siguen a sus plugins en vivo (`focus`, `gamification`). */
@@ -62,14 +64,16 @@ export function TodayNumbers({ date }: { date: string }) {
             <div className={CELL}>
               <span className={LABEL}>Tareas</span>
               <span className={VALUE}>
-                {tasks.done} <span className="text-text-muted">de</span> {tasks.total}
+                <CountUp value={tasks.done} /> <span className="text-text-muted">de</span> {tasks.total}
               </span>
               <span className={META}>hechas hoy</span>
             </div>
             {gamificationOn && (
               <div className={CELL}>
                 <span className={LABEL}>Progreso</span>
-                <span className={VALUE}>+{xp.today} XP</span>
+                <span className={VALUE}>
+                  <CountUp value={xp.today} format={plus} /> XP
+                </span>
                 <span className={META}>
                   quedan {xp.level.xpForNextLevel - xp.level.xpIntoLevel} para el nivel {xp.level.level + 1}
                 </span>
