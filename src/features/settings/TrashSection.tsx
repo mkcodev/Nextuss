@@ -5,14 +5,16 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Button, Card, EmptyState } from '../../design/primitives'
 import { listTrash, purgeTrashEntry, restoreTrashEntry } from '../../db/trash'
+import type { TrashableTable } from '../../db/types'
 import { useToastStore } from '../../lib/toastStore'
 
-const TABLE_LABELS: Record<string, string> = {
+const TABLE_LABELS: Record<TrashableTable, string> = {
   tasks: 'Tarea',
   habits: 'Hábito',
   goals: 'Objetivo',
   projects: 'Proyecto',
   routines: 'Rutina',
+  challenges: 'Reto',
 }
 
 /** Papelera: lo que `trashRows` ha ido apuntando — cada fila sigue viva (`deletedAt` puesto) hasta

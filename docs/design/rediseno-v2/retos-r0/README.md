@@ -158,6 +158,14 @@ Se calcula a partir de las líneas del mockup (la parte propia de cada vista es 
 - ¿Se puede abandonar o pausar un reto propio?
 - ¿Qué pasa al fallar sin escudos? El mockup lo trata como fallo y racha a 0.
 
+### Respuestas (decididas al planificar R1)
+
+- **Escudos:** por reto, fijados al crear, de 0 a 3 (por defecto, uno cada 10 días con un máximo de 3). Separados del bote mensual de hábitos y sin recarga. «Hoy no» gasta del mismo presupuesto; deshacerlo en el día devuelve el escudo.
+- **Datos de cada misión:** tareas completadas (solo raíz), una tarea de prioridad P1 (la más alta), minutos de foco, check-in respondido y hábitos programados de hoy. Los objetivos se calculan con días anteriores, sin contar hoy.
+- **Renovación:** a las 00:00 locales, con el mismo corte de día que Estadísticas (no el día lógico de las 04:00 de los lanzadores).
+- **Abandonar y pausar:** las dos. Abandonar conserva el historial y el XP y no se puede retomar. La pausa empieza mañana; los días en pausa son neutros (ni suman ni rompen racha, no gastan escudo) y alargan el reto. Apagar el plugin `challenges` pausa los retos activos y encenderlo los reanuda.
+- **Fallo sin escudos:** la racha vuelve a 0 y el reto sigue hasta su último día. Termina como cumplido; si no tuvo ningún fallo (escudos permitidos) es «perfecto» y da el bonus de XP.
+
 ## Cómo ejecutarlo
 
 Requiere el servidor local (con la barra final en la URL):

@@ -2,6 +2,8 @@ import Dexie, { type EntityTable } from 'dexie'
 import type {
   Achievement,
   Attribute,
+  Challenge,
+  ChallengeDay,
   CheckIn,
   DailyEntry,
   DemoSeedRecord,
@@ -67,12 +69,16 @@ export class NextussDB extends Dexie {
   virtualizationDays!: EntityTable<VirtualizationDay, 'id'>
   dailyEntries!: EntityTable<DailyEntry, 'id'>
 
-  constructor() {
+  challenges!: EntityTable<Challenge, 'id'>
+  challengeDays!: EntityTable<ChallengeDay, 'id'>
+
+  /** `name` solo cambia en los tests de migración, que abren una base aparte para no tocar `db`. */
+  constructor(name = 'nexus') {
     // Nombre real de la base de datos IndexedDB — deliberadamente NO sigue el rebranding a
     // "Nextuss": cambiarlo haría que la app abra una base de datos nueva y vacía, dejando huérfanos
     // todos los datos reales ya guardados bajo 'nexus'. Es un identificador interno invisible para
     // el usuario, así que no hay ningún coste en mantenerlo estable.
-    super('nexus')
+    super(name)
 
     this.version(1).stores({
       habits: '++id, attributeId',
@@ -218,9 +224,18 @@ export class NextussDB extends Dexie {
 
     // Diario mínimo (#97 PR5): tabla nueva, sin datos previos que migrar, sin `.upgrade()` — una
     // fila por día, sembrada por los pasos con tipo de las rutinas. La Fase 29 (#105) la reutiliza,
-    // así que esa fase pasa a ocupar v18.
+    // así que esa fase pasa a ocupar v19 (la v18 es de los retos).
     this.version(17).stores({
       dailyEntries: '++id, &date',
+    })
+
+    // Retos (#191 R1): tablas nuevas, sin datos previos que migrar, sin `.upgrade()`. `challenges`
+    // indexa solo lo común a todos los tipos (`kind`, `status`, fechas); lo propio de cada tipo va
+    // en `params`, sin índice, así que un tipo nuevo no pide otra versión. `challengeDays` lleva
+    // una fila por día cerrado o marcado; el índice único impide dos filas del mismo día.
+    this.version(18).stores({
+      challenges: '++id, kind, status, startDate, endDate, deletedAt, sortKey, [kind+startDate]',
+      challengeDays: '++id, challengeId, date, at, &[challengeId+date]',
     })
   }
 }

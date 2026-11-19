@@ -7,6 +7,7 @@ import { Button, Card, Dialog } from '../../design/primitives'
 import { useToastStore } from '../../lib/toastStore'
 import { useSubmitGuard } from '../../lib/useSubmitGuard'
 import { importDatabase, BackupVersionMismatchError, type ImportMode } from '../../db/backup'
+import { BackupValidationError } from '../../db/backupValidate'
 import { getOrCreateSettings, updateSettings } from '../../db/repositories/settings'
 import { downloadJson } from '../stats/export'
 import { buildSettingsExport, parseSettingsImport, settingsExportFilename, SettingsFileError, type ParsedSettingsImport } from './settingsTransfer'
@@ -84,7 +85,10 @@ export function BackupSection() {
     } catch (err) {
       push({
         title: 'No se pudo restaurar',
-        description: err instanceof BackupVersionMismatchError ? err.message : 'Comprueba que el archivo es una copia de seguridad de Nextuss válida.',
+        description:
+          err instanceof BackupVersionMismatchError || err instanceof BackupValidationError
+            ? err.message
+            : 'Comprueba que el archivo es una copia de seguridad de Nextuss válida.',
         variant: 'error',
       })
     } finally {
@@ -185,7 +189,7 @@ export function BackupSection() {
                 checked={restoreState?.mode === 'replace'}
                 onChange={() => setRestoreState((s) => (s ? { ...s, mode: 'replace' } : s))}
               />
-              Reemplazar — borra todo y deja la base de datos exactamente como en la copia
+              Reemplazar — borra todos los datos actuales, también los que la copia no trae (retos, por ejemplo), y deja la app exactamente como en la copia
             </label>
           </div>
           <div className="flex justify-end gap-2 pt-2">

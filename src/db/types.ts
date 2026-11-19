@@ -273,7 +273,8 @@ export type RoutineStepStyle = 'direct' | 'card' | 'journal'
 
 /** Una entrada de diario mínima por día (#97 PR5), sembrada por los pasos de tipo
  * gratitude/intention/visualization/focusTask de la rutina matutina. La Fase 29 (#105) la amplía
- * como diario completo — no crear una tabla nueva entonces, seguir escribiendo aquí. */
+ * como diario completo — no crear una tabla nueva entonces, seguir escribiendo aquí (ocupará la
+ * v19 de Dexie: la v18 es de los retos). */
 export interface DailyEntry {
   id?: number
   date: string // 'YYYY-MM-DD'
@@ -285,6 +286,49 @@ export interface DailyEntry {
   reflections: { prompt: string; answer: string; at: number }[]
   focusTaskId?: number
   updatedAt: number
+}
+
+// Retos (#191). Una sola tabla para todos los tipos: `kind` discrimina y `params` lleva lo propio de
+// cada tipo (JSON sin índice, lo valida su módulo). Añadir un tipo nuevo no exige migración.
+
+export const CHALLENGE_STATUSES = ['active', 'paused', 'done', 'expired', 'abandoned'] as const
+export type ChallengeStatus = (typeof CHALLENGE_STATUSES)[number]
+
+export interface Challenge {
+  id?: number
+  /** 'daily-mission' | 'custom' en la v1. Abierto: un tipo desconocido se conserva sin tocarlo. */
+  kind: string
+  status: ChallengeStatus
+  title: string
+  startDate: string // 'YYYY-MM-DD'
+  /** Inclusivo. En una misión diaria es igual a `startDate`. Cada día en pausa lo alarga uno. */
+  endDate: string // 'YYYY-MM-DD'
+  params: unknown
+  /** XP de la misión o bonus final realmente concedido: el deshacer resta exactamente esto. */
+  xpAwarded: number
+  /** Primer día que cuenta como pausado (siempre posterior al día en que se pausó). */
+  pausedSince?: string
+  pausedBy?: 'user' | 'plugin'
+  createdAt: number
+  updatedAt: number
+  completedAt?: number
+  deletedAt: number // 0 = vivo
+  sortKey: number
+}
+
+/** `skip` = «Hoy no»: gasta un escudo a propósito. `pause` = día neutro (ni suma ni rompe racha). */
+export const CHALLENGE_DAY_STATES = ['done', 'shield', 'skip', 'fail', 'pause'] as const
+export type ChallengeDayState = (typeof CHALLENGE_DAY_STATES)[number]
+
+/** Un día cerrado o marcado de un reto con días (los propios). Único por `[challengeId+date]`. */
+export interface ChallengeDay {
+  id?: number
+  challengeId: number
+  date: string // 'YYYY-MM-DD'
+  state: ChallengeDayState
+  /** XP concedido por este día (0 sin gamificación o si el estado no da XP). */
+  xp: number
+  at: number
 }
 
 export type RecurrenceFreq = 'daily' | 'weekly' | 'monthly'
@@ -496,7 +540,7 @@ export interface InsightFeedbackRecord {
   dismissedAt: number
 }
 
-export type TrashableTable = 'tasks' | 'habits' | 'goals' | 'projects' | 'routines'
+export type TrashableTable = 'tasks' | 'habits' | 'goals' | 'projects' | 'routines' | 'challenges'
 
 /** Metadatos de un borrado por lote (una tarea con su subárbol, un hábito, un objetivo) — lo que
  * alimenta la página de Papelera y la purga a los 30 días en `runDailyMaintenance`. La fila borrada

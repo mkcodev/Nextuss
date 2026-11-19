@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from './schema'
 import { BackupVersionMismatchError, exportDatabase, importDatabase } from './backup'
+import { BackupValidationError } from './backupValidate'
+import { createCustomChallenge, markChallengeDay } from './repositories/challenges'
 
 beforeEach(async () => {
   await db.transaction('rw', db.tables, async () => {
@@ -54,6 +56,25 @@ describe('exportDatabase / importDatabase round trip', () => {
 
     await importDatabase(backup, 'replace')
     expect(await db.attributes.count()).toBe(1) // replace vuelve exactamente al estado del backup
+  })
+
+  it('"replace" también vacía las tablas que no vienen en la copia (p. ej. retos frente a una v17); "merge" no', async () => {
+    await createCustomChallenge({ title: 'Reto actual', durationDays: 7 }, '2026-11-19')
+    await db.attributes.add({ name: 'Actual', icon: 'x', color: '#000', xp: 0, order: 0 })
+    const v17 = {
+      version: 17,
+      exportedAt: 1000,
+      tables: { attributes: [{ id: 50, name: 'De la copia', icon: 'y', color: '#fff', xp: 0, order: 0 }] },
+    }
+
+    await importDatabase(v17, 'merge')
+    expect(await db.challenges.count()).toBe(1)
+    expect(await db.attributes.count()).toBe(2)
+
+    await importDatabase(v17, 'replace')
+    expect(await db.challenges.count()).toBe(0)
+    expect(await db.tasks.count()).toBe(0)
+    expect((await db.attributes.toArray()).map((a) => a.name)).toEqual(['De la copia'])
   })
 
   it('rejects restoring a backup newer than the app', async () => {
@@ -132,5 +153,75 @@ describe('exportDatabase / importDatabase round trip', () => {
     const project = (await db.projects.toArray())[0]
     expect(project.deletedAt).toBe(0)
     expect(project.sortKey).toBeTypeOf('number')
+  })
+})
+
+describe('retos en la copia de seguridad (#191)', () => {
+  const challenge = (id: number, extra: Record<string, unknown> = {}) => ({
+    id,
+    kind: 'custom',
+    status: 'active',
+    title: `Reto ${id}`,
+    startDate: '2026-11-01',
+    endDate: '2026-11-30',
+    params: { durationDays: 30, shields: 3 },
+    xpAwarded: 0,
+    createdAt: 1,
+    updatedAt: 1,
+    deletedAt: 0,
+    sortKey: id,
+    ...extra,
+  })
+  const day = (id: number, challengeId: number, date: string, extra: Record<string, unknown> = {}) => ({
+    id,
+    challengeId,
+    date,
+    state: 'done',
+    xp: 0,
+    at: 1,
+    ...extra,
+  })
+  const payload = (tables: Record<string, unknown[]>) => ({ version: db.verno, exportedAt: 1, tables })
+
+  it('ida y vuelta: exportar e importar conserva retos y días', async () => {
+    const id = await createCustomChallenge({ title: 'Leer', durationDays: 30 }, '2026-11-19')
+    await markChallengeDay(id, '2026-11-19')
+    const backup = await exportDatabase()
+    expect(backup.version).toBe(18)
+    expect(backup.tables.challenges).toHaveLength(1)
+    expect(backup.tables.challengeDays).toHaveLength(1)
+
+    await importDatabase(backup, 'replace')
+    expect(await db.challenges.get(id)).toMatchObject({ title: 'Leer', params: { durationDays: 30, shields: 3 } })
+    expect(await db.challengeDays.where('challengeId').equals(id).count()).toBe(1)
+  })
+
+  it('conserva un tipo de reto desconocido y unos params que no entiende', async () => {
+    await importDatabase(payload({ challenges: [challenge(1, { kind: 'weekly-vs-self', params: { foo: 1 } })] }), 'replace')
+    expect(await db.challenges.get(1)).toMatchObject({ kind: 'weekly-vs-self', params: { foo: 1 } })
+  })
+
+  it.each([
+    ['un estado desconocido', { challenges: [challenge(1, { status: 'won' })] }, 'estado desconocido'],
+    ['fechas mal formadas', { challenges: [challenge(1, { startDate: '1/11/2026' })] }, 'fechas mal formadas'],
+    ['fin antes del inicio', { challenges: [challenge(1, { endDate: '2026-10-01' })] }, 'termina antes de empezar'],
+    ['un día con estado desconocido', { challenges: [challenge(1)], challengeDays: [day(1, 1, '2026-11-02', { state: 'meh' })] }, 'estado desconocido'],
+    ['un día duplicado', { challenges: [challenge(1)], challengeDays: [day(1, 1, '2026-11-02'), day(2, 1, '2026-11-02')] }, 'repite el día'],
+  ])('rechaza %s sin escribir nada', async (_name, tables, message) => {
+    await db.attributes.add({ name: 'Previa', icon: 'x', color: '#000', xp: 0, order: 0 })
+    const bad = payload({ ...tables, attributes: [] })
+    const run = importDatabase(bad, 'replace')
+    await expect(run).rejects.toBeInstanceOf(BackupValidationError)
+    await expect(run).rejects.toThrow(message)
+    expect(await db.attributes.count()).toBe(1)
+    expect(await db.challenges.count()).toBe(0)
+  })
+
+  it('descarta los días huérfanos; en «merge» vale un reto que ya existe en la base', async () => {
+    await importDatabase(payload({ challenges: [challenge(1)], challengeDays: [day(1, 1, '2026-11-02'), day(2, 9, '2026-11-02')] }), 'replace')
+    expect((await db.challengeDays.toArray()).map((d) => d.challengeId)).toEqual([1])
+
+    await importDatabase(payload({ challengeDays: [day(3, 1, '2026-11-03'), day(4, 9, '2026-11-03')] }), 'merge')
+    expect((await db.challengeDays.toArray()).map((d) => d.id)).toEqual([1, 3])
   })
 })

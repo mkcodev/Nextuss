@@ -64,8 +64,22 @@ export async function purgeTrashEntry(trashId: number): Promise<void> {
   if (!entry) return
   await db.transaction(
     'rw',
-    [db.tasks, db.habits, db.habitLogs, db.goals, db.projects, db.routines, db.routineRuns, db.trash],
+    [
+      db.tasks,
+      db.habits,
+      db.habitLogs,
+      db.goals,
+      db.projects,
+      db.routines,
+      db.routineRuns,
+      db.challenges,
+      db.challengeDays,
+      db.trash,
+    ],
     async () => {
+      if (entry.table === 'challenges') {
+        await db.challengeDays.where('challengeId').anyOf(entry.entityIds).delete()
+      }
       if (entry.table === 'habits') {
         await db.habitLogs.where('habitId').anyOf(entry.entityIds).delete()
       }
