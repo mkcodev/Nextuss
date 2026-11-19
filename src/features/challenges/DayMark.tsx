@@ -2,10 +2,11 @@ import { Check, Pause, Shield, X } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import { DAY_LABEL, formatWeekdayDay, type DayCell, type DayVisual } from '../../lib/challenges/calendar'
 
-type Size = 'sm' | 'md'
+/** `fill`: ocupa la celda de su cuadrícula (hasta 18 px), para la cadena de la vista Cadena. */
+type Size = 'sm' | 'md' | 'fill'
 
-const BOX: Record<Size, string> = { sm: 'size-3.5', md: 'size-5.5' }
-const GLYPH: Record<Size, number> = { sm: 8, md: 12 }
+const BOX: Record<Size, string> = { sm: 'size-3.5', md: 'size-5.5', fill: 'aspect-square w-full' }
+const GLYPH: Record<Size, number> = { sm: 8, md: 12, fill: 8 }
 
 /** Cada estado se distingue por su forma además de por el color (DESIGN.md): relleno sólido = hecho;
  *  relleno suave con escudo = cubierto; el mismo con borde discontinuo = «Hoy no»; borde y aspa = fallo;
@@ -22,11 +23,11 @@ const SHAPE: Record<Exclude<DayVisual, 'out'>, string> = {
 }
 
 /** La marca de un día. Solo decoración (`aria-hidden`): quien la usa pone el texto del estado. */
-export function DayMark({ visual, size = 'sm', className }: { visual: DayVisual; size?: Size; className?: string }) {
+export function DayMark({ visual, size = 'sm', className, title }: { visual: DayVisual; size?: Size; className?: string; title?: string }) {
   if (visual === 'out') return <span aria-hidden="true" className={cn('inline-block shrink-0', BOX[size], className)} />
   const g = GLYPH[size]
   return (
-    <span aria-hidden="true" className={cn('inline-grid shrink-0 place-items-center rounded-[3px]', BOX[size], SHAPE[visual], className)}>
+    <span aria-hidden="true" title={title} className={cn('inline-grid shrink-0 place-items-center rounded-[3px]', BOX[size], SHAPE[visual], className)}>
       {visual === 'done' && size === 'md' && <Check size={g} strokeWidth={3} />}
       {(visual === 'shield' || visual === 'skip') && <Shield size={g} strokeWidth={2.25} />}
       {visual === 'fail' && <X size={g} strokeWidth={2.5} />}

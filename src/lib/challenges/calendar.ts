@@ -117,3 +117,38 @@ export function markReason(challenge: Pick<Challenge, 'status' | 'pausedSince' |
   if (today > challenge.endDate) return 'Hoy ya está fuera de las fechas del reto.'
   return null
 }
+
+/** «1 día», «30 días». */
+export const daysText = (n: number): string => `${n} ${n === 1 ? 'día' : 'días'}`
+
+/** Todos los días del reto, de su primer a su último día: la cadena de la vista Cadena. */
+export function chainCells(range: Range, byDate: ReadonlyMap<string, ChallengeDay>, today: string): DayCell[] {
+  return eachDayKey(range.startDate, range.endDate).map((date) => ({ date, visual: dayVisual(date, today, range, byDate), isToday: date === today }))
+}
+
+/** Columnas de la cadena: una sola fila hasta 21 días y, a partir de ahí, filas de unos 22 días
+ * repartidas por igual (66 días = 3 filas de 22; 30 días = 2 de 15). */
+export function chainColumns(totalDays: number): number {
+  return totalDays <= 21 ? Math.max(1, totalDays) : Math.ceil(totalDays / Math.ceil(totalDays / 22))
+}
+
+const CHAIN_PARTS: [DayVisual, string][] = [
+  ['done', 'Hechos'],
+  ['shield', 'Con escudo'],
+  ['skip', '«Hoy no»'],
+  ['fail', 'Fallados'],
+  ['pause', 'En pausa'],
+  ['today', 'Hoy sin marcar'],
+  ['open', 'Sin registrar'],
+  ['upcoming', 'Por llegar'],
+]
+
+/** Texto de la cadena para lectores de pantalla: la cadena se pinta como una imagen y esto la cuenta
+ * («Cadena de 30 días. Hechos: 22. Con escudo: 1. Por llegar: 7.»). El día a día está en la ficha. */
+export function chainSummary(cells: readonly DayCell[]): string {
+  const parts = CHAIN_PARTS.flatMap(([visual, label]) => {
+    const n = cells.filter((c) => c.visual === visual).length
+    return n > 0 ? [`${label}: ${n}.`] : []
+  })
+  return [`Cadena de ${daysText(cells.length)}.`, ...parts].join(' ')
+}

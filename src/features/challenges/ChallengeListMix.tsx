@@ -1,10 +1,10 @@
-import { Archive, CalendarDays, Check, Circle, Flame, Pause, Shield, ShieldOff, Sparkles } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { Check, Flame, Shield } from 'lucide-react'
 import { Celebration } from '../../design/primitives'
 import { cn } from '../../lib/cn'
 import { DayStrip } from './DayMark'
 import { playFor } from './useCelebratedChallengeMark'
-import { isLastDay, progressText, rowStatus, type RowStatusKey } from './rowStatus'
+import { isLastDay, progressText, rowStatus } from './rowStatus'
+import { FinishedGlyph, StatusLabel, TAG } from './listParts'
 import type { ChallengeItem } from './challengesData'
 
 export interface ChallengeListProps {
@@ -24,28 +24,6 @@ export interface ChallengeListProps {
 
 /** Columnas de la vista Mezcla desde `md`: marca, reto, racha, últimos 7 días, escudos, progreso, hoy. */
 const COLS = 'md:grid-cols-[2.75rem_minmax(0,1fr)_4rem_7.5rem_4.5rem_6.5rem_7rem]'
-
-/** Etiqueta pequeña junto al título («Último día»). */
-const TAG = 'shrink-0 rounded-full px-2 text-2xs font-medium whitespace-nowrap'
-
-const STATUS_ICON: Record<RowStatusKey, ReactNode> = {
-  done: <Check size={13} strokeWidth={2.5} />,
-  skip: <ShieldOff size={13} strokeWidth={2} />,
-  pause: <Pause size={13} strokeWidth={2.25} />,
-  future: <CalendarDays size={13} strokeWidth={2} />,
-  pending: <Circle size={13} strokeWidth={2} />,
-  over: <Circle size={13} strokeWidth={2} />,
-  completed: <Check size={13} strokeWidth={2.5} />,
-  perfect: <Sparkles size={13} strokeWidth={2} />,
-  abandoned: <Archive size={13} strokeWidth={2} />,
-}
-
-const STATUS_TONE: Partial<Record<RowStatusKey, string>> = {
-  done: 'text-accent-text font-medium',
-  completed: 'text-accent-text font-medium',
-  perfect: 'text-accent-text font-medium',
-  skip: 'text-accent-text',
-}
 
 /** Vista D · Mezcla: tabla densa de retos propios, con la racha, los últimos 7 días, los escudos y el
  *  estado de hoy a la vista sin abrir la ficha. En pantallas estrechas cada fila pasa a dos líneas. */
@@ -110,7 +88,7 @@ function ChallengeRow({ item, today, play, open, onOpen, onToggleToday }: RowPro
       )}
     >
       {/* Destello de la microcelebración: solo al marcar un día por acción de la persona. */}
-      <Celebration play={play} />
+      <Celebration play={play} playOnMount />
 
       <div className="row-span-2 grid place-items-center md:row-span-1">
         {item.finished ? (
@@ -153,16 +131,10 @@ function ChallengeRow({ item, today, play, open, onOpen, onToggleToday }: RowPro
         {pauseFromTomorrow && <span className={cn(TAG, 'bg-warning/10 text-warning')}>Pausa desde mañana</span>}
       </div>
 
-      <span
-        className={cn(
-          'col-start-3 inline-flex items-center justify-end gap-1.5 text-xs whitespace-nowrap md:col-start-7 md:row-start-1 md:justify-start',
-          STATUS_TONE[status.key] ?? 'text-text-muted',
-        )}
-      >
-        <span aria-hidden="true">{STATUS_ICON[status.key]}</span>
-        <span className="sr-only">Hoy: </span>
-        {status.text}
-      </span>
+      <StatusLabel
+        status={status}
+        className="col-start-3 justify-end md:col-start-7 md:row-start-1 md:justify-start"
+      />
 
       <div className="col-span-2 col-start-2 row-start-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted md:contents">
         <span className="inline-flex items-center gap-1 tabular-nums md:col-start-3 md:row-start-1">
@@ -184,17 +156,5 @@ function ChallengeRow({ item, today, play, open, onOpen, onToggleToday }: RowPro
         <span className="tabular-nums md:col-start-6 md:row-start-1">{progressText(item)}</span>
       </div>
     </li>
-  )
-}
-
-function FinishedGlyph({ status }: { status: ChallengeItem['challenge']['status'] }) {
-  return status === 'abandoned' ? (
-    <span aria-hidden="true" className="grid size-5 place-items-center rounded-full border-2 border-border-strong text-text-faint">
-      <Archive size={10} strokeWidth={2.5} />
-    </span>
-  ) : (
-    <span aria-hidden="true" className="grid size-5 place-items-center rounded-full bg-accent text-on-accent">
-      <Check size={12} strokeWidth={3} />
-    </span>
   )
 }

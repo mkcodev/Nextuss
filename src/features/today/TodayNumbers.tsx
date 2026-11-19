@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { lazy, Suspense, useId } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Skeleton } from '../../design/primitives'
 import { db } from '../../db/schema'
@@ -9,20 +9,21 @@ import { progressForXp } from '../../lib/xp'
 import { formatMinutes } from '../routines/schedule'
 import { usePluginEnabled } from '../plugins/pluginsStore'
 import { CountUp } from './CountUp'
+import { CELL, LABEL, META, VALUE } from './numbersStyle'
 import { countTasks, focusComparison, focusRangeFor, summarizeFocus, xpEarnedToday, type FocusSummary } from './todayNumbersData'
 
-const CELL = 'flex min-w-0 flex-col gap-0.5 rounded-md border border-border bg-surface px-4 py-3.5 shadow-card'
-const LABEL = 'text-xs font-medium text-text-muted'
-const VALUE = 'text-xl font-semibold tracking-[-0.02em] tabular-nums text-text'
-const META = 'text-xs text-text-muted'
 const plus = (n: number) => `+${n}`
 
+// La celda de Retos va en su propio paquete: no engorda el JS inicial.
+const TodayChallenges = lazy(() => import('./TodayChallenges').then((m) => ({ default: m.TodayChallenges })))
+
 /** «Tu día en números» (Hoy, mockup de Línea): foco con barras de 7 días, tareas hechas y XP.
- *  Las celdas de Foco y Progreso siguen a sus plugins en vivo (`focus`, `gamification`). */
+ *  Las celdas de Foco, Progreso y Retos siguen a sus plugins en vivo (`focus`, `gamification`, `challenges`). */
 export function TodayNumbers({ date }: { date: string }) {
   const titleId = useId()
   const focusOn = usePluginEnabled('focus')
   const gamificationOn = usePluginEnabled('gamification')
+  const challengesOn = usePluginEnabled('challenges')
 
   const focus = useLiveQuery(async () => {
     const { fromTs, toTs } = focusRangeFor(date)
@@ -82,6 +83,14 @@ export function TodayNumbers({ date }: { date: string }) {
           </>
         )}
       </div>
+      {/* La celda «Retos» se calcula aparte y, sin misiones ni retos en marcha, no pinta nada. */}
+      {challengesOn && (
+        <div className="mt-3 empty:hidden">
+          <Suspense fallback={null}>
+            <TodayChallenges date={date} />
+          </Suspense>
+        </div>
+      )}
     </section>
   )
 }

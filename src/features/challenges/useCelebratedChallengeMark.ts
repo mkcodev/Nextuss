@@ -1,7 +1,11 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useCelebrationEnabled } from '../../lib/useCelebrationEnabled'
 import { markToday, unmarkToday } from './challengeActions'
 import type { ChallengeItem } from './challengesData'
+
+/** Lo que dura la celebración (700 ms) más un margen: pasado ese tiempo `playing` vuelve a `null`, así una
+ *  fila que se monte después (cambiar de vista, por ejemplo) no la repite. */
+const PLAYING_MS = 900
 
 /** Alterna hoy (hecho ↔ no hecho) en un reto propio y lanza la microcelebración. Hermano de
  *  `useCelebratedToggle` (tareas): solo celebra la transición de «no hecho» a «hecho» que pide la
@@ -14,6 +18,8 @@ export function useCelebratedChallengeMark(today: string) {
   const enabled = useCelebrationEnabled()
   const [playing, setPlaying] = useState<{ id: number; n: number } | null>(null)
   const counter = useRef(0)
+  const timer = useRef<number | undefined>(undefined)
+  useEffect(() => () => window.clearTimeout(timer.current), [])
 
   const toggleToday = useCallback(
     async (item: Pick<ChallengeItem, 'challenge' | 'summary'>): Promise<void> => {
@@ -23,7 +29,13 @@ export function useCelebratedChallengeMark(today: string) {
         return
       }
       const marked = await markToday(id, title, today)
-      if (marked && enabled) setPlaying({ id, n: ++counter.current })
+      if (marked && enabled) {
+        // Al marcar el último día el reto cambia de lista y su fila se vuelve a montar en «Terminados»
+        // con la celebración en curso: por eso las filas usan `playOnMount`.
+        setPlaying({ id, n: ++counter.current })
+        window.clearTimeout(timer.current)
+        timer.current = window.setTimeout(() => setPlaying(null), PLAYING_MS)
+      }
     },
     [enabled, today],
   )

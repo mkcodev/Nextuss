@@ -5,7 +5,8 @@ import type { Challenge, ChallengeDay } from '../types'
 import { todayKey } from '../../lib/dates'
 import { XP_PER_CHALLENGE_DAY } from '../../lib/xp'
 import { isPluginEnabled } from '../../features/plugins/pluginsStore'
-import { applyXpDelta } from './gamification'
+import { applyXpDelta, unlockAchievement } from './gamification'
+import { CHALLENGE_COUNT_ACHIEVEMENT_THRESHOLDS } from '../../lib/achievementThresholds'
 import {
   CUSTOM_KIND,
   MAX_DURATION_DAYS,
@@ -19,7 +20,7 @@ import {
   type CustomChallengeParams,
 } from '../../lib/challenges/custom'
 import { addDaysKey, eachDayKey, endDateFor } from '../../lib/challenges/dayRange'
-import { reconcileCustom } from '../../lib/challenges/customStreak'
+import { reconcileCustom, type Reconciliation } from '../../lib/challenges/customStreak'
 
 /** XP de retos solo con la gamificación activa EN ESE MOMENTO: apagada, se guarda 0 y no se reparte
  * con efecto retroactivo al encenderla. */
@@ -104,8 +105,10 @@ interface CustomContext {
 }
 
 /** Carga un reto propio vivo y comprueba que `today` se puede marcar: dentro de sus fechas, ni
- * terminado ni abandonado, y sin pausa en vigor (una pausa recién pedida empieza mañana). */
-async function loadMarkable(id: number, today: string): Promise<CustomContext> {
+ * terminado ni abandonado, y sin pausa en vigor (una pausa recién pedida empieza mañana).
+ * `allowJustClosed` deja pasar el reto que la marca de hoy acaba de cerrar (era su último día), para
+ * poder deshacer esa marca y reabrirlo. */
+async function loadMarkable(id: number, today: string, allowJustClosed = false): Promise<CustomContext> {
   const challenge = await db.challenges.get(id)
   if (!challenge || challenge.deletedAt !== 0 || challenge.kind !== CUSTOM_KIND) {
     throw new ChallengeActionError('Ese reto no existe.')
@@ -113,7 +116,8 @@ async function loadMarkable(id: number, today: string): Promise<CustomContext> {
   const params = parseCustomParams(challenge.params)
   if (!params) throw new ChallengeActionError('Los datos de este reto no son válidos.')
   const paused = challenge.status === 'paused' && challenge.pausedSince !== undefined && challenge.pausedSince <= today
-  if ((challenge.status !== 'active' && challenge.status !== 'paused') || paused) {
+  const justClosed = allowJustClosed && challenge.status === 'done' && challenge.endDate === today && challenge.completedAt !== undefined
+  if (((challenge.status !== 'active' && challenge.status !== 'paused') || paused) && !justClosed) {
     throw new ChallengeActionError('Este reto no admite marcar días ahora.')
   }
   if (today < challenge.startDate || today > challenge.endDate) {
@@ -127,28 +131,90 @@ async function touch(id: number, changes: Partial<Challenge> = {}): Promise<void
   await db.challenges.update(id, { ...changes, updatedAt: Date.now() })
 }
 
-/** Marca hoy como hecho. Si hoy era «Hoy no», pasa a hecho y el escudo vuelve al presupuesto. */
-export async function markChallengeDay(id: number, today: string = todayKey()): Promise<void> {
-  await db.transaction('rw', db.challenges, db.challengeDays, db.progress, async () => {
-    const { todayRow } = await loadMarkable(id, today)
-    if (todayRow?.state === 'done') return
+/** Lo que deja una marca: si cerró el reto y qué logros desbloqueó. */
+export interface MarkResult {
+  /** Presente si esta marca cerró el reto (era su último día). `bonus` ya es 0 con la gamificación apagada. */
+  finished?: { perfect: boolean; bonus: number; durationDays: number }
+  unlockedAchievements: string[]
+}
+
+/** Aplica el cierre de días de `reconcileCustom`: filas de escudo, fallo y pausa, fecha de fin y, si el
+ * reto termina, estado, bonus de XP y logros. Va dentro de una transacción que incluya `challenges`,
+ * `challengeDays`, `progress` y `achievements`. */
+async function applyReconciliation(id: number, result: Reconciliation): Promise<{ bonus: number; unlockedAchievements: string[] }> {
+  const now = Date.now()
+  if (result.add.length > 0) {
+    await db.challengeDays.bulkAdd(result.add.map((a) => ({ challengeId: id, date: a.date, state: a.state, xp: 0, at: now })))
+  }
+  const changes: Partial<Challenge> = { endDate: result.endDate }
+  let bonus = 0
+  if (result.finish) {
+    bonus = gamifiedXp(result.finish.bonus)
+    if (bonus > 0) await applyXpDelta(bonus)
+    Object.assign(changes, { status: 'done', xpAwarded: bonus, completedAt: now })
+  }
+  await touch(id, changes)
+  const unlockedAchievements = result.finish ? await unlockChallengeAchievements(result.finish.perfect) : []
+  return { bonus, unlockedAchievements }
+}
+
+/** Logros de reto cumplido: el primero, uno sin fallos y el quinto. El reto ya está en `done`. */
+async function unlockChallengeAchievements(perfect: boolean): Promise<string[]> {
+  const unlocked: string[] = []
+  const tryUnlock = async (key: string) => {
+    if (await unlockAchievement(key)) unlocked.push(key)
+  }
+  await tryUnlock('first_challenge')
+  if (perfect) await tryUnlock('challenge_perfect')
+  const rows = await db.challenges.where('kind').equals(CUSTOM_KIND).toArray()
+  const done = rows.filter((c) => c.deletedAt === 0 && c.status === 'done').length
+  for (const t of CHALLENGE_COUNT_ACHIEVEMENT_THRESHOLDS) {
+    if (done >= t.count) await tryUnlock(t.key)
+  }
+  return unlocked
+}
+
+/** Marca hoy como hecho. Si hoy era «Hoy no», pasa a hecho y el escudo vuelve al presupuesto. Si hoy es
+ * el último día del reto, lo cierra en el momento, igual que lo haría la reconciliación al día siguiente:
+ * rellena los días pasados sin cerrar, da el bonus si fue perfecto y desbloquea los logros. */
+export async function markChallengeDay(id: number, today: string = todayKey()): Promise<MarkResult> {
+  return db.transaction('rw', [db.challenges, db.challengeDays, db.progress, db.achievements], async () => {
+    const { challenge, params, todayRow } = await loadMarkable(id, today)
+    if (todayRow?.state === 'done') return { unlockedAchievements: [] }
     const xp = gamifiedXp(XP_PER_CHALLENGE_DAY)
     if (todayRow) await db.challengeDays.update(todayRow.id!, { state: 'done', xp, at: Date.now() })
     else await db.challengeDays.add({ challengeId: id, date: today, state: 'done', xp, at: Date.now() })
     if (xp > 0) await applyXpDelta(xp)
     await touch(id)
+
+    if (challenge.status !== 'active' || today !== challenge.endDate) return { unlockedAchievements: [] }
+    // Último día: con la marca de hoy el reto está resuelto. Se cierra como lo haría mañana la reconciliación.
+    const fresh = await db.challengeDays.where('challengeId').equals(id).toArray()
+    const result = reconcileCustom(challenge, params, fresh, addDaysKey(today, 1))
+    const applied = await applyReconciliation(id, result)
+    return {
+      finished: result.finish ? { perfect: result.finish.perfect, bonus: applied.bonus, durationDays: params.durationDays } : undefined,
+      unlockedAchievements: applied.unlockedAchievements,
+    }
   })
 }
 
-/** Deshace el «hecho» de hoy. Solo hoy: los días pasados ya están cerrados. */
+/** Deshace el «hecho» de hoy. Solo hoy: los días pasados ya están cerrados. Si esa marca cerró el reto
+ * (era su último día), lo reabre y devuelve el bonus; los logros ya desbloqueados se quedan, como en
+ * tareas y hábitos. */
 export async function unmarkChallengeDay(id: number, today: string = todayKey()): Promise<void> {
   await db.transaction('rw', db.challenges, db.challengeDays, db.progress, async () => {
-    const { todayRow } = await loadMarkable(id, today)
+    const { challenge, todayRow } = await loadMarkable(id, today, true)
     if (todayRow?.state !== 'done') return
     // Resta exactamente lo que dio ese día, aunque ahora la gamificación esté apagada.
     if (todayRow.xp > 0) await applyXpDelta(-todayRow.xp)
     await db.challengeDays.delete(todayRow.id!)
-    await touch(id)
+    if (challenge.status === 'done') {
+      if (challenge.xpAwarded > 0) await applyXpDelta(-challenge.xpAwarded)
+      await touch(id, { status: 'active', xpAwarded: 0, completedAt: undefined })
+    } else {
+      await touch(id)
+    }
   })
 }
 
@@ -236,7 +302,7 @@ function isLiveCustom(c: Challenge): boolean {
 }
 
 async function reconcileOne(id: number, today: string): Promise<void> {
-  await db.transaction('rw', db.challenges, db.challengeDays, db.progress, async () => {
+  await db.transaction('rw', [db.challenges, db.challengeDays, db.progress, db.achievements], async () => {
     const challenge = await db.challenges.get(id)
     if (!challenge || !isLiveCustom(challenge)) return
     if (challenge.status !== 'active' && challenge.status !== 'paused') return
@@ -245,18 +311,7 @@ async function reconcileOne(id: number, today: string): Promise<void> {
     const days = await db.challengeDays.where('challengeId').equals(id).toArray()
     const result = reconcileCustom(challenge, params, days, today)
     if (result.add.length === 0 && result.endDate === challenge.endDate && !result.finish) return
-
-    const now = Date.now()
-    if (result.add.length > 0) {
-      await db.challengeDays.bulkAdd(result.add.map((a) => ({ challengeId: id, date: a.date, state: a.state, xp: 0, at: now })))
-    }
-    const changes: Partial<Challenge> = { endDate: result.endDate }
-    if (result.finish) {
-      const bonus = gamifiedXp(result.finish.bonus)
-      if (bonus > 0) await applyXpDelta(bonus)
-      Object.assign(changes, { status: 'done', xpAwarded: bonus, completedAt: now })
-    }
-    await touch(id, changes)
+    await applyReconciliation(id, result)
   })
 }
 

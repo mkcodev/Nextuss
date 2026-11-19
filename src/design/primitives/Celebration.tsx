@@ -8,16 +8,21 @@ interface CelebrationProps {
    *  de la tarea recién completada o un contador. Al montar no se lanza. */
   play: string | number | null | undefined
   onDone?: () => void
+  /** Lanza también si ya viene con valor al montar. Para una fila que cambia de lista justo al
+   *  completarse y se vuelve a montar con la celebración en curso; quien lo usa debe poner `play` a
+   *  `null` cuando acaba (si no, cada nuevo montaje la repetiría). */
+  playOnMount?: boolean
   className?: string
 }
 
 /** Destello de acento sobre su contenedor más una línea que barre el borde inferior (Línea, 700 ms).
  *  Es la única microcelebración de la app: solo visual, sin sonido, y va dentro de un padre
- *  `relative`. Con movimiento reducido queda un destello corto de opacidad, sin barrido. */
-export function Celebration({ play, onDone, className }: CelebrationProps) {
+ *  `relative`. Con movimiento reducido queda un destello corto de opacidad, sin barrido. Por defecto no
+ *  se lanza al montar (ver `playOnMount`). */
+export function Celebration({ play, onDone, playOnMount = false, className }: CelebrationProps) {
   const reduceMotion = useReducedMotion()
-  const [seen, setSeen] = useState(play)
-  const [active, setActive] = useState<CelebrationProps['play']>(null)
+  const [seen, setSeen] = useState(playOnMount ? null : play)
+  const [active, setActive] = useState<CelebrationProps['play']>(playOnMount ? (play ?? null) : null)
   // Lanzar al cambiar `play` (patrón «estado derivado de la prop anterior», sin efecto).
   if (play !== seen) {
     setSeen(play)

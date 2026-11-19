@@ -34,6 +34,18 @@ describe('Celebration', () => {
     expect(container.querySelector('[data-celebration-sweep]')).toBeNull()
   })
 
+  it('con `playOnMount` se lanza ya al montar, y por defecto no', () => {
+    expect(render(<Celebration play="t1" playOnMount />).container.querySelector('[data-celebration]')).not.toBeNull()
+    expect(render(<Celebration play="t1" />).container.querySelector('[data-celebration]')).toBeNull()
+    expect(render(<Celebration play={null} playOnMount />).container.querySelector('[data-celebration]')).toBeNull()
+  })
+
+  it('con `playOnMount`, un cambio posterior de `play` también lanza', () => {
+    const { container, rerender } = render(<Celebration play={null} playOnMount />)
+    rerender(<Celebration play="t2" playOnMount />)
+    expect(container.querySelector('[data-celebration]')).not.toBeNull()
+  })
+
   it('volver a null no lanza nada', () => {
     const { container, rerender } = render(<Celebration play={null} />)
     rerender(<Celebration play={null} />)

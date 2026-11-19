@@ -5,6 +5,7 @@ import {
   ChallengeActionError,
   abandonChallenge,
   markChallengeDay,
+  type MarkResult,
   pauseChallenge,
   resumeChallenge,
   skipChallengeDay,
@@ -12,7 +13,8 @@ import {
   undoSkipChallengeDay,
   unmarkChallengeDay,
 } from '../../db/repositories/challenges'
-import { useToastStore } from '../../lib/toastStore'
+import { ACHIEVEMENTS_BY_KEY } from '../../lib/achievements'
+import { useToastStore, type Toast } from '../../lib/toastStore'
 import { useUndoStore } from '../../lib/undoStore'
 
 const toast = () => useToastStore.getState()
@@ -42,20 +44,48 @@ const quietly = (fn: () => Promise<unknown>) => async () => {
   }
 }
 
-function withUndo(label: string, title: string, description: string | undefined, undo: () => Promise<unknown>, redo: () => Promise<unknown>) {
+function withUndo(
+  label: string,
+  title: string,
+  description: string | undefined,
+  undo: () => Promise<unknown>,
+  redo: () => Promise<unknown>,
+  look: Pick<Toast, 'icon' | 'variant'> = {},
+) {
   const undoId = useUndoStore.getState().push({ label, undo: quietly(undo), redo: quietly(redo) })
   toast().push({
     title,
     description,
+    ...look,
     action: { label: 'Deshacer', onClick: () => void useUndoStore.getState().undoEntry(undoId) },
   })
 }
 
-/** Marca hoy como hecho. Devuelve `true` si lo marcó. */
+/** El texto del aviso de «Reto cumplido»: duración, si fue sin fallos y el bonus (solo con gamificación). */
+export function finishedDescription(title: string, f: NonNullable<MarkResult['finished']>): string {
+  const parts = [`${title} · ${f.durationDays} ${f.durationDays === 1 ? 'día' : 'días'}`]
+  if (f.perfect) parts.push('sin ningún fallo')
+  if (f.bonus > 0) parts.push(`+${f.bonus} XP`)
+  return parts.join(' · ')
+}
+
+/** Marca hoy como hecho. Devuelve `true` si lo marcó. Si era el último día, el reto se cierra en ese
+ * momento: el aviso es el de «Reto cumplido» (con «Deshacer», que lo reabre) y, si desbloquea logros,
+ * cada uno saca el suyo. */
 export function markToday(id: number, title: string, today: string): Promise<boolean> {
   return guarded(async () => {
-    await markChallengeDay(id, today)
-    withUndo(`Marcar hoy · ${title}`, 'Hoy marcado', title, () => unmarkChallengeDay(id, today), () => markChallengeDay(id, today))
+    const result = await markChallengeDay(id, today)
+    const undo = () => unmarkChallengeDay(id, today)
+    const redo = () => markChallengeDay(id, today)
+    if (result.finished) {
+      withUndo(`Reto cumplido · ${title}`, 'Reto cumplido', finishedDescription(title, result.finished), undo, redo, { icon: 'flag', variant: 'celebrate' })
+    } else {
+      withUndo(`Marcar hoy · ${title}`, 'Hoy marcado', title, undo, redo)
+    }
+    for (const key of result.unlockedAchievements) {
+      const def = ACHIEVEMENTS_BY_KEY.get(key)
+      if (def) toast().push({ title: def.title, description: def.description, icon: def.icon })
+    }
   })
 }
 
