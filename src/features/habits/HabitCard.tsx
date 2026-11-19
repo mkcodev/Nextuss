@@ -53,7 +53,9 @@ export function HabitCard({ entry, date, onEdit, selected }: HabitCardProps) {
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate text-sm font-medium text-text">{habit.name}</p>
+          <p className="truncate text-sm font-medium text-text" title={habit.name}>
+            {habit.name}
+          </p>
           {streak.current > 0 && (
             <span className="flex shrink-0 items-center gap-0.5 text-xs font-medium tabular-nums text-text-muted">
               <Flame size={12} strokeWidth={2} />
