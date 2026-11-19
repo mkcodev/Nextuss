@@ -2,6 +2,7 @@
 // app 100% local. Exporta/restaura todas las tablas tal cual, sin lógica de negocio.
 import { db } from './schema'
 import { applyMigrationsToBackupTables } from './migrations'
+import { validateChallengeTables } from './backupValidate'
 
 export interface BackupPayload {
   version: number
@@ -50,12 +51,17 @@ export async function importDatabase(payload: BackupPayload, mode: ImportMode): 
     throw new BackupVersionMismatchError(payload.version, db.verno)
   }
 
-  const tables = payload.version < db.verno ? structuredClone(payload.tables) : payload.tables
+  // Copia superficial como mínimo: la validación sustituye arrays y no debe tocar el `payload` de fuera.
+  const tables = payload.version < db.verno ? structuredClone(payload.tables) : { ...payload.tables }
   if (payload.version < db.verno) {
     applyMigrationsToBackupTables(tables, payload.version)
   }
 
   await db.transaction('rw', db.tables, async () => {
+    // Dentro de la transacción: si la validación lanza, no se ha escrito nada.
+    const existing = mode === 'merge' ? new Set(await db.challenges.toCollection().primaryKeys()) : undefined
+    validateChallengeTables(tables, existing as Set<number> | undefined)
+
     for (const table of db.tables) {
       const rows = tables[table.name]
       if (!rows) continue
